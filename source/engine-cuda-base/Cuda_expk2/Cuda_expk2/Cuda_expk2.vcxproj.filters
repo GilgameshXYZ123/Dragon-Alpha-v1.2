@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="A.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Cuda_expk2.cuh" />
+    <ClInclude Include="frame.cuh" />
+    <ClInclude Include="JNITool.cuh" />
+    <ClInclude Include="micro.cuh" />
+    <ClInclude Include="test.cuh" />
+    <ClInclude Include="Cuda_pad.cuh">
+      <Filter>Cuda_pad</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_transpose.cuh">
+      <Filter>Cuda_transpose</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_transpose_batchMat.cuh">
+      <Filter>Cuda_transpose</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_transpose2D.cuh">
+      <Filter>Cuda_transpose</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_transpose3D.cuh">
+      <Filter>Cuda_transpose</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_transpose4D.cuh">
+      <Filter>Cuda_transpose</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_check_memAlignment.cuh">
+      <Filter>Cuda_extra</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_gappedMemcpy2D.cuh">
+      <Filter>Cuda_memcpy</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_indexedMemcpy.cuh">
+      <Filter>Cuda_memcpy</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_indexedMemcpy_dst.cuh">
+      <Filter>Cuda_memcpy</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_indexedMemcpy_src.cuh">
+      <Filter>Cuda_memcpy</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_rot180.cuh">
+      <Filter>Cuda_extra</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_trim.cuh">
+      <Filter>Cuda_trim</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_trim2D.cuh">
+      <Filter>Cuda_trim</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_pad4D.cuh">
+      <Filter>Cuda_pad</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_pad3D.cuh">
+      <Filter>Cuda_pad</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_pad2D.cuh">
+      <Filter>Cuda_pad</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_trim4D.cuh">
+      <Filter>Cuda_trim</Filter>
+    </ClInclude>
+    <ClInclude Include="Cuda_trim3D.cuh">
+      <Filter>Cuda_trim</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Cuda_pad">
+      <UniqueIdentifier>{56d6f497-b4d0-484b-a3d6-bde1d400ee21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Cuda_transpose">
+      <UniqueIdentifier>{41413f8e-bd1a-4dd0-bcff-e4dc4f19bf03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Cuda_extra">
+      <UniqueIdentifier>{1b01e3ce-4466-47bd-aa28-2a5163a1aa38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Cuda_memcpy">
+      <UniqueIdentifier>{a84048b2-eeef-4d71-b9e1-ad228d46d60b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Cuda_trim">
+      <UniqueIdentifier>{e3b506d0-d718-412e-a08d-84ff0ff4361c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

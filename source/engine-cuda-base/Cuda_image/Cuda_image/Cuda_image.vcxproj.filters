@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="A.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Cuda_image.cuh" />
+    <ClInclude Include="frame.cuh" />
+    <ClInclude Include="JNITool.cuh" />
+    <ClInclude Include="micro.cuh" />
+    <ClInclude Include="img_linear2D.cuh">
+      <Filter>elementwise</Filter>
+    </ClInclude>
+    <ClInclude Include="img_affine.cuh">
+      <Filter>tensor_trick</Filter>
+    </ClInclude>
+    <ClInclude Include="img_pad.cuh">
+      <Filter>tensor_trick</Filter>
+    </ClInclude>
+    <ClInclude Include="img_resize.cuh">
+      <Filter>tensor_trick</Filter>
+    </ClInclude>
+    <ClInclude Include="img_trim.cuh">
+      <Filter>tensor_trick</Filter>
+    </ClInclude>
+    <ClInclude Include="img_exp2D.cuh">
+      <Filter>elementwise</Filter>
+    </ClInclude>
+    <ClInclude Include="img_log2D.cuh">
+      <Filter>elementwise</Filter>
+    </ClInclude>
+    <ClInclude Include="img_row_linear.cuh">
+      <Filter>reduce</Filter>
+    </ClInclude>
+    <ClInclude Include="func_reduce.cuh" />
+    <ClInclude Include="img_gappedMemcpy2D.cuh">
+      <Filter>tensor_trick</Filter>
+    </ClInclude>
+    <ClInclude Include="img_slide_window.cuh">
+      <Filter>tensor_trick</Filter>
+    </ClInclude>
+    <ClInclude Include="img_linear2_div2D_field.cuh">
+      <Filter>pixel2float</Filter>
+    </ClInclude>
+    <ClInclude Include="img_linear2_div2D_row.cuh">
+      <Filter>pixel2float</Filter>
+    </ClInclude>
+    <ClInclude Include="img_dualLinear2_divide2D.cuh">
+      <Filter>pixel2float</Filter>
+    </ClInclude>
+    <ClInclude Include="linear2D_float2pixel.cuh">
+      <Filter>pixel2float</Filter>
+    </ClInclude>
+    <ClInclude Include="linear2D_pixel2float.cuh">
+      <Filter>pixel2float</Filter>
+    </ClInclude>
+    <ClInclude Include="img_linear_dual2D_field.cuh">
+      <Filter>elementwise</Filter>
+    </ClInclude>
+    <ClInclude Include="img_linear_dual2D_row.cuh">
+      <Filter>elementwise</Filter>
+    </ClInclude>
+    <ClInclude Include="img_extract_3channels.cuh">
+      <Filter>tensor_trick</Filter>
+    </ClInclude>
+    <ClInclude Include="img_transpose4D.cuh">
+      <Filter>tensor_trick</Filter>
+    </ClInclude>
+    <ClInclude Include="img_transpose3D.cuh">
+      <Filter>tensor_trick</Filter>
+    </ClInclude>
+    <ClInclude Include="img_transpose_batchMat.cuh">
+      <Filter>tensor_trick</Filter>
+    </ClInclude>
+    <ClInclude Include="test_affine.cuh">
+      <Filter>ztest</Filter>
+    </ClInclude>
+    <ClInclude Include="test_function.cuh">
+      <Filter>ztest</Filter>
+    </ClInclude>
+    <ClInclude Include="test_resize.cuh">
+      <Filter>ztest</Filter>
+    </ClInclude>
+    <ClInclude Include="test_pad_trim.cuh">
+      <Filter>ztest</Filter>
+    </ClInclude>
+    <ClInclude Include="test_extract_3channels.cuh">
+      <Filter>ztest</Filter>
+    </ClInclude>
+    <ClInclude Include="test_reduce.cuh">
+      <Filter>ztest</Filter>
+    </ClInclude>
+    <ClInclude Include="test.cuh" />
+    <ClInclude Include="img_transpose2D.cuh">
+      <Filter>tensor_trick</Filter>
+    </ClInclude>
+    <ClInclude Include="func_tensor_trick.cuh">
+      <Filter>tensor_trick</Filter>
+    </ClInclude>
+    <ClInclude Include="func_elementwise.cuh">
+      <Filter>elementwise</Filter>
+    </ClInclude>
+    <ClInclude Include="img_quadratic2D.cuh">
+      <Filter>elementwise</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="reduce">
+      <UniqueIdentifier>{f8212410-ed9f-40a8-9b74-e0959e2f3c88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tensor_trick">
+      <UniqueIdentifier>{43df5e56-6da4-4cf3-8c4f-157e1878a0b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="elementwise">
+      <UniqueIdentifier>{bc34b4d5-92a7-4dea-acbf-2b961034b607}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pixel2float">
+      <UniqueIdentifier>{07913f3a-6887-4448-9a20-451a172d76bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ztest">
+      <UniqueIdentifier>{3f65e2db-4648-4996-8bd3-405f3fc17552}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

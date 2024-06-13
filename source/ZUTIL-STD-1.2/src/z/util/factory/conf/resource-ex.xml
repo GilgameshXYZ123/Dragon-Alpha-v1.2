@@ -1,0 +1,22 @@
+<!DOCTYPE Resource>
+<configuration>
+    
+    <namespace name="Handler" package="z.neural.core.handler.optimize">
+    
+        <resource name="Adam" class="Adam">
+            <property name="handler.adam.b1" type="Double"  value="0.1"/>
+            <property name="handler.adam.b2" type="Double"  value="0.01"/>
+            <property name="handler.adam.e" type="Double" value="1e-8"/>
+            <property name="handler.deltaTarget" type="String[]" value="channel.a, channel.b"/>
+            <property name="handler.deltaTarget2d" type="String[]" value="channel.w"/>
+        </resource>
+        
+        <resource name="Momentum" class="Momentum">
+            <property name="handler.adam.b1" type="Double"  value="0.1"/>
+            <property name="handler.deltaTarget" type="String[]" value="channel.a, channel.b"/>
+            <property name="handler.deltaTarget2d" type="String[]" value="channel.w"/>
+        </resource>
+    
+    </namespace>
+    
+</configuration>

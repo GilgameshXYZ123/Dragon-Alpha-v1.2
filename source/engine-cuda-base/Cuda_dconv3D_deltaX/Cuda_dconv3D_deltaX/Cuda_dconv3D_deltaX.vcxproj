@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D4ACDF1F-143E-4707-B4D4-FE98553ECFE3}</ProjectGuid>
+    <RootNamespace>Cuda_dconv3D_deltaX</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.5.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Users\Gilgamesh\Desktop\c-lib\java\include;C:\Users\Gilgamesh\Desktop\c-lib\java\include\win32;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Gilgamesh\Desktop\c-lib\java\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\Users\Gilgamesh\Desktop\c-lib\java\include;C:\Users\Gilgamesh\Desktop\c-lib\java\include\win32;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Gilgamesh\Desktop\c-lib\java\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <CodeGeneration>compute_61,sm_61</CodeGeneration>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <CodeGeneration>compute_61,sm_61</CodeGeneration>
+      <PtxAsOptionV>true</PtxAsOptionV>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CudaCompile Include="A.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="conv3D_input_pad_remode_v1.cuh" />
+    <ClInclude Include="conv3D_Winograd2D.cuh" />
+    <ClInclude Include="conv3D_Winograd2D_f22x33R_kernel.cuh" />
+    <ClInclude Include="conv3D_Winograd2D_f22x33R_util.cuh" />
+    <ClInclude Include="conv3D_Winograd2D_f33x22R_kernel.cuh" />
+    <ClInclude Include="conv3D_Winograd2D_f33x22R_util.cuh" />
+    <ClInclude Include="Cuda_dconv3D_deltaX.cuh" />
+    <ClInclude Include="dconv3D_dX.cuh" />
+    <ClInclude Include="dconv3D_dX_CrossAdd_kernel.cuh" />
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd.cuh" />
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s4_f2x3.cuh" />
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s4_f3x2.cuh" />
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s8_f2x7.cuh" />
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s8_f3x6.cuh" />
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s8_f4x5.cuh" />
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s8_f5x4.cuh" />
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s8_f6x3.cuh" />
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s8_f7x2.cuh" />
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_sg_f8x9.cuh" />
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_sg_f9x8.cuh" />
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_sg_fAx7.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplit.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplitV2_Ims2R_kernel.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplitV2_Ims2R_kernel_EX.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplit_Ims2R_kernel.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplit_Ims2R_kernel_A.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplit_Ims2R_kernel_EX.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplit_Ims2R_kernel_texture.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplitV2_Ims2R_uernel.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplit_Ims2R_uernel.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplit_ImsR_uernel.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplit_R_kernel.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplit_R_kernel_EX.cuh" />
+    <ClInclude Include="dconv3D_dX_ori_Winograd_f2x3.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPaddingV2_kernel_s1.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPaddingV2_kernel_s1_EX.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPaddingV2_kernel_s1_EX2.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPaddingV2_uernel_s1.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPadding_kernel_A_s1.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPadding_kernel_A_s1_texture.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPadding_kernel_s1_EX.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPadding_kernel_s1_texture.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPadding_uernel_s1_C.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPadding_uernel_s1.cuh" />
+    <ClInclude Include="dconv3D_dX_tensor_remode.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPadding.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPadding_uernel_s1_ruse.cuh" />
+    <ClInclude Include="deconv3D_dX_Winograd2D_f22x33_kernel_remode.cuh" />
+    <ClInclude Include="micro_common.cuh" />
+    <ClInclude Include="micro_CrossAdd.cuh" />
+    <ClInclude Include="micro_dconv3D_dX_idx.cuh" />
+    <ClInclude Include="micro_KernelSplit.cuh" />
+    <ClInclude Include="micro_KernelSplit_Ims.cuh" />
+    <ClInclude Include="micro_KernelSplit_Ims2.cuh" />
+    <ClInclude Include="micro_KernelSplit_V2.cuh" />
+    <ClInclude Include="micro_Winograd_s4_f2x3.cuh" />
+    <ClInclude Include="micro_Winograd_s4_f3x2.cuh" />
+    <ClInclude Include="micro_Winograd_s8_f2x7.cuh" />
+    <ClInclude Include="micro_Winograd_s8_f3x6.cuh" />
+    <ClInclude Include="micro_Winograd_s8_f4x5.cuh" />
+    <ClInclude Include="micro_Winograd_s8_f5x4.cuh" />
+    <ClInclude Include="micro_Winograd_s8_f6x3.cuh" />
+    <ClInclude Include="micro_Winograd_s8_f7x2.cuh" />
+    <ClInclude Include="micro_Winograd_sg_f9x8.cuh" />
+    <ClInclude Include="micro_Winograd_sg_fAx7.cuh" />
+    <ClInclude Include="micro_Winograd_sg_f8x9.cuh" />
+    <ClInclude Include="micro_ZeroPadding_dense.cuh" />
+    <ClInclude Include="micro_ZeroPadding_V2_dense.cuh" />
+    <ClInclude Include="Xeno1_winograd2D_V0.cuh" />
+    <ClInclude Include="Xeno0_old_memory.cuh" />
+    <ClInclude Include="Xeno0_old_W2pow_s1.cuh" />
+    <ClInclude Include="Xeno0_old_dconv3D_dX_kernelSplit_Ims2R_kernel.cuh" />
+    <ClInclude Include="Xeno0_deconv3D_dX_kernelSplit_Ims2R_kernel.cuh" />
+    <ClInclude Include="Xeno0_deconv3D_dX_kernelSplit_Ims2R_kernel_EX.cuh" />
+    <ClInclude Include="Xeno0_deconv3D_dX_kernelSplit_Ims2R_kernel_texture.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplit_ImsR_kernel.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplit_ImsR_kernel_EX.cuh" />
+    <ClInclude Include="dconv3D_dX_KernelSplit_ImsR_kernel_texture.cuh" />
+    <ClInclude Include="dconv3D_dX_kernelSplit_remode_v2.cuh" />
+    <ClInclude Include="Xeno0_deconv3D_dX_kernelSplit_Ims2_kernel_EX.cuh" />
+    <ClInclude Include="Xeno0_deconv3D_dX_kernelSplit_Ims2_kernel_texture.cuh" />
+    <ClInclude Include="Xeno0_old_dconv3D_dX_kernelSplit_kernel.cuh" />
+    <ClInclude Include="Xeno0_old_dconv3D_dX_kernelSplit_kernel_texture.cuh" />
+    <ClInclude Include="dconv3D_dX_kernelSplit_remode_v1.cuh" />
+    <ClInclude Include="Xeno0_deconv3D_dX_kernelSplit_Ims2_kernel.cuh" />
+    <ClInclude Include="texture.cuh" />
+    <ClInclude Include="Xeno0_deconv3D_dX_KernelSplit_kernel.cuh" />
+    <ClInclude Include="Xeno0_old_dconv3D_dX_ZeroPadding_kernel_s2pow.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPadding_kernel_s1.cuh" />
+    <ClInclude Include="dconv3D_dX_ZeroPadding_kernel_W1.cuh" />
+    <ClInclude Include="Xeno0_old_dconv3D_dX_ZeroPadding_kernel.cuh" />
+    <ClInclude Include="Xeno0_old_dconv3D_dX_ZeroPadding_kernel_suv.cuh" />
+    <ClInclude Include="frame.cuh" />
+    <ClInclude Include="JNITool.cuh" />
+    <ClInclude Include="micro.cuh" />
+    <ClInclude Include="test.cuh" />
+    <ClInclude Include="Xeno0_deconv3D_crossAdd_kernel.cuh" />
+    <ClInclude Include="Xeno0_Ims2_R.cuh" />
+    <ClInclude Include="Xeno0_s1_W3.cuh" />
+    <ClInclude Include="Xeno0_X8.cuh" />
+    <ClInclude Include="Xeno0_zeroPadding_kernel_s1.cuh" />
+    <ClInclude Include="Xeno0_kernelsplit_X1.cuh" />
+    <ClInclude Include="Xeno0_kernelsplit_X2.cuh" />
+    <ClInclude Include="Xeno0_kernelSplit_Ims_oriX.cuh" />
+    <ClInclude Include="Xeno0_X1.cuh" />
+    <ClInclude Include="Xeno0_X2.cuh" />
+    <ClInclude Include="Xeno0_X3.cuh" />
+    <ClInclude Include="Xeno0_X4.cuh" />
+    <ClInclude Include="Xeno0_X5.cuh" />
+    <ClInclude Include="Xeno0_X6.cuh" />
+    <ClInclude Include="Xeno0_X7.cuh" />
+    <ClInclude Include="Xeno0_X9.cuh" />
+    <ClInclude Include="Xeno0_X10.cuh" />
+    <ClInclude Include="Xeno0_X11.cuh" />
+    <ClInclude Include="Xeno0_X12.cuh" />
+    <ClInclude Include="Xeno1_s1_winograd_f2x3.cuh" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.5.targets" />
+  </ImportGroup>
+</Project>

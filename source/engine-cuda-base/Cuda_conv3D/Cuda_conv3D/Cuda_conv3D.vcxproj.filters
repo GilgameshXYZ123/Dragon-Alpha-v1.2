@@ -1,0 +1,350 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="A.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="conv3D.cuh" />
+    <ClInclude Include="texture.cuh" />
+    <ClInclude Include="Cuda_conv3D.cuh" />
+    <ClInclude Include="frame.cuh" />
+    <ClInclude Include="JNITool.cuh" />
+    <ClInclude Include="test.cuh" />
+    <ClInclude Include="conv3D_Gemm_kernel.cuh">
+      <Filter>Gemm</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Gemm_kernel_EX.cuh">
+      <Filter>Gemm</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Gemm_kernel_EX2.cuh">
+      <Filter>Gemm</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Gemm_kernel_no_padding.cuh">
+      <Filter>Gemm</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Gemm_kernel_no_padding_EX.cuh">
+      <Filter>Gemm</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Gemm_kernel_texture.cuh">
+      <Filter>Gemm</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Gemm_kernel_texture2.cuh">
+      <Filter>Gemm</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmR_kernel.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmR_kernel_EX.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmR_kernel_EX2.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmR_kernel_texture.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmR_kernel_texture2.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_kernel_W1.cuh">
+      <Filter>Gemm</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmR_kernel_W1.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmR_A_kernel.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmR_A_kernel_texture.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmR_uernel.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Gemm_sernel.cuh">
+      <Filter>Gemm</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_sernel_W1.cuh">
+      <Filter>Gemm</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_kernel_remode_V2.cuh">
+      <Filter>tensor_remode</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd_2x3_V2.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd_2x3_V1.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd_2x3_V3.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="winograd_kernel_remode.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd_f2x3_micro.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd_4x3_V1.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd_4x3_V2.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd_4x3_V3.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd2D_f22x33_V1.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Gemm.cuh">
+      <Filter>Gemm</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmR.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_kernel_remode_V1.cuh">
+      <Filter>tensor_remode</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Winograd2D_f22x33R_kernel.cuh">
+      <Filter>Winograd2D</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Winograd2D_f22x33R_util.cuh">
+      <Filter>Winograd2D</Filter>
+    </ClInclude>
+    <ClInclude Include="micro.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_conv3D_idx.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_common.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Gemm.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_GemmV2.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_f4x3.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_tensor_remode.cuh">
+      <Filter>tensor_remode</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd2D_f22x33_V2.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_input_pad_remode_v1.cuh">
+      <Filter>tensor_remode</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd2D_f22x33_V3.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd2D_f22x33_V4.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd2D_f22x33_V5.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Winograd2D_f22x33_kernel_remode_v1.cuh">
+      <Filter>tensor_remode</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Winograd2D_f22x33_kernel_remode_v2.cuh">
+      <Filter>tensor_remode</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Winograd2D.cuh">
+      <Filter>Winograd2D</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Winograd2D_f33x22R_kernel.cuh">
+      <Filter>Winograd2D</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Winograd2D_f33x22R_util.cuh">
+      <Filter>Winograd2D</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmR_uernel_EX.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmR_uernel_ruse.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_Standard_WF_2_3_v1.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd_f2x3_X1.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Im2col_Winograd.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_0_conv3D_Winograd2D_f22x33_util.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_conv3D_Winograd2D_f22x33.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_conv3D_Winograd2D_f22x33_util.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_im2col_Winograd_f3x6_V1.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_im2col_Winograd_f5x4_V1.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_im2col_Winograd_f6x3_V1.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_im2col_Winograd_f6x3_V2.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_Im2col_Winograd_f4x5_V1.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_Im2col_Winograd_f2x7_V1.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_kernel_remode_V3.cuh">
+      <Filter>tensor_remode</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_WinogradV2_f6x3R.cuh">
+      <Filter>Im2col_Winograd_V2</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_im2col_Winograd_f7x2_V1.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Im2col_Winograd_s8_f3x6R.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Im2col_Winograd_s8_f4x5R.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Im2col_Winograd_s8_f5x4R.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Im2col_Winograd_s8_f6x3R.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Im2col_Winograd_s8_f7x2R.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Im2col_Winograd_s8_f2x7R.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Im2col_Winograd_s4_f2x3R.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Im2col_Winograd_s4_f3x2R.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_ori_Winograd_f2x3R.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s4_f2x3.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s8_f2x7.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s8_f3x6.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s8_f4x5.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s8_f5x4.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s8_f6x3.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s8_f7x2.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s4_f3x2.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_im2col_Winograd_f6x3_V3.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_sg_f8x9.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmV2R_kernel.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmV2R_kernel_EX.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmV2R_uernel.cuh">
+      <Filter>GemmR</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmV2_kernel.cuh">
+      <Filter>Gemm</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_sg_fEx3.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Im2col_Winograd_sg_f8x9R.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Im2col_Winograd_sg_fAx7R.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_sg_fAx7.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_GemmR_uernel_C.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_Winograd_f14x3.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_Winorgrad_f8x9.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_X2.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_X0.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Im2col_Winograd_sg_f9x8R.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_sg_f9x8.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_X3.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="X.cuh" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="micro">
+      <UniqueIdentifier>{ef1c14ef-3125-455e-bf95-ab61e27ec838}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tensor_remode">
+      <UniqueIdentifier>{46a6b835-6733-48a2-9b6a-61b2d22d4bcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="xeno1">
+      <UniqueIdentifier>{b5ce0097-42d0-4b98-b56c-19ec4672d75a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Winograd2D">
+      <UniqueIdentifier>{eae64045-4635-4e59-8c39-f29c6e93e76b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gemm">
+      <UniqueIdentifier>{17647875-2b60-4d57-b1c5-e3576dc0a0c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GemmR">
+      <UniqueIdentifier>{36c8719b-791a-4b09-ba93-aee5c2eaeaff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Im2col_Winograd_V2">
+      <UniqueIdentifier>{3a2408f5-75e4-481e-9f17-c7d0f58219e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Im2col_Winograd">
+      <UniqueIdentifier>{60db1f26-67cc-4a02-9eed-c921ee68ea91}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

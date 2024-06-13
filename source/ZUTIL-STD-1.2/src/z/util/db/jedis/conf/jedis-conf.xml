@@ -1,0 +1,11 @@
+<!DOCTYPE JEDIS-SOURCE>
+<configuration>
+    <property name="jedis.host" value="hadoop23"/>
+    <property name="jedis.port" type="int" value="6379"/>
+    <property name="jedis.auth" value="123456"/>
+    
+    <property name="jedis.connect.retry.times" type="int" value="2"/>
+    <property name="jdbc.connect.retry.max.interval.ms" type="long" value="100"/>
+    <property name="jedis.connect.retry.interval.ms" type="long" value="50"/>
+    <property name="jedis.connect.retry.backoff" type="long" value="20"/>
+</configuration>

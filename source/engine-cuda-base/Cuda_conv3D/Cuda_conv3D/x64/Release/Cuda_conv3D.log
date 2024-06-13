@@ -1,0 +1,155 @@
+﻿  Compiling CUDA source file A.cu...
+  
+  D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda_conv3D\Cuda_conv3D>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\bin\nvcc.exe" -gencode=arch=compute_52,code=\"sm_52,compute_52\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x64" -x cu   -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\include" --source-in-ptx    --keep-dir x64\Release  -maxrregcount=0 --ptxas-options=-v --machine 64 --compile -cudart static    -DWIN32 -DWIN64 -DNDEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /Fdx64\Release\vc141.pdb /FS   /MD " -o x64\Release\A.cu.obj "D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda_conv3D\Cuda_conv3D\A.cu" 
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\conv3D_kernel_remode_v3.cuh(151): warning #177-D: variable "GM" was declared but never referenced
+  
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\conv3D_GemmR_uernel_C.cuh(2468): warning #177-D: variable "stream" was declared but never referenced
+  
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(183): warning #177-D: variable "ic_s" was declared but never referenced
+  
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(1742): warning #938-D: return type "int" omitted in declaration of function "main"
+  
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(964): warning #550-D: variable "dD" was set but never used
+            detected during instantiation of "void testSpeed<LB>(int, int, int, int, int, int, int, int, int, int, int, int, int, int) [with LB=4]" 
+  (1578): here
+  
+  ptxas info    : 1040 bytes gmem, 1288 bytes cmem[3]
+  ptxas info    : Compiling entry function '_Z39conv3dWinograd_f2x3_kernel_64x128RC_texILi3EEvyiiPKfPfiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z39conv3dWinograd_f2x3_kernel_64x128RC_texILi3EEvyiiPKfPfiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 146 registers, 43520 bytes smem, 380 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z40conv3dWinograd_f2x3_kernel_64x128R4C_texILi3EEvyiiPKfPfiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z40conv3dWinograd_f2x3_kernel_64x128R4C_texILi3EEvyiiPKfPfiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 149 registers, 43520 bytes smem, 380 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z38conv3dWinograd_f6x3_kernel_64x192R_texILi3EEvyiiPKfPfiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z38conv3dWinograd_f6x3_kernel_64x192R_texILi3EEvyiiPKfPfiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 149 registers, 49152 bytes smem, 376 bytes cmem[0], 32 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z41conv3dWinograd_f6x3_kernel_64x192R_p1_texILi3EEvyiiPKfPfiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z41conv3dWinograd_f6x3_kernel_64x192R_p1_texILi3EEvyiiPKfPfiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 148 registers, 49152 bytes smem, 376 bytes cmem[0], 32 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi448EEvyiiPKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi448EEvyiiPKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 148 registers, 49152 bytes smem, 372 bytes cmem[0], 32 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi384EEvyiiPKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi384EEvyiiPKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 148 registers, 49152 bytes smem, 372 bytes cmem[0], 32 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi320EEvyiiPKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi320EEvyiiPKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 148 registers, 49152 bytes smem, 372 bytes cmem[0], 32 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi192EEvyiiPKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi192EEvyiiPKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 148 registers, 49152 bytes smem, 372 bytes cmem[0], 32 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi1024EEvyiiPKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi1024EEvyiiPKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 149 registers, 49152 bytes smem, 372 bytes cmem[0], 32 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi512EEvyiiPKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi512EEvyiiPKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 149 registers, 49152 bytes smem, 372 bytes cmem[0], 32 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi256EEvyiiPKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi256EEvyiiPKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 149 registers, 49152 bytes smem, 372 bytes cmem[0], 32 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi128EEvyiiPKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi128EEvyiiPKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 149 registers, 49152 bytes smem, 372 bytes cmem[0], 32 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi64EEvyiiPKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z45conv3dWinograd_f6x3_kernel_64x192R_p1_OCT_texILi3ELi64EEvyiiPKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 149 registers, 49152 bytes smem, 372 bytes cmem[0], 32 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z37conv3dWinograd2d_f33x22_kernel_32x32RPKfiiS0_Pfiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z37conv3dWinograd2d_f33x22_kernel_32x32RPKfiiS0_Pfiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 139 registers, 46080 bytes smem, 380 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z37conv3dWinograd2d_f22x33_kernel_32x32RPKfiiS0_Pfiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z37conv3dWinograd2d_f22x33_kernel_32x32RPKfiiS0_Pfiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 139 registers, 46080 bytes smem, 380 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z54conv3D_winograd2D_f22x33_kernel_remode_v2_kernel_2x4_APKfPfii' for 'sm_52'
+  ptxas info    : Function properties for _Z54conv3D_winograd2D_f22x33_kernel_remode_v2_kernel_2x4_APKfPfii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 148 registers, 344 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z52conv3D_winograd2D_f22x33_kernel_remode_v2_kernel_2x4PKfPfii' for 'sm_52'
+  ptxas info    : Function properties for _Z52conv3D_winograd2D_f22x33_kernel_remode_v2_kernel_2x4PKfPfii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 128 registers, 344 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z52conv3D_winograd2D_f22x33_kernel_remode_v2_kernel_2x2PKfPfii' for 'sm_52'
+  ptxas info    : Function properties for _Z52conv3D_winograd2D_f22x33_kernel_remode_v2_kernel_2x2PKfPfii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 96 registers, 344 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z50conv3D_winograd2D_f22x33_kernel_remode_v2_kernel_1PKfPfiii' for 'sm_52'
+  ptxas info    : Function properties for _Z50conv3D_winograd2D_f22x33_kernel_remode_v2_kernel_1PKfPfiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 32 registers, 348 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z40winograd2D_f22x33_kernel_remode_kernel_1PKfPfiii' for 'sm_52'
+  ptxas info    : Function properties for _Z40winograd2D_f22x33_kernel_remode_kernel_1PKfPfiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 30 registers, 348 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z28input_pad_remode_kernel_4_4SILi3EEvPKfiiPfiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z28input_pad_remode_kernel_4_4SILi3EEvPKfiiPfiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 42 registers, 5184 bytes smem, 368 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z28input_pad_remode_kernel_4_4SILi4EEvPKfiiPfiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z28input_pad_remode_kernel_4_4SILi4EEvPKfiiPfiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 42 registers, 18496 bytes smem, 368 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z27input_pad_remode_kernel_4_4PKfiiPfiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z27input_pad_remode_kernel_4_4PKfiiPfiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 39 registers, 368 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z25input_pad_remode_kernel_4PKfiiPfiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z25input_pad_remode_kernel_4PKfiiPfiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 32 registers, 372 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z20kremodeV3_kernel_4X4PKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z20kremodeV3_kernel_4X4PKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 43 registers, 356 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z18kremodeV3_kernel_4PKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z18kremodeV3_kernel_4PKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 32 registers, 356 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z18kremodeV2_kernel_4PKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z18kremodeV2_kernel_4PKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 40 registers, 356 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z20kremode_kernel_4X4_APKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z20kremode_kernel_4X4_APKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 54 registers, 356 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z18kremode_kernel_4X4PKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z18kremode_kernel_4X4PKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 48 registers, 356 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z16kremode_kernel_4PKfPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z16kremode_kernel_4PKfPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 32 registers, 356 bytes cmem[0]
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(1742): warning #938-D: return type "int" omitted in declaration of function "main"
+  
+  A.cu
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(76): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(89): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(183): warning C4101: “ic_s”: 未引用的局部变量
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(240): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(311): warning C4244: “初始化”: 从“double”转换到“size_t”，可能丢失数据
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(953): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+  d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(1578): note: 参见对正在编译的函数 模板 实例化“void testSpeed<4>(int,int,int,int,int,int,int,int,int,int,int,int,int,int)”的引用
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(954): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(956): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(957): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(958): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(961): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda_conv3d\cuda_conv3d\test.cuh(1533): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+    正在创建库 D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda_conv3D\x64\Release\Cuda_conv3D.lib 和对象 D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda_conv3D\x64\Release\Cuda_conv3D.exp
+  LINK : 已指定 /LTCG，但不需要生成代码；从链接命令行中移除 /LTCG 以提高链接器性能
+  Cuda_conv3D.vcxproj -> D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda_conv3D\x64\Release\Cuda_conv3D.exe

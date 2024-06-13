@@ -1,0 +1,11 @@
+﻿  Compiling CUDA source file A.cu...
+  
+  D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda\Cuda>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\bin\nvcc.exe" -gencode=arch=compute_61,code=\"sm_61,compute_61\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x64" -x cu   -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\include"     --keep-dir x64\Release  -maxrregcount=0  --machine 64 --compile -cudart static    -DWIN32 -DWIN64 -DNDEBUG -D_CONSOLE -D_WINDLL -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /Fdx64\Release\vc141.pdb /FS   /MD " -o x64\Release\A.cu.obj "D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda\Cuda\A.cu" 
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda\cuda\JNIConfig.cuh(16): warning #2464-D: conversion from a string literal to "char *" is deprecated
+  
+d:\virtual-discc-code\dragon-alpha-3060ti\engine-cuda-base\cuda\cuda\JNIConfig.cuh(16): warning #2464-D: conversion from a string literal to "char *" is deprecated
+  
+  A.cu
+    正在创建库 D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda\x64\Release\Cuda.lib 和对象 D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda\x64\Release\Cuda.exp
+  LINK : 已指定 /LTCG，但不需要生成代码；从链接命令行中移除 /LTCG 以提高链接器性能
+  Cuda.vcxproj -> D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda\x64\Release\Cuda.dll

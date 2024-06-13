@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="A.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Cuda_pool2D.cuh" />
+    <ClInclude Include="frame.cuh" />
+    <ClInclude Include="JNITool.cuh" />
+    <ClInclude Include="micro.cuh" />
+    <ClInclude Include="pool2D.cuh" />
+    <ClInclude Include="test.cuh" />
+    <ClInclude Include="pool2D_avg_ip_kernel.cuh">
+      <Filter>pool2D_avg</Filter>
+    </ClInclude>
+    <ClInclude Include="pool2D_avg_kernel.cuh">
+      <Filter>pool2D_avg</Filter>
+    </ClInclude>
+    <ClInclude Include="pool2D_max_indexed_kernel.cuh">
+      <Filter>pool2D_max</Filter>
+    </ClInclude>
+    <ClInclude Include="pool2D_max_kernel.cuh">
+      <Filter>pool2D_max</Filter>
+    </ClInclude>
+    <ClInclude Include="X.cuh" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="pool2D_avg">
+      <UniqueIdentifier>{f14a8a6d-faa2-43a9-9968-271f8791beea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pool2D_max">
+      <UniqueIdentifier>{9dbf6f0b-b552-499b-b7a6-8bb0c6bda716}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

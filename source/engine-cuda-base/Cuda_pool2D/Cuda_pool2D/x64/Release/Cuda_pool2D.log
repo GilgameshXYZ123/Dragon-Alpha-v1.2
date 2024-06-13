@@ -1,0 +1,80 @@
+﻿  Compiling CUDA source file A.cu...
+  
+  D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda_pool2D\Cuda_pool2D>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\bin\nvcc.exe" -gencode=arch=compute_52,code=\"sm_52,compute_52\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x64" -x cu   -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\include"     --keep-dir x64\Release  -maxrregcount=0 --ptxas-options=-v --machine 64 --compile -cudart static    -DWIN32 -DWIN64 -DNDEBUG -D_CONSOLE -D_WINDLL -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /Fdx64\Release\vc141.pdb /FS   /MD " -o x64\Release\A.cu.obj "D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda_pool2D\Cuda_pool2D\A.cu" 
+  ptxas info    : 0 bytes gmem
+  ptxas info    : Compiling entry function '_Z27avg_kernel_1_ignore_paddingPKfiiiiPfiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z27avg_kernel_1_ignore_paddingPKfiiiiPfiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 22 registers, 388 bytes cmem[0], 12 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z27avg_kernel_2_ignore_paddingPKfiiiiPfiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z27avg_kernel_2_ignore_paddingPKfiiiiPfiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 24 registers, 388 bytes cmem[0], 12 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z27avg_kernel_4_ignore_paddingPKfiiiiPfiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z27avg_kernel_4_ignore_paddingPKfiiiiPfiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 29 registers, 388 bytes cmem[0], 12 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z12avg_kernel_1PKfiiiiPfiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z12avg_kernel_1PKfiiiiPfiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 23 registers, 388 bytes cmem[0], 12 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z12avg_kernel_2PKfiiiiPfiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z12avg_kernel_2PKfiiiiPfiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 24 registers, 388 bytes cmem[0], 12 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z12avg_kernel_4PKfiiiiPfiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z12avg_kernel_4PKfiiiiPfiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 31 registers, 388 bytes cmem[0], 12 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z15avg_W3_kernel_4PKfiiPfiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z15avg_W3_kernel_4PKfiiPfiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 32 registers, 380 bytes cmem[0], 16 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z17avg_div2_kernel_4PKfiiPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z17avg_div2_kernel_4PKfiiPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 26 registers, 364 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z20max_indexed_kernel_1PKfiiiiPfPiiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z20max_indexed_kernel_1PKfiiiiPfPiiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 23 registers, 396 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z20max_indexed_kernel_2PKfiiiiPfPiiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z20max_indexed_kernel_2PKfiiiiPfPiiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 24 registers, 396 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z20max_indexed_kernel_4PKfiiiiPfPiiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z20max_indexed_kernel_4PKfiiiiPfPiiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 32 registers, 396 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z23max_indexed_W3_kernel_4PKfiiPfPiiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z23max_indexed_W3_kernel_4PKfiiPfPiiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 32 registers, 388 bytes cmem[0], 4 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z25max_indexed_div2_kernel_4PKfiiPfPiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z25max_indexed_div2_kernel_4PKfiiPfPiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 28 registers, 372 bytes cmem[0], 4 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z12max_kernel_1PKfiiiiPfiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z12max_kernel_1PKfiiiiPfiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 22 registers, 388 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z12max_kernel_2PKfiiiiPfiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z12max_kernel_2PKfiiiiPfiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 22 registers, 388 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z12max_kernel_4PKfiiiiPfiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z12max_kernel_4PKfiiiiPfiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 32 registers, 388 bytes cmem[0]
+  ptxas info    : Compiling entry function '_Z15max_W3_kernel_4PKfiiPfiiiiiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z15max_W3_kernel_4PKfiiPfiiiiiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 31 registers, 380 bytes cmem[0], 4 bytes cmem[2]
+  ptxas info    : Compiling entry function '_Z17max_div2_kernel_4PKfiiPfiiiii' for 'sm_52'
+  ptxas info    : Function properties for _Z17max_div2_kernel_4PKfiiPfiiiii
+      0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+  ptxas info    : Used 24 registers, 364 bytes cmem[0], 4 bytes cmem[2]
+  A.cu
+    正在创建库 D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda_pool2D\x64\Release\Cuda_pool2D.lib 和对象 D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda_pool2D\x64\Release\Cuda_pool2D.exp
+  LINK : 已指定 /LTCG，但不需要生成代码；从链接命令行中移除 /LTCG 以提高链接器性能
+  Cuda_pool2D.vcxproj -> D:\virtual-discC-code\Dragon-alpha-3060ti\engine-cuda-base\Cuda_pool2D\x64\Release\Cuda_pool2D.dll

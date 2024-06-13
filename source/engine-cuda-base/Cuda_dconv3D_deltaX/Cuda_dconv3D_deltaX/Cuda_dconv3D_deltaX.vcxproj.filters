@@ -1,0 +1,373 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="A.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Cuda_dconv3D_deltaX.cuh" />
+    <ClInclude Include="dconv3D_dX.cuh" />
+    <ClInclude Include="frame.cuh" />
+    <ClInclude Include="JNITool.cuh" />
+    <ClInclude Include="test.cuh" />
+    <ClInclude Include="dconv3D_dX_CrossAdd_kernel.cuh">
+      <Filter>CrossAdd</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_kernelSplit_remode_v2.cuh">
+      <Filter>tensor_remode</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_X4.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_X3.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_X2.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_X1.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_s1_W3.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_X5.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_X6.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_X7.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_X8.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_X9.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_X10.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_X11.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_zeroPadding_kernel_s1.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_old_dconv3D_dX_kernelSplit_Ims2R_kernel.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_old_dconv3D_dX_ZeroPadding_kernel.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_old_dconv3D_dX_ZeroPadding_kernel_s2pow.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_old_dconv3D_dX_ZeroPadding_kernel_suv.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_old_dconv3D_dX_kernelSplit_kernel.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_old_dconv3D_dX_kernelSplit_kernel_texture.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_old_W2pow_s1.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_deconv3D_crossAdd_kernel.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_deconv3D_dX_kernelSplit_Ims2_kernel.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_deconv3D_dX_kernelSplit_Ims2_kernel_EX.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_old_memory.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_deconv3D_dX_kernelSplit_Ims2_kernel_texture.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_deconv3D_dX_kernelSplit_Ims2R_kernel.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_deconv3D_dX_kernelSplit_Ims2R_kernel_texture.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_deconv3D_dX_kernelSplit_Ims2R_kernel_EX.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_deconv3D_dX_KernelSplit_kernel.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_Ims2_R.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_kernelSplit_Ims_oriX.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_kernelsplit_X1.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno0_kernelsplit_X2.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="texture.cuh" />
+    <ClInclude Include="Xeno0_X12.cuh">
+      <Filter>xeno0</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_s1_winograd_f2x3.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_tensor_remode.cuh">
+      <Filter>tensor_remode</Filter>
+    </ClInclude>
+    <ClInclude Include="deconv3D_dX_Winograd2D_f22x33_kernel_remode.cuh">
+      <Filter>tensor_remode</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPadding.cuh">
+      <Filter>PaddingZero</Filter>
+    </ClInclude>
+    <ClInclude Include="micro.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_common.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_ZeroPadding_dense.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_ZeroPadding_V2_dense.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_input_pad_remode_v1.cuh">
+      <Filter>tensor_remode</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_kernelSplit_remode_v1.cuh">
+      <Filter>tensor_remode</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Winograd2D_f22x33R_kernel.cuh">
+      <Filter>Winograd2D</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Winograd2D_f22x33R_util.cuh">
+      <Filter>Winograd2D</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Winograd2D.cuh">
+      <Filter>Winograd2D</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Winograd2D_f33x22R_kernel.cuh">
+      <Filter>Winograd2D</Filter>
+    </ClInclude>
+    <ClInclude Include="conv3D_Winograd2D_f33x22R_util.cuh">
+      <Filter>Winograd2D</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPadding_kernel_W1.cuh">
+      <Filter>PaddingZero</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPadding_kernel_s1.cuh">
+      <Filter>PaddingZero</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPadding_kernel_A_s1.cuh">
+      <Filter>PaddingZero</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPadding_kernel_A_s1_texture.cuh">
+      <Filter>PaddingZero</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPadding_kernel_s1_EX.cuh">
+      <Filter>PaddingZero</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPadding_kernel_s1_texture.cuh">
+      <Filter>PaddingZero</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPadding_uernel_s1.cuh">
+      <Filter>PaddingZero</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPaddingV2_kernel_s1.cuh">
+      <Filter>PaddingZero</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPaddingV2_kernel_s1_EX.cuh">
+      <Filter>PaddingZero</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPaddingV2_kernel_s1_EX2.cuh">
+      <Filter>PaddingZero</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPaddingV2_uernel_s1.cuh">
+      <Filter>PaddingZero</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplit.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplit_R_kernel.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplit_R_kernel_EX.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_KernelSplit_V2.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_KernelSplit_Ims2.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_KernelSplit_Ims.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_KernelSplit.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_CrossAdd.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_dconv3D_dX_idx.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPadding_uernel_s1_C.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ori_Winograd_f2x3.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s4_f2x3.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s4_f3x2.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s8_f2x7.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s8_f3x6.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s8_f4x5.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s8_f5x4.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s8_f6x3.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_sg_f8x9.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_sg_fAx7.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_s8_f7x2.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s8_f2x7.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s8_f3x6.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s8_f4x5.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s8_f6x3.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s8_f7x2.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s8_f5x4.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_sg_f8x9.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_sg_fAx7.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s4_f2x3.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_ZeroPadding_uernel_s1_ruse.cuh">
+      <Filter>PaddingZero</Filter>
+    </ClInclude>
+    <ClInclude Include="Xeno1_winograd2D_V0.cuh">
+      <Filter>xeno1</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_s4_f3x2.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplit_Ims2R_kernel.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplit_Ims2R_kernel_A.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplit_Ims2R_kernel_EX.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplit_Ims2R_kernel_texture.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplit_Ims2R_uernel.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplitV2_Ims2R_kernel.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplitV2_Ims2R_kernel_EX.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplitV2_Ims2R_uernel.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplit_ImsR_kernel.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplit_ImsR_kernel_EX.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplit_ImsR_kernel_texture.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_KernelSplit_ImsR_uernel.cuh">
+      <Filter>KernelSplit</Filter>
+    </ClInclude>
+    <ClInclude Include="micro_Winograd_sg_f9x8.cuh">
+      <Filter>micro</Filter>
+    </ClInclude>
+    <ClInclude Include="dconv3D_dX_Im2col_Winograd_sg_f9x8.cuh">
+      <Filter>Im2col_Winograd</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="KernelSplit">
+      <UniqueIdentifier>{dca1bb40-07cc-4762-9506-fa824c31beea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CrossAdd">
+      <UniqueIdentifier>{1dbb6dde-ff9a-4942-91ba-58160a761049}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="xeno0">
+      <UniqueIdentifier>{7cedc42f-8590-4d1f-9b7b-a3597a498dfd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="xeno1">
+      <UniqueIdentifier>{b95000a4-aa47-4866-bb6d-7c6aa3b9801b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="micro">
+      <UniqueIdentifier>{e397a42e-20c5-45c6-97ce-09538a8989d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tensor_remode">
+      <UniqueIdentifier>{1951137a-32ac-4c7b-892e-99092d4c5d13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Winograd2D">
+      <UniqueIdentifier>{5e8a4fc4-e58f-48a1-9bea-b5975f19307b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PaddingZero">
+      <UniqueIdentifier>{ee7f0226-11cc-4b61-8ad2-d8e0349d3024}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Im2col_Winograd">
+      <UniqueIdentifier>{1d161ead-51ce-4abb-8c2c-a49836135d54}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

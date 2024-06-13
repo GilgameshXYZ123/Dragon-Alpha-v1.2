@@ -1,0 +1,9 @@
+<!DOCTYPE ResourceLink>
+<configuration>
+    <resource url="z/neural/conf/resource/def-afunction.xml"/>
+    <resource url="z/neural/conf/resource/def-lfunction.xml"/>
+    <resource url="z/neural/conf/resource/def-learner.xml"/>
+    <resource url="z/neural/conf/resource/def-fhandler.xml"/>
+    <resource url="z/neural/conf/resource/def-bhandler.xml"/>
+    <resource url="z/neural/conf/resource/def-channel.xml"/>
+</configuration>

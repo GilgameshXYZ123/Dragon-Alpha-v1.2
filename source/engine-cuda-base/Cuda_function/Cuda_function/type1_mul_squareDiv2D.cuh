@@ -1,0 +1,90 @@
+#pragma once
+
+#ifndef MUL_SQUARE_DIV_2D_H
+#define MUL_SQUARW_DIV_2D_H
+
+//lengthv = height * stride
+//stride = (width + 3)/4*4
+//[lenghtv, stride] % 4 == 0
+#ifndef MUL_SQUARE_DIV_2D_CALL
+#define MUL_SQUARE_DIV_2D_CALL
+
+//LB = log2(BLOCK_SIZE)
+//LT = log2(THREAD_ELEMENT_VISIT_SIZE)
+
+//lengthv < 256
+#define mul_squareDiv2d_k4_small(stream, alpha1, X1, beta1, alpha2, X2, beta2, alpha3, X3, beta3, gamma, Y, lengthv, width, stride)\
+	mul_squareDiv2D_kernel_4\
+		<<< 1, ((lengthv + 3) >> 2), 0, stream >>>\
+			(alpha1, X1, beta1, alpha2, X2, beta2, alpha3, X3, beta3, gamma, Y, lengthv, width, stride)
+
+//common
+#define mul_squareDiv2d_k4(stream, LB, LT, alpha1, X1, beta1, alpha2, X2, beta2, alpha3, X3, beta3, gamma, Y, lengthv, width, stride)\
+	mul_squareDiv2D_kernel_4\
+		<<< lengthv>>LB>>LT, (1<<LB), 0, stream >>>\
+			(alpha1, X1, beta1, alpha2, X2, beta2, alpha3, X3, beta3, gamma, Y, lengthv, width, stride)
+
+//lengthv > lengthv_max
+#define mul_squareDiv2d_k4_max(stream, alpha1, X1, beta1, alpha2, X2, beta2, alpha3, X3, beta3, gamma, Y, lengthv, width, stride)\
+	mul_squareDiv2D_kernel_4\
+		<<< GRID_MAX, 32, 0, stream >>>\
+			(alpha1, X1, beta1, alpha2, X2, beta2, alpha3, X3, beta3, gamma, Y, lengthv, width, stride)
+
+#endif
+
+
+#ifndef MUL_SQUARE_DIV_2D_KERNEL
+#define MUL_SQUARE_DIV_2D_KERNEL
+
+//Y = { (a1*X1 + b1) * (a2*X2 + b2) } / (a3*X3 + b3)^2  + gamma
+
+__global__ void mul_squareDiv2D_kernel_4(
+	float alpha1, const float* __restrict__ X1, float beta1,
+	float alpha2, const float* __restrict__ X2, float beta2,
+	float alpha3, const float* __restrict__ X3, float beta3,
+	float gamma,
+	float* __restrict__ Y,
+	int lengthv, int width, int stride)
+{
+	const int step = gridDim.x*blockDim.x, step4 = step << 2;
+	const int index = blockIdx.x*blockDim.x + threadIdx.x;
+
+	float4 table[2]; table[0] = F32_4_0;
+	for (int index4 = index << 2; index4 < lengthv; index4 += step4)
+	{
+		float4 x1 = *(float4*)(X1 + index4);
+		float4 x2 = *(float4*)(X2 + index4);
+		float4 x3 = *(float4*)(X3 + index4);
+
+		simdLinear4(x1, alpha1, x1, beta1);//X1 -> (a1*X1 + b1)
+		simdLinear4(x2, alpha2, x2, beta2);//X2 -> (a2*X2 + b2)
+		simdLinear4(x3, alpha3, x3, beta3);//X3 -> (a3*X3 + b3)
+
+		float4 y;//Y = { (a1*X1 + b1) * (a2*X2 + b2) } / (a3*X3 + b3)^2  + gamma
+		y.x = (x1.x * x2.x) / (x3.x * x3.x) + gamma;
+		y.y = (x1.y * x2.y) / (x3.y * x3.y) + gamma;
+		y.z = (x1.z * x2.z) / (x3.z * x3.z) + gamma;
+		y.w = (x1.w * x2.w) / (x3.w * x3.w) + gamma;
+
+		within_width_zero_nan(y, index4, table, stride, width);
+		*(float4*)(Y + index4) = y;
+	}
+}
+
+#endif
+
+
+void __mul_squareDiv2D(cudaStream_t stream,
+	float alpha1, const float* X1, float beta1,
+	float alpha2, const float* X2, float beta2,
+	float alpha3, const float* X3, float beta3,
+	float gamma, 
+	float* Y,
+	int lengthv, int width, int stride)
+{
+	if (lengthv < 256) { mul_squareDiv2d_k4_small(stream, alpha1, X1, beta1, alpha2, X2, beta2, alpha3, X3, beta3, gamma, Y, lengthv, width, stride); return; }
+	if (lengthv > LENGTHV_MAX) { mul_squareDiv2d_k4_max(stream, alpha1, X1, beta1, alpha2, X2, beta2, alpha3, X3, beta3, gamma, Y, lengthv, width, stride); return; }
+	mul_squareDiv2d_k4(stream, 5, 2, alpha1, X1, beta1, alpha2, X2, beta2, alpha3, X3, beta3, gamma, Y, lengthv, width, stride);
+}
+
+#endif

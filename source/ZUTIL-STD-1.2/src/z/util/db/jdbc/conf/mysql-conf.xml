@@ -1,0 +1,13 @@
+<!DOCTYPE JDBC-SOURCE>
+<configuration>
+    <property name="jdbc.url" value="jdbc:mysql://hadoop23:3306"/>
+    <property name="jdbc.query">useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false</property>
+    <property name="jdbc.user" value="mysql"/>
+    <property name="jdbc.password" value="123"/>
+    <property name="jdbc.driver" value="com.mysql.jdbc.Driver"/>
+    
+    <property name="jdbc.connect.retry.times" type="int" value="2"/>
+    <property name="jdbc.connect.retry.interval" type="long" value="20"/>
+    <property name="jdbc.connect.retry.max.interval" type="long" value="20"/>
+    <property name="jdbc.connect.retry.backoff" type="long" value="10"/>
+</configuration>

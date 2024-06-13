@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="A.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Cuda_random.cuh" />
+    <ClInclude Include="frame.cuh" />
+    <ClInclude Include="JNITool.cuh" />
+    <ClInclude Include="micro.cuh" />
+    <ClInclude Include="test.cuh" />
+    <ClInclude Include="random_uniform2D.cuh">
+      <Filter>uniform</Filter>
+    </ClInclude>
+    <ClInclude Include="random_sparse_uniform2D.cuh">
+      <Filter>uniform</Filter>
+    </ClInclude>
+    <ClInclude Include="random_bernouli_mul2D.cuh">
+      <Filter>bernouli</Filter>
+    </ClInclude>
+    <ClInclude Include="random_bernouli2D.cuh">
+      <Filter>bernouli</Filter>
+    </ClInclude>
+    <ClInclude Include="random_gaussian2D.cuh">
+      <Filter>gaussian</Filter>
+    </ClInclude>
+    <ClInclude Include="random_sparse_gaussian2D.cuh">
+      <Filter>gaussian</Filter>
+    </ClInclude>
+    <ClInclude Include="random_leakyRelu_bernouli_mul2D.cuh">
+      <Filter>bernouli</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="uniform">
+      <UniqueIdentifier>{07122538-1501-42a6-8100-9da3daedd01f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gaussian">
+      <UniqueIdentifier>{4e25c358-1a3c-40a6-8708-e36a60ae94ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="bernouli">
+      <UniqueIdentifier>{29d04bb1-288c-4a21-b57e-6ae7af5d8f06}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

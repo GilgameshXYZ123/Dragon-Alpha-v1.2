@@ -1,0 +1,20 @@
+<!DOCTYPE JDBC-SOURCE>
+<configuration>
+    <property name="jdbc.url" value="jdbc:mysql://localhost:3306"/>
+    <property name="jdbc.query">useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false</property>
+    <property name="jdbc.user" value="root"/>
+    <property name="jdbc.password" value="610607866"/>
+    <property name="jdbc.driver" value="com.mysql.jdbc.Driver"/>
+    
+    <property name="jdbc.connect.retry.times" type="int" value="2"/>
+    <property name="jdbc.connect.retry.interval" type="long" value="20"/>
+    <property name="jdbc.connect.retry.max.interval" type="long" value="20"/>
+    <property name="jdbc.connect.retry.backoff" type="long" value="10"/>
+    
+    <property name="pool.wait.time" type="long" value="100"/>
+    <property name="pool.init.propotion" type="double" value="0.5"/>
+    <property name="pool.fixed.limit" type="int" value="10"/>
+    <property name="pool.elastic.limit" type="int" value="20"/>
+    <property name="pool.elastic.increase.num" type="int" value="2"/>
+    <property name="pool.elastic.expire.frequency" type="long" value="300"/>
+</configuration>

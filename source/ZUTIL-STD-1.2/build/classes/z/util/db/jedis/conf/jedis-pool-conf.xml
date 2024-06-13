@@ -1,0 +1,23 @@
+<!DOCTYPE JEDIS-SOURCE>
+<configuration>
+    <property name="jedis.host" value="127.0.0.1"/>
+    <property name="jedis.port" type="int" value="6379"/>
+    <!--<property name="jedis.auth" value="123456"/>-->
+    
+    <property name="jedis.connect.retry.times" type="int" value="2"/>
+    <property name="jdbc.connect.retry.max.interval.ms" type="long" value="100"/>
+    <property name="jedis.connect.retry.interval.ms" type="long" value="50"/>
+    <property name="jedis.connect.retry.backoff" type="long" value="20"/>
+    
+    <property name="jdbc.connect.retry.times" type="int" value="2"/>
+    <property name="jdbc.connect.retry.interval.ms" type="long" value="20"/>
+    <property name="jdbc.connect.retry.max.interval.ms" type="long" value="20"/>
+    <property name="jdbc.connect.retry.backoff" type="long" value="10"/>
+    
+    <property name="pool.wait.time.ms" type="long" value="100"/>
+    <property name="pool.init.propotion" type="double" value="0.5"/>
+    <property name="pool.fixed.limit" type="int" value="10"/>
+    <property name="pool.elastic.limit" type="int" value="20"/>
+    <property name="pool.elastic.increase.num" type="int" value="2"/>
+    <property name="pool.elastic.expire.frequency.ms" type="long" value="300"/>
+</configuration>

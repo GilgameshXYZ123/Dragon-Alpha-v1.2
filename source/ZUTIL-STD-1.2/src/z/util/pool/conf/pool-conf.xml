@@ -1,0 +1,13 @@
+<!DOCTYPE POOL>
+<configuration>
+    <property name="pool.class" value="z.util.pool.ElasticPool"/>
+    <!--<property name="pool.manager" value="null"/>-->
+    
+    <property name="pool.wait.time.ms" type="long" value="100"/>
+    <property name="pool.init.propotion" type="double" value="0.5"/>
+    <property name="pool.fixed.limit" type="int" value="10"/>
+    
+    <property name="pool.elastic.limit" type="int" value="20"/>
+    <property name="pool.elastic.increase.num" type="int" value="2"/>
+    <property name="pool.elastic.expire.frequency.ms" type="long" value="300"/>
+</configuration>
