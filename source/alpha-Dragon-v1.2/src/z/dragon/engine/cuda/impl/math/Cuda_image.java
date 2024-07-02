@@ -305,6 +305,34 @@ public final class Cuda_image
     
     /**
      * <pre>
+     * Threshold: Y = (a*x > v ?  v1 : v2).
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * (4) the datatype of Y&X is int8 
+     *
+     * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
+     * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
+     * [height, width] = [1024, 1024]: Time = 0.108000, Speed = 72.337959 GB/s
+     * </pre>
+     * @param stream_address
+     * @param alpha
+     * @param dX_address
+     * @param v
+     * @param v1
+     * @param v2
+     * @param dY_address
+     * @param lengthv
+     * @param mem_width
+     * @param mem_stride 
+     */
+    public static native void img_threshold2D(long stream_address,
+            long dX_address, float alpha, float v, byte v1, byte v2,
+            long dY_address,
+            int lengthv, int mem_width, int mem_stride);
+    
+    /**
+     * <pre>
      * Linear Transformation: 
      *  [1] Y = alpha * X + beta
      *  [2] Y = clip(Y, 0, 255).

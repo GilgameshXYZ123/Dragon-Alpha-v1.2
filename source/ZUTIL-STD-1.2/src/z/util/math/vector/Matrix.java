@@ -552,8 +552,7 @@ public final class Matrix
         return new Object[] { Y, Index };
     }
     
-    public static Object[] row_min_indexed(float[][] X) 
-    {
+    public static Object[] row_min_indexed(float[][] X) {
         int height = X.length, width = X[0].length;
         float[] Y = new float[height];
         int[] Index = new int[height];
@@ -672,18 +671,18 @@ public final class Matrix
         return max; 
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="MaxMin For each Line">
-    public static double[] minValueEachRow(double[][] val) {
+    //<editor-fold defaultstate="collapsed" desc="MaxMin For each row">
+    public static double[] minValue_each_row(double[][] val) {
         double[] min = new double[val.length];
         for(int i=0; i<val.length; i++) min[i] = Vector.minValue(val[i]);
         return min;
     }
     public static void rowMin(float[][] val, float[] min) {
-        for(int i=0; i<val.length; i++) min[i] = Vector.min(val[i]);
+        for(int i=0; i<val.length; i++) min[i] = Vector.minValue(val[i]);
     }
     public static float[] minValueEachRow(float[][] val) {
         float[] min = new float[val.length];
-        for(int i=0; i<val.length; i++) min[i] = Vector.min(val[i]);
+        for(int i=0; i<val.length; i++) min[i] = Vector.minValue(val[i]);
         return min;
     }
     public static int[] minValueEachRow(int[][] val) {
@@ -712,43 +711,89 @@ public final class Matrix
     }
     
     public static <T extends Comparable> T[] maxValueEachRow(T[][] val, Class<T> clazz) {
-        T[] max=(T[]) Array.newInstance(clazz, val.length);
+        T[] max = (T[]) Array.newInstance(clazz, val.length);
         for(int i=0; i<val.length; i++) max[i]=Vector.max(val[i]);
         return max;
     }
-    public static MaxMin<int[]> maxMinForEachLine(int[][] val)
-    {
-        int[] max=new int[val.length];
-        int[] min=new int[val.length];
-        MaxMin<Integer> mm=new MaxMin<>();
-        for(int i=0;i<val.length;i++)
-        {
-            Vector.maxMin(val[i], 0, val[i].length-1, mm);
-            max[i]=mm.max;
-            min[i]=mm.min;
+    
+    //<editor-fold defaultstate="collapsed" desc="maxMin_each_row<long, int, char, short, byte>">
+    public static MaxMin<long[]> maxMin_each_row(long[][] val) {
+        long[] max = new long[val.length];
+        long[] min = new long[val.length];
+        for (int i=0; i<val.length; i++) {
+            MaxMin<Long> mm = Vector.maxMin(val[i]);
+            max[i] = mm.max; min[i] = mm.min;
         }
-        return new MaxMin(max,min);
+        return new MaxMin<>(max,min);
     }
-    public static MaxMin<int[]> maxMinForEachLine(double[][] val)
-    {
-        double[] max=new double[val.length];
-        double[] min=new double[val.length];
-        MaxMin<Double> mm=new MaxMin<>();
-        for(int i=0;i<val.length;i++)
-        {
-            Vector.maxMin(val[i], 0, val[i].length-1, mm);
-            max[i]=mm.max;
-            min[i]=mm.min;
+    
+    public static MaxMin<int[]> maxMin_each_row(int[][] val) {
+        int[] max = new int[val.length];
+        int[] min = new int[val.length];
+        for (int i=0; i<val.length; i++) {
+            MaxMin<Integer> mm = Vector.maxMin(val[i]);
+            max[i] = mm.max; min[i] = mm.min;
         }
-        return new MaxMin(max,min);
+        return new MaxMin<>(max,min);
     }
-    public static <T extends Comparable> MaxMin<T[]> maxMinForEachLine(T[][] val, Class<T> clazz)
-    {
-        T[] max=(T[]) Array.newInstance(clazz, val.length);
-        T[] min=(T[]) Array.newInstance(clazz, val.length);
+    
+    public static MaxMin<short[]> maxMin_each_row(short[][] val) {
+        short[] max = new short[val.length];
+        short[] min = new short[val.length];
+        for (int i=0; i<val.length; i++) {
+            MaxMin<Short> mm = Vector.maxMin(val[i]);
+            max[i] = mm.max; min[i] = mm.min;
+        }
+        return new MaxMin<>(max,min);
+    }
+    
+    public static MaxMin<char[]> maxMin_each_row(char[][] val) {
+        char[] max = new char[val.length];
+        char[] min = new char[val.length];
+        for (int i=0; i<val.length; i++) {
+            MaxMin<Character> mm = Vector.maxMin(val[i]);
+            max[i] = mm.max; min[i] = mm.min;
+        }
+        return new MaxMin<>(max,min);
+    }
+    
+    public static MaxMin<byte[]> maxMin_each_row(byte[][] val) {
+        byte[] max = new byte[val.length];
+        byte[] min = new byte[val.length];
+        for (int i=0; i<val.length; i++) {
+            MaxMin<Byte> mm = Vector.maxMin(val[i]);
+            max[i] = mm.max; min[i] = mm.min;
+        }
+        return new MaxMin<>(max,min);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="maxMin_each_row<float, double>">
+    public static MaxMin<double[]> maxMin_each_row(double[][] val) {
+        double[] max = new double[val.length];
+        double[] min = new double[val.length];
+        for (int i=0; i<val.length; i++) {
+            MaxMin<Double> mm = Vector.maxMin(val[i]);
+            max[i] = mm.max; min[i] = mm.min;
+        }
+        return new MaxMin<>(max,min);
+    }
+    
+    public static MaxMin<float[]> maxMin_each_row(float[][] val) {
+        float[] max = new float[val.length];
+        float[] min = new float[val.length];
+        for (int i=0; i<val.length; i++) {
+            MaxMin<Float> mm = Vector.maxMin(val[i]);
+            max[i] = mm.max; min[i] = mm.min;
+        }
+        return new MaxMin<>(max,min);
+    }
+    //</editor-fold>
+    
+    public static <T extends Comparable> MaxMin<T[]> maxMinForEachLine(T[][] val, Class<T> clazz) {
+        T[] max = (T[]) Array.newInstance(clazz, val.length);
+        T[] min = (T[]) Array.newInstance(clazz, val.length);
         MaxMin<T> mm=new MaxMin<>();
-        for(int i=0;i<val.length;i++)
-        {
+        for(int i=0;i<val.length;i++) {
             Vector.maxMin(val[i], 0, val[i].length-1, mm);
             max[i]=mm.max;
             min[i]=mm.min;
@@ -1850,7 +1895,7 @@ public final class Matrix
         }
     }
     //</editor-fold>
-     
+    
     //<editor-fold defaultstate="collapsed" desc="Matrix - Field Vector Operation">
     public static void fieldVectorBinomial(float[][] X1, float[] X2,
             float k11, float k12, float k22,
@@ -2547,20 +2592,6 @@ public final class Matrix
         for(int i=0; i<len; i++) eye[i][i]=1;
         return eye;
     }
-   
-    public static int[][] int_constants(int height, int width, int val) {
-        int[][] arr = new int[height][width];
-        for(int i=0; i<height;i++)
-        for(int j=0; j<width; j++) arr[i][j] = val;
-        return arr;
-    }
-     
-    public static double[][] double_constants(int height, int width, double val) {
-        double[][] arr = new double[height][width];
-        for(int i=0; i<height; i++)
-        for(int j=0; j<width; j++) arr[i][j]=val;
-        return arr;
-    }
     
     public static int[][] to_int_mat(double[][] x) {
         int[][] arr = new int[x.length][];
@@ -2590,48 +2621,81 @@ public final class Matrix
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Mathematic-Function:exRandom: int">
-    public static int[][] random_int_mat(int height, int width) {
-        return Lang.exr().nextIntMatrix(height, width);
+    //<editor-fold defaultstate="collapsed" desc="creator: constants">
+    public static long[][] constants(long C, int height, int width) {
+        long[][] arr = new long[height][width];
+        for(int i=0; i<height;i++)
+        for(int j=0; j<width; j++) arr[i][j] = C;
+        return arr;
     }
-    public static int[][] random_int_mat(int height, int width, int max) {
-        return Lang.exr().nextIntMatrix(height, width, 0,  max);
-    }
-    public static int[][] random_int_mat(int height, int width, int max ,int min) {
-        return Lang.exr().nextIntMatrix(height, width, max, min);
-    }
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Mathematic-Function:exRandom: double">
-    public static double[][] random_double_mat(int height, int width) {
-        return Lang.exr().next_double_matrix(height, width);
-    }
-    public static double[][] random_double_mat(int height, int width, double max) {
-        return Lang.exr().nextDoubleMatrix(height, width, max);
-    }
-    public static double[][] random_double_mat(int height, int width, double min ,double max){
-        return Lang.exr().nextDoubleMatrix(height, width, min, max);
+            
+    public static int[][] constants(int C, int height, int width) {
+        int[][] arr = new int[height][width];
+        for(int i=0; i<height;i++)
+        for(int j=0; j<width; j++) arr[i][j] = C;
+        return arr;
     }
     
-    public static double[][] random_gaussian_mat(int height ,int width) {
-        return Lang.exr().nextGaussianMatrix(height, width);
+    public static short[][] constants(short C, int height, int width) {
+        short[][] arr = new short[height][width];
+        for(int i=0; i<height;i++)
+        for(int j=0; j<width; j++) arr[i][j] = C;
+        return arr;
     }
-    public static double[][] random_gaussian_mat(int height ,int width, double max) {
-        return Lang.exr().nextGaussianMatrix(height, width, max);
+    
+    public static char[][] constants(char C, int height, int width) {
+        char[][] arr = new char[height][width];
+        for(int i=0; i<height;i++)
+        for(int j=0; j<width; j++) arr[i][j] = C;
+        return arr;
     }
-    public static double[][] random_gaussian_mat(int height, int width, double min, double max) {
-        return Lang.exr().nextGaussianMatrix(height, width, min, max);
+    
+    public static byte[][] constants(byte C, int height, int width) {
+        byte[][] arr = new byte[height][width];
+        for(int i=0; i<height;i++)
+        for(int j=0; j<width; j++) arr[i][j] = C;
+        return arr;
+    }
+     
+    public static double[][] constants(double C, int height, int width) {
+        double[][] arr = new double[height][width];
+        for(int i=0; i<height; i++)
+        for(int j=0; j<width; j++) arr[i][j]=C;
+        return arr;
+    }
+    
+    public static float[][] constants(float C, int height, int width) {
+        float[][] arr = new float[height][width];
+        for(int i=0; i<height; i++)
+        for(int j=0; j<width; j++) arr[i][j]=C;
+        return arr;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Mathematic-Function :exRandom: float">
-    public static float[][] random_float_mat(int height, int width) {
-        return Lang.exr().next_float_mat(height, width);
-    }
-    public static float[][] random_float_mat(int height, int width, float max) {
-        return Lang.exr().next_float_mat(height ,width, 0, max);
-    }
-    public static float[][] random_float_mat(int height, int width, float min, float max) {
-        return Lang.exr().next_float_mat(height, width, min, max);
-    }
+    
+    //<editor-fold defaultstate="collapsed" desc="creator: random">
+    public static long[][] random_long_mat(int height, int width) { return Lang.exr().next_long_mat(height, width); }
+    public static long[][] random_long_mat(int height, int width, long max) { return Lang.exr().next_long_mat(height, width, 0,  max); }
+    public static long[][] random_long_mat(int height, int width, long max ,long min) { return Lang.exr().next_long_mat(height, width, max, min); }
+    
+    public static int[][] random_int_mat(int height, int width) { return Lang.exr().next_int_mat(height, width); }
+    public static int[][] random_int_mat(int height, int width, int max) { return Lang.exr().next_int_mat(height, width, 0,  max); }
+    public static int[][] random_int_mat(int height, int width, int max ,int min) { return Lang.exr().next_int_mat(height, width, max, min); }
+
+    public static double[][] random_double_mat(int height, int width) { return Lang.exr().next_double_mat(height, width); }
+    public static double[][] random_double_mat(int height, int width, double max) { return Lang.exr().next_double_mat(height, width, max); }
+    public static double[][] random_double_mat(int height, int width, double min ,double max){ return Lang.exr().next_double_mat(height, width, min, max); }
+    
+    public static double[][] random_gaussian_mat(int height ,int width) { return Lang.exr().next_gaussian_mat(height, width); }
+    public static double[][] random_gaussian_mat(int height ,int width, double sigma) { return Lang.exr().next_gaussian_mat(height, width, sigma); }
+    public static double[][] random_gaussian_mat(int height, int width, double mu, double sigma) { return Lang.exr().next_gaussian_mat(height, width, mu, sigma); }
+
+    public static float[][] random_float_mat(int height, int width) { return Lang.exr().next_float_mat(height, width); }
+    public static float[][] random_float_mat(int height, int width, float max) { return Lang.exr().next_float_mat(height ,width, 0, max); }
+    public static float[][] random_float_mat(int height, int width, float min, float max) { return Lang.exr().next_float_mat(height, width, min, max); }
+    
+    public static float[][] random_gaussianf_mat(int height, int width) { return Lang.exr().next_gaussianf_mat(height, width); }
+    public static float[][] random_gaussianf_mat(int height, int width, float sigma) { return Lang.exr().next_gaussianf_mat(height ,width, 0, sigma); }
+    public static float[][] random_gaussianf_mat(int height, int width, float mu, float sigma) { return Lang.exr().next_gaussianf_mat(height, width, mu, sigma); }
     //</editor-fold>
     //</editor-fold>
     
@@ -2706,6 +2770,7 @@ public final class Matrix
         return r;
     }
     //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="Matrix-Convert-Function:elementary">
     public static Boolean[][] valueOfNBooleanMatrix(String value) throws Exception
     {
@@ -2783,15 +2848,13 @@ public final class Matrix
         }
     }
     
-    
     /**
      * Fo the input Matrx x, regard rows as tuples and fields as columns.
      * as the covariance Matrix=xT*x
      * @param x
      * @return 
      */
-    public static double[][] covarianceMatrixForLine(double[][] x)
-    {
+    public static double[][] covarianceMatrixForLine(double[][] x) {
         int width=x.length;
         double k=1.0/x.length;
         double[][] cov = new double[width][width];

@@ -392,7 +392,7 @@ public class ImageEngine
         return linear2_field(inplace, X1, X2, 1.0f, -1.0f, 0.0f);
     }
     
-    @Passed("CudaFloat32EngieBase")
+    @Passed("CudaFloat32EngieBase")//alpha*X1 + beta*X2 + gamma
     public Tensor linear2_field(boolean inplace, Tensor X1, Tensor X2,
             float alpha, float beta, float gamma)
     {
@@ -419,6 +419,21 @@ public class ImageEngine
         Tensor Y = (inplace? X : eg.empty_int8(X.dim).c());
         Syncer sc = eg.core.img_quadratic2D(Y.address,
                 X.address, alpha, beta, gamma, 
+                X.lengthv, X.lastDim());
+        if(eg.sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="image: threshold">
+    public Tensor threshold(boolean inplace, Tensor X, float v) { return threshold(inplace, X, 1.0f, v, (byte)0, (byte)255); }
+    public Tensor threshold(boolean inplace, Tensor X, float v, byte v1, byte v2) { return threshold(inplace, X, 1.0f, v, v1, v2); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor threshold(boolean inplace, Tensor X, float alpha, float v, int v1, int v2) {
+        if(eg.check) { eg.require_int8(X, "X"); }
+        Tensor Y = (inplace? X : eg.empty_int8(X.dim).c());
+        Syncer sc = eg.core.img_threshold2D(Y.address, 
+                X.address, alpha, v, (byte)v1, (byte)v2,
                 X.lengthv, X.lastDim());
         if(eg.sync) sc.sync(); else Y.setSyncer(sc);
         return Y;
@@ -993,7 +1008,7 @@ public class ImageEngine
     public static class ImageAffiner 
     {
         private float m00 = 1.0f, m01 = 0.0f, m02 = 0.0f;
-        private float m10 = 0.0f, m12 = 1.0f, m11 = 1.0f;
+        private float m10 = 0.0f, m11 = 1.0f, m12 = 0.0f;
       
         //<editor-fold defaultstate="collapsed" desc="Basic-Functions">
         public final float m00() { return m00; }
@@ -1343,6 +1358,7 @@ public class ImageEngine
     }
     //</editor-fold>
     //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="image: Tensor -> BufferedImage">
     public BufferedImage BGR(Tensor X) { return BGR(X, channel_blue, channel_green, channel_red); }
     public BufferedImage BGR(Tensor X, int blue, int green, int red) {

@@ -1123,7 +1123,27 @@ public class EngineCore implements MemStatus
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="forward propagation">
-    public Syncer pool2D_max(
+    //<editor-fold defaultstate="collapsed" desc="pool2D_max">
+    public Syncer pool2D_max(//ndim = 3
+            long Y_address, int OH, int OW,
+            long X_address, int IH, int IW,
+            int FH, int FW, int IC,
+            int sh, int sw, int ph, int pw)
+    {
+        if(check) {
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            pool2D_param_check(OH, OW, IH, IW, FH, FW, 1, IC, sh, sw, ph, pw);
+        }
+        return base.pool2D_max(Y_address, OH, OW, 
+                X_address, 
+                ((IH + 3) >> 2) << 2, 
+                IW, FH, FW, 1,//N = 1
+                ((IC + 3) >> 2) << 2,
+                sh, sw, ph, pw);
+    }
+    
+    public Syncer pool2D_max(//ndim = 4
             long Y_address, int OH, int OW,
             long X_address, int IH, int IW,
             int FH, int FW,
@@ -1135,14 +1155,14 @@ public class EngineCore implements MemStatus
             if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
             pool2D_param_check(OH, OW, IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
         }
-        
         return base.pool2D_max(Y_address, OH, OW, 
                 X_address, IH, IW, FH, FW, 
                 ((N  + 3) >> 2) << 2, 
                 ((IC + 3) >> 2) << 2,
                 sh, sw, ph, pw);
     }
-    
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="pool2D_max_indexed">
     public Syncer pool2D_max_indexed(
             long Y_address, long Index_address, int OH, int OW,
             long X_address, int IH, int IW,
@@ -1156,15 +1176,34 @@ public class EngineCore implements MemStatus
             if(Y_address == NULL) throw new NullPointerException("Tensor Index is null");
             pool2D_param_check(OH, OW, IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
         }
-        
         return base.pool2D_max_indexed(Y_address, Index_address, OH, OW, 
                 X_address, IH, IW, FH, FW,
                 ((N  + 3) >> 2) << 2, 
                 ((IC + 3) >> 2) << 2,
                 sh, sw, ph, pw);
     }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="pool2D_avg">
+    public Syncer pool2D_avg(//ndim = 3
+            long Y_address, int OH, int OW,
+            long X_address, int IH, int IW,
+            int FH, int FW, int IC,
+            int sh, int sw, int ph, int pw)
+    {
+        if(check) {
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            pool2D_param_check(OH, OW, IH, IW, FH, FW, 1, IC, sh, sw, ph, pw);
+        }
+        return base.pool2D_avg(Y_address, OH, OW, 
+                X_address, 
+                ((IH + 3) >> 2) << 2, 
+                IW, FH, FW, 1,//N = 1
+                ((IC + 3) >> 2) << 2,
+                sh, sw, ph, pw);
+    }
     
-    public Syncer pool2D_avg(
+    public Syncer pool2D_avg(//ndim = 4
             long Y_address, int OH, int OW,
             long X_address, int IH, int IW,
             int FH, int FW,
@@ -1176,7 +1215,6 @@ public class EngineCore implements MemStatus
             if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
             pool2D_param_check(OH, OW, IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
         }
-        
         return base.pool2D_avg(Y_address, OH, OW, 
                 X_address, IH, IW, FH, FW, 
                 ((N  + 3) >> 2) << 2, 
@@ -1184,7 +1222,26 @@ public class EngineCore implements MemStatus
                 sh, sw, ph, pw);
     }
     
-    public Syncer pool2D_avg_ignore_padding(
+    public Syncer pool2D_avg_ignore_padding(//ndim = 3
+            long Y_address, int OH, int OW,
+            long X_address, int IH, int IW,
+            int FH, int FW, int IC,
+            int sh, int sw, int ph, int pw)
+    {
+        if(check) {
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            pool2D_param_check(OH, OW, IH, IW, FH, FW, 1, IC, sh, sw, ph, pw);
+        }
+        return base.pool2D_avg_ignore_padding(Y_address, OH, OW, 
+                X_address,
+                ((IH + 3) >> 2) << 2, 
+                IW, FH, FW, 1,//N = 1
+                ((IC + 3) >> 2) << 2,
+                sh, sw, ph, pw);
+    }
+    
+    public Syncer pool2D_avg_ignore_padding(//ndim = 4
             long Y_address, int OH, int OW,
             long X_address, int IH, int IW,
             int FH, int FW,
@@ -1196,13 +1253,13 @@ public class EngineCore implements MemStatus
             if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
             pool2D_param_check(OH, OW, IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
         }
-        
         return base.pool2D_avg_ignore_padding(Y_address, OH, OW, 
                 X_address, IH, IW, FH, FW, 
                 ((N  + 3) >> 2) << 2, 
                 ((IC + 3) >> 2) << 2,
                 sh, sw, ph, pw);
     }
+    //</editor-fold>
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="backward propagation">
     public Syncer unpool2D_max(
@@ -2297,8 +2354,8 @@ public class EngineCore implements MemStatus
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="min, max, clip">
-    //<editor-fold defaultstate="collapsed" desc="min, min2">
+    //<editor-fold defaultstate="collapsed" desc="minValue, max, clip">
+    //<editor-fold defaultstate="collapsed" desc="minValue, min2">
     public Syncer min2D(long Y_address,
             float alpha, long X_address, float beta, 
             float vmin,
@@ -6024,7 +6081,7 @@ public class EngineCore implements MemStatus
                 width, stride);
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="field max, min">
+    //<editor-fold defaultstate="collapsed" desc="field max, minValue">
     public Syncer field_max(long Y_address,
             long X_address, 
             int length, int row_length, int width)
@@ -6288,7 +6345,7 @@ public class EngineCore implements MemStatus
                 width, stride);
     }
     //</editor-fold> 
-    //<editor-fold defaultstate="collapsed" desc="row max, min">
+    //<editor-fold defaultstate="collapsed" desc="row max, minValue">
     public Syncer row_max(long Y_address, 
             long X_address,
             int field_length, int row_length,
@@ -6556,6 +6613,21 @@ public class EngineCore implements MemStatus
         }
         return base.img_quadratic2D(Y_address, 
                 X_address, alpha, beta, gamma,
+                lengthv, width, stride);
+    }
+    
+    public Syncer img_threshold2D(long Y_address, 
+            long X_address, float alpha, float v, byte v1, byte v2,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.img_threshold2D(Y_address, 
+                X_address, alpha, v, v1, v2,
                 lengthv, width, stride);
     }
     

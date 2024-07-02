@@ -236,7 +236,7 @@ public final class Num
         int t=a[low];a[low]=a[maxIndex];a[maxIndex]=t;
         t=a[low+1];a[low+1]=a[minIndex];a[minIndex]=t;
         
-        //Time Complexity: O((max*min)^0.5 + sum(gcd*a[i])*0,5)
+        //Time Complexity: O((max*minValue)^0.5 + sum(gcd*a[i])*0,5)
         for(int i=low+2;i<=high;i++) gcd=gcd(gcd, a[i]);// 
         
         //exchange a[maxIndex], a[minIndex] with a[low] and a[low+1]
@@ -382,11 +382,11 @@ public final class Num
     
     public static long reverse(long n)  {
         n = (n >>> 32) | (n<<32);//exchange the first and last 16 bits
-        n = ((n&0xffff0000ffff0000L) >>> 16| (n&0x0000ffff0000ffffL) <<16);//16bits
-        n = ((n&0xff00ff00ff00ff00L) >>> 8 | (n&0x00ff00ff00ff00ffL) <<8 );//8bits
-        n = ((n&0xf0f0f0f0f0f0f0f0L) >>> 4 | (n&0x0f0f0f0f0f0f0f0fL) <<4 );//4bits
-        n = ((n&0xccccccccccccccccL) >>> 2 | (n&0xccccccccccccccccL) <<2 );//2bits
-        n = ((n&0xaaaaaaaaaaaaaaaaL) >>> 1 | (n&0xaaaaaaaaaaaaaaaaL) <<1 );//1bits
+        n = ((n & 0xffff0000ffff0000L) >>> 16| (n & 0x0000ffff0000ffffL) <<16);//16bits
+        n = ((n & 0xff00ff00ff00ff00L) >>> 8 | (n & 0x00ff00ff00ff00ffL) <<8 );//8bits
+        n = ((n & 0xf0f0f0f0f0f0f0f0L) >>> 4 | (n & 0x0f0f0f0f0f0f0f0fL) <<4 );//4bits
+        n = ((n & 0xccccccccccccccccL) >>> 2 | (n & 0xccccccccccccccccL) <<2 );//2bits
+        n = ((n & 0xaaaaaaaaaaaaaaaaL) >>> 1 | (n & 0xaaaaaaaaaaaaaaaaL) <<1 );//1bits
         return n;
     }
     /**

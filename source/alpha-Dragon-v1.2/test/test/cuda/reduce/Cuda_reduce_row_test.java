@@ -58,7 +58,7 @@ public class Cuda_reduce_row_test
 //        Y1 = Matrix.row_quadratic2(mX, mX2, alpha, beta, gamma, alpha2, beta2, gamma2);
         
 //        Matrix.maxValueEachRow(mX, Y1);
-//        Matrix.minValueEachRow(mX, Y1);
+//        Matrix.minValue_each_row(mX, Y1);
      
         System.out.print("CPU: "); Vector.println(Y1, 0, 10);
         //GPU-------------------------------------------------------------------

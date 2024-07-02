@@ -24,8 +24,7 @@ import z.util.math.ExRandom;
  *
  * @author Gilgamesh
  */
-public class Engine implements MemStatus
-{
+public class Engine implements MemStatus {
     protected EngineCore core;
     protected boolean check = true;
     protected boolean sync = true;
@@ -529,6 +528,14 @@ public class Engine implements MemStatus
             if(sync) sc.sync(); else ts.setSyncer(sc);
         }
         return ts;
+    }
+    
+    public Tensor inplace(Tensor X, Tensor Y) {//delete X, let X = Y
+        if (check) { this.equals_dataType(X, "X", Y, "Y"); }
+        long old_memLen = X.mem_size, old_addr = X.address;
+        X.copy_memoryMetaData_and_deleteSrc(Y);//let: X.dim = Y.dim/newDim, X.address = Y.address.newAddress
+        core.free(old_memLen, old_addr);
+        return X;
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="create: constant(C, dim)">
@@ -2575,7 +2582,6 @@ public class Engine implements MemStatus
             equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
             equals(Y.dim(3), "Y.IC", X.dim(3), "X.IC");
         }
-        
         int[] dimY = Y.dim, dimX = X.dim;
         int OH = dimY[1], OW = dimY[2];//Y[ N, OH, OW, OC]
         int XN = dimX[0], IH = dimX[1], IW = dimX[2], XIC = dimX[3];//X[ N, IH, IW, IC]
@@ -2600,11 +2606,27 @@ public class Engine implements MemStatus
     public Tensor pool2D_max(Tensor X, int FH, int FW, int OH, int OW, 
             int sh, int sw, int ph, int pw) 
     {
-        if(check) { require_dtype(X, "X"); equals(X.ndim(), "X.ndim", 4); }
-
-        int[] dimX = X.dim;//X[ N, IH, IW, IC]
-        int XN = dimX[0], IH = dimX[1], IW = dimX[2], XIC = dimX[3];
+        if(check) { require_dtype(X, "X"); must_greater_equal(X.ndim(), "X.ndim", 3); }
         
+        int[] dimX = X.dim;
+        //[ndim = 3]------------------------------------------------------------
+        if (X.ndim() == 3) {
+            int IH = dimX[0], IW = dimX[1], XIC = dimX[2];//X[IH, IW, IC]
+            if(OH == -1) OH = (IH - FH + (ph << 1))/sh + 1;//floor
+            if(OW == -1) OW = (IW - FW + (pw << 1))/sw + 1;//floor
+            Tensor Y = this.empty(OH, OW, XIC).c();
+            
+            Syncer sc = core.pool2D_max(
+                Y.address, OH, OW, 
+                X.address, IH, IW,
+                FH, FW, XIC, 
+                sh, sw, ph, pw);
+            if(sync) sc.sync(); else Y.setSyncer(sc);
+            return Y;
+        }
+        
+        //[ndim = 4]------------------------------------------------------------
+        int XN = dimX[0], IH = dimX[1], IW = dimX[2], XIC = dimX[3];
         if(OH == -1) OH = (IH - FH + (ph << 1))/sh + 1;//floor
         if(OW == -1) OW = (IW - FW + (pw << 1))/sw + 1;//floor
         Tensor Y = this.empty(XN, OH, OW, XIC).c();
@@ -2867,10 +2889,27 @@ public class Engine implements MemStatus
             Tensor X, int FH, int FW, int OH, int OW,
             int sh, int sw, int ph, int pw) 
     {
-        if(check) { require_dtype(X, "X"); equals(X.ndim(), "X.ndim", 4); }
+        if(check) { require_dtype(X, "X"); this.must_greater_equal(X.ndim(), "X,ndim", 3); }
+
+        int[] dimX = X.dim;
+        //[ndim = 3]------------------------------------------------------------
+        if (X.ndim() == 3) {
+            int IH = dimX[0], IW = dimX[1], XIC = dimX[2];//X[IH, IW, IC]
+            if(OH == -1) OH = (IH - FH + (ph << 1))/sh + 1;//floor
+            if(OW == -1) OW = (IW - FW + (pw << 1))/sw + 1;//floor
+            Tensor Y = this.empty(OH, OW, XIC).c();
+            
+            Syncer sc = (ignore_padding?
+                core.pool2D_avg_ignore_padding(Y.address, OH, OW, X.address, IH, IW,
+                        FH, FW, XIC, sh, sw, ph, pw) :
+                core.pool2D_avg(Y.address, OH, OW, X.address, IH, IW,
+                        FH, FW, XIC, sh, sw, ph, pw));
+            if(sync) sc.sync(); else Y.setSyncer(sc);
+            return Y;
+        }
         
-        int[] dimX = X.dim;//X[ N, IH, IW, IC]
-        int XN = dimX[0], IH = dimX[1], IW = dimX[2], XIC = dimX[3];
+        //[ndim = 4]------------------------------------------------------------
+        int XN = dimX[0], IH = dimX[1], IW = dimX[2], XIC = dimX[3];//X[ N, IH, IW, IC]
         
         if(OH == -1) OH = (IH - FH + (ph << 1))/sh + 1;//floor
         if(OW == -1) OW = (IW - FW + (pw << 1))/sw + 1;//floor
@@ -3098,7 +3137,7 @@ public class Engine implements MemStatus
         return linear_greater_switch(inplace, -1.0f, X, v, v1, v2);//X < v => X - v < 0 -> -X + v > 0
     }
     
-    @Passed("CudaFloat32EngieBase")//alpha*X + beta > 0
+    @Passed("CudaFloat32EngieBase")//alpha*X + beta > 0 ? v1 : v2
     public Tensor linear_greater_switch(boolean inplace, 
             float alpha, Tensor X, float beta, 
             float v1, float v2) 
@@ -4424,8 +4463,8 @@ public class Engine implements MemStatus
     //</editor-fold>
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="min, max, clip"> 
-    //<editor-fold defaultstate="collapsed" desc="BP: min">
+    //<editor-fold defaultstate="collapsed" desc="minValue, max, clip"> 
+    //<editor-fold defaultstate="collapsed" desc="BP: minValue">
     public Tensor min(boolean inplace, Tensor X, float vmin){ return min(inplace, 1, X, 0, vmin);}
     @Passed("CudaFloat32EngieBase")
     public Tensor min(boolean inplace, float alpha, Tensor X, float beta, float vmin) {
@@ -8479,7 +8518,7 @@ public class Engine implements MemStatus
         return result;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="straight min & max">
+    //<editor-fold defaultstate="collapsed" desc="straight minValue & max">
     @Passed("CudaFloat32EngieBase")
     public Result<Float> straight_max(Tensor X)  {
         if(check) { require_dtype(X, "X"); }
@@ -8498,7 +8537,7 @@ public class Engine implements MemStatus
         return result;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="straight min & max indexed">
+    //<editor-fold defaultstate="collapsed" desc="straight minValue & max indexed">
     @Passed("CudaFloat32EngieBase")
     public IndexedResult<Float> straight_max_indexed(Tensor X)  {
         if(check) { require_dtype(X, "X"); }
@@ -8851,7 +8890,7 @@ public class Engine implements MemStatus
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="field max\min">
+    //<editor-fold defaultstate="collapsed" desc="field max\minValue">
     public Tensor field_max(Tensor X) { return field_max(X, -1); }
     @Passed("CudaFloat32EngieBase")
     public Tensor field_max(Tensor X, int row_length) {
@@ -8888,7 +8927,7 @@ public class Engine implements MemStatus
         return Y;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="field max\min indexed">
+    //<editor-fold defaultstate="collapsed" desc="field max\minValue indexed">
     public Tensor[] field_max_indexed(Tensor X) { return field_max_indexed(X, -1); }
     @Passed("CudaFloat32EngieBase")
     public Tensor[] field_max_indexed(Tensor X, int row_length) {
@@ -9393,7 +9432,7 @@ public class Engine implements MemStatus
     }    
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="row max\min">
+    //<editor-fold defaultstate="collapsed" desc="row max\minValue">
     public Tensor row_max(Tensor X) { return row_max(X, -1); }
     @Passed("CudaFloat32EngieBase")
     public Tensor row_max(Tensor X, int row_length) {
@@ -9428,7 +9467,7 @@ public class Engine implements MemStatus
         return Y;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="row max\min indexed">
+    //<editor-fold defaultstate="collapsed" desc="row max\minValue indexed">
     public Tensor row_max_index(Tensor X) { return row_max_index(X, -1); }
     @Passed("CudaFloat32EngieBase")
     public Tensor row_max_index(Tensor X, int row_length) {

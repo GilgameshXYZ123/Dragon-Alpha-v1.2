@@ -739,16 +739,16 @@ public final class Vector
         T t=fn;fn=val[index];val[index]=t;
     }
     
-    //<editor-fold defaultstate="collapsed" desc="math: min">
-    public static float min(float... arr) { return min(arr, 0, arr.length - 1); }
-    public static float min(float[] arr, int low, int high) {
+    //<editor-fold defaultstate="collapsed" desc="math: minValue">
+    public static float minValue(float... arr) { return minValue(arr, 0, arr.length - 1); }
+    public static float minValue(float[] arr, int low, int high) {
         if(low > high) { int t = low; low = high; high = t; }
         float min = arr[low];
         for(int i=low+1; i<=high; i++) if(min > arr[i]) min = arr[i];
         return min;
     }
     
-    public static double minValue(double... arr) { return minValue(arr, 0, arr.length - 1); }
+    public static double minValue(double... arr) { return Vector.minValue(arr, 0, arr.length - 1); }
     public static double minValue(double[] arr, int low, int high) {
         if(low > high) { int t = low; low = high; high = t; }
         double min = arr[low];
@@ -756,7 +756,7 @@ public final class Vector
         return min;
     }
     
-    public static int minValue(byte[] arr) { return minValue(arr, 0, arr.length-1); }
+    public static int minValue(byte[] arr) { return Vector.minValue(arr, 0, arr.length-1); }
     public static int minValue(byte[] arr, int low, int high) {
         if(low > high) { int t = low; low = high; high = t; }
         byte min = arr[low];
@@ -764,7 +764,7 @@ public final class Vector
         return min;
     }
     
-    public static char minValue(char... arr) { return minValue(arr, 0, arr.length - 1); }
+    public static char minValue(char... arr) { return Vector.minValue(arr, 0, arr.length - 1); }
     public static char minValue(char[] arr, int low, int high) {
         if(low > high) { int t = low; low = high; high = t; }
         char min = arr[low];
@@ -772,7 +772,7 @@ public final class Vector
         return min;
     }
     
-    public static int minValue(int... arr) { return minValue(arr, 0, arr.length - 1); }
+    public static int minValue(int... arr) { return Vector.minValue(arr, 0, arr.length - 1); }
     public static int minValue(int[] arr, int low, int high) {
         if(low > high) { int t = low; low = high; high = t; }
         int min = arr[low];
@@ -780,7 +780,7 @@ public final class Vector
         return min;
     }
     
-    public static long minValue(long... arr) { return minValue(arr, 0, arr.length - 1); }
+    public static long minValue(long... arr) { return Vector.minValue(arr, 0, arr.length - 1); }
     public static long minValue(long[] arr, int low, int high) {
         if(low > high) { int t = low; low = high; high = t; }
         long min = arr[low];
@@ -914,36 +914,7 @@ public final class Vector
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Inner-Code:MaxMin">
     @Passed
-    static void maxMin(int[] val, int low, int high, MaxMin<Integer> mm)
-    {
-        int max,min;
-        if(val[low]>val[low+1]) {max=val[low];min=val[low+1];}
-        else {max=val[low+1];min=val[low];}
-        for(int i=2+low;i<high;i+=2)
-        {
-            if(val[i]>val[i+1])
-            {
-                if(max<val[i]) max=val[i];
-                if(min>val[i+1]) min=val[i+1];
-            }
-            else
-            {
-                if(max<val[i+1]) max=val[i+1];
-                if(min>val[i]) min=val[i];
-            }
-        }
-        if(((high-low+1)&1)==1)//val.length is an odd number
-        {
-            int ev=val[high];
-            if(max<ev) max=ev;
-            else if(min>ev) min=ev;
-        }
-        mm.max=max;
-        mm.min=min;
-    }
-    @Passed
-    static void maxMinABS(int[] val, int low, int high, MaxMin<Integer> mm)
-    {
+    static void maxMinABS(int[] val, int low, int high, MaxMin<Integer> mm) {
         int max,min;
         int abs1= (val[low]>=0? val[low]: -val[low]);
         int abs2= (val[low+1]>=0? val[low+1]: -val[low+1]);
@@ -973,7 +944,7 @@ public final class Vector
         mm.max=max;
         mm.min=min;
     }
-    @Passed
+    
     static void maxMinABSIndex(int[] val, int low, int high, MaxMin<Integer> mm)
     {
         int max,min, maxIndex, minIndex;
@@ -1005,34 +976,7 @@ public final class Vector
         mm.max=maxIndex;
         mm.min=minIndex;
     }
-    @Passed
-    static void maxMin(double[] val, int low, int high, MaxMin<Double> mm)
-    {
-        double max,min;
-        if(val[low]>val[low+1]) {max=val[low];min=val[low+1];}
-        else {max=val[low+1];min=val[low];}
-        for(int i=2+low;i<high;i+=2)
-        {
-            if(val[i]>val[i+1])
-            {
-                if(max<val[i]) max=val[i];
-                if(min>val[i+1]) min=val[i+1];
-            }
-            else
-            {
-                if(max<val[i+1]) max=val[i+1];
-                if(min>val[i]) min=val[i];
-            }
-        }
-        if(((high-low+1)&1)==1)//val.length is an odd number
-        {
-            double ev=val[high];
-            if(max<ev) max=ev;
-            else if(min>ev) min=ev;
-        }
-        mm.max=max;
-        mm.min=min;
-    }
+
     @Passed
     static void maxMinABS(double[] val, int low, int high, MaxMin<Double> mm)
     {
@@ -1094,58 +1038,68 @@ public final class Vector
         mm.min=min;
     }
     //</editor-fold>
-    public static MaxMin<Integer> maxMin(int[] val)
-    {
-        MaxMin<Integer> mm=new MaxMin<>();
-        Vector.maxMin(val, 0, val.length-1, mm);
-        return mm;
-    }
-    public static MaxMin<Integer> maxMin(int[] val, int low, int high)
-    {
-        MaxMin<Integer> mm=new MaxMin<>();
-        Vector.maxMin(val, low, high, mm);
-        return mm;
-    }
-    public static MaxMin<Integer> maxMinABS(int[] val)
-    {
-        MaxMin<Integer> mm=new MaxMin<>();
-        Vector.maxMinABS(val, 0, val.length-1, mm);
-        return mm;
-    }
-    public static MaxMin<Integer> maxMinABS(int[] val, int low, int high)
-    {
-        MaxMin<Integer> mm=new MaxMin<>();
+    
+    public static MaxMin<Integer> maxMinAbs(int[] val) { return maxMinAbs(val, 0, val.length - 1); }
+    public static MaxMin<Integer> maxMinAbs(int[] val, int low, int high) {
+        MaxMin<Integer> mm = new MaxMin<>();
         Vector.maxMinABS(val, low, high, mm);
         return mm;
     }
-    public static MaxMin<Integer> maxMinABSIndex(int[] val)
-    {
-        MaxMin<Integer> mm=new MaxMin<>();
+    
+    public static MaxMin<Integer> maxMinABSIndex(int[] val) {
+        MaxMin<Integer> mm = new MaxMin<>();
         Vector.maxMinABSIndex(val, 0, val.length-1, mm);
         return mm;
     }
-    public static MaxMin<Integer> maxMinABSIndex(int[] val, int low, int high)
-    {
-        MaxMin<Integer> mm=new MaxMin<>();
+    
+    public static MaxMin<Integer> maxMinABSIndex(int[] val, int low, int high) {
+        MaxMin<Integer> mm = new MaxMin<>();
         Vector.maxMinABSIndex(val, low, high, mm);
         return mm;
     }
     
-    /**
-     * if there exists max-min > threshold, return null and early stopping.
-     * @param a
-     * @param low
-     * @param high
-     * @param threshold
-     * @return 
-     */
-    public static MaxMin<Integer> maxMin(int[] a, int low, int high,  int threshold) {
+    //<editor-fold defaultstate="collapsed" desc="maxMin<long>">
+    public static MaxMin<Long> maxMin(long[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Long> maxMin(long[] a, int low, int high) {
+        long max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            long ev = a[high]; 
+            if(max < ev) max = ev; else if(min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="maxMin<int>">
+    public static MaxMin<Integer> maxMin(int[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Integer> maxMin(int[] a, int low, int high) {
+        int max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            int ev = a[high];
+            if(max < ev) max = ev; else if(min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    
+    public static MaxMin<Integer> maxMin(int[] a, int threshold) { return maxMin(a,  0, a.length - 1, threshold); }
+    public static MaxMin<Integer> maxMin(int[] a, int low, int high, int threshold) {
         int max, min;
         if (a[low] > a[low+1]) { max = a[low]; min = a[low + 1]; }
         else { max = a[low+1]; min = a[low]; }
         for (int i = 2 + low; i < high; i += 2) {
-            if(max - min > threshold) { return null; }
-            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            if (max - min > threshold) { return null; }//if there exists max-minValue > threshold, return null and early stopping.
+            if (a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
             else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min = a[i]; }
         }
         if (((high - low + 1) & 1) == 1) {//val.length is an odd number
@@ -1154,29 +1108,31 @@ public final class Vector
         }
         return new MaxMin<>(max, min);
     }
-    
-    public static MaxMin<Character> maxMin(char[] a, int low, int high, int threshold) {
-        char max, min;
-        if (a[low] > a[low+1]) { max = a[low]; min = a[low + 1]; }
-        else { max = a[low+1]; min = a[low]; }
-        for (int i = 2 + low; i < high; i += 2) {
-            if (max - min > threshold) { return null; }
-            if (a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
-            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min = a[i]; }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="maxMin<short>">
+    public static MaxMin<Short> maxMin(short[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Short> maxMin(short[] a, int low, int high) {
+        short max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
         }
-        if (((high - low + 1) & 1) == 1) {//val.length is an odd number
-            char ev = a[high];
-            if (max < ev) max = ev; else if (min > ev) min = ev;
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            short ev = a[high];
+            if(max < ev) max = ev; else if(min > ev) min = ev;
         }
         return new MaxMin<>(max, min);
     }
     
+    public static MaxMin<Short> maxMin(short[] a, int threshold) { return maxMin(a,  0, a.length - 1, threshold); }
     public static MaxMin<Short> maxMin(short[] a, int low, int high, int threshold) {
         short max, min;
         if (a[low] > a[low+1]) { max = a[low]; min = a[low + 1]; }
         else { max = a[low+1]; min = a[low]; }
         for (int i = 2 + low; i < high; i += 2) {
-            if (max - min > threshold) { return null; }
+            if (max - min > threshold) { return null; }//if there exists max-minValue > threshold, return null and early stopping.
             if (a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
             else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min = a[i]; }
         }
@@ -1186,21 +1142,64 @@ public final class Vector
         }
         return new MaxMin<>(max, min);
     }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="maxMin<char>">
+    public static MaxMin<Character> maxMin(char[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Character> maxMin(char[] a, int low, int high) {
+        char max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            char ev = a[high];
+            if(max < ev) max = ev; else if(min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
     
-    /**
-     * if there exists max-min>threshold, return null and early stopping.
-     * @param a
-     * @param low
-     * @param high
-     * @param threshold
-     * @return 
-     */
+    public static MaxMin<Character> maxMin(char[] a, int threshold) { return maxMin(a,  0, a.length - 1, threshold); }
+    public static MaxMin<Character> maxMin(char[] a, int low, int high, int threshold) {
+        char max, min;
+        if (a[low] > a[low+1]) { max = a[low]; min = a[low + 1]; }
+        else { max = a[low+1]; min = a[low]; }
+        for (int i = 2 + low; i < high; i += 2) {
+            if (max - min > threshold) { return null; }//if there exists max-minValue > threshold, return null and early stopping.
+            if (a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min = a[i]; }
+        }
+        if (((high - low + 1) & 1) == 1) {//val.length is an odd number
+            char ev = a[high];
+            if (max < ev) max = ev; else if (min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="maxMin<byte>">
+    public static MaxMin<Byte> maxMin(byte[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Byte> maxMin(byte[] a, int low, int high) {
+        byte max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            byte ev = a[high];
+            if(max < ev) max = ev; else if(min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    
     public static MaxMin<Byte> maxMin(byte[] a, int low, int high, int threshold) {
         byte max, min;
         if (a[low] > a[low+1]) { max = a[low]; min = a[low + 1]; }
         else { max = a[low+1]; min = a[low]; }
         for(int i = 2 + low; i < high; i += 2) {
-            if(max - min > threshold) { return null; }
+            if(max - min > threshold) { return null; }//if there exists max-minValue > threshold, return null and early stopping.
             if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
             else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min = a[i]; }
         }
@@ -1210,17 +1209,43 @@ public final class Vector
         }
         return new MaxMin<>(max, min);
     }
+    //</editor-fold>
     
-    public static MaxMin<Double> maxMin(double[] val) {
-        MaxMin<Double> mm = new MaxMin<>();
-        Vector.maxMin(val, 0, val.length-1, mm);
-        return mm;
+    //<editor-fold defaultstate="collapsed" desc="maxMin<double>">
+    public static MaxMin<Double> maxMin(double[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Double> maxMin(double[] a, int low, int high) {
+        double max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            double ev = a[high];
+            if(max < ev) max = ev; else if(min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
     }
-    public static MaxMin<Double> maxMin(double[] val, int low, int high) {
-        MaxMin<Double> mm=new MaxMin<>();
-        Vector.maxMin(val, low, high, mm);
-        return mm;
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="maxMin<float>">
+    public static MaxMin<Float> maxMin(float[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Float> maxMin(float[] a, int low, int high) {
+        float max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            float ev = a[high];
+            if(max < ev) max = ev; else if(min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
     }
+    //</editor-fold>
+
     public static MaxMin<Double> maxMinABS(double[] val) {
         MaxMin<Double> mm=new MaxMin<>();
         Vector.maxMinABS(val, 0, val.length-1, mm);
@@ -1248,9 +1273,9 @@ public final class Vector
      * <pre>
      * deassign a relative value from 0 to 1, to all element of the input
      * Array {@code val}.
-     * 1.find the max and min value of {@code val}
-     * 2.let {@code base=max-min}
-     * 2.for each element of val:{@code result[i]=(val[i]-min)/base}
+     * 1.find the max and minValue value of {@code val}
+     * 2.let {@code base=max-minValue}
+     * 2.for each element of val:{@code result[i]=(val[i]-minValue)/base}
      * </pre>
      * @param result
      * @param val 
@@ -4213,8 +4238,20 @@ public final class Vector
     public static <T> void sort(T[] a, Comparator<T> cmp) { Sort.sort(a, cmp, 0, a.length - 1); }
     public static <T> void sort(T[] a, Comparator<T> cmp, int low, int high) {  Sort.sort(a, cmp, low, high); }
     
+    public static void sort(byte... a) { Sort.sort(a, 0, a.length - 1); }
+    public static void sort(byte[] a, int low, int high) { Sort.sort(a, low, high); }
+    
+    public static void sort(char... a) { Sort.sort(a, 0, a.length - 1); }
+    public static void sort(char[] a, int low, int high) { Sort.sort(a, low, high); }
+    
+    public static void sort(short... a) { Sort.sort(a, 0, a.length - 1); }
+    public static void sort(short[] a, int low, int high) { Sort.sort(a, low, high); }
+    
     public static void sort(int... a) { Sort.sort(a, 0, a.length - 1); }
     public static void sort(int[] a, int low, int high) { Sort.sort(a, low, high); }
+    
+    public static void sort(long... a) { Sort.sort(a, 0, a.length - 1); }
+    public static void sort(long[] a, int low, int high) { Sort.sort(a, low, high); }
     
     public static void sort(float... a) { Sort.sort(a, 0, a.length - 1); }
     public static void sort(float[] a, int low, int high) { Sort.sort(a, low, high); }
@@ -4222,8 +4259,17 @@ public final class Vector
     public static void sort(double... a) { Sort.sort(a, 0, a.length-1); }
     public static void sort(double[] a, int low, int high) { Sort.sort(a, low, high); }
     
+    public static <T> void sort(char[] key, T[] val) { Sort.sort(key, val, 0, key.length - 1); }
+    public static <T> void sort(char[] key, T[] val, int low, int high) { Sort.sort(key, val, low, high); } 
+    
     public static <T> void sort(int[] key, T[] val) { Sort.sort(key, val, 0, key.length - 1); }
     public static <T> void sort(int[] key, T[] val, int low, int high) { Sort.sort(key, val, low, high); } 
+    
+    public static <T> void sort(float[] key, T[] val) { Sort.sort(key, val, 0, key.length - 1); }
+    public static <T> void sort(float[] key, T[] val, int low, int high) { Sort.sort(key, val, low, high); } 
+    
+    public static <T> void sort(double[] key, T[] val) { Sort.sort(key, val, 0, key.length - 1); }
+    public static <T> void sort(double[] key, T[] val, int low, int high) { Sort.sort(key, val, low, high); } 
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="tensor operation">
@@ -4297,7 +4343,6 @@ public final class Vector
         return v;
     }
      //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="flatten: byte">
     public static byte[] flatten(byte[][] mat) {
         int dim0 = mat.length, dim1 = mat[0].length;
@@ -4338,7 +4383,6 @@ public final class Vector
         return v;
     }
     //</editor-fold>
-   
     
     //<editor-fold defaultstate="collapsed" desc="toND(byte)">  
     public static byte[][] to2D(byte[] X, int dim0, int dim1) {
@@ -4402,7 +4446,6 @@ public final class Vector
         return Y;
     }
     //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="toND(float)">  
     public static float[][] to2D(float[] X, int dim0, int dim1) {
         float[][] Y = new float[dim0][dim1];
@@ -4723,10 +4766,8 @@ public final class Vector
     }
     //</editor-fold>
     
-    public static float[][][][] concat4D(int dimIdx, float[][][][]...X) 
-    {
+    public static float[][][][] concat4D(int dimIdx, float[][][][]...X)  {
         if(dimIdx < 0) dimIdx += 4;
-        
         if(dimIdx == 0) return concat4D_0(X);
         if(dimIdx == 1) return concat4D_1(X);
         if(dimIdx == 2) return concat4D_2(X);
@@ -4923,15 +4964,13 @@ public final class Vector
     }
     //</editor-fold>
     
-    public static float[][][][] rot180(float[][][][] X)
-    {
+    public static float[][][][] rot180(float[][][][] X) {
         int dim0 = X.length;
         int dim1 = X[0].length;
         int dim2 = X[0][0].length;
         int dim3 = X[0][0][0].length;
         
         float[][][][] Y = new float[dim0][dim1][dim2][dim3];
-        
         for(int d0 = 0; d0 < dim0; d0++)
         for(int d1 = 0; d1 < dim1; d1++)
         for(int d2 = 0; d2 < dim2; d2++)

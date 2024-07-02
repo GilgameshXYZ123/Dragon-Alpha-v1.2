@@ -300,7 +300,7 @@ public final class QueryFunction
         mt.put(JDBC_TOPSIS_AVG_FIRST, avg1);
         mt.put(JDBC_TOPSIS_STDDEV_FIRST, stddev1);
         
-        //find ma and min-------------------------------------------------------
+        //find ma and minValue-------------------------------------------------------
         double[] max=new double[columns.length];
         double[] min=new double[columns.length];
         QueryFunction.innerExecuteAggregation(pst, dstTable, F_MAX, columns, max);

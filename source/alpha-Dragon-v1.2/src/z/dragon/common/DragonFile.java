@@ -257,8 +257,8 @@ public class DragonFile
         protected BufferedOutputStream bufWriter;
         //<editor-fold defaultstate="collapsed" desc="file write">
         private void writeClose() throws IOException {
-            if(writer != null) writer.close();
             if(bufWriter != null) bufWriter.close();
+            if(writer != null) writer.close();
         }
         
         private void writeOpen() throws IOException {

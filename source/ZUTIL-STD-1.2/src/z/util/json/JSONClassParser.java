@@ -47,8 +47,7 @@ public class JSONClassParser extends JSONParser
     Constructor con;
     CF[] cfs;
     
-    public JSONClassParser(Class clazz) throws Exception
-    {
+    public JSONClassParser(Class clazz) throws Exception {
         if(clazz==null) throw new NullPointerException();
         con=clazz.getConstructor();
         
@@ -69,7 +68,7 @@ public class JSONClassParser extends JSONParser
                 if(column==null) continue;
                 fid.setAccessible(true);
                 flcls = fid.getType();
-                list.add(new CF(column, fid, Lang.isElementType(flcls)? null:map.getParserOrLoad(flcls)));
+                list.add(new CF(column, fid, Lang.is_elem_type(flcls)? null:map.getParserOrLoad(flcls)));
             }
         }
         cfs=new CF[list.number()];
@@ -77,9 +76,9 @@ public class JSONClassParser extends JSONParser
         for(CF v:list) cfs[index++]=v;
         list.clear();
     }
+    
     @Override
-    public String toString()
-    {
+    public String toString() {
         StringBuilder sb=new StringBuilder();
         sb.append("JSONParser = {");
         sb.append("\n\t columns = {");
@@ -87,16 +86,16 @@ public class JSONClassParser extends JSONParser
         sb.append("\n\t}\n}");
         return sb.toString();
     }
-    private void append(StringBuilder sb, CF cf,Object obj) throws Exception
-    {
+    
+    private void append(StringBuilder sb, CF cf,Object obj) throws Exception {
         Object val=cf.field.get(obj);
         if(val==null) sb.append("null");
         else if(cf.parser==null) sb.append('\"').append(val).append('\"');//if the field is an element type
         else cf.parser.append(sb, val);//if the field is a complex type
     }
+    
     @Override
-    public void append(StringBuilder sb, Object obj) throws Exception
-    {
+    public void append(StringBuilder sb, Object obj) throws Exception {
         //for the start column--------------------------------------------------
         sb.append("{\"").append(cfs[0].column).append("\":");
         append(sb, cfs[0], obj);

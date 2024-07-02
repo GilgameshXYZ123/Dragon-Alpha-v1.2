@@ -1803,6 +1803,10 @@ public abstract class EngineBase
             long X_address, float alpha, float beta, float gamma,
             int lengthv, int width, int stride);
     
+    public abstract Syncer img_threshold2D(long Y_address, 
+            long X_address, float alpha, float v, byte v1, byte v2,
+            int lengthv, int width, int stride);
+    
     public abstract Syncer img_log2D(long Y_address, 
             float C, float alpha, long X_address, float beta,
             int lengthv, int width, int stride);

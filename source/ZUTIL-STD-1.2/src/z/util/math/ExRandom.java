@@ -5,78 +5,20 @@
  */
 package z.util.math;
 import java.lang.reflect.Array;
-import java.util.Objects;
 import java.util.Random;
-import z.util.lang.annotation.Passed;
 import z.util.math.vector.Vector;
 import java.util.function.IntFunction;
+import z.util.math.vector.Matrix;
         
 /**
  *
  * @author dell
  */
-public class ExRandom extends Random
-{
+public class ExRandom extends Random {
     private static final long serialVersionUID = 12233124124L;
     
-    private static final String NEGATIVE_WIDTH = "Matrix.height<=0";
-    private static final String NEGATIVE_HEIGHT = "Matrix.width<=0";
-    private static final String NO_RANDOM_SPACE = "max==min:";
-    
     public ExRandom() {} 
-    public ExRandom(long seed) { super(seed); }
-
-    //<editor-fold defaultstate="collapsed" desc="Array-Checker">
-    private static void checkIntMatrix(int height, int width, long min, long max) {
-        if(height<=0) throw new BadBoundException(NEGATIVE_HEIGHT);
-        if(width<=0) throw new BadBoundException(NEGATIVE_WIDTH);
-        if(min==max) throw new BadBoundException(NO_RANDOM_SPACE);
-    }
-   
-    private static void checkIntMatrix(int[][] v, int min, int max)
-    {
-        if(v==null) throw new NullPointerException();
-        if(min==max) throw new BadBoundException(NO_RANDOM_SPACE);
-    }
-
-    private static void checkIntMatrix(long[][] v, long min, long max)
-    {
-        if(v==null) throw new NullPointerException();
-        if(min==max) throw new BadBoundException(NO_RANDOM_SPACE);
-    }
-
-    @Passed
-    private static void checkRealMatrix(int height, int width, double min, double max)
-    {
-        if(height<=0) throw new BadBoundException(NEGATIVE_HEIGHT);
-        if(width<=0) throw new BadBoundException(NEGATIVE_WIDTH);
-        if(min==max) throw new BadBoundException(NO_RANDOM_SPACE);
-    }
-  
-    @Passed
-    private static void checkRealMatrix(float[][] v, float min, float max)
-    {
-        if(v==null) throw new NullPointerException();
-        if(min==max) throw new BadBoundException(NO_RANDOM_SPACE);
-    }
-  
-    @Passed
-    private static void checkRealMatrix(double[][] v, double min, double max)
-    {
-        if(v==null) throw new NullPointerException();
-        if(min==max) throw new BadBoundException(NO_RANDOM_SPACE);
-    }
-    //</editor-fold>
-    
-    //<editor-fold defaultstate="collapsed" desc="class: BadBoundException">
-    public static class BadBoundException extends RuntimeException 
-    {
-        public static final String MSG = "BadBoundException:";
-        public BadBoundException() {}
-        public BadBoundException(String message) { super(MSG + message); }
-        public BadBoundException(Throwable cause) { super(cause); }
-    }
-    //</editor-fold>
+    public ExRandom(long seed) { super(seed);  }
     
     //<editor-fold defaultstate="collapsed" desc="extensive: next_number">
     //<editor-fold defaultstate="collapsed" desc="number: long">
@@ -284,7 +226,51 @@ public class ExRandom extends Random
     //</editor-fold>
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Vector: random">
+    //<editor-fold defaultstate="collapsed" desc="Vector: select">
+    public long select(long[] arr) { return select(arr, 0, arr.length - 1); }
+    public long select(long[] arr, int low, int high) {
+        if (low < 0) low = 0;
+        if (high > arr.length) high = arr.length - 1;
+        return arr[nextInt(low, high)];
+    } 
+    
+    public int select(int[] arr) { return select(arr, 0, arr.length - 1); }
+    public int select(int[] arr, int low, int high) {
+        if (low < 0) low = 0;
+        if (high > arr.length) high = arr.length - 1;
+        return arr[nextInt(low, high)];
+    } 
+    
+    public byte select(byte[] arr) { return select(arr, 0, arr.length - 1); }
+    public byte select(byte[] arr, int low, int high) {
+        if (low < 0) low = 0;
+        if (high > arr.length) high = arr.length - 1;
+        return arr[nextInt(low, high)];
+    }
+    
+    public double select(double[] arr) { return select(arr, 0, arr.length - 1); }
+    public double select(double[] arr, int low, int high) {
+        if (low < 0) low = 0;
+        if (high > arr.length) high = arr.length - 1;
+        return arr[nextInt(low, high)];
+    }
+    
+    public float select(float[] arr) { return select(arr, 0, arr.length - 1); }
+    public float select(float[] arr, int low, int high) {
+        if (low < 0) low = 0;
+        if (high > arr.length) high = arr.length - 1;
+        return arr[nextInt(low, high)];
+    }
+    
+    public <T> T select(T[] arr) { return select(arr, 0, arr.length - 1); }
+    public <T> T select(T[] arr, int low, int high) {
+        if (low < 0) low = 0;
+        if (high > arr.length) high = arr.length - 1;
+        return arr[nextInt(low, high)];
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="random: vector">
     //<editor-fold defaultstate="collapsed" desc="vector: double">
     public double[] next_double_vector(int length) {
         if(length <= 0) throw new IllegalArgumentException(String.format(
@@ -317,7 +303,8 @@ public class ExRandom extends Random
         for(int i=0; i<length; i++) arr[i] = nextDouble() * threshold + min;
         return arr;
     }
-  
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="vector: double">
     public double[] next_gaussian_vector(int length) {
         if(length <= 0) throw new IllegalArgumentException(String.format(
                 "length { got %d } must > 0", length));
@@ -386,7 +373,8 @@ public class ExRandom extends Random
         for(int i=0; i<length; i++) arr[i] = (float) (nextFloat() * bound + min);
         return arr;
     }
-    
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="vector: gaussian_float">
     public float[] next_gaussianf_vector(int length) {
         if(length <= 0) throw new IllegalArgumentException(String.format(
                 "length { got %d } must > 0", length));
@@ -434,7 +422,7 @@ public class ExRandom extends Random
                 "length { got %d } must > 0", length));
         if(max == 0) return new long[length];
         if(max < 0) throw new IllegalArgumentException(String.format(
-                "max { got %d } must > 0", length));
+                "max { got %d } must > 0", max));
         
         long bound = max + 1;
         if(bound > Long.MAX_VALUE || bound <= 0) throw new IllegalArgumentException(String.format(
@@ -697,7 +685,7 @@ public class ExRandom extends Random
     //</editor-fold>
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Matrix: random">
+    //<editor-fold defaultstate="collapsed" desc="random: matrix">
     //<editor-fold defaultstate="collapsed" desc="matrix: float">
     public float[][] next_float_mat(int height, int width) {
         if(height <= 0) throw new IllegalArgumentException(String.format(
@@ -717,6 +705,8 @@ public class ExRandom extends Random
         if(width <= 0) throw new IllegalArgumentException(String.format(
                 "width { got %d } must > 0", width));
         if(max == 0.0f) return new float[height][width];
+        if(max < 0.0f) throw new IllegalArgumentException(String.format(
+                "max { got %f } must >= 0", max));
         if(max > Float.MAX_VALUE) throw new IllegalArgumentException(String.format(
                 "max { got %f } must < Float.MAX_VALUE { got %f }", 
                 max, Float.MAX_VALUE));
@@ -732,15 +722,17 @@ public class ExRandom extends Random
                 "height { got %d } must > 0", height));
         if(width <= 0) throw new IllegalArgumentException(String.format(
                 "width { got %d } must > 0", width));
+        if(max == min) return Matrix.constants(max, height, width);
         if(max < min) { float t = max; max = min; min = t; }
-        double bound = (double)max - min;
+        double bound = (double) max - min;
         
         float[][] arr = new float[height][width];
         for(int i = 0; i < height; i++)
         for(int j = 0; j < width; j++) arr[i][j] = (float) (nextFloat() * bound + min);
         return arr;
     }
-    
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="matrix: gaussian_float">
     public float[][] next_gaussianf_mat(int height, int width) {
         if(height <= 0) throw new IllegalArgumentException(String.format(
                 "height { got %d } must > 0", height));
@@ -782,199 +774,189 @@ public class ExRandom extends Random
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="matrix: double">
-    public double[][] next_double_matrix(int height, int width) {
+    public double[][] next_double_mat(int height, int width) {
         if(height <= 0) throw new IllegalArgumentException(String.format(
                 "height { got %d } must > 0", height));
         if(width <= 0) throw new IllegalArgumentException(String.format(
                 "width { got %d } must > 0", width));
         
         double[][] arr = new double[height][width];
-        for(int i=0,j;i<height;i++)
-        for(j=0;j<width;j++) arr[i][j]=this.nextDouble();
+        for(int i=0; i<height; i++)
+        for(int j=0; j<width; j++) arr[i][j] = nextDouble();
         return arr;
     }
     
-    public double[][] nextGaussianMatrix(int height, int width)
-    {
-        double[][] arr=new double[height][width];
-        for(int i=0,j;i<height;i++)
-        for(j=0;j<width;j++) arr[i][j]=this.nextGaussian();
+    public double[][] next_double_mat(int height, int width, double max) {
+        if(height <= 0) throw new IllegalArgumentException(String.format(
+                "height { got %d } must > 0", height));
+        if(width <= 0) throw new IllegalArgumentException(String.format(
+                "width { got %d } must > 0", width));
+        if(max == 0.0) return new double[height][width];
+        if(max < 0.0) throw new IllegalArgumentException(String.format(
+                "max { got %f } must >= 0", max));
+        if(max > Double.MAX_VALUE) throw new IllegalArgumentException(String.format(
+                "max { got %f } must < Float.MAX_VALUE { got %f }", 
+                max, Float.MAX_VALUE));
+        
+        double[][] arr = new double[height][width];
+        for(int i=0; i<height; i++)
+        for(int j=0; j<width;j ++) arr[i][j] = nextDouble()*max;
+        return arr;
+    }
+    
+    public double[][] next_double_mat(int height, int width, double max, double min) {
+        if(height <= 0) throw new IllegalArgumentException(String.format(
+                "height { got %d } must > 0", height));
+        if(width <= 0) throw new IllegalArgumentException(String.format(
+                "width { got %d } must > 0", width));
+        if(max == min) return Matrix.constants(max, height, width);
+        if(max < min) { double t = max; max = min; min = t; }
+        double bound = (double)max - min;
+        
+        double[][] arr = new double[height][width];
+        for(int i=0; i<height; i++)
+        for(int j=0; j<width;j ++) arr[i][j] = nextDouble() * bound + min;
+        return arr;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="matrix: gaussian">
+    public double[][] next_gaussian_mat(int height, int width) {
+        if(height <= 0) throw new IllegalArgumentException(String.format(
+                "height { got %d } must > 0", height));
+        if(width <= 0) throw new IllegalArgumentException(String.format(
+                "width { got %d } must > 0", width));
+        
+        double[][] arr = new double[height][width];
+        for(int i=0; i<height; i++)
+        for(int j=0; j<width; j++) arr[i][j] = nextGaussian();
+        return arr;
+    }
+    
+    public double[][] next_gaussian_mat(int height, int width, double sigma) {
+        if(height <= 0) throw new IllegalArgumentException(String.format(
+                "height { got %d } must > 0", height));
+        if(width <= 0) throw new IllegalArgumentException(String.format(
+                "width { got %d } must > 0", width));
+        if(sigma <= 0.0) throw new IllegalArgumentException(String.format(
+                "sigma { got %f } must > 0", sigma));
+        
+        double[][] arr = new double[height][width];
+        for(int i=0; i<height; i++)
+        for(int j=0; j<width; j++) arr[i][j] = nextGaussian() * sigma;
+        return arr;
+    }
+  
+    public double[][] next_gaussian_mat(int height, int width, double mu, double sigma) {
+        if(height <= 0) throw new IllegalArgumentException(String.format(
+                "height { got %d } must > 0", height));
+        if(width <= 0) throw new IllegalArgumentException(String.format(
+                "width { got %d } must > 0", width));
+        if(sigma <= 0.0) throw new IllegalArgumentException(String.format(
+                "sigma { got %f } must > 0", sigma));
+        
+        double[][] arr = new double[height][width];
+        for(int i=0; i<height; i++)
+        for(int j=0; j<width; j++) arr[i][j] = nextGaussian()* sigma + mu;
+        return arr;
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="matrix: int">
+    public int[][] next_int_mat(int height, int width) {
+        if(height <= 0) throw new IllegalArgumentException(String.format(
+                "height { got %d } must > 0", height));
+        if(width <= 0) throw new IllegalArgumentException(String.format(
+                "width { got %d } must > 0", width));
+        
+        int[][] arr = new int[height][width];
+        for (int i=0; i<height; i++)
+        for (int j=0; j<width; j++) arr[i][j] = nextInt();
         return arr;
     }
    
-    public double[][] nextDoubleMatrix(int height, int width, double max)
-    {
-        return this.nextDoubleMatrix(height, width, 0, max);
-    }
-    @Passed
-    public double[][] nextGaussianMatrix(int height, int width, double max)
-    {
-        return this.nextDoubleMatrix(height, width, 0, max);
-    }
-    @Passed
-    public double[][] nextDoubleMatrix(double[][] v, double max)
-    {
-        this.nextDoubleMatrix(v, 0, max);
-        return v;
-    }
-    @Passed
-    public double[][] nextGaussianMatrix(double[][] v, double max)
-    {
-        this.nextGaussianMatrix(v, 0, max);
-        return v;
-    }
-    
-    public double[][] nextDoubleMatrix(int height, int width, double max, double min) {
-        ExRandom.checkRealMatrix(height, width, min, max);
-        double[][] arr=new double[height][width];
-        for(int i=0,j;i<height;i++)
-        for(j=0;j<width;j++) arr[i][j]=this.nextDouble()*max+min;
-        return arr;
-    }
-
-    public double[][] nextGaussianMatrix(int height, int width, double max, double min) {
-        ExRandom.checkRealMatrix(height, width, min, max);
-        double[][] arr = new double[height][width];
+    public int[][] next_int_mat(int height, int width, int min, int max) {
+        if(height <= 0) throw new IllegalArgumentException(String.format(
+                "height { got %d } must > 0", height));
+        if(width <= 0) throw new IllegalArgumentException(String.format(
+                "width { got %d } must > 0", width));
+        if(max == min) return Matrix.constants(max, height, width);
+        if(max < min) { int t = max; max = min; min = t; }
+        
+        int bound = max - min + 1;
+        int[][] arr = new int[height][width];
         for(int i=0; i<height; i++)
-        for(int j=0; j<width; j++) arr[i][j]=this.nextGaussian()*max+min;
+        for(int j=0; j<width; j++) arr[i][j] = nextInt(bound) + min;
         return arr;
     }
-    @Passed
-    public double[][] nextDoubleMatrix(double[][] v, double max, double min)
-    {
-        if(max<min) {double t=max;max=min;min=t;}
-        ExRandom.checkRealMatrix(v, min, max);
-        double threshold=max-min;
-        for(int i=0,j;i<v.length;i++)
-        {
-            Objects.requireNonNull(v[i]);
-            for(j=0;j<v[i].length;j++) v[i][j]=this.nextDouble()*threshold+min;
-        }
-        return v;
-    }
-    @Passed
-    public double[][] nextGaussianMatrix(double[][] v, double max, double min)
-    {
-        if(max<min) {double t=max;max=min;min=t;}
-        ExRandom.checkRealMatrix(v, min, max);
-        double threshold=max-min;
-        for(int i=0,j;i<v.length;i++)
-        {
-            Objects.requireNonNull(v[i]);
-            for(j=0;j<v[i].length;j++) v[i][j]=this.nextGaussian()*threshold+min;
-        }
-        return v;
+    
+    public int[][] next_int_mat(int height, int width, int max)  {
+        if(height <= 0) throw new IllegalArgumentException(String.format(
+                "height { got %d } must > 0", height));
+        if(width <= 0) throw new IllegalArgumentException(String.format(
+                "width { got %d } must > 0", width));
+        if(max == 0) return new int[height][width];
+        
+        int bound = max + 1;
+        if(bound > Integer.MAX_VALUE || bound <= 0) throw new IllegalArgumentException(String.format(
+                "max { got %d } must < Integer.MAX_VALUE { got %d }",
+                max, Integer.MAX_VALUE));
+        
+        int[][] arr = new int[height][width];
+        for(int i=0; i<height; i++)
+        for(int j=0; j<width; j++) arr[i][j] = nextInt(bound);
+        return arr;
     }
     //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="matrix: long">
+    public long[][] next_long_mat(int height, int width) {
+        if(height <= 0) throw new IllegalArgumentException(String.format(
+                "height { got %d } must > 0", height));
+        if(width <= 0) throw new IllegalArgumentException(String.format(
+                "width { got %d } must > 0", width));
+        
+        long[][] arr = new long[height][width];
+        for (int i=0; i<height; i++)
+        for (int j=0; j<width; j++) arr[i][j] = nextLong();
+        return arr;
+    }
     
-    //<editor-fold defaultstate="collapsed" desc="Matrix:exRandom:int">
-    @Passed
-    public int[][] nextIntMatrix(int height, int width)
-    {
-        int[][] arr=new int[height][width];
-        for(int i=0,j;i<height;i++)
-        for(j=0;j<width;j++) arr[i][j]=this.nextInt();
+    public long[][] next_long_mat(int width, int height, long max) {
+        if(height <= 0) throw new IllegalArgumentException(String.format(
+                "height { got %d } must > 0", height));
+        if(width <= 0) throw new IllegalArgumentException(String.format(
+                "width { got %d } must > 0", width));
+        if(max == 0) return new long[height][width];
+        if(max < 0) throw new IllegalArgumentException(String.format(
+                "max { got %d } must > 0", max));
+        
+        long bound = max + 1;
+        if(bound > Long.MAX_VALUE || bound <= 0) throw new IllegalArgumentException(String.format(
+                "max { got %d } must < Long.MAX_VALUE { got %d }",
+                max, Long.MAX_VALUE));
+        
+        long[][] arr = new long[height][width];
+        for (int i=0; i<height; i++)
+        for (int j=0; j<width; j++) arr[i][j] = (long) (nextDouble() * bound);
         return arr;
     }
-    @Passed
-    public int[][] nextIntMatrix(int[][] v)
-    {
-        Objects.requireNonNull(v);
-        for(int i=0,j;i<v.length;i++)
-        {
-            Objects.requireNonNull(v[i]);
-            for(j=0;j<v[i].length;j++) v[i][j]=this.nextInt();
-        }
-        return v;
-    }
-    @Passed
-    public int[][] nextIntMatrix(int height, int width, int max)
-    {
-        return this.nextIntMatrix(height, width, 0, max);
-    }
-    @Passed
-    public int[][] nextIntMatrix(int[][] v, int max)
-    {
-        this.nextIntMatrix(v, 0, max);
-        return v;
-    }
-    @Passed
-    public int[][] nextIntMatrix(int height, int width, int min, int max)
-    {
-        if(max<min) {int t=max;max=min;min=t;}
-        ExRandom.checkIntMatrix(height, width, min, max);
-        int threshold=max-min;
-        int[][] arr=new int[height][width];
-        for(int i=0,j;i<height;i++)
-        for(j=0;j<width;j++) arr[i][j]=this.nextInt(threshold)+min;
-        return arr;
-    }
-    @Passed
-    public int[][] nextIntMatrix(int[][] v, int min, int max)
-    {
-        if(max<min) {int t=max;max=min;min=t;}
-        ExRandom.checkIntMatrix(v, min, max);
-        int threshold=max-min;
-        for(int i=0,j;i<v.length;i++)
-        {
-            Objects.requireNonNull(v[i]);
-            for(j=0;j<v[i].length;j++) v[i][j]=this.nextInt(threshold)+min;
-        }
-        return v;
-    }
-    //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Matrix:exRandom:long">
-    @Passed
-    public long[][] nextLongMatrix(int height, int width)
-    {
-        long[][] arr=new long[height][width];
-        for(int i=0,j;i<height;i++)
-        for(j=0;j<width;j++) arr[i][j]=this.nextLong();
+    public long[][] next_long_mat(int width, int height, long min, long max) {
+        if(height <= 0) throw new IllegalArgumentException(String.format(
+                "height { got %d } must > 0", height));
+        if(width <= 0) throw new IllegalArgumentException(String.format(
+                "width { got %d } must > 0", width));
+        if(min == max) return Matrix.constants(max, height, width);
+        
+        if(max < min) { long t = max; max = min; min = t; }
+        long bound = max - min + 1;
+        if(bound > Long.MAX_VALUE || bound <= 0) throw new IllegalArgumentException(String.format(
+                "(max { got %d } - min { got %d }) must < Integer.MAX_VALUE { got %d }", 
+                max, min, Long.MAX_VALUE));
+        
+        long[][] arr = new long[height][width];
+        for (int i=0; i<height; i++)
+        for (int j=0; j<width; j++) arr[i][j] = (long) (nextDouble() * bound + min);
         return arr;
-    }
-    @Passed
-    public void nextLongMatrix(long[][] v)
-    {
-        Objects.requireNonNull(v);
-        for(int i=0,j;i<v.length;i++)
-        {
-            Objects.requireNonNull(v[i]);
-            for(j=0;j<v[i].length;j++) v[i][j]=this.nextInt();
-        }
-    }
-    @Passed
-    public long[][] nextLongMatrix(int height, int width, long max)
-    {   
-        return this.nextLongMatrix(height, width, 0, max);
-    }
-    @Passed
-    public void nextLongMatrix(long[][] v, long max)
-    {
-        this.nextLongMatrix(v, 0, max);
-    }
-    @Passed
-    public long[][] nextLongMatrix(int width, int height, long min, long max)
-    {
-        if(max<min) {long t=max;max=min;min=t;}
-        ExRandom.checkIntMatrix(height, width, min, max);
-        long[][] arr=new long[height][width];
-        long threshold=max-min;
-        for(int i=0,j;i<height;i++)
-        for(j=0;j<width;j++) arr[i][j]=(long) (this.nextDouble()*threshold+min);
-        return arr;
-    }
-    @Passed
-    public void nextLongMatrix(long[][] v, long min ,long max)
-    {
-        if(max<min) {long t=max;max=min;min=t;}
-        ExRandom.checkIntMatrix(v, min, max);
-        long threshold=max-min;
-        for(int i=0,j;i<v.length;i++)
-        {
-            Objects.requireNonNull(v[i]);
-            for(j=0;j<v[i].length;i++) v[i][j]=(long) (this.nextDouble()*threshold+min);
-        }
     }
     //</editor-fold>
     //</editor-fold>

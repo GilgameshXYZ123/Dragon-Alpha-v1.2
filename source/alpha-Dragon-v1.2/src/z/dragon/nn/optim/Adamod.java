@@ -16,20 +16,20 @@ import z.util.math.vector.Vector;
 
 /**
  * <pre>
- *Adamod(W):
- * Init: Uv = beta^t, Us = beta2^t
- * Iterate:
- *      a1 = beta1, a2 = 1 - beta1
- *      b1 = beta2, b2 = 1 - beta2
- *      (1) V = a1*V + a2*grad       
- *      (2) S = b1*S + b2*grad^2      
- *      (3) lr_t = lr * sqrt(1 - Us) / (1 - Uv)
- *      (4) eps_t = eps * sqrt(1 - Us)
- *      (5) neta = lr_t / (sqrt(S) + eps_t)
- *      (6) G = c1*G + c2*neta
- *      (7) neta = min(neta, G) * V
- *      (8) W -= stepSize  # gradient descent
- *      Uv *= alpha; Us *= beta.
+Adamod(W):
+ Init: Uv = beta^t, Us = beta2^t
+ Iterate:
+      a1 = beta1, a2 = 1 - beta1
+      b1 = beta2, b2 = 1 - beta2
+      (1) V = a1*V + a2*grad       
+      (2) S = b1*S + b2*grad^2      
+      (3) lr_t = lr * sqrt(1 - Us) / (1 - Uv)
+      (4) eps_t = eps * sqrt(1 - Us)
+      (5) neta = lr_t / (sqrt(S) + eps_t)
+      (6) G = c1*G + c2*neta
+      (7) neta = minValue(neta, G) * V
+      (8) W -= stepSize  # gradient descent
+      Uv *= alpha; Us *= beta.
  * </pre>
  * @author Gilgamesh
  */

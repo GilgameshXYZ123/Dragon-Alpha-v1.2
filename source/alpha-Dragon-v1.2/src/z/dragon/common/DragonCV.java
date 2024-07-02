@@ -7,6 +7,7 @@ package z.dragon.common;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.Transparency;
@@ -49,15 +50,17 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import static z.dragon.alpha.Alpha.alpha;
 import z.dragon.engine.Tensor;
+import z.ui.JUI;
 import static z.ui.JUI.jui;
 import z.util.math.vector.Vector;
 
 /**
- * default order of color-channels: Blue, Green, Red.
+ * default order of clr-channels: Blue, Green, Red.
  * @author Gilgamesh
  */
 public final class DragonCV 
 {
+    public final JUI.ColorHandler color = JUI.ColorHandler.clr;
     private DragonCV() {}
     
     public static final DragonCV instance() { return cv; }
@@ -67,16 +70,16 @@ public final class DragonCV
     /**
      * <pre> 
      * 3Byte: (Blue, Green, Red). 
-     * Represents an image with 8-bit RGB color components, corresponding
-     * to a Windows-style BGR color model, with the colors Blue, Green,
-     * and Red stored in 3 bytes.  There is no alpha.  The image has a
-     * <code>ComponentColorModel</code>.
-     * When data with non-opaque alpha is stored
-     * in an image of this type,
-     * the color data must be adjusted to a non-premultiplied form
-     * and the alpha discarded,
-     * as described in the
-     * {@link java.awt.AlphaComposite} documentation.
+     * Represents an image with 8-bit RGB clr components, corresponding
+ to a Windows-style BGR clr model, with the colors Blue, Green,
+ and Red stored in 3 bytes.  There is no alpha.  The image has a
+ <code>ComponentColorModel</code>.
+ When data with non-opaque alpha is stored
+ in an image of this type,
+ the clr data must be adjusted to a non-premultiplied form
+ and the alpha discarded,
+ as described in the
+ {@link java.awt.AlphaComposite} documentation.
      * </pre>
      */
     public final int TYPE_3BYTE_BGR = BufferedImage.TYPE_3BYTE_BGR;
@@ -84,28 +87,28 @@ public final class DragonCV
     /**
      * <pre> 
      * 4Byte: (Alpha, Blue, Green ,Red). 
-     * Represents an image with 8-bit RGBA color components with the colors
-     * Blue, Green, and Red stored in 3 bytes and 1 byte of alpha.  The
-     * image has a <code>ComponentColorModel</code> with alpha.  The
-     * color data in this image is considered not to be premultiplied with
-     * alpha.  The byte data is interleaved in a single
-     * byte array in the order A, B, G, R
-     * from lower to higher byte addresses within each pixel.
-     * </pre>
+     * Represents an image with 8-bit RGBA clr components with the colors
+ Blue, Green, and Red stored in 3 bytes and 1 byte of alpha.  The
+ image has a <code>ComponentColorModel</code> with alpha.  The
+ clr data in this image is considered not to be premultiplied with
+ alpha.  The byte data is interleaved in a single
+ byte array in the order A, B, G, R
+ from lower to higher byte addresses within each pixel.
+ </pre>
      */
     public final int TYPE_4BYTE_ABGR = BufferedImage.TYPE_4BYTE_ABGR;
     
     /**
      * <pre>
      * 4Byte: (Alpha, Blue, Green, Red). 
-     * The color data in this image is considered to be premultiplied with alpha.
-     * Represents an image with 8-bit RGBA color components with the colors
-     * Blue, Green, and Red stored in 3 bytes and 1 byte of alpha.  The
-     * image has a <code>ComponentColorModel</code> with alpha. The color
-     * data in this image is considered to be premultiplied with alpha.
-     * The byte data is interleaved in a single byte array in the order
-     * A, B, G, R from lower to higher byte addresses within each pixel.
-     * </pre>
+     * The clr data in this image is considered to be premultiplied with alpha.
+ Represents an image with 8-bit RGBA clr components with the colors
+ Blue, Green, and Red stored in 3 bytes and 1 byte of alpha.  The
+ image has a <code>ComponentColorModel</code> with alpha. The clr
+ data in this image is considered to be premultiplied with alpha.
+ The byte data is interleaved in a single byte array in the order
+ A, B, G, R from lower to higher byte addresses within each pixel.
+ </pre>
      */
     public final int TYPE_4BYTE_ABGR_PRE = BufferedImage.TYPE_4BYTE_ABGR_PRE;
     
@@ -116,16 +119,16 @@ public final class DragonCV
      * constructor that takes an <code>imageType</code> argument
      * but no <code>ColorModel</code> argument, an
      * <code>IndexColorModel</code> is created with
-     * a 256-color 6/6/6 color cube palette with the rest of the colors
-     * from 216-255 populated by grayscale values in the
-     * default sRGB ColorSpace.
-     *
-     * <p> When color data is stored in an image of this type,
-     * the closest color in the colormap is determined
-     * by the <code>IndexColorModel</code> and the resulting index is stored.
-     * Approximation and loss of alpha or color components
-     * can result, depending on the colors in the
-     * <code>IndexColorModel</code> colormap.
+ a 256-clr 6/6/6 clr cube palette with the rest of the colors
+ from 216-255 populated by grayscale values in the
+ default sRGB ColorSpace.
+
+ <p> When clr data is stored in an image of this type,
+ the closest clr in the colormap is determined
+ by the <code>IndexColorModel</code> and the resulting index is stored.
+ Approximation and loss of alpha or clr components
+ can result, depending on the colors in the
+ <code>IndexColorModel</code> colormap.
      * </pre>
      */
     public final int TYPE_BYTE_BINARY = BufferedImage.TYPE_BYTE_BINARY;
@@ -135,12 +138,12 @@ public final class DragonCV
      * Represents a unsigned byte grayscale image, non-indexed.  This
      * image has a <code>ComponentColorModel</code> with a CS_GRAY
      * {@link ColorSpace}.
-     * When data with non-opaque alpha is stored
-     * in an image of this type,
-     * the color data must be adjusted to a non-premultiplied form
-     * and the alpha discarded,
-     * as described in the
-     * {@link java.awt.AlphaComposite} documentation.
+ When data with non-opaque alpha is stored
+ in an image of this type,
+ the clr data must be adjusted to a non-premultiplied form
+ and the alpha discarded,
+ as described in the
+ {@link java.awt.AlphaComposite} documentation.
      * </pre>
      */
     public final int TYPE_BYTE_GRAY = BufferedImage.TYPE_BYTE_GRAY;
@@ -166,18 +169,22 @@ public final class DragonCV
      * <code>TYPE_BYTE_INDEXED</code> or <code>TYPE_BYTE_GRAY</code>
      * depending on their <code>ColorModel</code>.
 
-     * <p> When color data is stored in an image of this type,
-     * the closest color in the colormap is determined
-     * by the <code>IndexColorModel</code> and the resulting index is stored.
-     * Approximation and loss of alpha or color components
-     * can result, depending on the colors in the
-     * <code>IndexColorModel</code> colormap.
+     * <p> When clr data is stored in an image of this type,
+ the closest clr in the colormap is determined
+ by the <code>IndexColorModel</code> and the resulting index is stored.
+ Approximation and loss of alpha or clr components
+ can result, depending on the colors in the
+ <code>IndexColorModel</code> colormap.
      * </pre>
      */
     public static final int TYPE_BYTE_INDEXED = BufferedImage.TYPE_BYTE_INDEXED;
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="function: imageIO">
+    public BufferedImage newBGR(int height, int width) { return new BufferedImage(width, height, TYPE_3BYTE_BGR); }
+    public BufferedImage newABRG(int height, int width) { return new BufferedImage(width, height, TYPE_4BYTE_ABGR); }
+    public BufferedImage newGray(int height, int width) { return new BufferedImage(width, height, TYPE_BYTE_GRAY); }
+    
     public BufferedImage imread(InputStream in) {  try { return ImageIO.read(in); } catch(IOException e) { throw new RuntimeException(e); } }
     public BufferedImage imread(String path) { try { return ImageIO.read(new File(path)); }  catch(IOException e) { throw new RuntimeException(e); } }
     public BufferedImage imread(File file) { try { return ImageIO.read(file); } catch(IOException e) { throw new RuntimeException(e); } }
@@ -378,7 +385,7 @@ public final class DragonCV
     public int channels(BufferedImage img) { return img.getColorModel().getNumComponents(); }
     public int[] dim(BufferedImage img) { return new int[]{ img.getHeight(), img.getWidth(), channels(img) }; }
     
-    public int pixel_size(BufferedImage img) { return img.getColorModel().getPixelSize(); }//for precision and depth of color
+    public int pixel_size(BufferedImage img) { return img.getColorModel().getPixelSize(); }//for precision and depth of clr
     public int[] channel_pixel_size(BufferedImage img) { return img.getColorModel().getComponentSize(); }
     
     public String brief(BufferedImage img)  {
@@ -976,6 +983,82 @@ public final class DragonCV
             imgs[ic] = gray(pix, IH, IW, black, white);
         }
         return imgs;
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="static-class: Canvas">
+    public Canvas canvas(int height, int width) { return new Canvas(newBGR(height, width)); }
+    public Canvas canvas(BufferedImage img) { return new Canvas(img); }
+    
+    public static class Canvas  {
+        private final BufferedImage img;
+        private final Graphics2D g2d;
+        
+        public Canvas(BufferedImage img) {
+            this.img = img;
+            this.g2d = (Graphics2D) img.getGraphics();
+        }
+        
+        public BufferedImage image() { return img; }
+        public int height() { return img.getHeight(); }
+        public int width() { return img.getWidth(); }
+        
+        public Color color() { return g2d.getColor(); }
+        public Canvas color(Color color) { g2d.setColor(color); return this; }
+        
+        public Font font() { return g2d.getFont(); }
+        public Canvas font(Font font) { g2d.setFont(font); return this; }
+        
+        //<editor-fold defaultstate="collapsed" desc="fill functions">
+        public Canvas fill(Color color) {
+           g2d.setColor(color);
+           g2d.fillRect(0, 0, img.getWidth(), img.getHeight());
+           return this;
+        }
+        
+        public Canvas fill_rect(int y, int x, int H, int W) { g2d.fillRect(x, y, W, H); return this; }
+        public Canvas fill_rect(Color c, int y, int x, int H, int W) { g2d.setColor(c); return fill_rect(y, x, H, W); }  
+
+        public Canvas fill_rect3D(int y, int x, int H, int W, boolean raised) { g2d.fill3DRect(x, y, W, H, raised); return this; }
+        public Canvas fill_rect3D(Color c, int y, int x, int H, int W, boolean raised) { g2d.setColor(c); return fill_rect3D(y, x, H, W, raised); }
+
+        public Canvas fill_oval(int y, int x, int H, int W) { g2d.fillOval(x, y, W, H); return this; }
+        public Canvas fill_oval(Color c, int y, int x, int W, int H) { g2d.setColor(c); return fill_oval(y, x, H, W); }
+
+        public Canvas fill_arc(int y, int x, int H, int W, int start_angle, int arc_angle) {  g2d.fillArc(x, y, W, H, start_angle, arc_angle); return this; }
+        public Canvas fill_arc(Color c, int y, int x, int H, int W, int start_angle, int arc_angle) { g2d.setColor(c); return fill_arc(y, x, H, W, start_angle, arc_angle); }
+
+        public Canvas fill_polygon(Color c, int[] ys, int[] xs) { g2d.setColor(c); return fill_polygon(ys, xs); }
+        public Canvas fill_polygon(int[] ys, int[] xs) {
+            if (xs.length != ys.length) throw new IllegalArgumentException(String.format(
+                    "xs.length {got %d} != ys.length {got %d}", xs.length, ys.length));
+            g2d.fillPolygon(xs, ys, xs.length);
+            return this;
+        }
+        //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="draw functions">
+        public Canvas draw_string(String str, int y, int x) { g2d.drawString(str, x, y); return this; }
+        public Canvas draw_string(Color c, Font ft, String str, int y, int x) { g2d.setColor(c); g2d.setFont(ft); return draw_string(str, y, x); }
+
+        public Canvas draw_line(int y0, int x0, int y1, int x1) { g2d.drawLine(x0, y0, x1, y1); return this; }
+        public Canvas draw_line(Color c, int y0, int x0, int y1, int x1) { g2d.setColor(c); return draw_line(y0, x0, y1, x1); }
+
+        public Canvas draw_rect(int y, int x, int H, int W) { g2d.drawRect(x, y, W, H); return this; }
+        public Canvas draw_rect(Color c, int y, int x, int H, int W) { g2d.setColor(c); return draw_rect(y, x, H, W); }
+
+        public Canvas draw_oval(int y, int x, int H, int W) { g2d.drawOval(x, y, W, H); return this; }
+        public Canvas draw_oval(Color c, int y, int x, int H, int W) { g2d.setColor(c); return draw_oval(y, x, H, W); }
+        public Canvas draw_point(int y, int x) { return draw_oval(y, x, 1, 1); }
+        public Canvas draw_point(Color c, int y, int x) { return draw_oval(c, y, x, 1, 1); }
+
+        public Canvas draw_polygon(Color c, int[] ys, int[] xs) { g2d.setColor(c); return this.draw_polygon(ys, xs); }
+        public Canvas draw_polygon(int[] ys, int[] xs) {
+           if (xs.length != ys.length) throw new IllegalArgumentException(String.format(
+                    "xs.length {got %d} != ys.length {got %d}", xs.length, ys.length));
+            g2d.drawPolygon(xs, ys, xs.length);
+            return this;
+        }
+        //</editor-fold>
     }
     //</editor-fold>
 }
