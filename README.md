@@ -1,21 +1,27 @@
 # Dragon-Alpha-v1.2-source
 The source code of Dragon-Alpha-v1.2.
 
-# I. About Cu32
-**1.** Cu32 is a GPU acceleration library for FP32 tensor computing, and consists of 13 components:<br>
-- [1] Cuda: serves as the bridge between JVM (CPU) and GPU. Its functions includes data-copy, data-transfer, tensor-initialization, memory-management, and computing scheduling. It also provides Java APIs to manage Cuda memory, event, stream, and device.
-- [2] CudaDevice: get and manage the information of Cuda Device, like id, name, SM number, and L2 cache size.
-- [3] Cuda_random: generates pseudo random numbers, using many threads.
-- [4] Cuda_image: includes functions to process image in int8 datatype. These functions are not limited to 3-channel BGR images, and can also process HSIs (Hyper Spectrul Images).
-- [5] Cuda_math: includes element-wise functions, like Relu, Softmax, Gelu, and BatchNorm.
-- [6] Cuda_expk2: The extension library of Cuda_math and Cuda.
-- [7] Cuda_pool2D: implements the forward propagation of Average-2D-Pooling and Max-2D-Pooling.
-- [8] Cuda_upool2D: implements the backward propagation of 
 
-now is only complied for 64-bit Windows. If you want to run cu32 on other platforms like Centos, Ubuntu, or Redhat, please modify the code and recomplie it using nvcc compiler.<br> 
-**2.** I recommand nvcc-11.5 for RTX30XX GPU, and nvcc-11.8 for RTX40XX GPU. However, I suggest you personally try which verson of nvcc can generate the fastest code.<br> 
-**3.** There are 
- 
+# I. About Cu32
+**1.** ___Cu32___ is a GPU acceleration library for FP32 tensor computing, and consists of 14 components:<br>
+- [1] _Cuda_: serves as the bridge between JVM (CPU) and GPU. Its functions includes data-copy, data-transfer, tensor-initialization, memory-management, and computing scheduling. It also provides Java APIs to manage Cuda memory, event, stream, and device.
+- [2] _CudaDevice_: get and manage the information of Cuda Device, like id, name, SM number, and L2 cache size.
+- [3] _Cuda_random_: generates pseudo random numbers, using many threads.
+- [4] _Cuda_image_: includes functions to process image in int8 datatype. These functions are not limited to 3-channel BGR images, and can also process HSIs (Hyper Spectrul Images).
+- [5] _Cuda_math_: includes element-wise functions, like Relu, Softmax, Gelu, and BatchNorm.
+- [6] _Cuda_expk2_: The extension library of Cuda_math and Cuda.
+- [7] _Cuda_pool2D_: implements the forward propagation of Average-2D-Pooling and Max-2D-Pooling layers.
+- [8] _Cuda_upool2D_: implements the backward propagation of Average-2D-Pooling and Max-2D-Pooling layers.
+- [9] _Cuda_conv3D_: implements the forward propgation of 2D convolutional layers.
+- [10] _Cuda_dconv3D_deltaX_: implements the backward propagation of 2D convolutional layers, and this library is used to find the gradient of input feature maps.
+- [11] _Cuda_dconv3D_deltaW_: implements the backward propagation of 2D convolutional layers, and this library is used to find the gradient of filters.
+- [12] _Cuda_reduce_: includes some reduction operators, and can be used to find mean, variance, maximum, minimum, etc.
+- [13] _Cuda_mat_: contains 3 types of matrix multiplications:  $A * B$, $A * B^T$, $A^T * B$
+- [14] _Cuda_batchMatMul_: contains 3 types of batch matrix multiplications:  $A * B$, $A * B^T$, $A^T * B$
+2. ___Cu32___ now is only complied for 64-bit Windows. Under the Apache-2.0 License, you can modify and recompile it for other platforms like Centos, and Ubuntu. I recommand nvcc-11.5 compilter for RTX-30XX GPU, and nvcc-11.8 for RTX-40XX GPU. However, I suggest you personally try which verson of nvcc can generate the fastest code.
+  <br> Except for _Cuda_dconv3D_deltaX_ requires $compute >= 60$ and $sm >= 60$, the other libraries can be compiled with $compute >= 52$ and $sm >= 52$.
+  <br> For computation-intensive libs like _Cuda_ _{conv3D, dconv3D_deltaX, dconv3D_deltaW, matMul, batchMatMul}_, I recommand $compute = sm = 52$ or $70$. Moreover, I think you can try different compile conifgurations on your hardware to optimize performance.
+3. Due to my personal ability, I don't have enough time to optimize all kernel functions. Instead, I have to pay attention to optimize the kernel functions that have the highest performance up-limit. Therefore, matrix multiplication operators have good performance when dimensions are multiples of $64$, while convolution operators perform well with $64x$ channel.
 
 Please make sure: the JDK version is greater than 8.0<br>
 **3.** To complie the CUDA-C++ source code of cu32, make sure:  compute >= 52, sm >= 52 <br>
@@ -42,12 +48,14 @@ Please make sure: the JDK version is greater than 8.0<br>
   - **pytorch-code**  the experimental code of PyTorch.<br>
   - **experiment-data**  console output to track some metrics for both Alpha and PyTorch, in order to make a comparison.<br>
   - **test_cuda**  some related code to test Alpha&cu32. You can take it as examples of using Alpha’s operators.<br>
-
-
+  
 # About me
 - My name Zhang Zhiyi, and I often use Gilgamesh as my internet name.<br>
 - I was born in April, 2000, majored Computer-Science in my college, and now study Pattern-Recognition after graduate.<br>
 - First, let’s talk about the reason why I create Alpha instead of using PyTorch. I prefer Java to Python, but failed to find a Java-based DL framework as excellent as PyTorch, in the past few years. Also, I want to learn more about the principles and details of DL, and like implementing them to improve my abilities. So, I started to build my own Java DL framework. Dragon-Alpha can be regraded as a continuation of Dragon, which is my graduation project.<br>
-- It took me about 190 days and 200,000 lines of code to build Alpha’s prototype. In such progress, I have been suffering while enjoying, and finally benefited a lot. PyTorch&cuDNN is my opponent but also my mentor. I tried to learn its advantage, and pondered how to make some breakthrough while keeping Alpha’s own characteristics. Now, the Alpha’s prototype has been completed, and the relative paper has been written.<br>
+- It took me over 1 year to build Alpha-v1.2. In such progress, I have been suffering while enjoying, and finally benefited a lot. PyTorch&cuDNN is my opponent but also my mentor. I tried to learn its advantage, and pondered how to make some breakthrough while keeping Alpha’s own characteristics. Now, the Alpha’s prototype has been completed, and the relative paper has been written.<br>
 At present, Alpha is not as polished as PyTorch, but it could be good start and have a long way to reach perfection. I am grateful to all those who provided me with support and encouragement.<br>
 - It’s my honour to share the source code Alpha&cu32. Sincerely, I request and need all of you to use and improve it. If you have some related good advice and achievement, please contact me at gilgamesh@mail.ustc.edu.cn.<br>
+
+
+
