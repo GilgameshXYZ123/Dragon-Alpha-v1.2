@@ -35,11 +35,13 @@
 >> to know how Alpha select the algorithm for a specific convolution configuration, Please see the Java code of _CudaFloat32EngineBase_.
 
 # II. About Dragon-Alpha
-**1.** __What__ __is__ __Dragon-Alpha_? Dragon-Alpha (Alpha) is a Java tensor computing framework that can be used to execute DL algorithms. The CUDA kernels in Cu32 are merged to form a higher-level encapsulation in cu32, and have been integrated into Alpha through JNI (Java native interface).To know more about Alpha, please see my never-accepeted and arxiv-only paper at https://arxiv.com/xxx/xxx. The source of Alpha-1.2 is mainly in _alpha-Dragon-v1.2_ project, while the _ZUTIL-STD-1.2_ project is the necessary lib for _alpha-Dragon-v1.2_. You can open these 2 Java project using Net-Beans.
+**1.** __What__ __is__ __Dragon-Alpha_? Dragon-Alpha (Alpha) is a Java tensor computing framework that can be used to execute DL algorithms. The CUDA kernels in Cu32 are merged to form a higher-level encapsulation in cu32, and have been integrated into Alpha through JNI (Java native interface).To know more about Alpha, please see my never-accepeted and arxiv-only paper at https://arxiv.com/xxx/xxx. The source of Alpha-1.2 is mainly in _alpha-Dragon-v1.2_ project, while the _ZUTIL-STD-1.2_ project is the necessary lib for _alpha-Dragon-v1.2_. You can open these 2 Java project using Net-Beans. 
 
 **2.** Conditions for executing Alpha:
 - JDK version $\ge$ 8.0, and CUDA version $\ge$ 11.5.
 - No requirement for three-part libraries.
+- You need to specify the home path of Alpha to load dlls.
+- If your JDK versoion is 8.0
   
 # II. Files
 - **Arxiv.pdf**  an article talking about the background, characteristics, architecture and experiments of Alpha, preprinted on arxiv.org, at: https://arxiv.org/abs/2305.08819.<br>
