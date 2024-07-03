@@ -1,27 +1,30 @@
 # Dragon-Alpha-v1.2-source
-The source code of Dragon-Alpha-v1.2.
-
+> The source code of Dragon-Alpha-v1.2.
 
 # I. About Cu32
 **1.** ___Cu32___ is a GPU acceleration library for FP32 tensor computing, and consists of 14 components:<br>
-- [1] _Cuda_: serves as the bridge between JVM (CPU) and GPU. Its functions includes data-copy, data-transfer, tensor-initialization, memory-management, and computing scheduling. It also provides Java APIs to manage Cuda memory, event, stream, and device.
-- [2] _CudaDevice_: get and manage the information of Cuda Device, like id, name, SM number, and L2 cache size.
-- [3] _Cuda_random_: generates pseudo random numbers, using many threads.
-- [4] _Cuda_image_: includes functions to process image in int8 datatype. These functions are not limited to 3-channel BGR images, and can also process HSIs (Hyper Spectrul Images).
-- [5] _Cuda_math_: includes element-wise functions, like Relu, Softmax, Gelu, and BatchNorm.
-- [6] _Cuda_expk2_: The extension library of Cuda_math and Cuda.
-- [7] _Cuda_pool2D_: implements the forward propagation of Average-2D-Pooling and Max-2D-Pooling layers.
-- [8] _Cuda_upool2D_: implements the backward propagation of Average-2D-Pooling and Max-2D-Pooling layers.
-- [9] _Cuda_conv3D_: implements the forward propgation of 2D convolutional layers.
-- [10] _Cuda_dconv3D_deltaX_: implements the backward propagation of 2D convolutional layers, and this library is used to find the gradient of input feature maps.
-- [11] _Cuda_dconv3D_deltaW_: implements the backward propagation of 2D convolutional layers, and this library is used to find the gradient of filters.
-- [12] _Cuda_reduce_: includes some reduction operators, and can be used to find mean, variance, maximum, minimum, etc.
-- [13] _Cuda_mat_: contains 3 types of matrix multiplications:  $A * B$, $A * B^T$, $A^T * B$
-- [14] _Cuda_batchMatMul_: contains 3 types of batch matrix multiplications:  $A * B$, $A * B^T$, $A^T * B$
-2. ___Cu32___ now is only complied for 64-bit Windows. Under the Apache-2.0 License, you can modify and recompile it for other platforms like Centos, and Ubuntu. I recommand nvcc-11.5 compilter for RTX-30XX GPU, and nvcc-11.8 for RTX-40XX GPU. However, I suggest you personally try which verson of nvcc can generate the fastest code.
-  <br> Except for _Cuda_dconv3D_deltaX_ requires $compute >= 60$ and $sm >= 60$, the other libraries can be compiled with $compute >= 52$ and $sm >= 52$.
-  <br> For computation-intensive libs like _Cuda_ _{conv3D, dconv3D_deltaX, dconv3D_deltaW, matMul, batchMatMul}_, I recommand $compute = sm = 52$ or $70$. Moreover, I think you can try different compile conifgurations on your hardware to optimize performance.
-3. Due to my personal ability, I don't have enough time to optimize all kernel functions. Instead, I have to pay attention to optimize the kernel functions that have the highest performance up-limit. Therefore, matrix multiplication operators have good performance when dimensions are multiples of $64$, while convolution operators perform well with $64x$ channel.
+> - [1] _Cuda_: serves as the bridge between JVM (CPU) and GPU. Its functions includes data-copy, data-transfer, tensor-initialization, memory-management, and computing scheduling. It also
+> provides Java APIs to manage Cuda memory, event, stream, and device.
+> - [2] _CudaDevice_: get and manage the information of Cuda Device, like id, name, SM number, and L2 cache size.
+> - [3] _Cuda_random_: generates pseudo random numbers, using many threads.
+> - [4] _Cuda_image_: includes functions to process image in int8 datatype. These functions are not limited to 3-channel BGR images, and can also process HSIs (Hyper Spectrul Images).
+> - [5] _Cuda_math_: includes element-wise functions, like Relu, Softmax, Gelu, and BatchNorm.
+> - [6] _Cuda_expk2_: The extension library of Cuda_math and Cuda.
+> - [7] _Cuda_pool2D_: implements the forward propagation of Average-2D-Pooling and Max-2D-Pooling layers.
+> - [8] _Cuda_upool2D_: implements the backward propagation of Average-2D-Pooling and Max-2D-Pooling layers.
+> - [9] _Cuda_conv3D_: implements the forward propgation of 2D convolutional layers.
+> - [10] _Cuda_dconv3D_deltaX_: implements the backward propagation of 2D convolutional layers, and this library is used to find the gradient of input feature maps.
+> - [11] _Cuda_dconv3D_deltaW_: implements the backward propagation of 2D convolutional layers, and this library is used to find the gradient of filters.
+> - [12] _Cuda_reduce_: includes some reduction operators, and can be used to find mean, variance, maximum, minimum, etc.
+> - [13] _Cuda_mat_: contains 3 types of matrix multiplications:  $A * B$, $A * B^T$, $A^T * B$
+> - [14] _Cuda_batchMatMul_: contains 3 types of batch matrix multiplications:  $A * B$, $A * B^T$, $A^T * B$.
+>> These 14 components have corresponding dlls and VS2017-studio projects. Due to my personal ability, I don't have enough time to optimize all kernel functions. Instead, I have to pay attention to optimize the kernel functions that have the highest performance up-limit. Therefore, matrix multiplication operators have good performance when dimensions are multiples of $64$, while convolution operators perform well with $64x$ channel.
+  
+**2.**  Under the Apache-2.0 License, you can modify and recompile the source of ___Cu32___ :
+> - ___Cu32___ is now only complied for 64-bit Windows. Kindly recompile it for other Operating Systems like Centos, and Ubuntu.
+> - I recommand nvcc-11.5 compilter for RTX-30XX GPU, and nvcc-11.8 for RTX-40XX GPU. To  generate the fastest code, I suggest you to try different versions of nvcc on your platforms.
+> - Except for _Cuda_dconv3D_deltaX_ requires $compute >= 60$ and $sm >= 60$, the other libs can be compiled with $compute >= 52$ and $sm >= 52$.
+> - I recommand $compute = sm = 52$ or $70$ configurations. Moreover, I think you can try different compile conifgurations on your hardware to optimize performance.
 
 Please make sure: the JDK version is greater than 8.0<br>
 **3.** To complie the CUDA-C++ source code of cu32, make sure:  compute >= 52, sm >= 52 <br>
