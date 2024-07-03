@@ -34,13 +34,13 @@
 > - [9] _Cross-Add_: It supports BDConv, and is only used when channel sizes are very small. I have not fully optimize this algorithm.
 >> to know how Alpha select the algorithm for a specific convolution configuration, Please see the Java code of _CudaFloat32EngineBase_.
 
-# II. About Alpha
-Please make sure: the JDK version is greater than 8.0<br>
-**3.** To complie the CUDA-C++ source code of cu32, make sure:  compute >= 52, sm >= 52 <br>
-**4.** Kindly read “Arxiv.pdf” first, to briefly understand Alpha.<br>
-**5.** Alpha has only been executed on GTX 1050, RTX 3060ti GPU, and presently its applications can only be executed on CUDA GPU.<br>
-**6.** Since I am the only-one programmer to build Alpha, I must pay my main attention to the code instead of the document, to complete Alpha’s prototype in time. If you have some questions, just see the source-code. Sorry, my personal abilities are really limited.<br> 
+# II. About Dragon-Alpha
+**1.** __What__ __is__ __Dragon-Alpha_? Dragon-Alpha (Alpha) is a Java tensor computing framework that can be used to execute DL algorithms. The CUDA kernels in Cu32 are merged to form a higher-level encapsulation in cu32, and have been integrated into Alpha through JNI (Java native interface).To know more about Alpha, please see my never-accepeted and arxiv-only paper at https://arxiv.com/xxx/xxx. The source of Alpha-1.2 is mainly in _alpha-Dragon-v1.2_ project, while the _ZUTIL-STD-1.2_ project is the necessary lib for _alpha-Dragon-v1.2_. You can open these 2 Java project using Net-Beans.
 
+**2.** Conditions for executing Alpha:
+- JDK version $\ge$ 8.0, and CUDA version $\ge$ 11.5.
+- No requirement for three-part libraries.
+  
 # II. Files
 - **Arxiv.pdf**  an article talking about the background, characteristics, architecture and experiments of Alpha, preprinted on arxiv.org, at: https://arxiv.org/abs/2305.08819.<br>
 - **exec**  the executable files of Alpha.
