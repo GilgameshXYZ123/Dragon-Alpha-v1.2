@@ -1,4 +1,4 @@
-# Dragon-Alpha-v1.2-source
+# Dragon-Alpha-v1.2-source [To be continued]
 > The source code of Dragon-Alpha-v1.2.
 
 # I. About Cu32
