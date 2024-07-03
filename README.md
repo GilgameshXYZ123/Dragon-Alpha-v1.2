@@ -21,29 +21,20 @@
  
 **2.** __The__ __complication__ __of__ __Cu32__. Under the Apache-2.0 License, you can modify and recompile the source of ___Cu32___. Now, __Cu32__ is only compiled for 64-bit Windows, so kindly recompile it using NVCC for other Operating Systems, like Centos, and Ubuntu.  I recommand nvcc-11.5 compilter for RTX-30X0 (Ampere) GPU, and nvcc-11.8 for RTX-40X0 (Lovelace) GPU, however, I suggest you to try different nvcc versions on your platforms. Except that _Cuda_dconv3D_deltaX_ requires $compute$ and $sm \ge 60$, the other libs only requires $compute$ and $sm \ge 52$. According to my experience, $compute = sm = 52$ or $70$ can usually brings good performance, besides, I encourage you to try different compile conifgurations on your hardware to select the best.
 
-**3.**. __Convolution__ __algorithms__ __in__ __Cu32__.
-
-There are multiple convolution algorithms in ___Cu32___
-
-
-There are 3 kinds of convolutions in convolutional layers: forward convolution (FConv), backward-data convolution (BDConv), and backward-filrer(BFConv) convolution. The FConv generates the output-feature-maps in forward propagation, 
-
-The convolution algorithms in  ___Cu32___ are listed as follow
-  
-
-> - [1] _GEMM_: This algorithm is a variant of direct convolution, which transforms a convolution into a matrix multiplication. _GEMM_ supports both
-> - _forward_ and _backward_ propagation. 
-> - [2] _GEMMR_: It's an variant of _GEMM_, which transposes the filters from $O_C \times F_H \times F_W \times I_C$ to $F_H \times F_W \times I_C \times O_C$ format enhance bandwidth.
-> - [3] _GEMMSK_: It's an variant of _GEMM_, which splits the accumulation tasks along GK axis to enhance paralellism.
-> - [4] _GEMMV2_, _GEMMV2R_, _GEMMSKR_: They variants of _GEMM_, _GEMMR_, and _GEMMSK_. They adopt the filter-trimming technique to exclude the padded zeros, and can reduce time complexity especially when dealing with small feature maps.
-> - [5] _Im2col-Winograd_: It has been implemented for both forward and backward propagation. It supports unit stride and filters $<= 9*9$
-> - [6] _Winograd2D_: It is only used for evaluation, and has not been integrated to Dragon-Alpha.
-> - [7] _Kernel-Split_: It is used to find the gradient of input feature maps when $stride > 1$. I have specifically optimized this algorithm for cases with $stride = 2$.
-> - [8] _Kernel-SplitV2_: It's an variant of _Kenrel-Split_, with the integration of filter-trimming.
-> - [9] _Cross-Add_: It can find the gradient of input feature maps in backward propagation. It is only used when channel is very small. I have not fully optimize this algorithm.
+**3.**. __Convolution__ __algorithms__ __in__ __Cu32__. There are multiple convolution algorithms in ___Cu32___:
+> - [1] _GEMM_: It supports FConv, BDConv, and BFConv. This algorithm is a variant of direct convolution, which transforms a convolution into a matrix multiplication.
+> - [2] _GEMMR_: It's only applied in FConv. As a variant of _GEMM_, it transposes the filters from $O_C \times F_H \times F_W \times I_C$ to $F_H \times F_W \times I_C \times O_C$ format to enhance bandwidth.
+> - [3] _GEMMSK_: It's a variant of _GEMM_ and only applied in BFConv. This algorithm splits the accumulation tasks into multiple partition to adjust the parallelism.
+> - [4] _GEMMV2_: It's a variant of _GEMM_. This algorithm adopts the _filter-trimming_ technique to exclude the padded zeros, thus reducing the  time complexity especially when dealing with small feature maps.
+> - [5] _GEMMV2R_, _GEMMSKR_: They are respectively variants of _GEMMR_, and _GEMMSK_, with the integration of _filter-trimming_.
+> - [6] _Im2col-Winograd_: It supports unit-stride FConv and BDConv with 2-9 filter widths. This algorithm firstly lower the convolution to matrix multiplication using Im2col operator, and then accumulatively apply 1D Winograd on them.
+> - [6] _Winograd2D_: It is only used for evaluation and has not been actually adopted。
+> - [7] _Kernel-Split_: It is designed for non-unit-stride BDConv ($stride > 1$), and specifically optimized for cases with $stride = 2$.
+> - [8] _Kernel-SplitV2_: It's an variant of _Kenrel-Split_, with the integration of _filter-trimming_.
+> - [9] _Cross-Add_: It supports BDConv, and is only used when channel sizes are very small. I have not fully optimize this algorithm.
+>> to know how Alpha select the algorithm for a specific convolution configuration, Please see the Java code of _CudaFloat32EngineBase_.
 
 # II. About Alpha
-
 Please make sure: the JDK version is greater than 8.0<br>
 **3.** To complie the CUDA-C++ source code of cu32, make sure:  compute >= 52, sm >= 52 <br>
 **4.** Kindly read “Arxiv.pdf” first, to briefly understand Alpha.<br>
