@@ -14,24 +14,38 @@
 > - [8] _Cuda_upool2D_: implements the backward propagation of Average-2D-Pooling and Max-2D-Pooling layers.
 > - [9] _Cuda_conv3D_: implements the forward propgation of 2D convolutional layers.
 > - [10] _Cuda_dconv3D_deltaX_: implements the backward propagation of 2D convolutional layers, and this library is used to find the gradient of input feature maps.
-> - [11] _Cuda_dconv3D_deltaW_: implements the backward propagation of 2D convolutional layers, and this library is used to find the gradient of filters.
+> - [11] _Cuda_dconv3D_deltaW_: implements the backward propagation of 2D convolutional layers, and this library is used to find the gradient of filters. This lib contains some algorithms we haven't publicly disclosed, so the source has not been uploaded.
 > - [12] _Cuda_reduce_: includes some reduction operators, and can be used to find mean, variance, maximum, minimum, etc.
 > - [13] _Cuda_mat_: contains 3 types of matrix multiplications:  $A * B$, $A * B^T$, $A^T * B$
 > - [14] _Cuda_batchMatMul_: contains 3 types of batch matrix multiplications:  $A * B$, $A * B^T$, $A^T * B$.
->> These 14 components have corresponding dlls and VS2017-studio projects. Due to my personal ability, I don't have enough time to optimize all kernel functions. Instead, I have to pay attention to optimize the kernel functions that have the highest performance up-limit. Therefore, matrix multiplication operators have good performance when dimensions are multiples of $64$, while convolution operators perform well with $64x$ channel.
+>> These 14 components have corresponding dlls and VS2017-studio projects. Due to my limited personal ability, I don't have enough time to optimize all kernel functions. Instead, I have to pay attention to optimize the kernel functions that have the highest performance up-limit. Therefore, matrix multiplication operators have good performance when dimensions are multiples of $64$, while convolution operators perform well with $64x$ channel. <br>
+>> I paid attention to readbility when writing ___Cu32___. I believe smar you can understand them, without too much comments. To better understand ___Cu32___, please read the code of CudaFloat32EngineBase.java, which contains the Java APIs of ___Cu32___ and some higher-level operatioal logics.
   
 **2.**  Under the Apache-2.0 License, you can modify and recompile the source of ___Cu32___ :
 > - ___Cu32___ is now only complied for 64-bit Windows. Kindly recompile it for other Operating Systems like Centos, and Ubuntu.
 > - I recommand nvcc-11.5 compilter for RTX-30XX GPU, and nvcc-11.8 for RTX-40XX GPU. To  generate the fastest code, I suggest you to try different versions of nvcc on your platforms.
-> - Except for _Cuda_dconv3D_deltaX_ requires $compute >= 60$ and $sm >= 60$, the other libs can be compiled with $compute >= 52$ and $sm >= 52$.
-> - I recommand $compute = sm = 52$ or $70$ configurations. Moreover, I think you can try different compile conifgurations on your hardware to optimize performance.
+> - Except for _Cuda_dconv3D_deltaX_ requires $compute$ and $sm >= 60$, the other libs can be compiled with $compute$ and $sm >= 52$.
+> - I recommand $compute = sm = 52$ or $70$ configurations. Besides, I encourage you to try different compile conifgurations on your hardware to select the best configuration.
+> - Since ___Cu32___ has been integrated to Dragon-Alpha through JNI, there are relevant head files included in progjects. However, you can extract the key code and rewrite them for other purpose.
+
+**3.**. The convolution algorithms in  ___Cu32___ are as follows:
+> - [1] _GEMM_: It supports both forward and backward propagation.
+> - [2] _GEMMR_: It's an variant of _GEMM_, which transposes the filters from to enhance bandwidth.
+> - [3] _GEMMSK_: It's an variant of _GEMM_, which splits the accumulation tasks along GK axis to enhance paralellism.
+> - [4] _GEMMV2_, _GEMMV2R_, _GEMMSKR_: They variants of _GEMM_, _GEMMR_, and _GEMMSK_. They adopt the filter-trimming technique to exclude the padded zeros, and can reduce time complexity especially when dealing with small feature maps.
+> - [5] _Im2col-Winograd_: It has been implemented for both forward and backward propagation. It supports unit stride and filters $<= 9*9$
+> - [6] _Winograd2D_: It is only used for evaluation, and has not been integrated to Dragon-Alpha.
+> - [7] _Kernel-Split_: It is used to find the gradient of input feature maps when $stride > 1$. I have specifically optimized this algorithm for cases with $stride = 2$.
+> - [8] _Kernel-SplitV2_: It's an variant of _Kenrel-Split_, with the integration of filter-trimming.
+> - [9] _Cross-Add_: It can find the gradient of input feature maps in backward propagation. It is only used when channel is very small. I have not fully optimize this algorithm.
+
+# II. About Alpha
 
 Please make sure: the JDK version is greater than 8.0<br>
 **3.** To complie the CUDA-C++ source code of cu32, make sure:  compute >= 52, sm >= 52 <br>
 **4.** Kindly read “Arxiv.pdf” first, to briefly understand Alpha.<br>
 **5.** Alpha has only been executed on GTX 1050, RTX 3060ti GPU, and presently its applications can only be executed on CUDA GPU.<br>
 **6.** Since I am the only-one programmer to build Alpha, I must pay my main attention to the code instead of the document, to complete Alpha’s prototype in time. If you have some questions, just see the source-code. Sorry, my personal abilities are really limited.<br> 
-
 
 # II. Files
 - **Arxiv.pdf**  an article talking about the background, characteristics, architecture and experiments of Alpha, preprinted on arxiv.org, at: https://arxiv.org/abs/2305.08819.<br>
