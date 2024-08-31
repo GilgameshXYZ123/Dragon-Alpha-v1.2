@@ -2897,22 +2897,25 @@ public class Engine implements MemStatus {
     
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Pooling2D">
+    //<editor-fold defaultstate="collapsed" desc="Pooling2D (NHWC)">
+    //<editor-fold defaultstate="collapsed" desc="pool2D_param_check">
+    protected final void check_pool2D(Tensor Y, Tensor X) {
+        require_dtype(Y, "Y"); require_dtype(X, "X");
+        equals(Y.ndim(), "Y.ndim", 4);
+        equals(X.ndim(), "X.ndim", 4);
+        equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
+        equals(Y.dim(3), "Y.IC", X.dim(3), "X.IC");
+    }
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="Max Pooling 2D">
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y)">
     public Tensor pool2D_max(Tensor Y, Tensor X, int FH, int FW, int sh, int sw) { 
         return pool2D_max(Y, X, FH, FW, sh, sw, -1, -1);
     }
     @Passed("CudaFloat32EngieBase")
-    public Tensor pool2D_max(Tensor Y, Tensor X, int FH, int FW, int sh, int sw, int ph, int pw)  {
-        if(check) {
-            require_dtype(Y, "Y"); require_dtype(X, "X");
-            equals(Y.ndim(), "Y.ndim", 4);
-            equals(X.ndim(), "X.ndim", 4);
-            equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
-            equals(Y.dim(3), "Y.IC", X.dim(3), "X.IC");
-        }
-        
+    public Tensor pool2D_max(Tensor Y, Tensor X, int FH, int FW, int sh, int sw, int ph, int pw) {
+        if(check) check_pool2D(Y, X);
         int[] dimY = Y.dim, dimX = X.dim;
         int OH = dimY[1], OW = dimY[2];//Y[N, OH, OW, OC]
         int XN = dimX[0], IH = dimX[1], IW = dimX[2], XIC = dimX[3];//X[N, IH, IW, IC]
@@ -3007,7 +3010,8 @@ public class Engine implements MemStatus {
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="backward propagation: (X) -> deltaX">
-    public Tensor unpool2D_max(Tensor deltaY, Tensor Y, Tensor X, int FH, int FW, int sh, int sw) {
+    public Tensor unpool2D_max(Tensor deltaY, Tensor Y, Tensor X, 
+            int FH, int FW, int sh, int sw) {
         return unpool2D_max(deltaY, Y, X, FH, FW, sh, sw, -1, -1);
     }
     @Passed("CudaFloat32EngieBase")
@@ -3040,24 +3044,20 @@ public class Engine implements MemStatus {
     }
     //</editor-fold>
     //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="Max Pooling 2D indexed">
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y, Index)">
-    public Tensor pool2D_max_indexed(Tensor Y, Tensor Index, Tensor X, int FH, int FW, int sh, int sw)  {
+    public Tensor pool2D_max_indexed(Tensor Y, Tensor Index, Tensor X, 
+            int FH, int FW, int sh, int sw)  {
         return pool2D_max_indexed(Y, Index, X, FH, FW, sh, sw, -1, -1);
     }
     @Passed("CudaFloat32EngieBase")
-    public Tensor pool2D_max_indexed(Tensor Y, Tensor Index,
-            Tensor X, int FH, int FW, int sh, int sw, int ph, int pw) 
+    public Tensor pool2D_max_indexed(Tensor Y, Tensor Index, Tensor X, 
+            int FH, int FW, int sh, int sw, int ph, int pw) 
     {
-        if(check) {
-            require_dtype(Y, "X"); require_int32(Index, "Index"); require_dtype(X, "X");
-            equals(Y.ndim(), "Y.ndim", 4);
-            equals(X.ndim(), "X.ndim", 4);
+        if(check) { check_pool2D(Y, X);
+            require_int32(Index, "Index");
             equals(Index.ndim(), "Index.ndim", 4);
             equals_dim(Index, "Index<int32>", Y, "Y");
-            equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
-            equals(Y.dim(3), "Y.IC", X.dim(3), "X.IC");
         }
         
         int[] dimY = Y.dim, dimX = X.dim;
@@ -3077,7 +3077,8 @@ public class Engine implements MemStatus {
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (OH, OW) -> [Y, Index]">
-    public Tensor[] pool2D_max_indexed(Tensor X, int FH, int FW, int sh, int sw, int ph, int pw) {
+    public Tensor[] pool2D_max_indexed(Tensor X, int FH, int FW, 
+            int sh, int sw, int ph, int pw) {
         return pool2D_max_indexed(X, FH, FW, -1, -1, sh, sw, ph, pw);
     }
     @Passed("CudaFloat32EngieBase")
@@ -3173,7 +3174,6 @@ public class Engine implements MemStatus {
     }
     //</editor-fold>
     //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="Avg Pooling 2D">
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y)">
     public Tensor pool2D_avg(boolean ignore_padding, 
@@ -3182,19 +3182,13 @@ public class Engine implements MemStatus {
     }
     @Passed("CudaFloat32EngieBase")
     public Tensor pool2D_avg(boolean ignore_padding, 
-            Tensor Y, Tensor X, int FH, int FW, int sh, int sw, int ph, int pw) 
+            Tensor Y, Tensor X, int FH, int FW, 
+            int sh, int sw, int ph, int pw) 
     {
-        if(check) {
-            require_dtype(Y, "Y"); require_dtype(X, "X");
-            equals(Y.ndim(), "Y.ndim", 4);
-            equals(X.ndim(), "X.ndim", 4);
-            equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
-            equals(Y.dim(3), "Y.IC", X.dim(3), "X.IC");
-        }
-          
+        if(check) check_pool2D(Y, X);
         int[] dimY = Y.dim, dimX = X.dim;
-        int OH = dimY[1], OW = dimY[2];//Y[ N, OH, OW, IC]
-        int XN = dimX[0], IH = dimX[1], IW = dimX[2], XIC = dimX[3];//X[ N, IH, IW, IC]
+        int OH = dimY[1], OW = dimY[2];//Y[N, OH, OW, IC]
+        int XN = dimX[0], IH = dimX[1], IW = dimX[2], XIC = dimX[3];//X[N, IH, IW, IC]
         
         if(ph == -1) ph = ((OH - 1)*sh + FH - IH) >> 1;//floor
         if(pw == -1) pw = ((OW - 1)*sw + FW - IW) >> 1;//floor
@@ -3210,7 +3204,7 @@ public class Engine implements MemStatus {
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (OH, OW) -> Y">
-    public Tensor pool2D_avg(boolean ignore_padding, 
+    public Tensor pool2D_avg(boolean ignore_padding,
             Tensor X, int FH, int FW, 
             int sh, int sw, int ph, int pw) {
         return pool2D_avg(ignore_padding, X, FH, FW, -1, -1, sh, sw, ph, pw);
@@ -3220,7 +3214,7 @@ public class Engine implements MemStatus {
             Tensor X, int FH, int FW, int OH, int OW, 
             int sh, int sw, int ph, int pw) 
     {
-        if(check) { require_dtype(X, "X"); this.must_greater_equal(X.ndim(), "X,ndim", 3); }
+        if(check) { require_dtype(X, "X"); must_greater_equal(X.ndim(), "X,ndim", 3); }
 
         int[] dimX = X.dim;
         //[ndim = 3]------------------------------------------------------------
@@ -3257,12 +3251,14 @@ public class Engine implements MemStatus {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="backward propagation: (deltaX)">
-    public Tensor unpool2D_avg(boolean ignore_padding, Tensor deltaX, Tensor deltaY,
+    public Tensor unpool2D_avg(boolean ignore_padding, 
+            Tensor deltaX, Tensor deltaY, 
             int FH, int FW, int sh, int sw) {
         return unpool2D_avg(ignore_padding, deltaX, deltaY, FH, FW, sh, sw, -1, -1);
     }
     @Passed("CudaFloat32EngieBase")
-    public Tensor unpool2D_avg(boolean ignore_padding, Tensor deltaX, Tensor deltaY, 
+    public Tensor unpool2D_avg(boolean ignore_padding,
+            Tensor deltaX, Tensor deltaY, 
             int FH, int FW, int sh, int sw, int ph, int pw)
     {
         if(check) {
@@ -3316,21 +3312,23 @@ public class Engine implements MemStatus {
     //</editor-fold>
     //</editor-fold>
     //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Pooling1D (NWC)">
+    //<editor-fold defaultstate="collapsed" desc="pool1D_param_check">
+    protected final void check_pool1D(Tensor Y, Tensor X) {
+        require_dtype(Y, "Y"); require_dtype(X, "X");
+        equals(Y.ndim(), "Y.ndim", 3);
+        equals(X.ndim(), "X.ndim", 3);
+        equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
+        equals(Y.dim(2), "Y.IC", X.dim(2), "X.IC");
+    }
+    //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Pooling1D">
     //<editor-fold defaultstate="collapsed" desc="Max Pooling 1D">
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y)">
     public Tensor pool1D_max(Tensor Y, Tensor X, int FW, int sw) { return pool1D_max(Y, X, FW, sw, -1); }
     @Passed("CudaFloat32EngieBase")
     public Tensor pool1D_max(Tensor Y, Tensor X, int FW, int sw, int pw)  {
-        if(check) {
-            require_dtype(Y, "Y"); require_dtype(X, "X");
-            equals(Y.ndim(), "Y.ndim", 3);
-            equals(X.ndim(), "X.ndim", 3);
-            equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
-            equals(Y.dim(2), "Y.IC", X.dim(2), "X.IC");
-        }
-        
+        if(check) check_pool1D(Y, X);
         int[] dimY = Y.dim, dimX = X.dim;
         int OW = dimY[1];//Y[N, OW, OC]
         int XN = dimX[0], IW = dimX[1], XIC = dimX[2];//X[N, IW, IC]
@@ -3431,7 +3429,6 @@ public class Engine implements MemStatus {
     }
     //</editor-fold>
     //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="Max Pooling 1D indexed">
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y, Index)">
     public Tensor pool1D_max_indexed(Tensor Y, Tensor Index, Tensor X, int FW, int sw)  {
@@ -3439,14 +3436,10 @@ public class Engine implements MemStatus {
     }
     @Passed("CudaFloat32EngieBase")
     public Tensor pool1D_max_indexed(Tensor Y, Tensor Index, Tensor X, int FW, int sw, int pw)  {
-        if(check) {
-            require_dtype(Y, "X"); require_int32(Index, "Index"); require_dtype(X, "X");
-            equals(Y.ndim(), "Y.ndim", 3);
-            equals(X.ndim(), "X.ndim", 3);
+        if(check) { check_pool1D(Y, X);
+            require_int32(Index, "Index");
             equals(Index.ndim(), "Index.ndim", 3);
             equals_dim(Index, "Index<int32>", Y, "Y");
-            equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
-            equals(Y.dim(2), "Y.IC", X.dim(2), "X.IC");
         }
         
         int[] dimY = Y.dim, dimX = X.dim;
@@ -3473,7 +3466,7 @@ public class Engine implements MemStatus {
         if(check) { require_dtype(X, "X"); equals(X.ndim(), "X.ndim", 3); }
         
         int[] dimX = X.dim;//X[N, IW, IC]
-        int XN = dimX[0], IW = dimX[2], XIC = dimX[3];
+        int XN = dimX[0], IW = dimX[1], XIC = dimX[2];
         
         if(OW == -1) OW = (IW - FW + (pw << 1))/sw + 1;//floor
         Tensor Y = this.empty(XN, OW, XIC);
@@ -3547,7 +3540,6 @@ public class Engine implements MemStatus {
     }
     //</editor-fold>
     //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="Avg Pooling 1D">
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y)">
     public Tensor pool1D_avg(boolean ignore_padding, Tensor Y, Tensor X, int FW, int sw) {
@@ -3555,14 +3547,7 @@ public class Engine implements MemStatus {
     }
     @Passed("CudaFloat32EngieBase")
     public Tensor pool1D_avg(boolean ignore_padding, Tensor Y, Tensor X, int FW, int sw, int pw) {
-        if(check) {
-            require_dtype(Y, "Y"); require_dtype(X, "X");
-            equals(Y.ndim(), "Y.ndim", 3);
-            equals(X.ndim(), "X.ndim", 3);
-            equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
-            equals(Y.dim(2), "Y.IC", X.dim(2), "X.IC");
-        }
-          
+        if(check) check_pool1D(Y, X);
         int[] dimY = Y.dim, dimX = X.dim;
         int OW = dimY[1];//Y[N, OW, IC]
         int XN = dimX[0], IW = dimX[1], XIC = dimX[2];//X[N, IW, IC]
@@ -3584,7 +3569,7 @@ public class Engine implements MemStatus {
     }
     @Passed("CudaFloat32EngieBase")
     public Tensor pool1D_avg(boolean ignore_padding, Tensor X, int FW, int OW, int sw, int pw) {
-        if(check) { require_dtype(X, "X"); this.must_greater_equal(X.ndim(), "X,ndim", 3); }
+        if(check) { require_dtype(X, "X"); must_greater_equal(X.ndim(), "X,ndim", 3); }
 
         int[] dimX = X.dim;
         int XN = dimX[0], IW = dimX[1], XIC = dimX[2];//X[N, IW, IC]
