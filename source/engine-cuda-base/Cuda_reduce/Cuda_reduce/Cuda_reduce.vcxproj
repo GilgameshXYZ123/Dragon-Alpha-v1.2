@@ -82,27 +82,36 @@
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <PtxAsOptionV>true</PtxAsOptionV>
+      <CodeGeneration>compute_86,sm_86</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <CudaCompile Include="A.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="center_linear.cuh" />
+    <ClInclude Include="center_quadratic.cuh" />
     <ClInclude Include="center_quadratic_dual.cuh" />
     <ClInclude Include="center_quadratic_dual_deltaX.cuh" />
     <ClInclude Include="Cuda_reduce.cuh" />
     <ClInclude Include="field_affine_deltaAB_v1.cuh" />
     <ClInclude Include="field_affine_deltaAB_v2.cuh" />
     <ClInclude Include="field_affine_deltaA_v1.cuh" />
+    <ClInclude Include="field_affine_with_function_deltaAB_v1.cuh" />
+    <ClInclude Include="field_affine_with_function_deltaAB_v2.cuh" />
     <ClInclude Include="field_affine_with_leakyRelu_deltaAB_v1.cuh" />
     <ClInclude Include="field_affine_with_leakyRelu_deltaAB_v2.cuh" />
     <ClInclude Include="field_batchNorm_deltaAB_v2.cuh" />
     <ClInclude Include="field_batchNorm_deltaA_v2.cuh" />
+    <ClInclude Include="field_batchNorm_with_function_deltaAB_v2.cuh" />
+    <ClInclude Include="field_batchNorm_with_function_deltaXp_v1.cuh" />
+    <ClInclude Include="field_batchNorm_with_function_deltaXp_v2.cuh" />
     <ClInclude Include="field_batchNorm_with_leakyRelu_deltaAB_v2.cuh" />
     <ClInclude Include="field_batchNorm_with_leakyRelu_deltaXp_v1.cuh" />
     <ClInclude Include="field_batchNorm_with_leakyRelu_deltaXp_v2.cuh" />
     <ClInclude Include="field_sqBatchNorm_deltaAB_v2.cuh" />
     <ClInclude Include="field_linear2_square_row.cuh" />
+    <ClInclude Include="FP32_function.cuh" />
     <ClInclude Include="row_linear2_square_row.cuh" />
     <ClInclude Include="R_center.cuh" />
     <ClInclude Include="Xeno0_field_batchnorm_deltaXp_v1_affined.cuh" />

@@ -8,7 +8,7 @@ using namespace std;
 #include "test.cuh"
 
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 //Kernel Remode Functions
 #ifndef JNI_CONV_3D_KERNEL_REMODE
@@ -24,6 +24,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_kernel_1
 	float* dW = (float*)(intptr_t)dW_address;
 	float* dCW = (float*)(intptr_t)dCW_address;
 	__kernel_remode(stream, dW, dCW, FH, FW, OC, IC);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -55,6 +56,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv3D(J
 		dY, OH, OW, 
 		N, IC, OC, 
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    conv3D_texture
@@ -80,6 +82,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv3D_1
 		N, IC, OC,
 		sh, sw, ph, pw);
 	cudaError_t error = cudaDestroyTextureObject(texX); handleError(error);
+	error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    conv3DV2
@@ -104,6 +107,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv3DV2
 		dY, OH, OW,
 		IC, OC,
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 // Method:    conv3D_np
@@ -127,6 +131,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv3D_1
 		dY, OH, OW,
 		IC, OC,
 		sh, sw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    conv3D_W1
@@ -146,6 +151,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv3D_1
 	__conv3D_W1(streams, index, length,
 		dX, IH, IW, dW, dY, 
 		N, IC, OC);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -181,6 +187,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv3D_1
 		dY, OH, OW,
 		N, IC, OC,
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    conv3D_GemmR_SGM
@@ -225,6 +232,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv3D_1
 			GN, GMr, GK,
 			0, j_index);
 	}
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -329,6 +337,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv3D_1
 	__conv3D_GemmR_W1(streams, index, length,
 		dX, IH, IW, dW, dCW, dY,
 		N, IC, OC);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    conv3D_GemmR_W1_SGM
@@ -368,6 +377,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv3D_1
 			GN, GMr,
 			0, j_index);
 	}
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -399,6 +409,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv3D_1
 		dY, OH, OW,
 		IC, OC,
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -439,6 +450,7 @@ JNIEXPORT jboolean JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv
 		N, IC, OC, 
 		ph, pw);
 	cudaError_t error = cudaDestroyTextureObject(texX); handleError(error);
+	error = cudaGetLastError(); handleError(error);
 	return flag;
 }
 
@@ -512,7 +524,7 @@ JNIEXPORT jboolean JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv
 				1, 1, ph, pw);
 		}
 	}
-
+	cudaError_t error = cudaGetLastError(); handleError(error);
 	return true;
 }
 
@@ -548,6 +560,7 @@ JNIEXPORT jboolean JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv
 		N, IC, OC,
 		ph, pw);
 	cudaError_t error = cudaDestroyTextureObject(texX); handleError(error);
+	error = cudaGetLastError(); handleError(error);
 	return flag;
 }
 
@@ -619,7 +632,7 @@ JNIEXPORT jboolean JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1conv3D_conv
 				1, 1, ph, pw);
 		}
 	}
-
+	cudaError_t error = cudaGetLastError(); handleError(error);
 	return true;
 }
 

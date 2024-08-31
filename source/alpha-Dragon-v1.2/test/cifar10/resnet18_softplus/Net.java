@@ -21,7 +21,7 @@ public class Net
         Unit conv1, bn1, conv2, bn2, downsample;
         public BasicBlock(int in_channel, int out_channel, int stride) {
            conv1 = nn.conv3D(false, in_channel, out_channel, 3, stride, 1);
-           bn1 = nn.batchNorm(false, out_channel);
+           bn1 = nn.batchNorm_softplus(nn.batchNorm(out_channel), nn.softplus()).inplace(false);
            
            conv2 = nn.conv3D(false, out_channel, out_channel, 3, 1, 1);
            bn2 = nn.batchNorm(out_channel);
@@ -36,19 +36,12 @@ public class Net
         @Override
         public Tensor[] __forward__(Tensor... X) {
             Tensor[] res = X;
-            
             X = conv1.forward(X);
             X = bn1.forward(X);
-            X = F.softplus(X);
             
-            X = conv2.forward(X);
-            X = bn2.forward(X);
-            
+            X = bn2.forward(conv2.forward(X));
             if(downsample != null) res = downsample.forward(res);
-            X = F.add(X[0], res[0]);
-            X = F.softplus(X);
-            
-            return X;
+            return  F.add_softplus(X[0], res[0]);
         }
     }
     

@@ -16,8 +16,7 @@ public final class Cuda_batchMatMul
     private Cuda_batchMatMul() {}
 
     //<editor-fold defaultstate="collapsed" desc="streamSize">
-    public static int streamSize(int N, int M) //N%4, M%4 == 0
-    {
+    public static int streamSize(int N, int M) {//N%4, M%4 == 0
         int sn = 0, sm = 0;
         if((N & (N - 1)) == 0) sn = 1;
         else for(;;) {
@@ -59,7 +58,7 @@ public final class Cuda_batchMatMul
      * 4D Tensor: for(N, M) from (1, 1) to(+1, +1) to (64, 64), K = 20, Batch = [4 * 3]:  correct
      * 4D Tensor: for(N, M) from (1, 1) to(+1, +1) to (82, 96), K = 20, Batch = [5 * 3]:  correct
      * 3D Tensor: for(N, M) from (1, 1) to(+1, +1) to (64, 64), K = 20, Batch = [12]:  correct
-     * 
+     *
      * for[Batch0, Batch1, K] = [32, 8, 256]: (nIter = 1000)
      * [N, M] = [128, 128]: size = 1.0, Time = 1.419 msec, Performance = 1513.3782 GFlop/s
      * [N, M] = [160, 128]: size = 1.25, Time = 1.957 msec, Performance = 1371.6681 GFlop/s
@@ -76,6 +75,7 @@ public final class Cuda_batchMatMul
      * [N, M] = [127, 340]: size = 2.635498, Time = 4.176 msec, Performance = 1355.2894 GFlop/s
      * [N, M] = [255, 340]: size = 5.291748, Time = 9.432 msec, Performance = 1204.8285 GFlop/s
      * </pre>
+     *
      * @param streamArray
      * @param length
      * @param dA_address
@@ -84,14 +84,15 @@ public final class Cuda_batchMatMul
      * @param Batch
      * @param N
      * @param M
-     * @param BK 
-     * @param AK 
+     * @param BK
+     * @param AK
      */
     @Passed
     public static native void batchMatMul(long[] streamArray, int length,
             long dA_address, long dB_address,
-            long dC_address, 
+            long dC_address,
             int Batch, int N, int M, int BK, int AK);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="batchMatMul_texture">
     /**
@@ -108,7 +109,7 @@ public final class Cuda_batchMatMul
      * 4D Tensor: for(N, M) from (1, 1) to(+1, +1) to (64, 64), K = 20, Batch = [4 * 3]:  correct
      * 4D Tensor: for(N, M) from (1, 1) to(+1, +1) to (82, 96), K = 20, Batch = [5 * 3]:  correct
      * 3D Tensor: for(N, M) from (1, 1) to(+1, +1) to (64, 64), K = 20, Batch = [12]:  correct
-     * 
+     *
      * for[Batch0, Batch1, K] = [32, 8, 256]:
      * [N, M] = [128, 128]: size = 1.0, Time = 1.448 msec, Performance = 1483.0688 GFlop/s
      * [N, M] = [132, 132]: size = 1.0634766, Time = 3.22 msec, Performance = 709.25415 GFlop/s
@@ -122,6 +123,7 @@ public final class Cuda_batchMatMul
      * [N, M] = [240, 240]: size = 3.515625, Time = 5.404 msec, Performance = 1397.0665 GFlop/s
      * [N, M] = [248, 248]: size = 3.7539062, Time = 5.476 msec, Performance = 1472.1425 GFlop/s
      * </pre>
+     *
      * @param streamArray
      * @param length
      * @param dA_address
@@ -130,16 +132,16 @@ public final class Cuda_batchMatMul
      * @param Batch
      * @param N
      * @param M
-     * @param BK 
-     * @param AK 
+     * @param BK
+     * @param AK
      */
     @Passed
     public static native void batchMatMul_texture(long[] streamArray, int length,
             long dA_address, long dB_address,
-            long dC_address, 
+            long dC_address,
             int Batch, int N, int M, int BK, int AK);
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="batchMatMulT1">
     /**
      * <pre>
@@ -153,7 +155,7 @@ public final class Cuda_batchMatMul
      * 4D Tensor: for(N, M) from (1, 1) to(+1, +1) to (64, 64), K = 20, Batch = [4 * 8]:  correct
      * 4D Tensor: for(N, M) from (1, 1) to(+1, +1) to (82, 96), K = 20, Batch = [5 * 3]:  correct
      * 3D Tensor: for(N, M) from (1, 1) to(+1, +1) to (64, 64), K = 20, Batch = [12]:  correct
-     * 
+     *
      * for[Batch0, Batch1, K] = [32, 8, 256]:
      * [N, M] = [128, 128]: size = 1.0, Time = 1.446 msec, Performance = 1485.1201 GFlop/s
      * [N, M] = [192, 128]: size = 1.5, Time = 2.232 msec, Performance = 1443.2013 GFlop/s
@@ -163,6 +165,7 @@ public final class Cuda_batchMatMul
      * [N, M] = [240, 240]: size = 3.515625, Time = 6.19 msec, Performance = 1219.6683 GFlop/s
      * [N, M] = [248, 248]: size = 3.7539062, Time = 5.71 msec, Performance = 1411.813 GFlop/s
      * </pre>
+     *
      * @param streamArray
      * @param length
      * @param dA_address
@@ -172,15 +175,15 @@ public final class Cuda_batchMatMul
      * @param CN
      * @param AN
      * @param M
-     * @param K 
+     * @param K
      */
-     @Passed
+    @Passed
     public static native void batchMatMulT1(long[] streamArray, int length,
             long dA_address, long dB_address,
-            long dC_address, 
+            long dC_address,
             int Batch, int CN, int AN, int M, int K);
     //</editor-fold>
-     
+
     //<editor-fold defaultstate="collapsed" desc="batchMatMulT2">
     /**
      * <pre>
@@ -195,7 +198,7 @@ public final class Cuda_batchMatMul
      * 4D Tensor: for(N, M) from (1, 1) to(+1, +1) to (64, 64), K = 20, Batch = [4 * 3]:  correct
      * 4D Tensor: for(N, M) from (1, 1) to(+1, +1) to (82, 96), K = 20, Batch = [5 * 3]:  correct
      * 3D Tensor: for(N, M) from (1, 1) to(+1, +1) to (64, 64), K = 20, Batch = [12]:  correct
-     * 
+     *
      * for[Batch0, Batch1, K] = [32, 8, 256]:
      * [N, M] = [128, 128]: size = 1.0, Time = 1.558 msec, Performance = 1378.3591 GFlop/s
      * [N, M] = [192, 128]: size = 1.5, Time = 2.754 msec, Performance = 1169.6533 GFlop/s
@@ -209,6 +212,7 @@ public final class Cuda_batchMatMul
      * [N, M] = [127, 340]: size = 2.635498, Time = 6.332 msec, Performance = 893.8233 GFlop/s
      * [N, M] = [255, 340]: size = 5.291748, Time = 14.554 msec, Performance = 780.8123 GFlop/s
      * </pre>
+     *
      * @param streamArray
      * @param length
      * @param dA_address
@@ -218,13 +222,14 @@ public final class Cuda_batchMatMul
      * @param N
      * @param CM
      * @param BM
-     * @param K 
+     * @param K
      */
     @Passed
     public static native void batchMatMulT2(long[] streamArray, int length,
             long dA_address, long dB_address,
-            long dC_address, 
-            int Batch, int N, int CM, int BM, int K); 
+            long dC_address,
+            int Batch, int N, int CM, int BM, int K);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="batchMatMulT2_texture">
     /**
@@ -240,7 +245,7 @@ public final class Cuda_batchMatMul
      * 4D Tensor: for(N, M) from (1, 1) to(+1, +1) to (64, 64), K = 20, Batch = [4 * 3]:  correct
      * 4D Tensor: for(N, M) from (1, 1) to(+1, +1) to (82, 96), K = 20, Batch = [5 * 3]:  correct
      * 3D Tensor: for(N, M) from (1, 1) to(+1, +1) to (64, 64), K = 20, Batch = [12]:  correct
-     * 
+     *
      * for[Batch0, Batch1, K] = [32, 8, 256]:
      * [N, M] = [128, 128]: Size = 1.0, Time = 1.824 msec, Performance = 1177.3484 GFlop/s
      * [N, M] = [192, 128]: size = 1.5, Time = 3.404 msec, Performance = 946.3059 GFlop/s
@@ -251,6 +256,7 @@ public final class Cuda_batchMatMul
      * [N, M] = [248, 248]: size = 3.7539062, Time = 7.28 msec, Performance = 1107.3423 GFlop/
      * [N, M] = [252, 252]: size = 3.8759766, Time = 7.496 msec, Performance = 1110.405 GFlop/s
      * </pre>
+     *
      * @param streamArray
      * @param length
      * @param dA_address
@@ -260,12 +266,12 @@ public final class Cuda_batchMatMul
      * @param N
      * @param CM
      * @param BM
-     * @param K 
+     * @param K
      */
     @Passed
     public static native void batchMatMulT2_texture(long[] streamArray, int length,
             long dA_address, long dB_address,
-            long dC_address, 
-            int Batch, int N, int CM, int BM, int K); 
+            long dC_address,
+            int Batch, int N, int CM, int BM, int K);
     //</editor-fold>
 }

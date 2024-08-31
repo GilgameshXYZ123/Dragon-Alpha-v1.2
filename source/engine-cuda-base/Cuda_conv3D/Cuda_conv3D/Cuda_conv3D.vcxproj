@@ -23,7 +23,7 @@
     <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
@@ -87,7 +87,7 @@
       <InterleaveSourceInPTX>true</InterleaveSourceInPTX>
       <GPUDebugInfo>false</GPUDebugInfo>
       <NvccCompilation>compile</NvccCompilation>
-      <CodeGeneration>compute_52,sm_52</CodeGeneration>
+      <CodeGeneration>compute_86,sm_86</CodeGeneration>
     </CudaCompile>
     <CudaLink>
       <Optimization>O3</Optimization>
@@ -168,7 +168,6 @@
     <ClInclude Include="micro_Winograd_s8_f6x3.cuh" />
     <ClInclude Include="micro_Winograd_s8_f7x2.cuh" />
     <ClInclude Include="micro_Winograd_sg_f8x9.cuh" />
-    <ClInclude Include="X.cuh" />
     <ClInclude Include="Xeno1_X3.cuh" />
     <ClInclude Include="Xeno1_Winograd_f14x3.cuh" />
     <ClInclude Include="Xeno1_Winorgrad_f8x9.cuh" />

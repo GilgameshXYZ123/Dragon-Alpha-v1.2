@@ -2259,6 +2259,26 @@ public final class Matrix
         }
     }
     
+    public static float[][] center_linear(float[][][] X,
+            float alpha, float beta)
+    {
+        int dim0 = X.length;
+        int dim1 = X[0].length;
+        int dim2 = X[0][0].length;
+        float[][] V = new float[dim0][dim2];
+        
+        for(int d0=0; d0<dim0; d0++)
+        for(int d2=0; d2<dim2; d2++) {
+            float v = 0.0f;
+            for(int d1=0; d1<dim1; d1++) {
+                float x = X[d0][d1][d2];
+                v += alpha*x + beta;
+            }
+            V[d0][d2] = v;
+        }
+        return V;
+    }
+    
     public static float[][] field_linear_quadratic(float[][] A, 
             float alpha1, float beta1, 
             float alpha2, float beta2, float gamma2)
@@ -2279,8 +2299,7 @@ public final class Matrix
     }
     
     
-    public static void field_mean(float[][] A, float[] V)
-    {
+    public static void field_mean(float[][] A, float[] V) {
         int N = A.length, M = A[0].length;
         for(int j = 0; j < M; j++) {
             V[j] = 0;
@@ -2289,8 +2308,7 @@ public final class Matrix
         }
     }
     
-    public static void field_squareMean(float[][] A, float[] V)
-    {
+    public static void field_squareMean(float[][] A, float[] V) {
         int N = A.length, M = A[0].length;
         for(int j = 0; j < M; j++) {
             V[j] = 0;
@@ -2306,8 +2324,7 @@ public final class Matrix
             float alpha, float beta, float gamma, float[] V)
     {
         int N = X1.length, M = X1[0].length;
-        for(int j = 0; j < M; j++)
-        {
+        for(int j = 0; j < M; j++) {
             V[j] = 0;
             for(int i=0; i<N; i++) {
                 V[j] += alpha* X1[i][j] + beta*X2[i][j] + gamma;
@@ -2319,8 +2336,7 @@ public final class Matrix
             float alpha, float beta, float gamma, float[] V)
     {
         int N = A.length, M = A[0].length;
-        for(int j = 0; j < M; j++)
-        {
+        for(int j = 0; j < M; j++) {
             V[j] = 0;
             for(int i=0; i<N; i++) {
                 float a = A[i][j];
@@ -2328,6 +2344,26 @@ public final class Matrix
             }
         }
     }
+    
+    public static float[][] center_quadratic(float[][][] X,
+            float alpha, float beta, float gamma)
+    {
+        int dim0 = X.length;
+        int dim1 = X[0].length;
+        int dim2 = X[0][0].length;
+        float[][] V = new float[dim0][dim2];
+        
+        for(int d0=0; d0<dim0; d0++)
+        for(int d2=0; d2<dim2; d2++) {
+            float v = 0.0f;
+            for(int d1=0; d1<dim1; d1++) {
+                float x = X[d0][d1][d2];
+                v += alpha*x*x + beta*x + gamma;
+            }
+            V[d0][d2] = v;
+        }
+        return V;
+    } 
     
     public static void field_quadratic2(float[][] X1, float[][] X2, 
             float k11, float k12, float k22, 
@@ -2366,7 +2402,6 @@ public final class Matrix
         }
         return V;
     } 
-    
     
     public static void batchNorm_deltaA(float[][] deltaY, float[][] X,
             float[] X_mean, float[] X_square_mean, float e,

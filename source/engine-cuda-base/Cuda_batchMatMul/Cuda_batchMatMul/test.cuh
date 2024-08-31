@@ -3,6 +3,7 @@
 #ifndef TEST_H
 #define TEST_H
 
+#ifndef COMPILE//<<<<complie-area--------------------------------------------------
 
 #ifndef UTIL
 #define UTIL
@@ -627,5 +628,7 @@ main()
 		//for (int M = 4; M <= 96; M += 4)
 			//testCorrectT1<3, 1, 1>(16, N, M, 16);
 }
+
+#endif
 
 #endif

@@ -65,7 +65,7 @@ __global__ void img_linear_dual2D_field_kernel_16(
 		float C2 = X2[(index16 +  8) / row_lengthv] * beta + gamma;
 		float C3 = X2[(index16 + 12) / row_lengthv] * beta + gamma;
 
-		float16 fy;//y = alpha*x + beta
+		float16 fy;//y = alpha*x + be
 		fy.x0 = (alpha * x1.x0) + C0;
 		fy.y0 = (alpha * x1.y0) + C0;
 		fy.z0 = (alpha * x1.z0) + C0;

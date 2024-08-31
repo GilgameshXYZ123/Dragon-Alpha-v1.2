@@ -193,6 +193,30 @@ extern "C" {
 
 	/*
 	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
+	 * Method:    linear_dual2D_with_function
+	 * Signature: (JJJFFFI[FIJIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear_1dual2D_1with_1function
+	(JNIEnv *, jclass, jlong, jlong, jlong, jfloat, jfloat, jfloat, jint, jfloatArray, jint, jlong, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
+	 * Method:    linear_dual2D_with_function_deltaX_v1
+	 * Signature: (JJJJJFFI[FIIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear_1dual2D_1with_1function_1deltaX_1v1
+	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jlong, jfloat, jfloat, jint, jfloatArray, jint, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
+	 * Method:    linear_dual2D_with_function_deltaX_v2
+	 * Signature: (JJJJJJFFFI[FIIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear_1dual2D_1with_1function_1deltaX_1v2
+	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jlong, jlong, jfloat, jfloat, jfloat, jint, jfloatArray, jint, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
 	 * Method:    quadratic2D
 	 * Signature: (JJFFFJIII)V
 	 */
@@ -1041,6 +1065,30 @@ extern "C" {
 
 	/*
 	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
+	 * Method:    affine2D_row_with_function
+	 * Signature: (JJJJIJI[FIIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_affine2D_1row_1with_1function
+	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jint, jlong, jint, jfloatArray, jint, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
+	 * Method:    affine2D_row_with_function_deltaX_v1
+	 * Signature: (JJJJI[FIJIIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_affine2D_1row_1with_1function_1deltaX_1v1
+	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jint, jfloatArray, jint, jlong, jint, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
+	 * Method:    affine2D_row_with_function_deltaX_v2
+	 * Signature: (JJJI[FIJJJIIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_affine2D_1row_1with_1function_1deltaX_1v2
+	(JNIEnv *, jclass, jlong, jlong, jlong, jint, jfloatArray, jint, jlong, jlong, jlong, jint, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
 	 * Method:    sqBatchNorm2D_row
 	 * Signature: (JJJJFIJIII)V
 	 */
@@ -1198,6 +1246,54 @@ extern "C" {
 	 */
 	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchNorm_1affined2D_1row_1with_1leakyRelu_1deltaX_1v2
 	(JNIEnv *, jclass, jlong, jlong, jfloat, jlong, jlong, jlong, jfloat, jlong, jlong, jlong, jlong, jint, jlong, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
+	 * Method:    batchNorm2D_row_with_function
+	 * Signature: (JJJJFIJI[FIIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchNorm2D_1row_1with_1function
+	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jfloat, jint, jlong, jint, jfloatArray, jint, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
+	 * Method:    batchNorm_affined2D_row_with_function
+	 * Signature: (JJJJFJJIJI[FIIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchNorm_1affined2D_1row_1with_1function
+	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jfloat, jlong, jlong, jint, jlong, jint, jfloatArray, jint, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
+	 * Method:    batchNorm2D_row_with_function_deltaX_v1
+	 * Signature: (JJJI[FIJFJJIJIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchNorm2D_1row_1with_1function_1deltaX_1v1
+	(JNIEnv *, jclass, jlong, jlong, jlong, jint, jfloatArray, jint, jlong, jfloat, jlong, jlong, jint, jlong, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
+	 * Method:    batchNorm2D_row_with_function_deltaX_v2
+	 * Signature: (JJI[FIJJJFJJIJIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchNorm2D_1row_1with_1function_1deltaX_1v2
+	(JNIEnv *, jclass, jlong, jlong, jint, jfloatArray, jint, jlong, jlong, jlong, jfloat, jlong, jlong, jint, jlong, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
+	 * Method:    batchNorm_affined2D_row_with_function_deltaX_v1
+	 * Signature: (JJJI[FIJFJJJJIJIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchNorm_1affined2D_1row_1with_1function_1deltaX_1v1
+	(JNIEnv *, jclass, jlong, jlong, jlong, jint, jfloatArray, jint, jlong, jfloat, jlong, jlong, jlong, jlong, jint, jlong, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function
+	 * Method:    batchNorm_affined2D_row_with_function_deltaX_v2
+	 * Signature: (JJI[FIJJJFJJJJIJIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchNorm_1affined2D_1row_1with_1function_1deltaX_1v2
+	(JNIEnv *, jclass, jlong, jlong, jint, jfloatArray, jint, jlong, jlong, jlong, jfloat, jlong, jlong, jlong, jlong, jint, jlong, jint, jint, jint);
 
 	/*
 	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_function

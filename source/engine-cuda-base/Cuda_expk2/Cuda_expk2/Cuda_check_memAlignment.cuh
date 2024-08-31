@@ -70,6 +70,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_Cuda_1expk2_check_1mem_1al
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)(dX_address);
 	__check_mem_alignment(stream, dX, lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif

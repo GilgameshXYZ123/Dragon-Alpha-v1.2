@@ -33,8 +33,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class FullConnect extends SimpleUnit
-{
+public class FullConnect extends SimpleUnit {
     private static final long serialVersionUID = 562781240130001L;
     
     protected int IW, OW;
@@ -49,7 +48,6 @@ public class FullConnect extends SimpleUnit
         this.OW = out_features;
     }
 
-    
     //<editor-fold defaultstate="collapsed" desc="Basic-Functions">
     public final boolean biased() { return biased; }
     public final int in_features() { return IW; }
@@ -96,8 +94,8 @@ public class FullConnect extends SimpleUnit
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="running-area: others">
-    transient private boolean baseW = true;
-    transient private boolean baseB = true;
+    transient private boolean baseW = true;//is the first gradient of W
+    transient private boolean baseB = true;//is the first gradient of B
     
     protected final synchronized void reset_backward() { baseW = baseB = true;  }
     protected final synchronized boolean baseW() {  boolean old = baseW; baseW = false; return old; }
@@ -156,8 +154,7 @@ public class FullConnect extends SimpleUnit
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: InlineFullConnect"> 
-    public static class InlineFullConnect extends SimpleCore<FullConnect>
-    {
+    public static class InlineFullConnect extends SimpleCore<FullConnect> {
         transient private Tensor y;
         
         public InlineFullConnect(FullConnect unit) { super(unit); }

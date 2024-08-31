@@ -15,8 +15,7 @@ import z.dragon.nn.unit.simple.SimpleInplaceInline;
  *
  * @author Gilgamesh
  */
-public class HardSigmoid extends SimpleInplaceFunction 
-{
+public class HardSigmoid extends SimpleInplaceFunction  {
     private static final long serialVersionUID = 1231412776191L;
     
     public HardSigmoid(boolean inplace) { super(inplace); }

@@ -55,8 +55,13 @@ import z.util.lang.annotation.Passed;
  * @author dell
  */
 @SuppressWarnings("unchecked")
-public final class Lang 
-{
+public final class Lang {
+    public static final String JDK_version;
+    static { try {
+        String version = System.getProperty("java.version");
+        JDK_version = version.substring(version.indexOf(": ") + 1, version.lastIndexOf('.')).trim();
+    } catch(Exception e) { throw new RuntimeException(); } }
+    
     public static final String NULL = "null";
     public static final String NULL_LN = "null\n";
     
@@ -100,7 +105,7 @@ public final class Lang
     public static String currentDateTime() { return DEF_SDF.format(new Date()); }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="HashMap with Function-Pointer">
+    //<editor-fold defaultstate="collapsed" desc="Reflect-Function">
     //<editor-fold defaultstate="collapsed" desc="class Converter">
     //elementary converters-----------------------------------------------------
     private static final Converter doubleConverter = new Converter() {
@@ -378,188 +383,7 @@ public final class Lang
     private static final Printer floatMatrixPrinter = (Printer<float[][]>) (out, val) -> { Matrix.println(out, val); };
     private static final Printer doubleMatrixPrinter = (Printer<double[][]>) (out, val) -> { Matrix.println(out, val); };
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Init-State">
-    private static final String TOSTRING_INIT_CONF = "lang.toString.init";
-    private static final String PRINT_INIT_CONF = "lang.print.init";
     
-    static {
-        try {
-            Lang.init_ClassMapping();
-            Lang.init_Converter();
-            Meta mt = Meta.valueOf("z/util/lang/conf/zlang-site.xml", null, "configuration");
-            if (mt.getValue(TOSTRING_INIT_CONF)) Lang.init_toString();
-            if (mt.getValue(PRINT_INIT_CONF)) Lang.init_Print();
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Fail to init z.util.lang.Lang");
-        }
-    }
-    //</editor-fold>
-    
-    private static Set<Class> ELEMENT_TYPE;
-    private static Set<Class> ELEMENT_VECTOR_TYPE;
-    private static Set<Class> ELEMENT_MATRIX_TYPE;
-    private static Map<Class, String> CLASS_NAME_MAP;
-    private static Map<String, Class> NAME_CLASS_MAP;
-    private synchronized static void init_ClassMapping() {
-        ELEMENT_TYPE = new HashSet<>();
-        ELEMENT_VECTOR_TYPE = new HashSet<>();
-        ELEMENT_MATRIX_TYPE = new HashSet<>();
-        CLASS_NAME_MAP = new HashMap<>();
-        NAME_CLASS_MAP = new HashMap<>();
-        
-        //for element data type-------------------------------------------------
-        Class[] cls = Lang.elem_class();
-        String[] name = Lang.elem_class_name();
-        for(int i=0; i<cls.length; i++) {
-            ELEMENT_TYPE.add(cls[i]);
-            CLASS_NAME_MAP.put(cls[i], name[i]);
-            NAME_CLASS_MAP.put(name[i], cls[i]);
-        }
-        
-        //for element vector-----------------------------------------------------
-        cls = Lang.elem_array_class();
-        name = Lang.elem_array_class_name();
-        for(int i=0; i<cls.length; i++)  {
-            ELEMENT_VECTOR_TYPE.add(cls[i]);
-            CLASS_NAME_MAP.put(cls[i], name[i]);
-            NAME_CLASS_MAP.put(name[i], cls[i]);
-        }
-        
-        //for element matrix----------------------------------------------------
-        cls = Lang.elem_mat_class();
-        name = Lang.elem_mat_class_name();
-        for(int i=0; i<cls.length; i++)  {
-            ELEMENT_MATRIX_TYPE.add(cls[i]);
-            CLASS_NAME_MAP.put(cls[i], name[i]);
-            NAME_CLASS_MAP.put(name[i], cls[i]);
-        }
-    }
-
-    private static HashMap<Class,Converter> CLASS_CONVERTER_MAP;
-    private static HashMap<String,Converter> NAME_CONVERTER_MAP;  
-    private synchronized static void init_Converter() {
-        CLASS_CONVERTER_MAP = new HashMap<>();
-        NAME_CONVERTER_MAP = new HashMap<>();
-        
-        //for elemnt converter--------------------------------------------------
-        Converter[] converter = new Converter[]{
-            byteConverter, booleanConverter, shortConverter, intConverter, longConverter,
-            floatConverter, doubleConverter,
-            stringConverter, clazzConverter,
-            booleanConverter, byteConverter, shortConverter, intConverter, longConverter,
-            floatConverter, doubleConverter
-        };
-         
-        Class[] cls = Lang.elem_class();
-        String[] name = Lang.elem_class_name();
-        for(int i=0; i<cls.length; i++)  {
-            CLASS_CONVERTER_MAP.put(cls[i], converter[i]);
-            NAME_CONVERTER_MAP.put(name[i], converter[i]);
-        }
-        
-        //for vector converter--------------------------------------------------
-        converter = new Converter[]{
-            byteVectorConverter, booleanVectorConverter, shortVectorConverter, intVectorConverter, longVectorConverter,
-            floatVectorConverter, doubleVectorConverter,
-            stringVectorConverter,
-            nBooleanVectorConverter, nByteVectorConverter, nShortVectorConverter, nIntVectorConverter, nLongVectorConverter,
-            nFloatVectorConverter, nDoubleVectorConverter
-        };
-        
-        cls = Lang.elem_array_class();
-        name = Lang.elem_array_class_name();
-        for(int i=0; i<cls.length; i++)   {
-            CLASS_CONVERTER_MAP.put(cls[i], converter[i]);
-            NAME_CONVERTER_MAP.put(name[i], converter[i]);
-        }
-        
-        //for matrix converter--------------------------------------------------
-        converter=new Converter[] {
-            byteMatrixConverter, booleanMatrixConverter, shortMatrixConverter, intMatrixConverter, longMatrixConverter,
-            floatMatrixConverter, doubleMatrixConverter,
-            stringMatrixConverter,
-            nBooleanMatrixConverter, nByteMatrixConverter, nShortMatrixConverter, nIntMatrixConverter, nLongMatrixConverter,
-            nFloatMatrixConverter, nDoubleMatrixConverter
-        };
-        
-        cls = Lang.elem_mat_class();
-        name = Lang.elem_mat_class_name();
-        for(int i=0; i<cls.length; i++)  {
-            CLASS_CONVERTER_MAP.put(cls[i], converter[i]);
-            NAME_CONVERTER_MAP.put(name[i], converter[i]);
-        }
-    }
-
-    private static boolean TOSTRING_INIT = false;
-    private static HashMap<Class, Stringer> CLASS_STRINGER_MAP;
-    public synchronized static void init_toString()  {
-        if(TOSTRING_INIT)  { System.out.println("z.util.Lang-Stringer has been initialized, don't call this function repeatedly"); return; }
-        CLASS_STRINGER_MAP = new HashMap<>();
-        
-        //for vector Stringer---------------------------------------------------
-        Stringer[] stringer = new Stringer[]{
-            booleanVectorStringer, byteVectorStringer, shortVectorStringer, intVectorStringer, longVectorStringer,
-            floatVectorStringer, doubleVectorStringer
-        };
-        
-        Class[] cls = Lang.elem_array_class();
-        for(int i=0; i<stringer.length; i++) CLASS_STRINGER_MAP.put(cls[i], stringer[i]);
-
-        //for matrix Stringer---------------------------------------------------
-        stringer = new Stringer[]{
-            booleanMatrixStringer, byteMatrixStringer, shortMatrixStringer, intMatrixStringer, longMatrixStringer,
-            floatMatrixStringer, doubleMatrixStringer
-        };
-
-        cls = Lang.elem_mat_class();
-        for(int i=0; i<stringer.length; i++) CLASS_STRINGER_MAP.put(cls[i], stringer[i]);
-        TOSTRING_INIT = true;
-    }
-    public synchronized static void cleanup_toString() {
-        if(!TOSTRING_INIT)  {
-            System.out.println("z.util.Lang-Stringer has been cleaned up,"
-                    + " don't call this function repeatedly");
-            return;
-        }
-        CLASS_STRINGER_MAP.clear();
-        CLASS_STRINGER_MAP = null;
-        TOSTRING_INIT = false;
-    }
-    
-    private static boolean PRINT_INIT = false;
-    private static HashMap<Class, Printer> CLASS_PRINTER_MAP;
-    public synchronized static void init_Print() {
-        if(PRINT_INIT) { System.out.println("z.util.Lang-Printer has been initialized, don't call this function repeatedly"); return; }
-        CLASS_PRINTER_MAP = new HashMap<>();
-        
-        //for vector Stringer---------------------------------------------------
-        Printer[] printer = new Printer[]{
-            booleanVectorPrinter, byteVectorPrinter, shortVectorPrinter, intVectorPrinter, longVectorPrinter,
-            floatVectorPrinter, doubleVectorPrinter
-        };
-        Class[] cls = Lang.elem_array_class();
-        for (int i=0; i<printer.length; i++) CLASS_PRINTER_MAP.put(cls[i], printer[i]);
-
-        //for matrix Stringer---------------------------------------------------
-        printer = new Printer[]{
-            booleanMatrixPrinter, byteMatrixPrinter, shortMatrixPrinter, intMatrixPrinter, longMatrixPrinter,
-            floatMatrixPrinter, doubleMatrixPrinter};
-        cls = Lang.elem_mat_class();
-        for (int i=0; i<printer.length; i++) CLASS_PRINTER_MAP.put(cls[i], printer[i]);
-        
-        PRINT_INIT = true;
-    }
-    public synchronized static void cleanup_print() {
-        if(!PRINT_INIT)  { System.out.println("z.util.Lang-Printer has been initialized, don't call this function repeatedly"); return; }
-        CLASS_PRINTER_MAP.clear();
-        CLASS_PRINTER_MAP = null;
-        PRINT_INIT = false;
-    }
-    //</editor-fold>
-    
-    //<editor-fold defaultstate="collapsed" desc="Reflect-Function">
     //<editor-fold defaultstate="collapsed" desc="Normal-Function">
     private static final Class<?>[] elem_cls = {
         byte.class, boolean.class, short.class, int.class, long.class,
@@ -643,6 +467,16 @@ public final class Lang
         try { sub_cls.asSubclass(super_cls); return true; }
         catch(Exception e) { return false; }
     }
+    
+    public static String code_root_path(Class cls) {
+        String path = cls.getProtectionDomain().getCodeSource().getLocation().getFile();
+        return path.replace('/', File.separatorChar);
+    }
+    
+    public static String class_path(Class cls) {
+        return code_root_path(cls) + cls.getName().replace('.', File.separatorChar);
+    }
+    
     public static String to_detail_String(Class<?> cls)  {
         StringBuilder sb = new StringBuilder(1024);
         sb.append("Class - ").append(cls.getName()).append("{\n");
@@ -659,19 +493,17 @@ public final class Lang
         StringBuilder sb = new StringBuilder(1024);
         sb.append("Class - ").append(cls.getName()).append("{\n");
         
-        Collection<Field> fields = Lang.getExtensiveFields(cls);
         sb.append("Fields:\n");
         Class<?>[] interfs = null;
-        for(Field field : fields) {
+        for(Field field : Lang.getExtensiveFields(cls)) {
             sb.append(field.toGenericString());
             interfs = field.getType().getInterfaces();
             if(interfs != null) sb.append(Arrays.toString(interfs));
             sb.append('\n');
         }
         
-        Method[] methods = cls.getDeclaredMethods();
         sb.append("\nFunctions\n");
-        for (Method m : methods) sb.append(m.toGenericString()).append('\n');
+        for (Method m : cls.getDeclaredMethods()) sb.append(m.toGenericString()).append('\n');
         sb.append(" }");
         return sb.toString();
     }
@@ -1029,6 +861,182 @@ public final class Lang
         Lang.makeClassSetNeat(set, DEF_CLL);
     }
     //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="Init-State">
+    private static Set<Class> ELEMENT_TYPE;
+    private static Set<Class> ELEMENT_VECTOR_TYPE;
+    private static Set<Class> ELEMENT_MATRIX_TYPE;
+    private static Map<Class, String> CLASS_NAME_MAP;
+    private static Map<String, Class> NAME_CLASS_MAP;
+    
+    private synchronized static void init_ClassMapping() {
+        ELEMENT_TYPE = new HashSet<>();
+        ELEMENT_VECTOR_TYPE = new HashSet<>();
+        ELEMENT_MATRIX_TYPE = new HashSet<>();
+        CLASS_NAME_MAP = new HashMap<>();
+        NAME_CLASS_MAP = new HashMap<>();
+        
+        //for element data type-------------------------------------------------
+        Class[] cls = Lang.elem_class();
+        String[] name = Lang.elem_class_name();
+        for(int i=0; i<cls.length; i++) {
+            ELEMENT_TYPE.add(cls[i]);
+            CLASS_NAME_MAP.put(cls[i], name[i]);
+            NAME_CLASS_MAP.put(name[i], cls[i]);
+        }
+        
+        //for element vector-----------------------------------------------------
+        cls = Lang.elem_array_class();
+        name = Lang.elem_array_class_name();
+        for(int i=0; i<cls.length; i++)  {
+            ELEMENT_VECTOR_TYPE.add(cls[i]);
+            CLASS_NAME_MAP.put(cls[i], name[i]);
+            NAME_CLASS_MAP.put(name[i], cls[i]);
+        }
+        
+        //for element matrix----------------------------------------------------
+        cls = Lang.elem_mat_class();
+        name = Lang.elem_mat_class_name();
+        for(int i=0; i<cls.length; i++)  {
+            ELEMENT_MATRIX_TYPE.add(cls[i]);
+            CLASS_NAME_MAP.put(cls[i], name[i]);
+            NAME_CLASS_MAP.put(name[i], cls[i]);
+        }
+    }
+
+    private static HashMap<Class,Converter> CLASS_CONVERTER_MAP;
+    private static HashMap<String,Converter> NAME_CONVERTER_MAP;  
+    private synchronized static void init_Converter() {
+        CLASS_CONVERTER_MAP = new HashMap<>();
+        NAME_CONVERTER_MAP = new HashMap<>();
+        
+        //for elemnt converter--------------------------------------------------
+        Converter[] converter = new Converter[]{
+            byteConverter, booleanConverter, shortConverter, intConverter, longConverter,
+            floatConverter, doubleConverter,
+            stringConverter, clazzConverter,
+            booleanConverter, byteConverter, shortConverter, intConverter, longConverter,
+            floatConverter, doubleConverter
+        };
+         
+        Class[] cls = Lang.elem_class();
+        String[] name = Lang.elem_class_name();
+        for(int i=0; i<cls.length; i++)  {
+            CLASS_CONVERTER_MAP.put(cls[i], converter[i]);
+            NAME_CONVERTER_MAP.put(name[i], converter[i]);
+        }
+        
+        //for vector converter--------------------------------------------------
+        converter = new Converter[]{
+            byteVectorConverter, booleanVectorConverter, shortVectorConverter, intVectorConverter, longVectorConverter,
+            floatVectorConverter, doubleVectorConverter,
+            stringVectorConverter,
+            nBooleanVectorConverter, nByteVectorConverter, nShortVectorConverter, nIntVectorConverter, nLongVectorConverter,
+            nFloatVectorConverter, nDoubleVectorConverter
+        };
+        
+        cls = Lang.elem_array_class();
+        name = Lang.elem_array_class_name();
+        for(int i=0; i<cls.length; i++)   {
+            CLASS_CONVERTER_MAP.put(cls[i], converter[i]);
+            NAME_CONVERTER_MAP.put(name[i], converter[i]);
+        }
+        
+        //for matrix converter--------------------------------------------------
+        converter=new Converter[] {
+            byteMatrixConverter, booleanMatrixConverter, shortMatrixConverter, intMatrixConverter, longMatrixConverter,
+            floatMatrixConverter, doubleMatrixConverter,
+            stringMatrixConverter,
+            nBooleanMatrixConverter, nByteMatrixConverter, nShortMatrixConverter, nIntMatrixConverter, nLongMatrixConverter,
+            nFloatMatrixConverter, nDoubleMatrixConverter
+        };
+        
+        cls = Lang.elem_mat_class();
+        name = Lang.elem_mat_class_name();
+        for(int i=0; i<cls.length; i++)  {
+            CLASS_CONVERTER_MAP.put(cls[i], converter[i]);
+            NAME_CONVERTER_MAP.put(name[i], converter[i]);
+        }
+    }
+
+    private static boolean TOSTRING_INIT = false;
+    private static HashMap<Class, Stringer> CLASS_STRINGER_MAP;
+    public synchronized static void init_toString()  {
+        if(TOSTRING_INIT)  { System.out.println("z.util.Lang-Stringer has been initialized, don't call this function repeatedly"); return; }
+        CLASS_STRINGER_MAP = new HashMap<>();
+        
+        //for vector Stringer---------------------------------------------------
+        Stringer[] stringer = new Stringer[]{
+            booleanVectorStringer, byteVectorStringer, shortVectorStringer, intVectorStringer, longVectorStringer,
+            floatVectorStringer, doubleVectorStringer
+        };
+        Class[] cls = Lang.elem_array_class();
+        for(int i=0; i<stringer.length; i++) CLASS_STRINGER_MAP.put(cls[i], stringer[i]);
+
+        //for matrix Stringer---------------------------------------------------
+        stringer = new Stringer[]{
+            booleanMatrixStringer, byteMatrixStringer, shortMatrixStringer, intMatrixStringer, longMatrixStringer,
+            floatMatrixStringer, doubleMatrixStringer
+        };
+        cls = Lang.elem_mat_class();
+        for(int i=0; i<stringer.length; i++) CLASS_STRINGER_MAP.put(cls[i], stringer[i]);
+        TOSTRING_INIT = true;
+    }
+    public synchronized static void cleanup_toString() {
+        if(!TOSTRING_INIT) { System.out.println("z.util.Lang-Stringer has been cleaned up, don't call this function repeatedly"); return; }
+        CLASS_STRINGER_MAP.clear();
+        CLASS_STRINGER_MAP = null;
+        TOSTRING_INIT = false;
+    }
+    
+    private static boolean PRINT_INIT = false;
+    private static HashMap<Class, Printer> CLASS_PRINTER_MAP;
+    public synchronized static void init_Print() {
+        if(PRINT_INIT) { System.out.println("z.util.Lang-Printer has been initialized, don't call this function repeatedly"); return; }
+        CLASS_PRINTER_MAP = new HashMap<>();
+        
+        //for vector Stringer---------------------------------------------------
+        Printer[] printer = new Printer[]{
+            booleanVectorPrinter, byteVectorPrinter, shortVectorPrinter, intVectorPrinter, longVectorPrinter,
+            floatVectorPrinter, doubleVectorPrinter
+        };
+        Class[] cls = Lang.elem_array_class();
+        for (int i=0; i<printer.length; i++) CLASS_PRINTER_MAP.put(cls[i], printer[i]);
+
+        //for matrix Stringer---------------------------------------------------
+        printer = new Printer[]{
+            booleanMatrixPrinter, byteMatrixPrinter, shortMatrixPrinter, intMatrixPrinter, longMatrixPrinter,
+            floatMatrixPrinter, doubleMatrixPrinter};
+        cls = Lang.elem_mat_class();
+        for (int i=0; i<printer.length; i++) CLASS_PRINTER_MAP.put(cls[i], printer[i]);
+        
+        PRINT_INIT = true;
+    }
+    public synchronized static void cleanup_print() {
+        if(!PRINT_INIT)  { System.out.println("z.util.Lang-Printer has been initialized, don't call this function repeatedly"); return; }
+        CLASS_PRINTER_MAP.clear();
+        CLASS_PRINTER_MAP = null;
+        PRINT_INIT = false;
+    }
+    
+    private static final String TOSTRING_INIT_CONF = "lang.toString.init";
+    private static final String PRINT_INIT_CONF = "lang.print.init";
+    
+    static {
+        try {
+            Lang.init_ClassMapping();
+            Lang.init_Converter();
+            
+            Meta mt = Meta.valueOf("z/util/lang/conf/zlang-site.xml", null, "configuration");
+            if (mt.getValue(TOSTRING_INIT_CONF)) Lang.init_toString();
+            if (mt.getValue(PRINT_INIT_CONF))    Lang.init_Print();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Fail to init z.util.lang.Lang");
+        }
+    }
+    //</editor-fold>
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Clone-Function">
@@ -1193,9 +1201,7 @@ public final class Lang
     public static synchronized void setDefaultPrintStream(PrintStream out) {DEF_OUT=out;}
     public static PrintStream getDefaultPrintStream(){return DEF_OUT;}
     
-    @Passed
-    public static String printerDetail()
-    {
+    public static String printerDetail() {
         StringBuilder sb=new StringBuilder();
         
         sb.append("Map: class->Printer = {");
@@ -1245,6 +1251,7 @@ public final class Lang
     private static Field StringBuilder_value;
     private static Field String_value;
     static {
+        if (JDK_version.compareTo("1.8") >= 0 && JDK_version.length() >= "1.8".length())
         try {
             Class cls = StringBuilder.class.getSuperclass();
             StringBuilder_value = cls.getDeclaredField("value");

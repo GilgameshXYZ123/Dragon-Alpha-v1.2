@@ -17,9 +17,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Relu_BernouliMul extends SimpleInplaceFunction
-        implements Train2Eval
-{
+public class Relu_BernouliMul extends SimpleInplaceFunction implements Train2Eval {
     private static final long serialVersionUID = 562781240330001L;
     
     protected float p;//possibility of positive case

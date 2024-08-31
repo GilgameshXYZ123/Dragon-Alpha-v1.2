@@ -7,7 +7,7 @@ using namespace std;
 #include "test.cuh"
 
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 #ifndef JNI_POOL2D_MAX
 #define JNI_POOL2D_MAX
@@ -21,8 +21,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1pool2D_pool2D_1
 	jint N, jint IC,
 	jint sh, jint sw, jint ph, jint pw)
 {
-	jlong streams[MAX_STREAM_SIZE];
-	env->GetLongArrayRegion(streamArray, 0, length, streams);
+	jlong streams[MAX_STREAM_SIZE]; env->GetLongArrayRegion(streamArray, 0, length, streams);
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
 
@@ -33,6 +32,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1pool2D_pool2D_1
 		dY, OH, OW, 
 		N, IC, 
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -56,6 +56,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1pool2D_pool2D_1
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
 	int *dIndex = (int*)(intptr_t)dIndex_address;
+
 	int index = 0;
 	__pool2D_max_indexed(streams, index, length, 
 		dX, IH, IW, 
@@ -63,6 +64,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1pool2D_pool2D_1
 		dY, dIndex, OH, OW, 
 		N, IC, 
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -81,10 +83,10 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1pool2D_pool2D_1
 	jint N, jint IC,
 	jint sh, jint sw, jint ph, jint pw)
 {
-	jlong streams[MAX_STREAM_SIZE];
-	env->GetLongArrayRegion(streamArray, 0, length, streams);
+	jlong streams[MAX_STREAM_SIZE]; env->GetLongArrayRegion(streamArray, 0, length, streams);
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
+
 	int index = 0;
 	__pool2D_avg(streams, index, length, 
 		dX, IH, IW,
@@ -92,6 +94,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1pool2D_pool2D_1
 		dY, OH, OW,
 		N, IC,
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -111,10 +114,10 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1pool2D_pool2D_1
 	jint N, jint IC, 
 	jint sh, jint sw, jint ph, jint pw)
 {
-	jlong streams[MAX_STREAM_SIZE];
-	env->GetLongArrayRegion(streamArray, 0, length, streams);
+	jlong streams[MAX_STREAM_SIZE]; env->GetLongArrayRegion(streamArray, 0, length, streams);
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
+
 	int index = 0;
 	__pool2D_avg_ip(streams, index, length,
 		dX, IH, IW,
@@ -122,6 +125,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1pool2D_pool2D_1
 		dY, OH, OW,
 		N, IC,
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif

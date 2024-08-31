@@ -14,7 +14,7 @@
 //(2) N % 4 != 0
 //(3) K = BK: AK % 4 == 0, BK % 4 != 0, AK >= BK, AK = (BK + 3) >> 2 << 2
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 #ifndef BATCH_MATMUL
 #define BATCH_MATMUL

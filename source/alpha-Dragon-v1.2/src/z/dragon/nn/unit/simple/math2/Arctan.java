@@ -16,8 +16,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Arctan extends SimpleInplaceFunction
-{
+public class Arctan extends SimpleInplaceFunction {
     private static final long serialVersionUID = 562781240320001L;
     
     protected float alpha;

@@ -11,26 +11,24 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 
 /**
- *
+ * ArrayList(int64).
  * @author Gilgamesh
  */
-public class ArrayList_int64 implements Serializable
-{
+public class ArrayList_int64 implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     public static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
     public static final int DEFAULT_CAPACITY = 10;
 
     private static final long[] EMPTY_ELEMENTDATA = {};
     private static final long[] DEFAULT_CAPACITY_EMPTY_ELEMENTDATA = {};
-
+    
+    public ArrayList_int64() { this.element = DEFAULT_CAPACITY_EMPTY_ELEMENTDATA; }
     public ArrayList_int64(int init_capacity) {
         if(init_capacity < 0) throw new IllegalArgumentException("Illegal Capacity: "+ init_capacity);
         this.element = (init_capacity > 0 ? 
                 new long[init_capacity] : 
                 EMPTY_ELEMENTDATA);
-    }
-
-    public ArrayList_int64() {
-        this.element = DEFAULT_CAPACITY_EMPTY_ELEMENTDATA;
     }
     
     //<editor-fold defaultstate="collapsed" desc="member-params & Basic-Functions">
@@ -51,12 +49,11 @@ public class ArrayList_int64 implements Serializable
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="inner-code">
-    private String outOfBoundsMsg(int index) { return "Index: "+index+", Size: "+size; }
+    private String outOfBoundsMsg(int index) { return "Index: " + index + ", Size: " + size; }
     
     public void ensureCapacity(int min_capacity) {
         int minExpand = (element != DEFAULT_CAPACITY_EMPTY_ELEMENTDATA) ? 
-                0: 
-                DEFAULT_CAPACITY; 
+                0 : DEFAULT_CAPACITY; 
         if (min_capacity > minExpand) ensureExplicitCapacity(min_capacity);
     }
 
@@ -82,7 +79,6 @@ public class ArrayList_int64 implements Serializable
         int new_capacity = old_capacity + (old_capacity >> 1);//1.5 * old_capacity
         if (new_capacity - min_capacity < 0) new_capacity = min_capacity;//new_capcity >= min_capacity
         if (new_capacity - MAX_ARRAY_SIZE > 0) new_capacity = hugeCapacity(min_capacity);
-        
         element = Arrays.copyOf(element, new_capacity);
     }
 
@@ -130,7 +126,7 @@ public class ArrayList_int64 implements Serializable
         return true;
     }
     
-     public void add(int index, long element)  {
+    public void add(int index, long element)  {
         if(index > size || index < 0) throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
         ensureCapacityInternal(size + 1);// Increments modCount!!
         System.arraycopy(this.element, index, this.element, index + 1, size - index);
@@ -140,22 +136,18 @@ public class ArrayList_int64 implements Serializable
      
     public long remove(int index) {
         if(index >= size) throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
-
         long old_value = element[index];
 
         int numMoved = size - index - 1;
         if (numMoved > 0) System.arraycopy(element, index+1, element, index, numMoved);
-        
         size--;
+        
         return old_value;
     }
     
     public boolean remove(long value) {
         for (int index = 0; index < size; index++)
-            if (value == element[index]) {
-                fastRemove(index);
-                return true;
-            }
+            if (value == element[index]) { fastRemove(index); return true; }
         return false;
     }
     
@@ -164,6 +156,16 @@ public class ArrayList_int64 implements Serializable
         if (numMoved > 0)
             System.arraycopy(element, index+1, element, index, numMoved);
         size--;
+    }
+    
+    public boolean addAll(ArrayList_int64 list) {
+        if(list == null || list.isEmpty()) return false;
+        int total_num = list.size;
+        
+        ensureCapacityInternal(size + total_num);  // Increments modCount
+        System.arraycopy(list.element, 0, element, size, total_num);
+        size += total_num;
+        return true;
     }
     
     public boolean addAll(long[] values) {
@@ -205,8 +207,7 @@ public class ArrayList_int64 implements Serializable
 
         @Override
         public long next() {
-            int i = cursor;
-            if (i >= size) throw new NoSuchElementException();
+            int i = cursor; if (i >= size) throw new NoSuchElementException();
             
             long[] elementData = ArrayList_int64.this.element;
             if (i >= elementData.length) throw new ConcurrentModificationException();
@@ -217,7 +218,6 @@ public class ArrayList_int64 implements Serializable
 
         public void remove() {
             if (lastRet < 0) throw new IllegalStateException();
-
             try {
                 ArrayList_int64.this.remove(lastRet);
                 cursor = lastRet;

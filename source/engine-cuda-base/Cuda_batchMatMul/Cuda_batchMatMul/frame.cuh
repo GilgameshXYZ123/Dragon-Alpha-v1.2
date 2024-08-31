@@ -12,6 +12,6 @@
 #include <cmath>
 #include <ctime>
 
-#define COMPLIE 1
+#define COMPILE 1
 
 #endif

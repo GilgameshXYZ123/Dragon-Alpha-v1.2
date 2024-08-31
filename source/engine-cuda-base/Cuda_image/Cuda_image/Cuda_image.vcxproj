@@ -80,13 +80,17 @@
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <PtxAsOptionV>true</PtxAsOptionV>
+      <CodeGeneration>compute_86,sm_86</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <CudaCompile Include="A.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="img_dualLinear2_normalize2D_center.cuh" />
+    <ClInclude Include="img_dualLinear2_normalize2D_row.cuh" />
     <ClInclude Include="img_quadratic2D.cuh" />
+    <ClInclude Include="img_threshold.cuh" />
     <ClInclude Include="img_transpose2D.cuh" />
     <ClInclude Include="test_extract_3channels.cuh" />
     <ClInclude Include="test_pad_trim.cuh" />

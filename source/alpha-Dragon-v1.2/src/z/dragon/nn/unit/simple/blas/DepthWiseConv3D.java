@@ -18,8 +18,7 @@ import z.dragon.nn.unit.simple.SimpleUnit;
  *
  * @author Gilgamesh
  */
-public class DepthWiseConv3D extends SimpleUnit 
-{
+public class DepthWiseConv3D extends SimpleUnit {
     private static final long serialVersionUID = 962781240122221L;
     
     protected int OC;

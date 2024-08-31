@@ -79,21 +79,21 @@ public final class Cuda_pool2D
      * (2) GN >= 4, GN % 4 == 0
      * (3) GM >= 4. GM % 4 == 0
      * (4) GK >= 8, GK % 4 == 0
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[asynchronized]------------
      * [IH, IW] = 31, [FH, FW] = 3, [N] = 8, [sh, sw] = 1, 2, [ph, pw] = 1
      * for ic from 1 to 128: correct
-     * 
+     *
      * [IH, IW] = 62, [FH, FW] = 4, [N] = 8, [sh, sw] = 2, [ph, pw] = 1
      * (1) IC = 128: Size = 0.029327, Time = 0.260000 msec, Performance = 121.115562 GFlop/s
      * (2) IC = 192: Size = 0.043991, Time = 0.380000 msec, Performance = 124.302818 GFlop/s
      * (3) IC = 248: Size = 0.056822, Time = 0.593000 msec, Performance = 102.886955 GFlop/s
      * (4) IC = 252: Size = 0.057738, Time = 0.680000 msec, Performance =  91.170624 GFlop/s
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
      * [IH, IW] = 31, [FH, FW] = 3, [N] = 8, [sh, sw] = 1, 2, [ph, pw] = 1
      * for ic from 1 to 128: correct
-     * 
+     *
      * [IH, IW] = 62, [FH, FW] = 4, [N] = 8, [sh, sw] = 2, [ph, pw] = 1
      * (1) IC = 128: Size = 0.029327, Time = 0.330000 msec, Performance =  95.424370 GFlop/s
      * (2) IC = 192: Size = 0.043991, Time = 0.458000 msec, Performance = 103.133339 GFlop/s
@@ -103,9 +103,10 @@ public final class Cuda_pool2D
      * (6) IC = 252: Size = 0.057738, Time = 0.760000 msec, Performance =  81.573723 GFlop/s
      * (7) IC = 255: Size = 0.058426, Time = 0.580000 msec, Performance = 108.162201 GFlop/s
      * </pre>
+     *
      * @param streamArray
      * @param length
-     * @param dX_address 
+     * @param dX_address
      * @param IH dim size on Y axis of X
      * @param IW dim size on X axis of X
      * @param FH
@@ -113,7 +114,7 @@ public final class Cuda_pool2D
      * @param dY_address
      * @param OH dim size on Y axis of Y
      * @param OW dim size on Y axis of Y
-     * @param N batch size 
+     * @param N batch size
      * @param IC input channel num
      * @param sh step on y axis
      * @param sw step on x axis
@@ -127,6 +128,7 @@ public final class Cuda_pool2D
             long dY_address, int OH, int OW,
             int N, int IC,
             int sh, int sw, int ph, int pw);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="pool2D max indexed">
     /**
@@ -137,21 +139,21 @@ public final class Cuda_pool2D
      * (2) GN >= 4, GN % 4 == 0
      * (3) GM >= 4. GM % 4 == 0
      * (4) GK >= 8, GK % 4 == 0
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[asynchronized]------------
      * [IH, IW] = 31, [FH, FW] = 3, [N] = 8, [sh, sw] = 1, 2, [ph, pw] = 1
      * for ic from 1 to 128: correct
-     * 
+     *
      * [IH, IW] = 62, [FH, FW] = 4, [N] = 8, [sh, sw] = 2, [ph, pw] = 1
      * (1) IC = 128: Size = 0.029327, Time = 0.260000 msec, Performance = 121.115562 GFlop/s
      * (2) IC = 192: Size = 0.043991, Time = 0.380000 msec, Performance = 124.302818 GFlop/s
      * (3) IC = 248: Size = 0.056822, Time = 0.593000 msec, Performance = 102.886955 GFlop/s
      * (4) IC = 252: Size = 0.057738, Time = 0.680000 msec, Performance =  91.170624 GFlop/s
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
      * [IH, IW] = 31, [FH, FW] = 3, [N] = 8, [sh, sw] = 1, 2, [ph, pw] = 1
      * for ic from 1 to 128: correct
-     * 
+     *
      * [IH, IW] = 62, [FH, FW] = 4, [N] = 8, [sh, sw] = 2, [ph, pw] = 1
      * (1) IC = 128: Size = 0.029327, Time = 0.330000 msec, Performance =  95.424370 GFlop/s
      * (2) IC = 192: Size = 0.043991, Time = 0.458000 msec, Performance = 103.133339 GFlop/s
@@ -161,9 +163,10 @@ public final class Cuda_pool2D
      * (6) IC = 252: Size = 0.057738, Time = 0.760000 msec, Performance =  81.573723 GFlop/s
      * (7) IC = 255: Size = 0.058426, Time = 0.580000 msec, Performance = 108.162201 GFlop/s
      * </pre>
+     *
      * @param streamArray
      * @param length
-     * @param dX_address 
+     * @param dX_address
      * @param IH dim size on Y axis of X
      * @param IW dim size on X axis of X
      * @param FH
@@ -172,7 +175,7 @@ public final class Cuda_pool2D
      * @param dIndex_address
      * @param OH dim size on Y axis of Y
      * @param OW dim size on Y axis of Y
-     * @param N batch size 
+     * @param N batch size
      * @param IC input channel num
      * @param sh step on y axis
      * @param sw step on x axis
@@ -187,7 +190,7 @@ public final class Cuda_pool2D
             int N, int IC,
             int sh, int sw, int ph, int pw);
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="pool2D_avg">
     /**
      * <pre>
@@ -196,11 +199,11 @@ public final class Cuda_pool2D
      * (2) GN >= 4, GN % 4 == 0
      * (3) GM >= 4. GM % 4 == 0
      * (4) GK >= 8, GK % 4 == 0
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[asynchronized]------------
      * [IH, IW] = 31, [FH, FW] = 3, [N] = 8, [sh, sw] = 1, 2, [ph, pw] = 1
      * for IC from 1 to 128: correct
-     * 
+     *
      * [IH, IW] = 62, [FH, FW] = 4, [N] = 8, [sh, sw] = 2, [ph, pw] = 1
      * (1) IC = 128: Size = 0.029327, Time = 0.270000 msec, Performance = 116.629791 GFlop/s
      * (2) IC = 192: Size = 0.043991, Time = 0.390000 msec, Performance = 121.115570 GFlop/s
@@ -209,17 +212,18 @@ public final class Cuda_pool2D
      * (5) IC = 248: Size = 0.056822, Time = 0.578000 msec, Performance = 105.557030 GFlop/s
      * (6) IC = 252: Size = 0.057738, Time = 0.670000 msec, Performance =  92.531387 GFlop/s
      * (7) IC = 255: Size = 0.058426, Time = 0.525000 msec, Performance = 119.493477 GFlop/s
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
      * [IH, IW] = 31, [FH, FW] = 3, [N] = 8, [sh, sw] = 1, 2, [ph, pw] = 1
      * for IC from 1 to 128: correct
-     * 
+     *
      * [IH, IW] = 62, [FH, FW] = 4, [N] = 8, [sh, sw] = 2, [ph, pw] = 1
      * for ic from 1 to 128: correct
      * (1) IC = 128: Size = 0.029327, Time = 0.391000 msec, Performance = 80.537201 GFlop/s
      * (2) IC = 192: Size = 0.043991, Time = 0.544000 msec, Performance = 86.829163 GFlop/s
      * (3) IC = 252: Size = 0.057738, Time = 0.893000 msec, Performance = 69.424446 GFlop/s
      * </pre>
+     *
      * @param streamArray
      * @param length
      * @param dX_address
@@ -230,7 +234,7 @@ public final class Cuda_pool2D
      * @param dY_address
      * @param OH dim size on Y axis of Y
      * @param OW dim size on Y axis of Y
-     * @param N batch size 
+     * @param N batch size
      * @param IC input channel num
      * @param sh step on y axis
      * @param sw step on x axis
@@ -244,6 +248,7 @@ public final class Cuda_pool2D
             long dY_address, int OH, int OW,
             int N, int IC,
             int sh, int sw, int ph, int pw);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="pool2D_avg_ignore_padding">
     /**
@@ -253,11 +258,11 @@ public final class Cuda_pool2D
      * (2) GN >= 4, GN % 4 == 0
      * (3) GM >= 4. GM % 4 == 0
      * (4) GK >= 8, GK % 4 == 0
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[asynchronized]------------
      * [IH, IW] = 31, [FH, FW] = 3, [N] = 8, [sh, sw] = 1, 2, [ph, pw] = 1
      * for IC from 1 to 128: correct
-     * 
+     *
      * [IH, IW] = 62, [FH, FW] = 4, [N] = 8, [sh, sw] = 2, [ph, pw] = 1
      * (1) IC = 128: Size = 0.029327, Time = 0.270000 msec, Performance = 116.629791 GFlop/s
      * (2) IC = 192: Size = 0.043991, Time = 0.390000 msec, Performance = 121.115570 GFlop/s
@@ -266,17 +271,18 @@ public final class Cuda_pool2D
      * (5) IC = 248: Size = 0.056822, Time = 0.578000 msec, Performance = 105.557030 GFlop/s
      * (6) IC = 252: Size = 0.057738, Time = 0.670000 msec, Performance =  92.531387 GFlop/s
      * (7) IC = 255: Size = 0.058426, Time = 0.525000 msec, Performance = 119.493477 GFlop/s
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
      * [IH, IW] = 31, [FH, FW] = 3, [N] = 8, [sh, sw] = 1, 2, [ph, pw] = 1
      * for IC from 1 to 128: correct
-     * 
+     *
      * [IH, IW] = 62, [FH, FW] = 4, [N] = 8, [sh, sw] = 2, [ph, pw] = 1
      * for ic from 1 to 128: correct
      * (1) IC = 128: Size = 0.029327, Time = 0.391000 msec, Performance = 80.537201 GFlop/s
      * (2) IC = 192: Size = 0.043991, Time = 0.544000 msec, Performance = 86.829163 GFlop/s
      * (3) IC = 252: Size = 0.057738, Time = 0.893000 msec, Performance = 69.424446 GFlop/s
      * </pre>
+     *
      * @param streamArray
      * @param length
      * @param dX_address
@@ -287,7 +293,7 @@ public final class Cuda_pool2D
      * @param dY_address
      * @param OH dim size on Y axis of Y
      * @param OW dim size on Y axis of Y
-     * @param N batch size 
+     * @param N batch size
      * @param IC input channel num
      * @param sh step on y axis
      * @param sw step on x axis
@@ -302,7 +308,7 @@ public final class Cuda_pool2D
             int N, int IC,
             int sh, int sw, int ph, int pw);
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="Document">
     /**
      * <pre>

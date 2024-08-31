@@ -9,7 +9,7 @@ package z.dragon.engine.cuda.impl;
  *
  * @author Gilgamesh
  */
-public interface CudaStreamCallback 
+public interface CudaStreamCallback
 {
     public void callback(long stream_address, int error_type);
 }

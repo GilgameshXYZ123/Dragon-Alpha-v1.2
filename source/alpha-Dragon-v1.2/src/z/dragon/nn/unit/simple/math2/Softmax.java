@@ -17,8 +17,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Softmax extends SimpleInplaceFunction
-{
+public class Softmax extends SimpleInplaceFunction {
     private static final long serialVersionUID = 1L;
     
     protected int features;

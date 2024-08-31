@@ -26,13 +26,12 @@ import z.util.lang.SimpleTimer;
  */
 public class train 
 {
-    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.1"); }
+    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2"); }
     static Mempool memp = alpha.engine.memp1(alpha.MEM_1GB * 8);
     static Engine eg = alpha.engine.cuda_float32(0, memp, alpha.MEM_1MB * 1024);
     static {
         eg.kaiming_fan_mode = Engine.FanMode.fan_in_out;
         CudaFloat32EngineBase cu32 = (CudaFloat32EngineBase) eg.engineBase();
-//        cu32.conv3D_useTexture(true);
     }
     
     static int batch_size = 512;//512;
@@ -88,7 +87,7 @@ public class train
             //25 epochs for Adam
             //50 epochs for SGD
             //30 epcohs for SGDMN
-            training(25);
+            training(5);
         }
         catch(IOException e) {
             e.printStackTrace();

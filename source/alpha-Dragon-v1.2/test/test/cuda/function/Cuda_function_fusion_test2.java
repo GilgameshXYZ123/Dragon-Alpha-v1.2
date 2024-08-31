@@ -17,7 +17,7 @@ import z.util.math.vector.Vector;
  */
 public class Cuda_function_fusion_test2
 {
-    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.1");}
+    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2");}
     static Engine eg = alpha.engine.cuda_float32(0, alpha.engine.memp1());
     static final ExRandom exr = new ExRandom();
     
@@ -43,13 +43,35 @@ public class Cuda_function_fusion_test2
         float k = exr.nextFloat();
         
         //GPU-------------------------------------------------------------------
-        Tensor tY1 = eg.linear2_leakyRelu(false, tX1, tX2, alpha, beta, gamma, k);
+//        Tensor tY1 = eg.linear2_leakyRelu(false, tX1, tX2, alpha, beta, gamma, k);
+//        Tensor[] grads1 = eg.linear2_leakyRelu_deltaX_v1(false, tdeltaY, tY1, alpha, beta, k);
+//        Tensor[] grads2 = eg.linear2_leakyRelu_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma, k);
+//        Tensor[] grads3 = eg.linear_2out(false, eg.leakyRelu_deltaX_v1(false, tdeltaY, tY1, k), alpha, 0, beta, 0);
         
-        Tensor[] grads1 = eg.linear2_leakyRelu_deltaX_v1(false, tdeltaY, tY1, alpha, beta, k);
-        Tensor[] grads2 = eg.linear2_leakyRelu_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma, k);
-        Tensor[] grads3 = eg.linear_2out(false, 
-                eg.leakyRelu_deltaX_v1(false, tdeltaY, tY1, k), 
-                alpha, 0, beta, 0);
+        Tensor tY1 = eg.linear2_elu(false, tX1, tX2, alpha, beta, gamma, alpha2, k);
+        Tensor[] grads1 = eg.linear2_elu_deltaX_v1(false, tdeltaY, tY1, alpha, beta, alpha2, k);
+        Tensor[] grads2 = eg.linear2_elu_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma,  alpha2, k);
+        Tensor[] grads3 = eg.linear_2out(false, eg.elu_deltaX_v1(false, tdeltaY, tY1, alpha2, k), alpha, 0, beta, 0);
+
+//        Tensor tY1 = eg.linear2_softplus(false, tX1, tX2, alpha, beta, gamma);
+//        Tensor[] grads1 = eg.linear2_softplus_deltaX_v1(false, tdeltaY, tY1, alpha, beta);
+//        Tensor[] grads2 = eg.linear2_softplus_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma);
+//        Tensor[] grads3 = eg.linear_2out(false, eg.softplus_deltaX_v1(false, tdeltaY, tY1), alpha, 0, beta, 0);
+
+//        Tensor tY1 = eg.linear2(false, tX1, tX2, alpha, beta, gamma);
+//        Tensor[] grads1 = eg.linear2_gelu_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma);
+//        Tensor[] grads2 = eg.linear2_gelu_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma);
+//        Tensor[] grads3 = eg.linear_2out(false, eg.gelu_deltaX(false, tdeltaY, tY1), alpha, 0, beta, 0);
+
+//        Tensor tY1 = eg.linear2_sigmoid(false, tX1, tX2, alpha, beta, gamma);
+//        Tensor[] grads1 = eg.linear2_sigmoid_deltaX_v1(false, tdeltaY, tY1, alpha, beta);
+//        Tensor[] grads2 = eg.linear2_sigmoid_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma);
+//        Tensor[] grads3 = eg.linear_2out(false, eg.sigmoid_deltaX_v1(false, tdeltaY, tY1), alpha, 0, beta, 0);
+
+//        Tensor tY1 = eg.linear2_tanh(false, tX1, tX2, alpha, beta, gamma);
+//        Tensor[] grads1 = eg.linear2_tanh_deltaX_v1(false, tdeltaY, tY1, alpha, beta);
+//        Tensor[] grads2 = eg.linear2_tanh_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma);
+//        Tensor[] grads3 = eg.linear_2out(false, eg.tanh_deltaX_v1(false, tdeltaY, tY1), alpha, 0, beta, 0);
         
         Tensor dA1 = grads1[0], dB1 = grads1[1];
         Tensor dA2 = grads2[0], dB2 = grads2[1];
@@ -89,8 +111,7 @@ public class Cuda_function_fusion_test2
         System.gc();
     }
     
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         Vector.PRINT_DIFFERENT = true;
         
         for(int h=1; h<=10; h++)

@@ -14,8 +14,9 @@ import z.dragon.nn.unit.dual.DualFunction;
  *
  * @author Gilgamesh
  */
-public class Linear2_Relu extends DualFunction 
-{
+public class Linear2_Relu extends DualFunction {
+    private static final long serialVersionUID = 1L;
+    
     protected boolean likeX1;
     protected float alpha, beta, gamma;
     
@@ -47,7 +48,7 @@ public class Linear2_Relu extends DualFunction
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="static class: InlineLinear2_LeakyRelu">
+    //<editor-fold defaultstate="collapsed" desc="static class: InlineLinear2_Relu">
     public static class InlineLinear2_Relu extends DualCore<Linear2_Relu>
     {
         public InlineLinear2_Relu(Linear2_Relu unit) { super(unit); }

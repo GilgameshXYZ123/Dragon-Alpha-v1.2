@@ -13,11 +13,8 @@ import z.dragon.data.TensorIter;
 import z.dragon.dataset.Cifar10;
 import z.dragon.engine.Engine;
 import z.dragon.engine.Tensor;
-import z.dragon.engine.cuda.CudaFloat32EngineBase;
 import z.dragon.engine.memp.Mempool;
 import z.dragon.nn.loss.LossFunction;
-import z.dragon.nn.unit.simple.blas.Conv3D;
-import z.dragon.nn.unit.simple.blas.FullConnect;
 import z.util.math.vector.Vector;
 
 /**
@@ -26,19 +23,19 @@ import z.util.math.vector.Vector;
  */
 public class test 
 {
-    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.1"); }
-    static Mempool memp = alpha.engine.memp3(alpha.MEM_1GB * 6);
+    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2"); }
+    static Mempool memp = alpha.engine.memp2(alpha.MEM_1GB * 6);
     static Engine eg = alpha.engine.cuda_float32(0, memp, alpha.MEM_1MB * 1024);
    
     
-    static int batch_size = 128;
+    static int batch_size = 512;
     public static void test() {
         ResNet18 net = new ResNet18().eval().init(eg).println();
         net.load();
         
         LossFunction loss = alpha.loss.softmax_crossEntropy();
-        DataSet<byte[], Integer> dataset = Cifar10.train();
-//        DataSet<byte[], Integer> dataset = Cifar10.test();
+//        DataSet<byte[], Integer> dataset = Cifar10.train();
+        DataSet<byte[], Integer> dataset = Cifar10.test();
 //        
         int batchIdx = 0;
         double accuracy = 0;

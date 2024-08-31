@@ -36,9 +36,14 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -49,9 +54,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import static z.dragon.alpha.Alpha.alpha;
+import z.dragon.common.int32.ArrayList_int32;
 import z.dragon.engine.Tensor;
 import z.ui.JUI;
 import static z.ui.JUI.jui;
+import z.util.function.Predicate_int32;
+import z.util.lang.Lang;
+import z.util.math.Sort;
 import z.util.math.vector.Vector;
 
 /**
@@ -67,123 +76,18 @@ public final class DragonCV
     public static final DragonCV cv = new DragonCV();
  
     //<editor-fold defaultstate="collapsed" desc="enum: Byte Image Types">
-    /**
-     * <pre> 
-     * 3Byte: (Blue, Green, Red). 
-     * Represents an image with 8-bit RGB clr components, corresponding
- to a Windows-style BGR clr model, with the colors Blue, Green,
- and Red stored in 3 bytes.  There is no alpha.  The image has a
- <code>ComponentColorModel</code>.
- When data with non-opaque alpha is stored
- in an image of this type,
- the clr data must be adjusted to a non-premultiplied form
- and the alpha discarded,
- as described in the
- {@link java.awt.AlphaComposite} documentation.
-     * </pre>
-     */
-    public final int TYPE_3BYTE_BGR = BufferedImage.TYPE_3BYTE_BGR;
-    
-    /**
-     * <pre> 
-     * 4Byte: (Alpha, Blue, Green ,Red). 
-     * Represents an image with 8-bit RGBA clr components with the colors
- Blue, Green, and Red stored in 3 bytes and 1 byte of alpha.  The
- image has a <code>ComponentColorModel</code> with alpha.  The
- clr data in this image is considered not to be premultiplied with
- alpha.  The byte data is interleaved in a single
- byte array in the order A, B, G, R
- from lower to higher byte addresses within each pixel.
- </pre>
-     */
+    public final int TYPE_3BYTE_BGR  = BufferedImage.TYPE_3BYTE_BGR;
     public final int TYPE_4BYTE_ABGR = BufferedImage.TYPE_4BYTE_ABGR;
-    
-    /**
-     * <pre>
-     * 4Byte: (Alpha, Blue, Green, Red). 
-     * The clr data in this image is considered to be premultiplied with alpha.
- Represents an image with 8-bit RGBA clr components with the colors
- Blue, Green, and Red stored in 3 bytes and 1 byte of alpha.  The
- image has a <code>ComponentColorModel</code> with alpha. The clr
- data in this image is considered to be premultiplied with alpha.
- The byte data is interleaved in a single byte array in the order
- A, B, G, R from lower to higher byte addresses within each pixel.
- </pre>
-     */
     public final int TYPE_4BYTE_ABGR_PRE = BufferedImage.TYPE_4BYTE_ABGR_PRE;
-    
-    /**
-     * <pre>
-     *  Represents an indexed byte image.  When this type is used as the
-     * <code>imageType</code> argument to the <code>BufferedImage</code>
-     * constructor that takes an <code>imageType</code> argument
-     * but no <code>ColorModel</code> argument, an
-     * <code>IndexColorModel</code> is created with
- a 256-clr 6/6/6 clr cube palette with the rest of the colors
- from 216-255 populated by grayscale values in the
- default sRGB ColorSpace.
-
- <p> When clr data is stored in an image of this type,
- the closest clr in the colormap is determined
- by the <code>IndexColorModel</code> and the resulting index is stored.
- Approximation and loss of alpha or clr components
- can result, depending on the colors in the
- <code>IndexColorModel</code> colormap.
-     * </pre>
-     */
     public final int TYPE_BYTE_BINARY = BufferedImage.TYPE_BYTE_BINARY;
-    
-    /**
-     * <pre>
-     * Represents a unsigned byte grayscale image, non-indexed.  This
-     * image has a <code>ComponentColorModel</code> with a CS_GRAY
-     * {@link ColorSpace}.
- When data with non-opaque alpha is stored
- in an image of this type,
- the clr data must be adjusted to a non-premultiplied form
- and the alpha discarded,
- as described in the
- {@link java.awt.AlphaComposite} documentation.
-     * </pre>
-     */
     public final int TYPE_BYTE_GRAY = BufferedImage.TYPE_BYTE_GRAY;
-    
-     /**
-     * <pre>
-     * Represents an opaque byte-packed 1, 2, or 4 bit image.  The
-     * image has an {@link IndexColorModel} without alpha.  When this
-     * type is used as the <code>imageType</code> argument to the
-     * <code>BufferedImage</code> constructor that takes an
-     * <code>imageType</code> argument but no <code>ColorModel</code>
-     * argument, a 1-bit image is created with an
-     * <code>IndexColorModel</code> with two colors in the default
-     * sRGB <code>ColorSpace</code>: {0,&nbsp;0,&nbsp;0} and
-     * {255,&nbsp;255,&nbsp;255}.
-     *
-     * <p> Images with 2 or 4 bits per pixel may be constructed via
-     * the <code>BufferedImage</code> constructor that takes a
-     * <code>ColorModel</code> argument by supplying a
-     * <code>ColorModel</code> with an appropriate map size.
-     *
-     * <p> Images with 8 bits per pixel should use the image types
-     * <code>TYPE_BYTE_INDEXED</code> or <code>TYPE_BYTE_GRAY</code>
-     * depending on their <code>ColorModel</code>.
-
-     * <p> When clr data is stored in an image of this type,
- the closest clr in the colormap is determined
- by the <code>IndexColorModel</code> and the resulting index is stored.
- Approximation and loss of alpha or clr components
- can result, depending on the colors in the
- <code>IndexColorModel</code> colormap.
-     * </pre>
-     */
     public static final int TYPE_BYTE_INDEXED = BufferedImage.TYPE_BYTE_INDEXED;
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="function: imageIO">
-    public BufferedImage newBGR(int height, int width) { return new BufferedImage(width, height, TYPE_3BYTE_BGR); }
-    public BufferedImage newABRG(int height, int width) { return new BufferedImage(width, height, TYPE_4BYTE_ABGR); }
-    public BufferedImage newGray(int height, int width) { return new BufferedImage(width, height, TYPE_BYTE_GRAY); }
+    public BufferedImage BGR(int height, int width) { return new BufferedImage(width, height, TYPE_3BYTE_BGR); }
+    public BufferedImage ABRG(int height, int width) { return new BufferedImage(width, height, TYPE_4BYTE_ABGR); }
+    public BufferedImage gray(int height, int width) { return new BufferedImage(width, height, TYPE_BYTE_GRAY); }
     
     public BufferedImage imread(InputStream in) {  try { return ImageIO.read(in); } catch(IOException e) { throw new RuntimeException(e); } }
     public BufferedImage imread(String path) { try { return ImageIO.read(new File(path)); }  catch(IOException e) { throw new RuntimeException(e); } }
@@ -200,12 +104,11 @@ public final class DragonCV
         imwrite(img, format, file);
     }
     //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="function: read HSI raw">
     public byte[] read_raw_bil_dtype12(byte[] bytes) {//[IW, IC, IH]
-        if((bytes.length & 1) != 0) throw new IllegalArgumentException("bytes.length % 2 != 0");
+        if ((bytes.length & 1) != 0) throw new IllegalArgumentException("bytes.length % 2 != 0");
         byte[] pixel = new byte[bytes.length >> 1];
-        for(int i=0; i<pixel.length; i++) {
+        for (int i=0; i<pixel.length; i++) {
             int b0 = bytes[(i << 1)    ] & 0xff;//char -> unsigned char
             int b1 = bytes[(i << 1) + 1] & 0xff;
             pixel[i] = (byte) (((b1 << 8) + b0) >> 4);
@@ -244,7 +147,6 @@ public final class DragonCV
         return pixel;
     }
     //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="function: pixelIO">
     public byte[] read_pixels(String path) { return alpha.fl.to_bytes(path); }
     public byte[] read_pixels(File file) { return alpha.fl.to_bytes(file); }
@@ -381,7 +283,7 @@ public final class DragonCV
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="function: info of image">
+    //<editor-fold defaultstate="collapsed" desc="function: info of group">
     public int channels(BufferedImage img) { return img.getColorModel().getNumComponents(); }
     public int[] dim(BufferedImage img) { return new int[]{ img.getHeight(), img.getWidth(), channels(img) }; }
     
@@ -397,8 +299,7 @@ public final class DragonCV
         return sb.toString();
     }
     //</editor-fold>
-    
-    //<editor-fold defaultstate="collapsed" desc="function: show_frame image">
+    //<editor-fold defaultstate="collapsed" desc="function: show group">
     protected int[] show_last_yx = null;
     protected int[] show_last_hw = null;
     protected int show_move = 0;
@@ -459,6 +360,86 @@ public final class DragonCV
         return frame;
     }
     
+    public JFrame imshow(BufferedImage[] images) { return imshow(images, "Image show"); }
+    public JFrame imshow(BufferedImage[] images, String title) {
+        if(images == null) throw new NullPointerException("images is null");
+
+        JFrame frame = new JFrame(title);
+        JPanel panel = new JPanel(); frame.add(panel);
+        
+        int M = (int) Math.sqrt(images.length); 
+        M = (M + 9) / 10 * 10; if (M >= 20) M = 20;
+        int N = (images.length + M - 1) / M; 
+        
+        panel.setLayout(jui.layout_grid(N, M, 4, 4));
+        
+        int[] Hs = new int[M];
+        int[] Ws = new int[N];
+        for (int i=0; i<images.length; i++) {
+            BufferedImage img = images[i];
+            JLabel label = new JLabel();
+            label.setIcon(new ImageIcon(img));
+            panel.add(label);
+            Hs[i % M] += img.getHeight();
+            Ws[i / M] += img.getWidth();
+        }
+       
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setResizable(false);
+        frame.pack();
+        
+        int height = Vector.maxValue(Hs) + 10 * (N + 1);
+        int width  = Vector.maxValue(Ws) + 7 * (M + 1);
+        frame.setSize(width, height);
+        
+        if(show_last_yx == null) { 
+            frame.setLocationRelativeTo(null);
+            show_last_yx = new int[2];
+            show_last_hw = new int[2];
+        }
+        else {
+            Dimension screen_dim = Toolkit.getDefaultToolkit().getScreenSize();
+            int sh = screen_dim.height, sw = screen_dim.width;
+            int ly = show_last_yx[0], lx = show_last_yx[1];
+            int lh = show_last_hw[0], lw = show_last_hw[1];
+            
+            int moveY = ((show_move & 1) == 0 ? 1 : 0), moveX = 1 - moveY;
+            int y = (ly + lh * moveY) % sh;
+            int x = (lx + lw * moveX) % sw;
+            frame.setLocation(x, y);
+        }
+        
+        show_last_yx[0] = frame.getY(); show_last_hw[0] = frame.getHeight();
+        show_last_yx[1] = frame.getX(); show_last_hw[1] = frame.getWidth();
+        show_move++;
+        
+        frame.setVisible(true);
+        return frame;
+    }
+    public JPanel impanel(BufferedImage[] images, String title) {
+        if(images == null) throw new NullPointerException("images is null");
+
+        JPanel panel = new JPanel();
+        int M = 10, N = (images.length + M - 1) / M; 
+        panel.setLayout(jui.layout_grid(N, M, 4, 4));
+        
+        int[] Hs = new int[M];
+        int[] Ws = new int[N];
+        for (int i=0; i<images.length; i++) {
+            BufferedImage img = images[i];
+            JLabel label = new JLabel();
+            label.setIcon(new ImageIcon(img));
+            panel.add(label);
+            Hs[i % M] += img.getHeight();
+            Ws[i / M] += img.getWidth();
+        }
+       
+        int height = Vector.maxValue(Hs) + 10 * (N + 1);
+        int width  = Vector.maxValue(Ws) + 7 * (M + 1);
+        panel.setSize(width, height);
+        return panel;
+    }
+    
     public JFrame imshow(BufferedImage[][] images) { return imshow(images, "Image show"); }
     public JFrame imshow(BufferedImage[][] images, String title) {
         if(images == null) throw new NullPointerException("images is null");
@@ -517,8 +498,7 @@ public final class DragonCV
     }
     //</editor-fold>    
     
-    //<editor-fold defaultstate="collapsed" desc="function: reshape image">    
-    //<editor-fold defaultstate="collapsed" desc="function: reshape image">
+    //<editor-fold defaultstate="collapsed" desc="function: reshape group">
     public BufferedImage reshape(BufferedImage img, double scaleY, double scaleX) {
         int height = (int) (img.getHeight() * scaleY);
         int width = (int) (img.getWidth() * scaleX);
@@ -566,7 +546,7 @@ public final class DragonCV
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="function: pad image">
+    //<editor-fold defaultstate="collapsed" desc="function: pad group">
     public BufferedImage pad(BufferedImage img, int ph, int pw) { return pad(img, ph, pw, ph, pw); }
     public BufferedImage pad(BufferedImage img, int ph0, int pw0, int ph1, int pw1) {
         int IH = img.getHeight(), IW = img.getWidth();
@@ -595,7 +575,7 @@ public final class DragonCV
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="function: trim image">
+    //<editor-fold defaultstate="collapsed" desc="function: trim group">
     public BufferedImage trim(BufferedImage img, int th, int tw) { return trim(img, th, tw, th, tw); }
     public BufferedImage trim(BufferedImage img, int th0, int tw0, int th1, int tw1) {
         int IH = img.getHeight(), IW = img.getWidth();
@@ -624,11 +604,23 @@ public final class DragonCV
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="function: crop image">
+    //<editor-fold defaultstate="collapsed" desc="function: crop group">
+    public byte[] crop(byte[] src, int ihs, int iws, int ihe, int iwe) {
+        int IH = ihe - ihs + 1;
+        int IW = iwe - iws + 1;
+        byte[] dst = new byte[IH * IW];
+        for (int ih=ihs; ih<=ihe; ih++)
+        for (int iw=iws; iw<=iws; iw++) {
+            int src_idx = ih*IW + iw;
+            int dst_idx = (ih - ihs)*IW + iw - iws;
+            dst[dst_idx] = src[src_idx];
+        }
+        return dst;
+    }
+    
     public BufferedImage crop(BufferedImage img, 
             double scaleY1, double scaleX1, 
-            double scaleY2, double scaleX2) 
-    {
+            double scaleY2, double scaleX2) {
         int sh = img.getHeight(), sw = img.getWidth();
         int y1 = (int) (sh*scaleY1), y2 = (int) (sh*scaleY2);
         int x1 = (int) (sw*scaleX1), x2 = (int) (sw*scaleX2);
@@ -638,8 +630,7 @@ public final class DragonCV
     public BufferedImage crop(BufferedImage img, 
             double scaleY1, double scaleX1, 
             double scaleY2, double scaleX2,
-            Color bgColor) 
-    {
+            Color bgColor) {
         int sh = img.getHeight(), sw = img.getWidth();
         int y1 = (int) (sh*scaleY1), y2 = (int) (sh*scaleY2);
         int x1 = (int) (sw*scaleX1), x2 = (int) (sw*scaleX2);
@@ -675,10 +666,8 @@ public final class DragonCV
         Graphics2D graph = dst.createGraphics();
         graph.drawImage(img, 0, 0, width - 1, height - 1, x1, y1, x2, y2, bgColor, null);
         graph.dispose();
-        
         return dst;
     }
-    //</editor-fold>
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Affine Transform">
@@ -817,14 +806,10 @@ public final class DragonCV
     private final ColorConvertOp bgr_op = new ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_sRGB), null);
     
     public BufferedImage to_gray(BufferedImage img) { return gray_op.filter(img, null);  }
-
-    public BufferedImage to_BGR(BufferedImage img) { 
-        BufferedImage dst = new BufferedImage(img.getWidth(), img.getHeight(), TYPE_3BYTE_BGR);
-        return bgr_op.filter(img, dst); 
-    }
+    public BufferedImage to_BGR(BufferedImage img) {  return bgr_op.filter(img, new BufferedImage(img.getWidth(), img.getHeight(), TYPE_3BYTE_BGR)); }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="image & pixel[]">
+    //<editor-fold defaultstate="collapsed" desc="group & pixel[]">
     public byte[][] pixel_channel_split(byte[] pixel, int... dim) { return pixel_channel_split(pixel, dim[0], dim[1], dim[2]); }
     public byte[][] pixel_channel_split(byte[] pixel, int IH, int IW, int IC) {
         if (pixel.length != IH*IW*IC) throw new IllegalArgumentException(String.format(
@@ -833,8 +818,7 @@ public final class DragonCV
         final int HW = IH * IW;
         byte[][] pix = new byte[IC][HW];
         for (int ic=0; ic<IC; ic++)
-        for (int hw=0; hw<HW; hw++)
-            pix[ic][hw] = pixel[hw*IC + ic];
+        for (int hw=0; hw<HW; hw++) pix[ic][hw] = pixel[hw*IC + ic];
         return pix;
     }
     
@@ -987,7 +971,7 @@ public final class DragonCV
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static-class: Canvas">
-    public Canvas canvas(int height, int width) { return new Canvas(newBGR(height, width)); }
+    public Canvas canvas(int height, int width) { return new Canvas(BGR(height, width)); }
     public Canvas canvas(BufferedImage img) { return new Canvas(img); }
     
     public static class Canvas  {
@@ -1061,4 +1045,231 @@ public final class DragonCV
         //</editor-fold>
     }
     //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="pixel_center">
+    public int[] center(byte[] pixel, int IH, int IW, Predicate_int32 pred) { return center(pixel,IH, IW, 0, 0, IW-1, IH-1, pred);  }
+    public int[] center(byte[] pixel, int IH, int IW,//gray: IH * IW
+            int ihs, int iws, int ihe, int iwe, 
+            Predicate_int32 pred)
+    {
+        if (pixel.length != IH * IW) throw new IllegalArgumentException(String.format(
+                "pixel.length {got %d} != IH {got %d} * IW {got %d}", 
+                pixel.length, IH, IW));
+        if (ihs < 0) ihs = 0; if (ihe >= IH) ihe = IH - 1;
+        if (iws < 0) iws = 0; if (iwe >= IW) iwe = IW - 1;
+        
+        double ysum = 0, xsum = 0; int count = 0;
+        for (int ih = ihs;            ih <= ihe; ih++) 
+        for (int iw = iws, h = ih*IW; iw <= iwe; iw++) {
+            int p = pixel[h + iw] & 0xff;
+            if (pred.test(p)) { ysum += ih; xsum += iw; count++; }
+        }
+          
+        return new int[]{
+            (int) (ysum / count),
+            (int) (xsum / count),
+            count};
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="class: ConnectedDomain">
+    public static final class ConnectedDomain {
+        public final int[] group;//image[labels]
+        public final Map<Integer, ArrayList_int32> map;//map<label, points>
+        private int IH, IW;
+            
+        ConnectedDomain(int[] image, Map<Integer, ArrayList_int32> map, int IH, int IW) {
+            this.group = image;
+            this.map = map;
+            this.IH = IH;
+            this.IW = IW;
+        }
+        
+        public int height() { return IH; }
+        public int width() { return IW; }
+        
+        public BufferedImage toGray() {
+            byte[] pix = new byte[IH * IW];
+            int[] v = Lang.exr().next_int_vector(map.size() + 1, 125, 240); v[0] = 0;
+            for(int i=0; i<pix.length; i++)
+                if (group[i] != 0) pix[i] = (byte) v[group[i]];
+            return cv.gray(pix, IH, IW);
+        }
+        
+        //<editor-fold defaultstate="collapsed" desc="inner-code: center">
+        private int[] center(ArrayList_int32 arr) {
+            int size = arr.size(), elem[] = arr.element();
+            double ysum = 0, xsum = 0;
+            for (int i=0; i<size; i++) {
+                int idx = elem[i], ih = idx / IW, iw = idx % IW;
+                ysum += ih; xsum += iw;
+            }
+            return new int[] {
+                (int)(ysum / size), 
+                (int)(xsum / size)}; 
+        }
+        //</editor-fold>
+        public int[][] centers() {//[label][y, x]
+            int[][] yxs = new int[map.size()][2]; int idx = 0;
+            for (Entry<Integer, ArrayList_int32> kv : map.entrySet())
+                yxs[idx++] = center(kv.getValue());
+            return yxs;
+        }
+        
+        //<editor-fold defaultstate="collapsed" desc="inner-code: shape">
+        private int[] shape(ArrayList_int32 arr) {
+            int size = arr.size(), elem[] = arr.element();
+            int ymin = IH, ymax = 0;
+            int xmin = IW, xmax = 0;
+            for (int i=0; i<size; i++) {
+                int idx = elem[i], ih = idx / IW, iw = idx % IW;
+                if (ymin > ih) ymin = ih; else if (ymax < ih) ymax = ih;
+                if (xmin > iw) xmin = iw; else if (xmax < iw) xmax = iw;
+            }
+            return new int[] {
+                ymax - ymin + 1,
+                xmax - xmin + 1
+            };
+        }
+        //</editor-fold>
+        public int[][] shapes() {//[label][H, W]
+            int[][] yxs = new int[map.size()][2]; int idx = 0;
+            for (Entry<Integer, ArrayList_int32> kv : map.entrySet()) 
+                yxs[idx++] = shape(kv.getValue());
+            return yxs;
+        }
+        
+        //<editor-fold defaultstate="collapsed" desc="inner-code: region">
+        private int[] region(ArrayList_int32 arr) {
+            int size = arr.size(), elem[] = arr.element();
+            int ymin = IH, ymax = 0;
+            int xmin = IW, xmax = 0;
+            for (int i=0; i<size; i++) {
+                int idx = elem[i], ih = idx / IW, iw = idx % IW;
+                if (ymin > ih) ymin = ih; else if (ymax < ih) ymax = ih;
+                if (xmin > iw) xmin = iw; else if (xmax < iw) xmax = iw;
+            }
+            return new int[] {
+                ymin, xmin,
+                ymax, xmax
+            };
+        }
+        //</editor-fold>
+        public int[][] regions() {//[label][hs, he, ws, se]
+            int[][] yxs = new int[map.size()][2]; int idx = 0;
+            for (Entry<Integer, ArrayList_int32> kv : map.entrySet()) 
+                yxs[idx++] = region(kv.getValue());
+            return yxs;
+        }
+        
+        
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="class: ConnectedDomainScanner">
+    public static class ConnectedDomainScanner {
+        private Predicate_int32 pixel_pred;//binarize pixel values
+        private Predicate_int32 group_pred;//predicate the size of group
+        private Comparator<ArrayList_int32> group_cmp;//sort the size of group
+        private static final Comparator<ArrayList_int32> def_group_cmp = (a, b) -> { return b.size() - a.size(); };
+        
+        //<editor-fold defaultstate="collapsed" desc="Basic-functions">
+        public Predicate_int32 pixel_predicte() { return pixel_pred; }
+        public ConnectedDomainScanner pixel_predicte(Predicate_int32 pred) { pixel_pred = pred; return this; }
+        
+        public Predicate_int32 group_predicate() { return group_pred; }
+        public ConnectedDomainScanner group_predicate(Predicate_int32 pred) { group_pred = pred; return this; }
+        
+        public Comparator<ArrayList_int32> group_comparator() { return group_cmp; }
+        public ConnectedDomainScanner group_comparator(Comparator<ArrayList_int32> cmp) { group_cmp = cmp; return this; }
+        //</editor-fold>
+        
+        //<editor-fold defaultstate="collapsed" desc="inner-code">
+        private void pass1(int[] gp, Map<Integer, ArrayList_int32> map, 
+                byte[] pix, int IW, int ihs, int iws, int ihe, int iwe) {
+            for (int ih = ihs, label = 1; ih <= ihe; ih++) 
+            for (int iw = iws, h = ih*IW; iw <= iwe; iw++) {
+                int idx = h + iw, p = pix[idx] & 0xff; if (!pixel_pred.test(p)) continue;
+                
+                int ih0 = ih - 1, h0 = ih0 * IW;//[p0, p1, p2]
+                int iw0 = iw - 1, iw1 = iw + 1; //[p3, p,    ]
+                int min = Integer.MAX_VALUE;//min value of neighbor labels
+                if (ih0 >= 0 && iw0 >= 0) { int pos = h0 + iw0; if (pix[pos] > 0) { int g = gp[pos]; if (g > 0 && min > g) min = g; } }//p0
+                if (ih0 >= 0            ) { int pos = h0 + iw;  if (pix[pos] > 0) { int g = gp[pos]; if (g > 0 && min > g) min = g; } }//p1
+                if (ih0 >= 0 && iw1 < IW) { int pos = h0 + iw1; if (pix[pos] > 0) { int g = gp[pos]; if (g > 0 && min > g) min = g; } }//p2
+                if (            iw0 >= 0) { int pos = h  + iw0; if (pix[pos] > 0) { int g = gp[pos]; if (g > 0 && min > g) min = g; } }//p3
+                
+                ArrayList_int32 list;
+                if (min == Integer.MAX_VALUE) map.put(gp[idx] = label++, list = new ArrayList_int32());//a new scan area
+                else list = map.get(gp[idx] = min);//concat to a existed scan area
+                list.add(idx);//[h, w]
+            }
+        }
+        
+        private void pass2(int[] gp, Map<Integer, ArrayList_int32> map,
+                int IW, int ihs, int iws, int ihe, int iwe) {
+            for (int ih = ihs, ids[] = new int[3]; ih <= ihe; ih++) 
+            for (int iw = iws, h = ih*IW;          iw <= iwe; iw++) {
+                int idx = h + iw, p = gp[idx]; if (p == 0) continue;
+               
+                ids[0] = p; int n = 1;//different numbers of group labels
+                int ih0 = ih - 1, h0 = ih0 * IW;//[p0, p1, p2]
+                int iw0 = iw - 1;               //[p3, p,    ]
+                if (ih0 >= 0) { int p1 = gp[h0 + iw ]; if (p1 > 0 && p1 != p) ids[n++] = p1; }
+                if (iw0 >= 0) { int p3 = gp[h  + iw0]; if (p3 > 0 && p3 != p) ids[n++] = p3; }
+                if (n < 2) continue;
+                
+                int min = p; for (int i=1; i<n; i++) if (min > ids[i]) min = ids[i];
+                ArrayList_int32 min_pos = map.get(min); if (min_pos == null) continue;
+                
+                for (int i=0; i<n; i++) {//combine scan area
+                    int id = ids[i]; if (id == min) continue;
+                    ArrayList_int32 pos = map.remove(id); if (pos == null) continue;
+                    int size = pos.size(), elem[] = pos.element();
+                    for (int t=0; t<size; t++) gp[elem[t]] = min;
+                    min_pos.addAll(pos);
+                }
+            }
+        }
+        
+        private void result_process(int[] gp, Map<Integer, ArrayList_int32> map) {
+            ArrayList_int32[] vs = new ArrayList_int32[map.size()]; int idx = 0;
+            if (group_pred == null) { vs = map.values().toArray(vs); idx = vs.length; }
+            else for (ArrayList_int32 pos : map.values()) 
+                if (group_pred.test(pos.size())) vs[idx++] = pos;//non zero area
+                else { int size = pos.size(), e[] = pos.element(); for (int t=0; t<size; t++) gp[e[t]] = 0; } //zero area
+            map.clear();
+            
+            Comparator<ArrayList_int32> cmp = (group_cmp != null ? group_cmp : def_group_cmp);
+            Sort.sort(vs, cmp, 0, idx - 1);
+            for (int i=0; i<idx; i++) {//minimize labels
+                ArrayList_int32 pos = vs[i]; map.put(i, pos);
+                int size = pos.size(), e[] = pos.element();
+                for (int t=0; t<size; t++) gp[e[t]] = i + 1;
+            }
+        }
+        //</editor-fold>
+        public ConnectedDomain scan(BufferedImage img) {  
+            if (img.getType() != cv.TYPE_BYTE_GRAY) throw new RuntimeException("only TYPE_BYTE_GRAY is allowed");
+            return scan(cv.pixel(img), img.getHeight(), img.getWidth()); 
+        } 
+        public ConnectedDomain scan(byte[] pixel, int IH, int IW) { return scan(pixel, IH, IW, 0, 0, IH - 1, IW - 1); }
+        public ConnectedDomain scan(byte[] pixel, int IH, int IW,//gray: IH * IW
+                int ihs, int iws, int ihe, int iwe)  {
+            if (pixel.length != IH * IW) throw new IllegalArgumentException(String.format(
+                    "pixel.length {got %d} != IH {got %d} * IW {got %d}", 
+                    pixel.length, IH, IW));
+            if (ihs < 0) ihs = 0; if (ihe >= IH) ihe = IH - 1;
+            if (iws < 0) iws = 0; if (iwe >= IW) iwe = IW - 1;
+            
+            int[] gp = new int[IH * IW];//group
+            Map<Integer, ArrayList_int32> map = new HashMap<>(128);
+            
+            this.pass1(gp, map, pixel, IW, ihs, iws, ihe, iwe);
+            this.pass2(gp, map, IW, ihs, iws, ihe, iwe);
+            this.result_process(gp, map);
+            return new ConnectedDomain(gp, map, IH, IW);//group, map<label, points>
+        }
+    }
+    //</editor-fold>
+    public ConnectedDomainScanner connected_domain() { return new ConnectedDomainScanner(); }
 }

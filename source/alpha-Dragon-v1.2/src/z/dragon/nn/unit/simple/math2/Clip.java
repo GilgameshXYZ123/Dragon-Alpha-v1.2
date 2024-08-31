@@ -17,8 +17,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Clip extends SimpleInplaceFunction
-{
+public class Clip extends SimpleInplaceFunction {
     private static final long serialVersionUID = 972781440360786L;
     
     protected float alpha;

@@ -23,8 +23,7 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class ImageEngine 
-{
+public class ImageEngine {
     protected final Engine eg;
     protected ImageEngine(Engine engine) { this.eg = engine; }
     
@@ -195,7 +194,7 @@ public class ImageEngine
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="image: dualLinear2_div">
-    public Tensor reflection_normalization(boolean inplace, Tensor X, Tensor white, Tensor black) {
+    public Tensor reflection_normalize(boolean inplace, Tensor X, Tensor white, Tensor black) {
         return dualLinear2_div(inplace, black, X, white, 
                 -1.0f, 1.0f, 0.0f,//Y1 = -black + X     = X - black
                 -1.0f, 1.0f, 0.0f,//Y2 = -black + white = white - black
@@ -220,6 +219,94 @@ public class ImageEngine
                 alpha1, beta1, gamma1, 
                 alpha2, beta2, gamma2, C,
                 X.lengthv, X.lastDim());
+        
+        //inplace = false, return the new Tensor Y==============================
+        if(!inplace) { if(eg.sync) sc1.sync(); Y.setSyncer(sc1); return Y;  }
+        
+        //inplace = true, return the old Tensor X===============================
+        long old_memLen = X.mem_size, oldAddr = X.address;
+        X.copy_memoryMetaData_and_deleteSrc(Y);//let: X.dim = Y.dim/newDim, X.address = Y.address.newAddress
+        X.dataType = Y.dataType;//X<int8> -> X<dtype>
+        
+        Syncer sc = Syncer.dual(sc1, ()->{ eg.core.free(old_memLen, oldAddr); });
+        if(eg.sync) sc.sync(); else X.setSyncer(sc);
+        return X;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="image: dualLinear2_normalize_row">
+    @Passed("CudaFloat32EngieBase")//(alpha1*X + beta1*X1 + gamma1) / (/alpha2*X1 + beta2*X2 + gamma2) + C
+    public Tensor dualLinear2_normalize_row(boolean inplace,
+            Tensor X, Tensor X1, Tensor X2,
+            float alpha1, float beta1, float gamma1,
+            float alpha2, float beta2, float gamma2, float C)
+    {
+        if(eg.check) {//Y = (alpha1*X + beta1*X1 + gamma1) / (alpha2*X + beta2*X2 + gamma2) + C
+            eg.require_int8(X, "X"); 
+            eg.require_dtype(X1, "X1"); eg.require_dtype(X2, "X2");
+            eg.equals_valueStructure(X, "X", X1, "X1");
+            eg.equals_valueStructure(X, "X", X2, "X2");
+        }
+        
+        Tensor Y = eg.empty(X.dim).c();
+        Syncer sc1 = eg.core.img_dualLinear2_normalize2D_row(Y.address, 
+                X.address,
+                X1.address, X2.address, X1.lengthv,
+                alpha1, beta1, gamma1, 
+                alpha2, beta2, gamma2, C, 
+                X.lengthv, X.lastDim());
+        
+        //inplace = false, return the new Tensor Y==============================
+        if(!inplace) { if(eg.sync) sc1.sync(); Y.setSyncer(sc1); return Y;  }
+        
+        //inplace = true, return the old Tensor X===============================
+        long old_memLen = X.mem_size, oldAddr = X.address;
+        X.copy_memoryMetaData_and_deleteSrc(Y);//let: X.dim = Y.dim/newDim, X.address = Y.address.newAddress
+        X.dataType = Y.dataType;//X<int8> -> X<dtype>
+        
+        Syncer sc = Syncer.dual(sc1, ()->{ eg.core.free(old_memLen, oldAddr); });
+        if(eg.sync) sc.sync(); else X.setSyncer(sc);
+        return X;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="image: dualLinear2_normalize_center">
+    public Tensor reflection_normalize_center(boolean inplace, Tensor X, Tensor white, Tensor black) {//[H, W, C] | [H, C]
+        return dualLinear2_normalize_center(inplace, X, black, white, 
+                1.0f, -1.0f, 0.0f,//Y1 = X - black
+                -1.0f, 1.0f, 0.0f,//Y2 = -black + white = white - black
+                0.0f);//Y = Y1 / Y2
+    }
+    
+    public Tensor dualLinear2_normalize_center(boolean inplace,
+            Tensor X, Tensor X1, Tensor X2,
+            float alpha1, float beta1, float gamma1,
+            float alpha2, float beta2, float gamma2, float C) {
+        return dualLinear2_normalize_center(inplace, X, X1, X2, -1, alpha1, beta1, gamma1, alpha2, beta2, gamma2, C);
+    }
+    @Passed("CudaFloat32EngieBase")//(alpha1*X + beta1*X1 + gamma1) / (/alpha2*X1 + beta2*X2 + gamma2) + C
+    public Tensor dualLinear2_normalize_center(boolean inplace,
+            Tensor X, Tensor X1, Tensor X2, int dim2,
+            float alpha1, float beta1, float gamma1,
+            float alpha2, float beta2, float gamma2, float C)
+    {
+        if(dim2 == -1) dim2 = X.lastDim();
+        if(eg.check) {//Y = (alpha1*X + beta1*X1 + gamma1) / (alpha2*X + beta2*X2 + gamma2) + C
+            eg.require_int8(X, "X"); 
+            eg.require_dtype(X1, "X1"); eg.require_dtype(X2, "X2");
+            eg.check_center(X, "X", X1, "X1", dim2);
+            eg.check_center(X, "X", X2, "X2", dim2);
+            eg.equals_valueStructure(X1, "X1", X2, "X2");
+        }
+        
+        Tensor Y = (inplace? X : eg.empty(X.dim).c());
+        int dim1 = X.length / X1.length;//[dim0, dim1, dim2] / [dim0, dim2]
+        int dim0 = X2.length / dim2;//[dim0, dim2] / dim2
+        Syncer sc1 = eg.core.img_dualLinear2_normalize2D_center(Y.address,
+                X.address, 
+                X1.address, X2.address, 
+                alpha1, beta1, gamma1, 
+                alpha2, beta2, gamma2, C, 
+                dim0, dim1, dim2,
+                X.lastDim());
         
         //inplace = false, return the new Tensor Y==============================
         if(!inplace) { if(eg.sync) sc1.sync(); Y.setSyncer(sc1); return Y;  }
@@ -711,6 +798,70 @@ public class ImageEngine
         return X;
     }
     //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="image: segment">
+    public Tensor[] segment2D(Tensor X, int[][] centers, int H, int W) {
+        if(eg.check) {
+            eg.require_int8(X, "X"); 
+            eg.must_greater_equal(X.ndim(), "X.ndim", 3);
+        }
+        
+        Tensor[] Ys = new Tensor[centers.length];//[IH, IW, IC]
+        int IH = X.dim(-3), IW = X.dim(-2);
+        
+        for(int i=0; i<centers.length; i++) {
+            int[] yx = centers[i];
+            int y = yx[0] - (H >> 1), h = H;
+            int x = yx[1] - (W >> 1), w = W;
+            if (y < 0) { h += y; y = 0; } if (y + h >= IH) { h = IH - y; }
+            if (x < 0) { w += x; x = 0; } if (x + w >= IW) { w = IW - x; }
+            Ys[i] = crop2D(false, X, new int[] { y, x }, new int[] { h, w});
+        }
+        return Ys;
+    }
+    
+    public Tensor[] segment2D(Tensor X, int[][] centers, int[][] shapes) {
+        if(eg.check) {
+            eg.require_int8(X, "X"); 
+            eg.must_greater_equal(X.ndim(), "X.ndim", 3);
+            eg.equals(centers.length, "centers.length", shapes.length, "shapes.length");
+        }
+        
+        Tensor[] Ys = new Tensor[centers.length];//[IH, IW, IC]
+        int IH = X.dim(-3), IW = X.dim(-2);
+        
+        for(int i=0; i<centers.length; i++) {
+            int[] yx = centers[i], HW = shapes[i];
+            int H = HW[0], W = HW[1];
+            int y = yx[0] - (H >> 1), h = H;
+            int x = yx[1] - (W >> 1), w = W;
+            if (y < 0) { h += y; y = 0; } if (y + h >= IH) { h = IH - y; }
+            if (x < 0) { w += x; x = 0; } if (x + w >= IW) { w = IW - x; }
+            Ys[i] = crop2D(false, X, new int[] { y, x }, new int[] { h, w });
+        }
+        return Ys;
+    }
+    
+    public Tensor[] segment2D(Tensor X, int[][] regions) {
+        if(eg.check) {
+            eg.require_int8(X, "X"); 
+            eg.must_greater_equal(X.ndim(), "X.ndim", 3);
+        }
+        
+        Tensor[] Ys = new Tensor[regions.length];//[IH, IW, IC]
+        int IH = X.dim(-3), IW = X.dim(-2);
+        
+        for(int i=0; i<regions.length; i++) {
+            int[] reg = regions[i];
+            int y = reg[0], h = reg[2] - y + 1;
+            int x = reg[1], w = reg[3] - x + 1;
+            if (y < 0) { h += y; y = 0; } if (y + h >= IH) { h = IH - y; }
+            if (x < 0) { w += x; x = 0; } if (x + w >= IW) { w = IW - x; }
+            
+            Ys[i] = crop2D(false, X, new int[] { y, x }, new int[] { h, w });
+        }
+        return Ys;
+    }
+    //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="image: transpose(2D -> 4D): X -> X^T">
     @Passed("CudaFloat32EngieBase")
@@ -765,6 +916,9 @@ public class ImageEngine
             eg.require_int8(X, "X");
             eg.must_greater_equal(X.ndim(), "X.ndim", 3);
         }
+        
+        if (OH == -1) OH = X.dim(-3);//[N, H(-3), W(-2), C(-1)]
+        if (OW == -1) OW = X.dim(-2);
         
         int[] Xdim = X.dim; int ndim = Xdim.length;
         int N = (ndim == 3 ? 1 : Xdim[0]);
@@ -1360,6 +1514,12 @@ public class ImageEngine
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="image: Tensor -> BufferedImage">
+    public BufferedImage[] BGR(Tensor... X) { return BGR(X, channel_blue, channel_green, channel_red); }
+    public BufferedImage[] BGR(Tensor[] X, int blue, int green, int red) {
+        BufferedImage[] imgs = new BufferedImage[X.length];
+        for (int i=0; i<X.length; i++) imgs[i] = BGR(X[i], blue, green, red);
+        return imgs;
+    }
     public BufferedImage BGR(Tensor X) { return BGR(X, channel_blue, channel_green, channel_red); }
     public BufferedImage BGR(Tensor X, int blue, int green, int red) {
         if(eg.check) { eg.must_equal(X.ndim(), "X.ndim", 3); }
@@ -1369,6 +1529,12 @@ public class ImageEngine
         return img;
     }
     
+    public BufferedImage[] RGB(Tensor... X) { return RGB(X, channel_blue, channel_green, channel_red); }
+    public BufferedImage[] RGB(Tensor[] X, int blue, int green, int red) {
+        BufferedImage[] imgs = new BufferedImage[X.length];
+        for (int i=0; i<X.length; i++) imgs[i] = RGB(X[i], blue, green, red);
+        return imgs;
+    }
     public BufferedImage RGB(Tensor X) { return RGB(X, channel_red, channel_green, channel_blue); }
     public BufferedImage RGB(Tensor X, int red, int green, int blue) {
         if(eg.check) { eg.must_equal(X.ndim(), "X.ndim", 3); }
@@ -1378,6 +1544,11 @@ public class ImageEngine
         return img;
     }
     
+    public BufferedImage[] gray(Tensor... X) {
+       BufferedImage[] imgs = new BufferedImage[X.length]; 
+       for (int i=0; i<X.length; i++) imgs[i] = gray(X[i]);
+       return imgs;
+    }
     public BufferedImage gray(Tensor X) {
         if(eg.check) { 
             eg.must_smaller_equal(X.ndim(), "X.ndim", 3);//<=3

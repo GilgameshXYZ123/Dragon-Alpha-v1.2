@@ -73,21 +73,19 @@ import z.dragon.nn.unit.dual.blas.MatMul;
 import z.dragon.nn.unit.dual.blas.MatMulT1;
 import z.dragon.nn.unit.dual.blas.MatMulT2;
 import z.dragon.nn.unit.dual.math.Quadratic2;
-import z.dragon.nn.unit.simple.pool2d.AdaptiveAvgPool2D;
-import z.dragon.nn.unit.simple.pool2d.AdaptiveMaxPool2D;
-import z.dragon.nn.unit.simple.pool2d.AdaptiveNaiveMaxPool2D;
-import z.dragon.nn.unit.simple.pool2d.AvgPool2D;
-import z.dragon.nn.unit.simple.pool2d.AvgUnpool2D;
+import z.dragon.nn.unit.simple.pool.adaptive.AdaptiveAvgPool2D;
+import z.dragon.nn.unit.simple.pool.adaptive.AdaptiveMaxPool2D;
+import z.dragon.nn.unit.simple.pool.AvgPool2D;
+import z.dragon.nn.unit.simple.pool.AvgUnpool2D;
 import z.dragon.nn.unit.simple.blas.Conv3D;
 import z.dragon.nn.unit.simple.blas.Deconv3D;
 import z.dragon.nn.unit.simple.blas.FullConnect;
-import z.dragon.nn.unit.simple.pool2d.MaxPool2D;
-import z.dragon.nn.unit.simple.pool2d.NaiveMaxPool2D;
+import z.dragon.nn.unit.simple.pool.MaxPool2D;
 import z.dragon.nn.unit.simple.math1.Abs;
 import z.dragon.nn.unit.simple.affine.Affine;
 import z.dragon.nn.unit.simple.math2.Arcsin;
 import z.dragon.nn.unit.simple.math2.Arctan;
-import z.dragon.nn.unit.simple.affine.GlobalSqBatchNorm;
+import z.dragon.nn.unit.simple.batchnorm.global.GlobalSqBatchNorm;
 import z.dragon.nn.unit.simple.math1.Cos;
 import z.dragon.nn.unit.simple.math2.Cot;
 import z.dragon.nn.unit.simple.math2.Dropout;
@@ -95,7 +93,7 @@ import z.dragon.nn.unit.simple.math2.Elu;
 import z.dragon.nn.unit.simple.math2.Exp;
 import z.dragon.nn.unit.simple.tensor.Flatten;
 import z.dragon.nn.unit.simple.math2.HalfSin;
-import z.dragon.nn.unit.simple.affine.LayerNorm;
+import z.dragon.nn.unit.simple.layernorm.LayerNorm;
 import z.dragon.nn.unit.simple.math2.LeakyRelu;
 import z.dragon.nn.unit.simple.math2.Linear;
 import z.dragon.nn.unit.simple.math2.Log;
@@ -115,7 +113,7 @@ import z.dragon.nn.unit.Unit;
 import z.dragon.nn.unit.dual.math.Linear2;
 import z.dragon.nn.unit.reducer.math.QuadraticMean;
 import z.dragon.nn.unit.reducer.math.QuadraticSummary;
-import z.dragon.nn.unit.simple.affine.SqBatchNorm;
+import z.dragon.nn.unit.simple.batchnorm.SqBatchNorm;
 import z.dragon.nn.unit.simple.math2.LogSoftmax;
 import z.dragon.nn.unit.simple.math2.Softmax;
 import z.dragon.nn.unit.simple.tensor.View;
@@ -151,8 +149,13 @@ import z.dragon.nn.core.dual.blas.CoreMatMulT2;
 import z.dragon.nn.core.dual.math.CoreDiv;
 import z.dragon.nn.core.dual.math.CoreLinear2;
 import z.dragon.nn.core.dual.math.CoreLinear2Row;
+import z.dragon.nn.core.dual.math.CoreLinear2_Elu;
+import z.dragon.nn.core.dual.math.CoreLinear2_Gelu;
 import z.dragon.nn.core.dual.math.CoreLinear2_LeakyRelu;
 import z.dragon.nn.core.dual.math.CoreLinear2_Relu;
+import z.dragon.nn.core.dual.math.CoreLinear2_Sigmoid;
+import z.dragon.nn.core.dual.math.CoreLinear2_Softplus;
+import z.dragon.nn.core.dual.math.CoreLinear2_Tanh;
 import z.dragon.nn.core.dual.math.CoreQuadratic2;
 import z.dragon.nn.core.dual.math.CoreQuadratic2Center;
 import z.dragon.nn.core.dual.math.CoreQuadratic2Row;
@@ -167,8 +170,8 @@ import z.dragon.nn.core.reducer.math.CoreQuadraticSummary;
 import z.dragon.nn.core.reducer.tensor.CoreConcat;
 import z.dragon.nn.core.simple.SimpleCore;
 import z.dragon.nn.unit.simple.SimpleFunction;
-import z.dragon.nn.unit.simple.affine.BatchNorm;
-import z.dragon.nn.unit.simple.affine.GlobalBatchNorm;
+import z.dragon.nn.unit.simple.batchnorm.BatchNorm;
+import z.dragon.nn.unit.simple.batchnorm.global.GlobalBatchNorm;
 import z.dragon.nn.unit.simple.math1.Csc;
 import z.dragon.nn.unit.simple.math1.Sec;
 import z.dragon.nn.core.simple.math1.CoreAbs;
@@ -180,10 +183,8 @@ import z.dragon.nn.core.simple.math1.CoreSec;
 import z.dragon.nn.core.simple.math1.CoreSin;
 import z.dragon.nn.core.simple.math2.CoreArcsin;
 import z.dragon.nn.core.simple.math2.CoreArctan;
-import z.dragon.nn.core.simple.math2.CoreBernouliMul;
 import z.dragon.nn.core.simple.math2.CoreClip;
 import z.dragon.nn.core.simple.math2.CoreCot;
-import z.dragon.nn.core.simple.math2.CoreDropout;
 import z.dragon.nn.core.simple.math2.CoreElu;
 import z.dragon.nn.core.simple.math2.CoreExp;
 import z.dragon.nn.core.simple.math2.CoreHalfSin;
@@ -203,13 +204,15 @@ import z.dragon.nn.core.simple.math2.CoreSoftplus;
 import z.dragon.nn.core.simple.math2.CoreSqrt;
 import z.dragon.nn.core.simple.math2.CoreTan;
 import z.dragon.nn.core.simple.math2.CoreTanh;
-import z.dragon.nn.core.simple.pool2d.CoreAdaptiveAvgPool2D;
-import z.dragon.nn.core.simple.pool2d.CoreAdaptiveMaxPool2D;
-import z.dragon.nn.core.simple.pool2d.CoreAdaptiveNaiveMaxPool2D;
-import z.dragon.nn.core.simple.pool2d.CoreAvgPool2D;
-import z.dragon.nn.core.simple.pool2d.CoreAvgUnpool2D;
-import z.dragon.nn.core.simple.pool2d.CoreMaxPool2D;
-import z.dragon.nn.core.simple.pool2d.CoreNaiveMaxPool2D;
+import z.dragon.nn.core.simple.pool.CoreAvgPool1D;
+import z.dragon.nn.core.simple.pool.adaptive.CoreAdaptiveAvgPool2D;
+import z.dragon.nn.core.simple.pool.adaptive.CoreAdaptiveMaxPool2D;
+import z.dragon.nn.core.simple.pool.CoreAvgPool2D;
+import z.dragon.nn.core.simple.pool.CoreAvgUnpool2D;
+import z.dragon.nn.core.simple.pool.CoreMaxPool1D;
+import z.dragon.nn.core.simple.pool.CoreMaxPool2D;
+import z.dragon.nn.core.simple.pool.adaptive.CoreAdaptiveAvgPool1D;
+import z.dragon.nn.core.simple.pool.adaptive.CoreAdaptiveMaxPool1D;
 import z.dragon.nn.core.simple.tensor.CoreCrop;
 import z.dragon.nn.core.simple.tensor.CoreExpand;
 import z.dragon.nn.unit.simple.tensor.Pad;
@@ -224,18 +227,40 @@ import z.dragon.nn.core.simple.tensor.CoreTrim;
 import z.dragon.nn.optim.RAdam;
 import z.dragon.nn.unit.dual.DualFunction;
 import z.dragon.nn.unit.dual.math.Linear2Row;
+import z.dragon.nn.unit.dual.math.Linear2_Elu;
+import z.dragon.nn.unit.dual.math.Linear2_Gelu;
 import z.dragon.nn.unit.dual.math.Linear2_LeakyRelu;
 import z.dragon.nn.unit.dual.math.Linear2_Relu;
+import z.dragon.nn.unit.dual.math.Linear2_Sigmoid;
+import z.dragon.nn.unit.dual.math.Linear2_Softplus;
+import z.dragon.nn.unit.dual.math.Linear2_Tanh;
 import z.dragon.nn.unit.dual.math.Quadratic2Center;
 import z.dragon.nn.unit.dual.math.Quadratic2Row;
 import z.dragon.nn.unit.furcation.FurcateFunction;
 import z.dragon.nn.unit.reducer.ReduceFunction;
-import z.dragon.nn.unit.simple.affine.leakyRelu.Affine_LeakyRelu;
-import z.dragon.nn.unit.simple.affine.relu.Affine_Relu;
-import z.dragon.nn.unit.simple.affine.leakyRelu.BatchNorm_LeakyRelu;
-import z.dragon.nn.unit.simple.affine.relu.BatchNorm_Relu;
-import z.dragon.nn.unit.simple.affine.leakyRelu.GlobalBatchNorm_LeakyRelu;
-import z.dragon.nn.unit.simple.affine.relu.GlobalBatchNorm_Relu;
+import z.dragon.nn.unit.simple.affine.Affine_Elu;
+import z.dragon.nn.unit.simple.affine.Affine_Gelu;
+import z.dragon.nn.unit.simple.affine.Affine_LeakyRelu;
+import z.dragon.nn.unit.simple.affine.Affine_Relu;
+import z.dragon.nn.unit.simple.affine.Affine_Sigmoid;
+import z.dragon.nn.unit.simple.affine.Affine_Softplus;
+import z.dragon.nn.unit.simple.affine.Affine_Tanh;
+import z.dragon.nn.unit.simple.batchnorm.BatchNorm_Elu;
+import z.dragon.nn.unit.simple.batchnorm.BatchNorm_Gelu;
+import z.dragon.nn.unit.simple.batchnorm.BatchNorm_LeakyRelu;
+import z.dragon.nn.unit.simple.batchnorm.BatchNorm_Relu;
+import z.dragon.nn.unit.simple.batchnorm.BatchNorm_Sigmoid;
+import z.dragon.nn.unit.simple.batchnorm.BatchNorm_Softplus;
+import z.dragon.nn.unit.simple.batchnorm.BatchNorm_Tanh;
+import z.dragon.nn.unit.simple.blas.Conv2D;
+import z.dragon.nn.unit.simple.blas.Deconv2D;
+import z.dragon.nn.unit.simple.batchnorm.global.GlobalBatchNorm_Elu;
+import z.dragon.nn.unit.simple.batchnorm.global.GlobalBatchNorm_Gelu;
+import z.dragon.nn.unit.simple.batchnorm.global.GlobalBatchNorm_LeakyRelu;
+import z.dragon.nn.unit.simple.batchnorm.global.GlobalBatchNorm_Relu;
+import z.dragon.nn.unit.simple.batchnorm.global.GlobalBatchNorm_Sigmoid;
+import z.dragon.nn.unit.simple.batchnorm.global.GlobalBatchNorm_Softplus;
+import z.dragon.nn.unit.simple.batchnorm.global.GlobalBatchNorm_Tanh;
 import z.dragon.nn.unit.simple.math1.Gelu;
 import z.dragon.nn.unit.simple.math2.Clip;
 import z.dragon.nn.unit.simple.math2.HardSigmoid;
@@ -246,6 +271,10 @@ import z.dragon.nn.unit.simple.math2.Min;
 import z.dragon.nn.unit.simple.math2.ReluN;
 import z.dragon.nn.unit.simple.math2.Relu_BernouliMul;
 import z.dragon.nn.unit.simple.math2.Relu_Dropout;
+import z.dragon.nn.unit.simple.pool.AvgPool1D;
+import z.dragon.nn.unit.simple.pool.MaxPool1D;
+import z.dragon.nn.unit.simple.pool.adaptive.AdaptiveAvgPool1D;
+import z.dragon.nn.unit.simple.pool.adaptive.AdaptiveMaxPool1D;
 import z.dragon.nn.unit.simple.tensor.Crop;
 import z.dragon.nn.unit.simple.tensor.Expand;
 
@@ -281,7 +310,7 @@ public final class Alpha
         StringBuilder sb = new StringBuilder(128);
         sb.append("Dragon-Alpha-v1.2 { ");
         sb.append("\n\tAuthor: 张智溢 Gilgamesh.CN");
-        sb.append("\n\tDate: 2024/3/19");
+        sb.append("\n\tDate: 2024/8/30");
         sb.append("\n\tAnywhere, try your best! }");
         return sb.toString();
     }
@@ -752,15 +781,14 @@ public final class Alpha
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="class: NeuralParam">
-    public static class NeuralParam
-    {
-        public static boolean simple_math2_inplace = true;
-        public static boolean simple_tensor_inplace = true;
-        public static boolean simple_affine_inplace = true;
+    public static class NeuralParam {
+        public static boolean sp_math2_inplace = true;
+        public static boolean sp_tensor_inplace = true;
+        public static boolean sp_affine_inplace = true;
         
-        public static float leakyRelu_negative_slope = 0.01f;
+        public static float leakyRelu_neg_slope = 0.01f;
         public static float elu_alpha = 1.0f;
-        public static float elu_negative_slope = 0.01f;
+        public static float elu_neg_slope = 0.01f;
         
         public static boolean batchNorm_affine = true;
         public static float batchNorm_beta1 = 0.9f;
@@ -770,82 +798,99 @@ public final class Alpha
         public static boolean layerNorm_affine = true;
         public static float layerNorm_eps = 1e-5f;
         
-        public static boolean avgpool2D_ignore_padding = false;
+        public static boolean avgpool2D_igpad = false;
+        public static boolean avgpool1D_igpad = false;
         public static boolean avgunpool2D_ignore_padding = false;
          
-        public static boolean dual_likeX1 = true;
+        public static boolean dl_likeX1 = true;
     }
     //</editor-fold>       
     
     //<editor-fold defaultstate="collapsed" desc="class: UnitBuilder">
-    public static class UnitBuilder 
-    {
+    public static class UnitBuilder {
         protected UnitBuilder() {}
         public static final UnitBuilder nn = new UnitBuilder();
         
         //<editor-fold defaultstate="collapsed" desc="create: fusion">
-        public Affine_Relu affine_relu(Affine affine, Relu relu) {
-            return new Affine_Relu(affine.inplace() && relu.inplace(), 
-                    affine.param_dim());
+        public Affine_Relu affine_relu(Affine afi, Relu af) { return new Affine_Relu(afi.inplace() && af.inplace(), afi.param_dim()); }
+        public Affine_LeakyRelu affine_leakyRelu(Affine afi, LeakyRelu af) { return new Affine_LeakyRelu(afi.inplace() && af.inplace(), af.negative_slope(), afi.param_dim()); }
+        public Affine_Elu affine_elu(Affine afi, Elu af) { return new Affine_Elu(afi.inplace() && af.inplace(), af.alpha(), af.negative_slope(), afi.param_dim()); }
+        public Affine_Softplus affine_softplus(Affine afi, Softplus af) { return new Affine_Softplus(afi.inplace() && af.inplace(), afi.param_dim()); }
+        public Affine_Gelu affine_gelu(Affine afi, Gelu af) { return new Affine_Gelu(afi.inplace(), afi.param_dim()); }
+        public Affine_Sigmoid affine_sigmoid(Affine afi, Sigmoid af) { return new Affine_Sigmoid(afi.inplace() && af.inplace(), afi.param_dim()); }
+        public Affine_Tanh affine_tanh(Affine afi, Tanh af) { return new Affine_Tanh(afi.inplace() && af.inplace(), afi.param_dim()); }
+        
+        public GlobalBatchNorm_Relu global_batchNorm_relu(GlobalBatchNorm bn, Relu af) { 
+            return new GlobalBatchNorm_Relu(bn.inplace() && af.inplace(), bn.affine(), 
+                    bn.beta1(), bn.beta2(), bn.eps(), bn.param_dim()); 
         }
-        public GlobalBatchNorm_Relu global_batchNorm_relu(GlobalBatchNorm bn, Relu relu) {
-            return new GlobalBatchNorm_Relu(bn.inplace() && relu.inplace(), bn.affine(),
-                    bn.beta1(), bn.beta2(), bn.eps(),
-                    bn.param_dim());
+        public GlobalBatchNorm_LeakyRelu global_batchNorm_leakyRelu(GlobalBatchNorm bn, LeakyRelu af) { 
+            return new GlobalBatchNorm_LeakyRelu(bn.inplace() && af.inplace(), bn.affine(),
+                    bn.beta1(), bn.beta2(), bn.eps(), af.negative_slope(), bn.param_dim()); 
         }
-        public BatchNorm_Relu batchNorm_relu(BatchNorm bn, Relu relu) {
-            return new BatchNorm_Relu(false, bn.affine(),
-                    bn.beta1(), bn.beta2(), bn.eps(),
-                    bn.param_dim());
+        public GlobalBatchNorm_Elu global_batchNorm_elu(GlobalBatchNorm bn, Elu af) {
+            return new GlobalBatchNorm_Elu(bn.inplace() && af.inplace(), bn.affine(),
+                    bn.beta1(), bn.beta2(), bn.eps(), af.alpha(), af.negative_slope(), bn.param_dim());
         }
-
-        public Affine_LeakyRelu affine_leakyRelu(Affine affine, LeakyRelu leaky_relu) {
-            return new Affine_LeakyRelu(affine.inplace() && leaky_relu.inplace(), 
-                    leaky_relu.negative_slop(), 
-                    affine.param_dim());
+        public GlobalBatchNorm_Softplus global_batchNorm_softplus(GlobalBatchNorm bn, Softplus af) {
+            return new GlobalBatchNorm_Softplus(bn.inplace() && af.inplace(), bn.affine(),
+                    bn.beta1(), bn.beta2(), bn.eps(), bn.param_dim());
         }
-        public GlobalBatchNorm_LeakyRelu global_batchNorm_leakyRelu(GlobalBatchNorm bn, LeakyRelu leaky_relu) {
-            return new GlobalBatchNorm_LeakyRelu(bn.inplace() && leaky_relu.inplace(), bn.affine(),
-                    bn.beta1(), bn.beta2(), bn.eps(),
-                    leaky_relu.negative_slop(),
-                    bn.param_dim());
+        public GlobalBatchNorm_Gelu global_batchNorm_gelu(GlobalBatchNorm bn, Gelu af) {
+            return new GlobalBatchNorm_Gelu(bn.inplace(), bn.affine(),
+                    bn.beta1(), bn.beta2(), bn.eps(), bn.param_dim());
         }
-        public BatchNorm_LeakyRelu batchNorm_leakyRelu(BatchNorm bn, LeakyRelu leaky_relu) {
-            return new BatchNorm_LeakyRelu(bn.inplace() && leaky_relu.inplace(), bn.affine(),
-                    bn.beta1(), bn.beta2(), bn.eps(),
-                    leaky_relu.negative_slop(),
-                    bn.param_dim());
+        public GlobalBatchNorm_Sigmoid global_batchNorm_sigmoid(GlobalBatchNorm bn, Sigmoid af) {
+            return new GlobalBatchNorm_Sigmoid(bn.inplace() && af.inplace(), bn.affine(),
+                    bn.beta1(), bn.beta2(), bn.eps(), bn.param_dim());
         }
-                 
-        public Linear2_Relu linear2_relu(Linear2 linear2, Relu afunc) {
-            return new Linear2_Relu(linear2.likeX1(), 
-                    linear2.alpha(), linear2.beta(), linear2.gamma());
-        }
-        public Linear2_LeakyRelu linear2_leakyRelu(Linear2 linear2, LeakyRelu afunc) {
-            return new Linear2_LeakyRelu(linear2.likeX1(), 
-                    linear2.alpha(), linear2.beta(), linear2.gamma(), 
-                    afunc.negative_slop());
+        public GlobalBatchNorm_Tanh global_batchNorm_tanh(GlobalBatchNorm bn, Tanh af) {
+            return new GlobalBatchNorm_Tanh(bn.inplace() && af.inplace(), bn.affine(),
+                    bn.beta1(), bn.beta2(), bn.eps(), bn.param_dim());
         }
         
-        public Relu_Dropout relu_dropout(Relu relu, Dropout dropout) {
-            return new Relu_Dropout(relu.inplace() && dropout.inplace(), 
-                    dropout.nonzero_percent());
+        public BatchNorm_Relu batchNorm_relu(BatchNorm bn, Relu af) { 
+            return new BatchNorm_Relu(bn.inplace() && af.inplace(), bn.affine(), 
+                    bn.beta1(), bn.beta2(), bn.eps(), bn.param_dim()); 
         }
-        public LeakyRelu_Dropout leakyRelu_dropout(LeakyRelu leaky_relu, Dropout dropout) {
-            return new LeakyRelu_Dropout(leaky_relu.inplace() && dropout.inplace(), 
-                    leaky_relu.negative_slop(), 
-                    dropout.nonzero_percent());
+        public BatchNorm_LeakyRelu batchNorm_leakyRelu(BatchNorm bn, LeakyRelu af) {
+            return new BatchNorm_LeakyRelu(bn.inplace() && af.inplace(), bn.affine(),
+                    bn.beta1(), bn.beta2(), bn.eps(), af.negative_slope(), bn.param_dim());
+        }
+        public BatchNorm_Elu batchNorm_elu(BatchNorm bn, Elu af) {
+            return new BatchNorm_Elu(bn.inplace() && af.inplace(), bn.affine(), 
+                    bn.beta1(), bn.beta2(), bn.eps(), af.alpha(), af.negative_slope(), bn.param_dim()); 
+        }
+        public BatchNorm_Softplus batchNorm_softplus(BatchNorm bn, Softplus af) { 
+            return new BatchNorm_Softplus(bn.inplace() && af.inplace(), bn.affine(), 
+                    bn.beta1(), bn.beta2(), bn.eps(), bn.param_dim()); 
+        }
+        public BatchNorm_Gelu batchNorm_gelu(BatchNorm bn, Gelu af) { 
+            return new BatchNorm_Gelu(bn.inplace(), bn.affine(), 
+                    bn.beta1(), bn.beta2(), bn.eps(), bn.param_dim()); 
+        }
+        public BatchNorm_Sigmoid batchNorm_sigmoid(BatchNorm bn, Sigmoid af) { 
+            return new BatchNorm_Sigmoid(bn.inplace() && af.inplace(), bn.affine(), 
+                    bn.beta1(), bn.beta2(), bn.eps(), bn.param_dim()); 
+        }
+        public BatchNorm_Tanh batchNorm_tanh(BatchNorm bn, Tanh af) {
+            return new BatchNorm_Tanh(bn.inplace() && af.inplace(), bn.affine(), 
+                    bn.beta1(), bn.beta2(), bn.eps(), bn.param_dim()); 
         }
         
-        public Relu_BernouliMul relu_bernouliMul(Relu relu, BernouliMul berm) {
-            return new Relu_BernouliMul(relu.inplace() && berm.inplace(),  
-                    berm.p(), berm.v1(), berm.v2());
-        }
-        public LeakyRelu_BernouliMul leakyRelu_bernouliMul(LeakyRelu leaky_relu, BernouliMul berm) {
-            return new LeakyRelu_BernouliMul(leaky_relu.inplace() && berm.inplace(),
-                    leaky_relu.negative_slop(),
-                    berm.p(), berm.v1(), berm.v2());
-        }
+        public Linear2_Relu linear2_relu(Linear2 l2, Relu af) { return new Linear2_Relu(l2.likeX1(), l2.alpha(), l2.beta(), l2.gamma()); }
+        public Linear2_LeakyRelu linear2_leakyRelu(Linear2 l2, LeakyRelu af) { return new Linear2_LeakyRelu(l2.likeX1(), l2.alpha(), l2.beta(), l2.gamma(), af.negative_slope()); }
+        public Linear2_Elu linear2_Elu(Linear2 l2, Elu af) { return new Linear2_Elu(l2.likeX1(), l2.alpha(), l2.beta(), l2.gamma(), af.alpha(), af.negative_slope()); }
+        public Linear2_Softplus linear2_softplus(Linear2 l2, Softplus af) { return new Linear2_Softplus(l2.likeX1(), l2.alpha(), l2.beta(), l2.gamma()); }
+        public Linear2_Gelu linear2_gelu(Linear2 l2, Gelu af) { return new Linear2_Gelu(l2.likeX1(), l2.alpha(), l2.beta(), l2.gamma()); }
+        public Linear2_Sigmoid linear2_sigmoid(Linear2 l2, Sigmoid af) { return new Linear2_Sigmoid(l2.likeX1(), l2.alpha(), l2.beta(), l2.gamma()); }
+        public Linear2_Tanh linear2_tanh(Linear2 linear2, Tanh af) { return new Linear2_Tanh(linear2.likeX1(), linear2.alpha(), linear2.beta(), linear2.gamma()); }
+        
+        public Relu_Dropout relu_dropout(Relu af, Dropout dp) { return new Relu_Dropout(af.inplace() && dp.inplace(), dp.nonzero_percent()); }
+        public LeakyRelu_Dropout leakyRelu_dropout(LeakyRelu af, Dropout dp) { return new LeakyRelu_Dropout(af.inplace() && dp.inplace(), af.negative_slope(), dp.nonzero_percent()); }
+        
+        public Relu_BernouliMul relu_bernouliMul(Relu af, BernouliMul bm) { return new Relu_BernouliMul(af.inplace() && bm.inplace(), bm.p(), bm.v1(), bm.v2()); }
+        public LeakyRelu_BernouliMul leakyRelu_bernouliMul(LeakyRelu af, BernouliMul bm) { return new LeakyRelu_BernouliMul(af.inplace() && bm.inplace(), af.negative_slope(), bm.p(), bm.v1(), bm.v2()); }
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="create: simple.math1">
@@ -872,35 +917,35 @@ public final class Alpha
         public Gelu gelu() { return new Gelu(); }
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="create: simple.math2">
-        public Max max(float vmax) { return new Max(simple_math2_inplace, 1.0f, 0.0f, vmax); }
-        public Max max(float alpha, float beta, float vmax) { return new Max(simple_math2_inplace, alpha, beta, vmax); }
+        public Max max(float vmax) { return new Max(sp_math2_inplace, 1.0f, 0.0f, vmax); }
+        public Max max(float alpha, float beta, float vmax) { return new Max(sp_math2_inplace, alpha, beta, vmax); }
         public Max max(boolean inplace, float vmax) { return new Max(inplace, 1.0f, 0.0f, vmax); }
         public Max max(boolean inplace, float alpha, float beta, float vmax) { return new Max(inplace, alpha, beta, vmax); }
         
-        public Min min(float vmin) { return new Min(simple_math2_inplace, 1.0f, 0.0f, vmin); }
-        public Min min(float alpha, float beta, float vmin) { return new Min(simple_math2_inplace, alpha, beta, vmin); }
+        public Min min(float vmin) { return new Min(sp_math2_inplace, 1.0f, 0.0f, vmin); }
+        public Min min(float alpha, float beta, float vmin) { return new Min(sp_math2_inplace, alpha, beta, vmin); }
         public Min min(boolean inplace, float vmin) { return new Min(inplace, 1.0f, 0.0f, vmin); }
         public Min min(boolean inplace, float alpha, float beta, float vmin) { return new Min(inplace, alpha, beta, vmin); }
         
-        public Clip clip(float vmin, float vmax) { return new Clip(simple_math2_inplace, 1.0f, 0.0f, vmin, vmax); }
+        public Clip clip(float vmin, float vmax) { return new Clip(sp_math2_inplace, 1.0f, 0.0f, vmin, vmax); }
         public Clip clip(float alpha, float beta, float vmin, float vmax) {
-            return new Clip(simple_math2_inplace, alpha, beta, vmin, vmax);
+            return new Clip(sp_math2_inplace, alpha, beta, vmin, vmax);
         }
         public Clip clip(boolean inplace, float vmin, float vmax) { return new Clip(inplace, 1.0f, 0.0f, vmin, vmax); }
         public Clip clip(boolean inplace, float alpha, float beta, float vmin, float vmax) {
             return new Clip(inplace, alpha, beta, vmin, vmax);
         }
         
-        public Rpl rpl() { return new Rpl(simple_math2_inplace, 1.0f, 0.0f, 0.0f); }
-        public Rpl rpl(float alpha, float beta, float gamma) { return new Rpl(simple_math2_inplace, alpha, beta, gamma); }
+        public Rpl rpl() { return new Rpl(sp_math2_inplace, 1.0f, 0.0f, 0.0f); }
+        public Rpl rpl(float alpha, float beta, float gamma) { return new Rpl(sp_math2_inplace, alpha, beta, gamma); }
         public Rpl rpl(boolean inplace) { return new Rpl(inplace, 1.0f, 0.0f, 0.0f); }
         public Rpl rpl(boolean inplace, float alpha, float beta, float gamma) { return new Rpl(inplace, alpha, beta, gamma); }
         
-        public Linear sadd(float C) { return new Linear(simple_math2_inplace, 1.0f, C); }
-        public Linear ssub(float C) { return new Linear(simple_math2_inplace, 1.0f, -C); }
-        public Linear smul(float C) { return new Linear(simple_math2_inplace, C, 0.0f); }
-        public Linear sdiv(float C) { return new Linear(simple_math2_inplace, (1.0f / C), 0.0f); }
-        public Linear linear(float alpha, float beta) { return new Linear(simple_math2_inplace, alpha, beta); }
+        public Linear sadd(float C) { return new Linear(sp_math2_inplace, 1.0f, C); }
+        public Linear ssub(float C) { return new Linear(sp_math2_inplace, 1.0f, -C); }
+        public Linear smul(float C) { return new Linear(sp_math2_inplace, C, 0.0f); }
+        public Linear sdiv(float C) { return new Linear(sp_math2_inplace, (1.0f / C), 0.0f); }
+        public Linear linear(float alpha, float beta) { return new Linear(sp_math2_inplace, alpha, beta); }
         
         public Linear sadd(boolean inplace, float C) { return new Linear(inplace, 1.0f, C); }
         public Linear ssub(boolean inplace, float C) { return new Linear(inplace, 1.0f, -C); }
@@ -908,134 +953,132 @@ public final class Alpha
         public Linear sdiv(boolean inplace, float C) { return new Linear(inplace, 1.0f / C, 0.0f); }
         public Linear linear(boolean inplace, float alpha, float beta) { return new Linear(inplace, alpha, beta); }
 
-        public Relu relu() { return new Relu(simple_math2_inplace); }
+        public Relu relu() { return new Relu(sp_math2_inplace); }
         public Relu relu(boolean inplace) { return new Relu(inplace); }
         
-        public ReluN relu6() { return new ReluN(simple_math2_inplace, 6.0f); }
+        public ReluN relu6() { return new ReluN(sp_math2_inplace, 6.0f); }
         public ReluN relu6(boolean inplace) { return new ReluN(inplace, 6.0f); }
          
-        public ReluN reluN(float N) { return new ReluN(simple_math2_inplace, N); }
+        public ReluN reluN(float N) { return new ReluN(sp_math2_inplace, N); }
         public ReluN reluN(boolean inplace, float N) { return new ReluN(inplace, N); }
         
-        public LeakyRelu leakyRelu() { return new LeakyRelu(simple_math2_inplace, leakyRelu_negative_slope); }
-        public LeakyRelu leakyRelu(float negative_slope) { return new LeakyRelu(simple_math2_inplace, negative_slope); }
-        public LeakyRelu leakyRelu(boolean inplace) { return new LeakyRelu(inplace, leakyRelu_negative_slope); }
+        public LeakyRelu leakyRelu() { return new LeakyRelu(sp_math2_inplace, leakyRelu_neg_slope); }
+        public LeakyRelu leakyRelu(float negative_slope) { return new LeakyRelu(sp_math2_inplace, negative_slope); }
+        public LeakyRelu leakyRelu(boolean inplace) { return new LeakyRelu(inplace, leakyRelu_neg_slope); }
         public LeakyRelu leakyRelu(boolean inplace, float negative_slope) { return new LeakyRelu(inplace, negative_slope); }
 
-        public Softplus softplus() { return new Softplus(simple_math2_inplace); }
+        public Softplus softplus() { return new Softplus(sp_math2_inplace); }
         public Softplus softplus(boolean inplace) { return new Softplus(inplace); }
 
-        public Elu elu() { return elu(simple_math2_inplace, elu_alpha, elu_negative_slope);}
-        public Elu elu(float negative_slope) { return elu(simple_math2_inplace, elu_alpha, negative_slope); }
-        public Elu elu(float alpha, float negative_slope) { return new Elu(simple_math2_inplace, alpha, negative_slope); }
-        public Elu elu(boolean inplace) { return elu(inplace, elu_alpha, elu_negative_slope); }
-        public Elu elu(boolean inplace, float negative_slope) { return elu(inplace, 1.0f, negative_slope); }
+        public Elu elu() { return elu(sp_math2_inplace, elu_alpha, elu_neg_slope);}
+        public Elu elu(float alpha, float negative_slope) { return new Elu(sp_math2_inplace, alpha, negative_slope); }
+        public Elu elu(boolean inplace) { return elu(inplace, elu_alpha, elu_neg_slope); }
         public Elu elu(boolean inplace, float alpha, float negative_slope) { return new Elu(inplace, alpha, negative_slope); }
         
-        public Exp exp() { return new Exp(simple_math2_inplace, 1.0f, 0.0f);  }
-        public Exp exp(float alpha, float beta) { return new Exp(simple_math2_inplace, alpha, beta); }
+        public Exp exp() { return new Exp(sp_math2_inplace, 1.0f, 0.0f);  }
+        public Exp exp(float alpha, float beta) { return new Exp(sp_math2_inplace, alpha, beta); }
         public Exp exp(boolean inplace) { return new Exp(inplace, 1.0f, 0.0f); }
         public Exp exp(boolean inplace, float alpha, float beta) { return new Exp(inplace, alpha, beta); }
         
-        public Log log() { return new Log(simple_math2_inplace, 1.0f, 0.0f); }
-        public Log log(float alpha, float beta) { return new Log(simple_math2_inplace, alpha, beta); }
+        public Log log() { return new Log(sp_math2_inplace, 1.0f, 0.0f); }
+        public Log log(float alpha, float beta) { return new Log(sp_math2_inplace, alpha, beta); }
         public Log log(boolean inplace) { return new Log(inplace, 1.0f, 0.0f); }
         public Log log(boolean inplace, float alpha, float beta) { return new Log(inplace, alpha, beta); }
         
-        public Sqrt sqrt() { return new Sqrt(simple_math2_inplace, 1.0f, 0.0f); }
-        public Sqrt sqrt(float alpha, float beta) { return new Sqrt(simple_math2_inplace, alpha, beta); }
+        public Sqrt sqrt() { return new Sqrt(sp_math2_inplace, 1.0f, 0.0f); }
+        public Sqrt sqrt(float alpha, float beta) { return new Sqrt(sp_math2_inplace, alpha, beta); }
         public Sqrt sqrt(boolean inplace) { return new Sqrt(inplace, 1.0f, 0.0f); }
         public Sqrt sqrt(boolean inplace, float alpha, float beta) { return new Sqrt(inplace, alpha, beta); }
         
-        public Sigmoid sigmoid() { return new Sigmoid(simple_math2_inplace); }
+        public Sigmoid sigmoid() { return new Sigmoid(sp_math2_inplace); }
         public Sigmoid sigmoid(boolean inplace) { return new Sigmoid(inplace); }
         
-        public HardSigmoid hard_sigmoid() { return new HardSigmoid(simple_math2_inplace); }
+        public HardSigmoid hard_sigmoid() { return new HardSigmoid(sp_math2_inplace); }
         public HardSigmoid hard_sigmoid(boolean inplace) { return new HardSigmoid(inplace); }
         
-        public Tanh tanh() { return new Tanh(simple_math2_inplace); }
+        public Tanh tanh() { return new Tanh(sp_math2_inplace); }
         public Tanh tanh(boolean inplace) { return new Tanh(inplace); }
 
-        public Softmax softmax() { return new Softmax(simple_math2_inplace, -1); }
-        public Softmax softmax(int features) { return new Softmax(simple_math2_inplace, features);  }
+        public Softmax softmax() { return new Softmax(sp_math2_inplace, -1); }
+        public Softmax softmax(int features) { return new Softmax(sp_math2_inplace, features);  }
         public Softmax softmax(boolean inplace) { return new Softmax(inplace, -1); }
         public Softmax softmax(boolean inplace, int features) { return new Softmax(inplace, features); }
         
-        public LogSoftmax log_softmax() { return new LogSoftmax(simple_math2_inplace, -1); }
-        public LogSoftmax log_softmax(int features) { return new LogSoftmax(simple_math2_inplace, features); }
+        public LogSoftmax log_softmax() { return new LogSoftmax(sp_math2_inplace, -1); }
+        public LogSoftmax log_softmax(int features) { return new LogSoftmax(sp_math2_inplace, features); }
         public LogSoftmax log_softmax(boolean inplace) { return new LogSoftmax(inplace, -1); }
         public LogSoftmax log_softmax(boolean inplace, int features) {  return new LogSoftmax(inplace, features); }
 
-        public HalfSin halfSin(float Amp) { return new HalfSin(simple_math2_inplace, Amp, 1.0f, 0.0f); }
+        public HalfSin halfSin(float Amp) { return new HalfSin(sp_math2_inplace, Amp, 1.0f, 0.0f); }
         public HalfSin halfSin(float Amp, float alpha, float beta) {
-            return new HalfSin(simple_math2_inplace, Amp, alpha, beta);
+            return new HalfSin(sp_math2_inplace, Amp, alpha, beta);
         }
         public HalfSin halfSin(boolean inplace, float Amp) {  return halfSin(inplace, Amp, 1.0f, 0.0f); }
         public HalfSin halfSin(boolean inplace, float Amp, float alpha, float beta) {
             return new HalfSin(inplace, Amp, alpha, beta);
         }
           
-        public Tan tan() { return new Tan(simple_math2_inplace, 1.0f, 0.0f); }
-        public Tan tan(float alpha, float beta) { return new Tan(simple_math2_inplace, alpha, beta); }
+        public Tan tan() { return new Tan(sp_math2_inplace, 1.0f, 0.0f); }
+        public Tan tan(float alpha, float beta) { return new Tan(sp_math2_inplace, alpha, beta); }
         public Tan tan(boolean inplace) { return new Tan(inplace, 1.0f, 0.0f); }
         public Tan tan(boolean inplace, float alpha, float beta) { return new Tan(inplace, alpha, beta); }
         
-        public Cot cot() { return new Cot(simple_math2_inplace, 1.0f, 0.0f); }
-        public Cot cot(float alpha, float beta) { return new Cot(simple_math2_inplace, alpha, beta); }        
+        public Cot cot() { return new Cot(sp_math2_inplace, 1.0f, 0.0f); }
+        public Cot cot(float alpha, float beta) { return new Cot(sp_math2_inplace, alpha, beta); }        
         public Cot cot(boolean inplace) { return new Cot(inplace, 1.0f, 0.0f); }
         public Cot cot(boolean inplace, float alpha, float beta) { return new Cot(inplace, alpha, beta); }
 
-        public Arcsin arcsin() { return new Arcsin(simple_math2_inplace, 1.0f, 0.0f); }
-        public Arcsin arcsin(float alpha, float beta) { return new Arcsin(simple_math2_inplace, alpha, beta); }
+        public Arcsin arcsin() { return new Arcsin(sp_math2_inplace, 1.0f, 0.0f); }
+        public Arcsin arcsin(float alpha, float beta) { return new Arcsin(sp_math2_inplace, alpha, beta); }
         public Arcsin arcsin(boolean inplace) { return new Arcsin(inplace, 1.0f, 0.0f); } 
         public Arcsin arcsin(boolean inplace, float alpha, float beta) { return new Arcsin(inplace, alpha, beta); }
         
-        public Arctan arctan() { return new Arctan(simple_math2_inplace, 1.0f, 0.0f); } 
-        public Arctan arctan(float alpha, float beta) { return new Arctan(simple_math2_inplace, alpha, beta); }
+        public Arctan arctan() { return new Arctan(sp_math2_inplace, 1.0f, 0.0f); } 
+        public Arctan arctan(float alpha, float beta) { return new Arctan(sp_math2_inplace, alpha, beta); }
         public Arctan arctan(boolean inplace) { return new Arctan(inplace, 1.0f, 0.0f); } 
         public Arctan arctan(boolean inplace, float alpha, float beta) { return new Arctan(inplace, alpha, beta); } 
         
-        public BernouliMul bernouliMul(float p, float v1, float v2) { return new BernouliMul(simple_math2_inplace, p, v1, v2); }
+        public BernouliMul bernouliMul(float p, float v1, float v2) { return new BernouliMul(sp_math2_inplace, p, v1, v2); }
         public BernouliMul bernouliMul(boolean inplace, float p, float v1, float v2) { return new BernouliMul(inplace, p, v1, v2); }
         
-        public  Dropout dropout(float nonzero_p) { return new Dropout(simple_math2_inplace, nonzero_p); }
+        public  Dropout dropout(float nonzero_p) { return new Dropout(sp_math2_inplace, nonzero_p); }
         public  Dropout dropout(boolean inplace, float nonzero_prop) { return new Dropout(inplace, nonzero_prop); }
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="create: simple.tensor">
-        public View view(int... out_dim) { return new View(simple_tensor_inplace, out_dim); }
+        public View view(int... out_dim) { return new View(sp_tensor_inplace, out_dim); }
         public View view(boolean inplace, int... out_dim) { return new View(inplace, out_dim); }
         
-        public Reshape reshape(int... outDim) { return new Reshape(simple_tensor_inplace, outDim); }
+        public Reshape reshape(int... outDim) { return new Reshape(sp_tensor_inplace, outDim); }
         public Reshape reshape(boolean inplace, int... outDim) { return new Reshape(inplace, outDim); }
         
-        public Flatten flaten() { return new Flatten(simple_tensor_inplace); }
+        public Flatten flaten() { return new Flatten(sp_tensor_inplace); }
         public Flatten flaten(boolean inplace) { return new Flatten(inplace); }
         
         public Transpose transpose(int dimIdx1, int dimIdx2) {
-            return new Transpose(simple_tensor_inplace, dimIdx1, dimIdx2);
+            return new Transpose(sp_tensor_inplace, dimIdx1, dimIdx2);
         }
         public Transpose transpose(boolean inplace, int dimIdx1, int dimIdx2) {
             return new Transpose(inplace, dimIdx1, dimIdx2);
         }
         
-        public Rot180 rot180() { return new Rot180(simple_tensor_inplace); }
+        public Rot180 rot180() { return new Rot180(sp_tensor_inplace); }
         public Rot180 rot180(boolean inplace) { return new Rot180(inplace); }
         
-        public Pad pad(int... p) { return new Pad(simple_tensor_inplace, p, Vector.arrayCopy(p)); }
-        public Pad pad(int[] p0, int[] p1) { return new Pad(simple_tensor_inplace, p0, p1); }
+        public Pad pad(int... p) { return new Pad(sp_tensor_inplace, p, Vector.arrayCopy(p)); }
+        public Pad pad(int[] p0, int[] p1) { return new Pad(sp_tensor_inplace, p0, p1); }
         public Pad pad(boolean inplace, int... p) { return new Pad(inplace, p, Vector.arrayCopy(p)); }
         public Pad pad(boolean inplace, int[] p0, int[] p1) { return new Pad(inplace, p0, p1); }
         
-        public Trim trim(int... t) { return new Trim(simple_tensor_inplace, t, Vector.arrayCopy(t)); }
-        public Trim trim(int[] t0, int[] t1) { return new Trim(simple_tensor_inplace, t0, t1); }
+        public Trim trim(int... t) { return new Trim(sp_tensor_inplace, t, Vector.arrayCopy(t)); }
+        public Trim trim(int[] t0, int[] t1) { return new Trim(sp_tensor_inplace, t0, t1); }
         public Trim trim(boolean inplace, int... t) {  return new Trim(inplace, t, Vector.arrayCopy(t)); }
         public Trim trim(boolean inplace, int[] t0, int[] t1) { return new Trim(inplace, t0, t1); }
         
         public Pad pad2D(int... p) { 
-            return new Pad(simple_tensor_inplace, Vector.append(p, 0), Vector.append(p, 0)); 
+            return new Pad(sp_tensor_inplace, Vector.append(p, 0), Vector.append(p, 0)); 
         }
         public Pad pad2D(int[] p0, int[] p1) {
-            return new Pad(simple_tensor_inplace, Vector.append(p0, 0), Vector.append(p1, 0)); 
+            return new Pad(sp_tensor_inplace, Vector.append(p0, 0), Vector.append(p1, 0)); 
         }
         public Pad pad2D(boolean inplace, int... p) { 
             return new Pad(inplace, Vector.append(p, 0), Vector.append(p, 0)); 
@@ -1045,10 +1088,10 @@ public final class Alpha
         }
         
         public Trim trim2D(int... t) {
-            return new Trim(simple_tensor_inplace, Vector.append(t, 0), Vector.append(t, 0)); 
+            return new Trim(sp_tensor_inplace, Vector.append(t, 0), Vector.append(t, 0)); 
         }
         public Trim trim2D(int[] t0, int[] t1) {
-            return new Trim(simple_tensor_inplace, Vector.append(t0, 0), Vector.append(t1, 0));
+            return new Trim(sp_tensor_inplace, Vector.append(t0, 0), Vector.append(t1, 0));
         }
         public Trim trim2D(boolean inplace, int... t) {  
             return new Trim(inplace, Vector.append(t, 0), Vector.append(t, 0)); 
@@ -1057,21 +1100,21 @@ public final class Alpha
             return new Trim(inplace, Vector.append(t0, 0), Vector.append(t1, 0)); 
         }
         
-        public Expand expand(int...out_dim) { return new Expand(simple_tensor_inplace, Engine.from_center, out_dim); }
-        public Expand expand(int[] start_point, int[] out_dim) { return new Expand(simple_tensor_inplace, start_point, out_dim); }
+        public Expand expand(int...out_dim) { return new Expand(sp_tensor_inplace, Engine.from_center, out_dim); }
+        public Expand expand(int[] start_point, int[] out_dim) { return new Expand(sp_tensor_inplace, start_point, out_dim); }
         public Expand expand(boolean inplace, int...out_dim) { return new Expand(inplace, Engine.from_center, out_dim); }
         public Expand expand(boolean inplace, int[] start_point, int[] out_dim) { return new Expand(inplace, start_point, out_dim); }
         
-        public Crop crop(int...out_dim) { return new Crop(simple_tensor_inplace, Engine.from_center, out_dim); }
-        public Crop crop(int[] start_point, int[] out_dim) { return new Crop(simple_tensor_inplace, start_point, out_dim); }
+        public Crop crop(int...out_dim) { return new Crop(sp_tensor_inplace, Engine.from_center, out_dim); }
+        public Crop crop(int[] start_point, int[] out_dim) { return new Crop(sp_tensor_inplace, start_point, out_dim); }
         public Crop crop(boolean inplace, int...out_dim) { return new Crop(inplace, Engine.from_center, out_dim); }
         public Crop crop(boolean inplace, int[] start_point, int[] out_dim) { return new Crop(inplace, start_point, out_dim); }
         
         public Expand expand2D(int...out_dim) {
-            return new Expand(simple_tensor_inplace, Engine.from_center, Vector.append(out_dim, -1));
+            return new Expand(sp_tensor_inplace, Engine.from_center, Vector.append(out_dim, -1));
         }
         public Expand expand2D(int[] start, int[] out_dim) {
-            return new Expand(simple_tensor_inplace, Vector.append(start, 0), Vector.append(out_dim, -1));
+            return new Expand(sp_tensor_inplace, Vector.append(start, 0), Vector.append(out_dim, -1));
         }
         public Expand expand2D(boolean inplace, int...out_dim) {
             return new Expand(inplace, Engine.from_center, Vector.append(out_dim, -1));
@@ -1081,10 +1124,10 @@ public final class Alpha
         }
         
         public Crop crop2D(int...out_dim) {
-            return new Crop(simple_tensor_inplace, Engine.from_center, Vector.append(out_dim, -1));
+            return new Crop(sp_tensor_inplace, Engine.from_center, Vector.append(out_dim, -1));
         }
         public Crop crop2D(int[] start, int[] out_dim) {
-            return new Crop(simple_tensor_inplace, Vector.append(start, 0), Vector.append(out_dim, -1));
+            return new Crop(sp_tensor_inplace, Vector.append(start, 0), Vector.append(out_dim, -1));
         }
         public Crop crop2D(boolean inplace, int...out_dim) { 
             return new Crop(inplace, Engine.from_center, Vector.append(out_dim, -1));
@@ -1094,14 +1137,14 @@ public final class Alpha
         }
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="create: simple.affine">
-        public Affine affine(int... feature_dim) { return new Affine(simple_affine_inplace, feature_dim); }
+        public Affine affine(int... feature_dim) { return new Affine(sp_affine_inplace, feature_dim); }
         public Affine affine(boolean inplace, int... feature_dim) { return new Affine(inplace, feature_dim); }
         
         public LayerNorm layerNorm(int... feature_dim) {
-            return new LayerNorm(simple_affine_inplace, layerNorm_affine, layerNorm_eps, feature_dim);
+            return new LayerNorm(sp_affine_inplace, layerNorm_affine, layerNorm_eps, feature_dim);
         }     
         public LayerNorm layerNorm(boolean affine, float eps, int... feature_dim) {
-            return new LayerNorm(simple_affine_inplace, affine, eps, feature_dim);
+            return new LayerNorm(sp_affine_inplace, affine, eps, feature_dim);
         }
         public LayerNorm layerNorm(boolean inplace, int... feature_dim) {
             return new LayerNorm(inplace, layerNorm_affine, layerNorm_eps, feature_dim);
@@ -1111,14 +1154,14 @@ public final class Alpha
         }
 
         public GlobalSqBatchNorm global_sqBatchNorm(int... feature_dim) {
-            return new GlobalSqBatchNorm(simple_affine_inplace, batchNorm_affine, 
+            return new GlobalSqBatchNorm(sp_affine_inplace, batchNorm_affine, 
                     batchNorm_beta1, batchNorm_beta2, batchNorm_eps,
                     feature_dim);
         }
         public GlobalSqBatchNorm global_sqBatchNorm(boolean affine,
                 float beta1, float beta2, float eps, 
                 int... feature_dim) {
-            return new GlobalSqBatchNorm(simple_affine_inplace, affine, 
+            return new GlobalSqBatchNorm(sp_affine_inplace, affine, 
                     beta1, beta2, eps,
                     feature_dim);
         }
@@ -1136,14 +1179,14 @@ public final class Alpha
         }
         
         public SqBatchNorm sqBatchNorm(int... feature_dim) {
-            return new SqBatchNorm(simple_affine_inplace, batchNorm_affine, 
+            return new SqBatchNorm(sp_affine_inplace, batchNorm_affine, 
                     batchNorm_beta1, batchNorm_beta2, batchNorm_eps,
                     feature_dim);
         }
         public SqBatchNorm sqBatchNorm(boolean affine,
                 float beta1, float beta2, float eps, 
                 int... feature_dim) {
-            return new SqBatchNorm(simple_affine_inplace, batchNorm_affine, 
+            return new SqBatchNorm(sp_affine_inplace, batchNorm_affine, 
                     beta1, beta2, eps,
                     feature_dim);
         }
@@ -1161,14 +1204,14 @@ public final class Alpha
         }
         
         public GlobalBatchNorm global_batchNorm(int... feature_dim) {
-            return new GlobalBatchNorm(simple_affine_inplace, batchNorm_affine,
+            return new GlobalBatchNorm(sp_affine_inplace, batchNorm_affine,
                     batchNorm_beta1, batchNorm_beta2, batchNorm_eps,
                     feature_dim);
         }
         public GlobalBatchNorm global_batchNorm(boolean affine,
                 float beta1, float beta2, float eps, 
                 int... feature_dim) {
-            return new GlobalBatchNorm(simple_affine_inplace, affine, 
+            return new GlobalBatchNorm(sp_affine_inplace, affine, 
                     beta1, beta2, eps,
                     feature_dim);
         }
@@ -1186,14 +1229,14 @@ public final class Alpha
         }
         
         public BatchNorm batchNorm(int... feature_dim) {
-            return new BatchNorm(simple_affine_inplace, batchNorm_affine, 
+            return new BatchNorm(sp_affine_inplace, batchNorm_affine, 
                     batchNorm_beta1, batchNorm_beta2, batchNorm_eps,
                     feature_dim);
         }
         public BatchNorm batchNorm(boolean affine,
                 float beta1, float beta2, float eps, 
                 int... feature_dim) {
-            return new BatchNorm(simple_affine_inplace, batchNorm_affine, 
+            return new BatchNorm(sp_affine_inplace, batchNorm_affine, 
                     beta1, beta2, eps,
                     feature_dim);
         }
@@ -1212,14 +1255,14 @@ public final class Alpha
         }
         //</editor-fold>
 
-        //<editor-fold defaultstate="collapsed" desc="create: simple.pool2d.AvgPool2D">
+        //<editor-fold defaultstate="collapsed" desc="create: simple.pool.AvgPool2D">
         public AvgPool2D avgPool2D(int div) {
-            return new AvgPool2D(avgpool2D_ignore_padding,
+            return new AvgPool2D(avgpool2D_igpad,
                     div, div, div, div, 0, 0, 
                     -1, -1);
         }
         public AvgPool2D avgPool2D(int kernel, int stride, int padding) {
-            return new AvgPool2D(avgpool2D_ignore_padding,
+            return new AvgPool2D(avgpool2D_igpad,
                     kernel, kernel, stride, stride, padding, padding, 
                     -1, -1);
         }
@@ -1227,38 +1270,15 @@ public final class Alpha
                 int kernel_height, int kernel_width,
                 int stride_height, int stride_width,
                 int padding_height, int padding_width) {
-            return new AvgPool2D(avgpool2D_ignore_padding,
-                    kernel_height, kernel_width,
-                    stride_height, stride_width,
-                    padding_height, padding_width, 
-                    -1, -1);
-        }
-        //</editor-fold> 
-        //<editor-fold defaultstate="collapsed" desc="create: simple.pool2d.NaiveMaxPool2D">
-        public NaiveMaxPool2D naive_maxPool2D(int div) {
-            return new NaiveMaxPool2D(div, div, div, div, 0, 0, 
-                    -1, -1);
-        }
-        public NaiveMaxPool2D naive_maxPool2D(int kernel, int stride, int padding) {
-            return new NaiveMaxPool2D(kernel, kernel, stride, stride, padding, padding, 
-                    -1, -1);
-        }
-        public NaiveMaxPool2D naive_maxPool2D(
-                int kernel_height, int kernel_width,
-                int stride_height, int stride_width,
-                int padding_height, int padding_width) {
-            return new NaiveMaxPool2D(
+            return new AvgPool2D(avgpool2D_igpad,
                     kernel_height, kernel_width,
                     stride_height, stride_width,
                     padding_height, padding_width, 
                     -1, -1);
         }
         //</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="create: simple.pool2d.MaxPool2D">
-        public MaxPool2D maxPool2D(int div) {
-            return new MaxPool2D(div, div, div, div, 0, 0, 
-                    -1, -1);
-        }
+        //<editor-fold defaultstate="collapsed" desc="create: simple.pool.MaxPool2D">
+        public MaxPool2D maxPool2D(int div) { return new MaxPool2D(div, div, div, div, 0, 0, -1, -1); }
         public MaxPool2D maxPool2D(int kernel, int stride, int padding) {
             return new MaxPool2D(kernel, kernel, stride, stride, padding, padding, 
                     -1, -1);
@@ -1274,34 +1294,7 @@ public final class Alpha
                     -1, -1);
         }
         //</editor-fold>
-        
-        //<editor-fold defaultstate="collapsed" desc="create: simple.pool2d.AdaptiveAvgPool2D">
-        public AdaptiveAvgPool2D adaptive_avgPool2D(int out_size) {
-            return new AdaptiveAvgPool2D(avgpool2D_ignore_padding, 
-                    out_size, out_size);
-        }
-        public AdaptiveAvgPool2D adaptive_avgPool2D(int out_height, int out_width) {
-            return new AdaptiveAvgPool2D(avgpool2D_ignore_padding, 
-                    out_height, out_width);
-        }
-        //</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="create: simple.pool2d.AdaptiveNaiveMaxPool2D">
-        public AdaptiveNaiveMaxPool2D adaptive_naive_maxPool2D(int out_size) {
-            return new AdaptiveNaiveMaxPool2D(out_size, out_size);
-        }
-        public AdaptiveNaiveMaxPool2D adaptive_naive_maxPool2D(int out_height, int out_width) {
-            return new AdaptiveNaiveMaxPool2D(out_height, out_width);
-        }
-        //</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="create: simple.pool2d.AdaptiveMaxPool2D">
-        public AdaptiveMaxPool2D adaptive_maxPool2D(int out_size) {
-            return new AdaptiveMaxPool2D(out_size, out_size);
-        }
-        public AdaptiveMaxPool2D adaptive_maxPool2D(int out_height, int out_width) {
-            return new AdaptiveMaxPool2D(out_height, out_width);
-        }
-        //</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="create: simple.pool2D.AvgUnpool2D">
+        //<editor-fold defaultstate="collapsed" desc="create: simple.pool.AvgUnpool2D">
         public AvgUnpool2D avgUnpool2D(int mul) {
             return new AvgUnpool2D(avgunpool2D_ignore_padding, 
                     mul, mul, mul, mul, 0, 0, 
@@ -1324,67 +1317,124 @@ public final class Alpha
                     -1, -1);
         }
         //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="create: simple.pool.AdaptivePool2D">
+        public AdaptiveAvgPool2D adaptive_avgPool2D(int out_size) { return new AdaptiveAvgPool2D(avgpool2D_igpad, out_size, out_size); }
+        public AdaptiveAvgPool2D adaptive_avgPool2D(int out_height, int out_width) {
+            return new AdaptiveAvgPool2D(avgpool2D_igpad, out_height, out_width);
+        }
+        
+        public AdaptiveMaxPool2D adaptive_maxPool2D(int out_size) { return new AdaptiveMaxPool2D(out_size, out_size); }
+        public AdaptiveMaxPool2D adaptive_maxPool2D(int out_height, int out_width) {
+            return new AdaptiveMaxPool2D(out_height, out_width);
+        }
+        //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="create: simple.pool.Pool1D">
+        public AvgPool1D avgPool1D(int div) { return new AvgPool1D(avgpool1D_igpad, div, div, 0, -1); }
+        public AvgPool1D avgPool1D(int kernel_width, int stride_width, int padding_width) {
+            return new AvgPool1D(avgpool1D_igpad, kernel_width, stride_width, padding_width, -1);
+        }
+        
+        public MaxPool1D maxPool1D(int div) { return new MaxPool1D(div, div, 0, -1); }
+        public MaxPool1D maxPool1D(int kernel_width, int stride_width, int padding_width) {
+            return new MaxPool1D(kernel_width, stride_width, padding_width, -1);
+        }
+        //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="create: simple.pool.AdaptivePool1D">
+        public AdaptiveAvgPool1D adaptive_avgPool1D(int out_width) { return new AdaptiveAvgPool1D(avgpool1D_igpad, out_width); }
+        public AdaptiveMaxPool1D adaptive_maxPool1D(int out_width) { return new AdaptiveMaxPool1D(out_width); }
+        //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="create: simple.blas.Conv3D">
         public Conv3D point_conv3D(boolean biased, 
-                int in_channels, int out_channels) {
+                int in_channel, int out_channel) {
             return new Conv3D(biased, 
-                    in_channels, out_channels,
+                    in_channel, out_channel,
                     1, 1, 1, 1, 0, 0, 
                     -1, -1);
         }
         
         public Conv3D conv3D(boolean biased,
-                int in_channels, int out_channels,
+                int in_channel, int out_channel,
                 int kernel, int stride, int padding) {
             return new Conv3D(biased, 
-                    in_channels, out_channels,
+                    in_channel, out_channel,
                     kernel, kernel, stride, stride, padding, padding,
                     -1, -1);
         }
         
         public Conv3D conv3D(boolean biased,
-                int in_channels, int out_channels,
-                int kernel_height, int kernel_width,
-                int stride_height, int stride_width,
+                int in_channel,     int out_channel,
+                int kernel_height,  int kernel_width,
+                int stride_height,  int stride_width,
                 int padding_height, int padding_width) {
             return new Conv3D(biased, 
-                    in_channels, out_channels,
-                    kernel_height, kernel_width,
-                    stride_height, stride_width,
+                    in_channel,     out_channel,
+                    kernel_height,  kernel_width,
+                    stride_height,  stride_width,
                     padding_height, padding_width,
                     -1, -1);
         }
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="create: simple.blas.Deconv3D">
         public Deconv3D point_deconv3D(boolean biased, 
-                int in_channels, int out_channels) {
+                int in_channel, int out_channel) {
             return new Deconv3D(biased, 
-                    in_channels, out_channels, 
+                    in_channel, out_channel, 
                     1, 1, 1, 1, 0, 0, 
                     -1, -1);
         }
         public Deconv3D deconv3D(boolean biased,
-                int in_channels, int out_channels,
+                int in_channel, int out_channel,
                 int kernel, int stride, int padding) {
             return new Deconv3D(biased, 
-                    in_channels, out_channels,
+                    in_channel, out_channel,
                     kernel, kernel,
                     stride, stride,
                     padding, padding,
                     -1, -1);
         }
         public Deconv3D deconv3D(boolean biased, 
-                int in_channels, int out_channels,
-                int kernel_height, int kernel_width,
-                int stride_height, int stride_width,
+                int in_channel,     int out_channel,
+                int kernel_height,  int kernel_width,
+                int stride_height,  int stride_width,
                 int padding_height, int padding_width) {
             return new Deconv3D(biased, 
-                    in_channels, out_channels,
-                    kernel_height, kernel_width,
-                    stride_height, stride_width,
+                    in_channel,     out_channel,
+                    kernel_height,  kernel_width,
+                    stride_height,  stride_width,
                     padding_height, padding_width,
                     -1, -1);
+        }
+        //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="create: simple.blas.Conv2D">
+        public Conv2D point_conv2D(boolean biased, 
+                int in_channel, int out_channel) {
+            return new Conv2D(biased, 
+                    in_channel, out_channel,
+                    1, 1, 0, -1);
+        }
+        
+        public Conv2D conv2D(boolean biased,
+                int in_channel, int out_channel,
+                int kernel_width, int stride_width, int padding_width) {
+            return new Conv2D(biased, 
+                    in_channel, out_channel,
+                    kernel_width, stride_width, padding_width, -1);
+        }
+        //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="create: simple.blas.Deconv2D">
+        public Deconv2D point_deconv2D(boolean biased, 
+                int in_channel, int out_channel) {
+            return new Deconv2D(biased, 
+                    in_channel, out_channel, 
+                    1, 1, 0, -1);
+        }
+        public Deconv2D deconv2D(boolean biased,
+                int in_channel, int out_channel,
+                int kernel_width, int stride_width, int padding_width) {
+            return new Deconv2D(biased, 
+                    in_channel, out_channel,
+                    kernel_width, stride_width, padding_width, -1);
         }
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="create: simple.blas.Fullconnect">
@@ -1398,22 +1448,22 @@ public final class Alpha
         public MatMulT1 matMulT1() { return new MatMulT1(); }
         public MatMulT2 matMulT2() { return new MatMulT2(); }
         
-        public BatchMatMul batchMatMul() {  return batchMatMul(dual_likeX1); }
+        public BatchMatMul batchMatMul() {  return batchMatMul(dl_likeX1); }
         public BatchMatMul batchMatMul(boolean likeX1) { return new BatchMatMul(likeX1); }
         
-        public BatchMatMulT1 batchMatMulT1() { return batchMatMulT1(dual_likeX1);  }
+        public BatchMatMulT1 batchMatMulT1() { return batchMatMulT1(dl_likeX1);  }
         public BatchMatMulT1 batchMatMulT1(boolean likeX1) { return new BatchMatMulT1(likeX1); }
         
-        public BatchMatMulT2 batchMatMulT2() { return batchMatMulT2(dual_likeX1); }
+        public BatchMatMulT2 batchMatMulT2() { return batchMatMulT2(dl_likeX1); }
         public BatchMatMulT2 batchMatMulT2(boolean likeX1) { return new BatchMatMulT2(likeX1); }
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="create: dual.math">
-        public Linear2 add() { return new Linear2(dual_likeX1, 1.0f,  1.0f, 0.0f); }
-        public Linear2 sub() { return new Linear2(dual_likeX1, 1.0f, -1.0f, 0.0f); }
-        public Linear2 add(float alpha, float beta) { return new Linear2(dual_likeX1, alpha,  beta, 0.0f); }
-        public Linear2 sub(float alpha, float beta) { return new Linear2(dual_likeX1, alpha, -beta, 0.0f); } 
+        public Linear2 add() { return new Linear2(dl_likeX1, 1.0f,  1.0f, 0.0f); }
+        public Linear2 sub() { return new Linear2(dl_likeX1, 1.0f, -1.0f, 0.0f); }
+        public Linear2 add(float alpha, float beta) { return new Linear2(dl_likeX1, alpha,  beta, 0.0f); }
+        public Linear2 sub(float alpha, float beta) { return new Linear2(dl_likeX1, alpha, -beta, 0.0f); } 
         public Linear2 linear2(float alpha, float beta, float gamma) {
-            return new Linear2(dual_likeX1, alpha, beta, gamma);
+            return new Linear2(dl_likeX1, alpha, beta, gamma);
         }
         
         public Linear2 add(boolean likeX1) { return new Linear2(likeX1, 1.0f, 1.0f, 0.0f); }
@@ -1432,13 +1482,13 @@ public final class Alpha
             return new Linear2Row(alpha, beta, gamma);
         }
         
-        public Quadratic2 mul() { return new Quadratic2(dual_likeX1, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f); }
-        public Quadratic2 mul(float alpha) { return new Quadratic2(dual_likeX1, 0.0f, alpha, 0.0f, 0.0f, 0.0f, 0.0f); }
-        public Quadratic2 sqadd() { return new Quadratic2(dual_likeX1, 1.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f); }        
-        public Quadratic2 sqsub() { return new Quadratic2(dual_likeX1, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f); }        
-        public Quadratic2 sqadd(float alpha, float beta) { return new Quadratic2(dual_likeX1, alpha, 0.0f, beta, 0.0f, 0.0f, 0.0f); }        
+        public Quadratic2 mul() { return new Quadratic2(dl_likeX1, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f); }
+        public Quadratic2 mul(float alpha) { return new Quadratic2(dl_likeX1, 0.0f, alpha, 0.0f, 0.0f, 0.0f, 0.0f); }
+        public Quadratic2 sqadd() { return new Quadratic2(dl_likeX1, 1.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f); }        
+        public Quadratic2 sqsub() { return new Quadratic2(dl_likeX1, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f); }        
+        public Quadratic2 sqadd(float alpha, float beta) { return new Quadratic2(dl_likeX1, alpha, 0.0f, beta, 0.0f, 0.0f, 0.0f); }        
         public Quadratic2 quadratic2(float k11, float k12, float k22, float k1, float k2, float C) {
-            return new Quadratic2(dual_likeX1, k11, k12, k22, k1, k2, C);
+            return new Quadratic2(dl_likeX1, k11, k12, k22, k1, k2, C);
         }
         
         public Quadratic2 mul(boolean likeX1) { return new Quadratic2(likeX1, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f); }
@@ -1472,9 +1522,9 @@ public final class Alpha
             return new Quadratic2Center(dim2, k11, k12, k22, k1, k2, C);
         }
         
-        public Div div() { return div(dual_likeX1, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f); }
+        public Div div() { return div(dl_likeX1, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f); }
         public Div div(float alpha1, float beta1, float alpha2, float beta2, float gamma){
-            return div(dual_likeX1, alpha1, beta1, alpha2, beta2, gamma);
+            return div(dl_likeX1, alpha1, beta1, alpha2, beta2, gamma);
         }
         
         public Div div(boolean likeX1) { return div(likeX1, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f); }
@@ -1544,8 +1594,7 @@ public final class Alpha
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="class: UnitFunctional">
-    public static class UnitFunctional
-    {
+    public static class UnitFunctional {
         protected UnitFunctional() {}
         
         public static final UnitFunctional F = new UnitFunctional();
@@ -1618,7 +1667,7 @@ public final class Alpha
         
         private static Tensor[] fsp(SimpleCore<?> core, Tensor[] X) {//simple fixed-carrier
             Tensor[] Y = core.forward(X);
-            if(!simple_math2_inplace){//if X[0] is output of OneOffScale, X[0].needCarry = true
+            if(!sp_math2_inplace){//if X[0] is output of OneOffScale, X[0].needCarry = true
                 Y[0].need_carry(true); Y[0].carry(X[0]);//use Y[0] to carray X[0]
                 core.hook_after_backward((self)->{
                     Tensor deltaX = core.deltaX().need_carry(true);
@@ -1629,6 +1678,30 @@ public final class Alpha
         }
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="carraier: simple.MaxPool">
+        private static Tensor[] csp_maxPool(CoreMaxPool1D<?> core, Tensor[] X) {//simple carrier
+            Tensor[] Y = core.forward(X);
+            Y[0].need_carry(true);//if X[0] is output of OneOffUnitCore, X[0].need_carry = true 
+            Tensor Index = core.Index(); Index.need_carry(true);
+            Y[0].carry(X[0]); Y[0].carry(Index);//use Y[0] to carray { X[0], Index }
+            core.hook_after_backward((self)->{
+                Tensor deltaX = core.deltaX(); deltaX.need_carry(true);
+                deltaX.carry(core.deltaY());
+            });
+            return Y;
+        }
+        
+        private static Tensor[] csp_maxPool_with_Idx(CoreMaxPool1D<?> core, Tensor[] X) {//simple carrier
+            Tensor[] Y = core.forward(X);
+            Y[0].need_carry(true);//if X[0] is output of OneOffUnitCore, X[0].need_carry = true 
+            Tensor Index = core.Index(); Index.need_carry(true);
+            Y[0].carry(X[0]); Y[0].carry(Index);//use Y[0] to carray { X[0], Index }
+            core.hook_after_backward((self)->{
+                Tensor deltaX = core.deltaX(); deltaX.need_carry(true);
+                deltaX.carry(core.deltaY());
+            });
+            return new Tensor[] { Y[0], core.Index() };
+        }
+        
         private static Tensor[] csp_maxPool(CoreMaxPool2D<?> core, Tensor[] X) {//simple carrier
             Tensor[] Y = core.forward(X);
             Y[0].need_carry(true);//if X[0] is output of OneOffUnitCore, X[0].need_carry = true 
@@ -1641,7 +1714,7 @@ public final class Alpha
             return Y;
         }
         
-        private static Tensor[] csp_maxPool_with_Index(CoreMaxPool2D<?> core, Tensor[] X) {//simple carrier
+        private static Tensor[] csp_maxPool_with_Idx(CoreMaxPool2D<?> core, Tensor[] X) {//simple carrier
             Tensor[] Y = core.forward(X);
             Y[0].need_carry(true);//if X[0] is output of OneOffUnitCore, X[0].need_carry = true 
             Tensor Index = core.Index(); Index.need_carry(true);
@@ -1654,6 +1727,30 @@ public final class Alpha
         }
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="carraier: simple.AdaptiveMaxPool">
+        private static Tensor[] csp_maxPool(CoreAdaptiveMaxPool1D<?> core, Tensor[] X) {//simple carrier
+            Tensor[] Y = core.forward(X);
+            Y[0].need_carry(true);//if X[0] is output of OneOffUnitCore, X[0].need_carry = true 
+            Tensor Index = core.Index(); Index.need_carry(true);
+            Y[0].carry(X[0]); Y[0].carry(Index); //use Y[0] to carray { X[0], Index }
+            core.hook_after_backward((self)->{
+                Tensor deltaX = core.deltaX(); deltaX.need_carry(true);
+                deltaX.carry(core.deltaY());
+            });
+            return Y;
+        }
+        
+        private static Tensor[] csp_maxPool_with_Idx(CoreAdaptiveMaxPool1D<?> core, Tensor[] X) {//simple carrier
+            Tensor[] Y = core.forward(X);
+            Y[0].need_carry(true);//if X[0] is output of OneOffUnitCore, X[0].need_carry = true 
+            Tensor Index = core.Index(); Index.need_carry(true);
+            Y[0].carry(X[0]); Y[0].carry(Index);//use Y[0] to carray { X[0], Index }
+            core.hook_after_backward((self)->{
+                Tensor deltaX = core.deltaX(); deltaX.need_carry(true);
+                deltaX.carry(core.deltaY());
+            });
+            return new Tensor[] {Y[0], core.Index()};
+        }
+        
         private static Tensor[] csp_maxPool(CoreAdaptiveMaxPool2D<?> core, Tensor[] X) {//simple carrier
             Tensor[] Y = core.forward(X);
             Y[0].need_carry(true);//if X[0] is output of OneOffUnitCore, X[0].need_carry = true 
@@ -1666,7 +1763,7 @@ public final class Alpha
             return Y;
         }
         
-        private static Tensor[] csp_maxPool_with_Index(CoreAdaptiveMaxPool2D<?> core, Tensor[] X) {//simple carrier
+        private static Tensor[] csp_maxPool_with_Idx(CoreAdaptiveMaxPool2D<?> core, Tensor[] X) {//simple carrier
             Tensor[] Y = core.forward(X);
             Y[0].need_carry(true);//if X[0] is output of OneOffUnitCore, X[0].need_carry = true 
             Tensor Index = core.Index(); Index.need_carry(true);
@@ -1718,392 +1815,217 @@ public final class Alpha
         
         //<editor-fold defaultstate="collapsed" desc="functional: simple.math1">
         public final Tensor[] abs(Tensor... X) {  return csp(new CoreAbs<>(sp_func, 1.0f, 0.0f), X); }
-        public final Tensor[] abs(float alpha, float beta, Tensor...X) {
-            return csp(new CoreAbs<>(sp_func, alpha, beta), X);
-        }
+        public final Tensor[] abs(float alpha, float beta, Tensor...X) { return csp(new CoreAbs<>(sp_func, alpha, beta), X); }
         
-        public final Tensor[] square(Tensor... X) {
-            return csp(new CoreQuadratic<>(sp_func, 1.0f, 1.0f, 0.0f), X); 
-        }
-        public final Tensor[] square(float alpha, Tensor... X) {
-            return csp(new CoreQuadratic<>(sp_func, alpha, 0.0f, 0.0f), X); 
-        }
-        public final Tensor[] quadratic(float alpha, float beta, float gamma, Tensor... X){
-            return csp(new CoreQuadratic<>(sp_func, alpha, beta, gamma), X);
-        }
+        public final Tensor[] square(Tensor... X) { return csp(new CoreQuadratic<>(sp_func, 1.0f, 1.0f, 0.0f), X); }
+        public final Tensor[] square(float alpha, Tensor... X) { return csp(new CoreQuadratic<>(sp_func, alpha, 0.0f, 0.0f), X); }
+        public final Tensor[] quadratic(float alpha, float beta, float gamma, Tensor... X){ return csp(new CoreQuadratic<>(sp_func, alpha, beta, gamma), X); }
         
         public final Tensor[] sin(Tensor... X) { return csp(new CoreSin<>(sp_func, 1.0f, 0), X); }
-        public final Tensor[] sin(float alpha, float beta, Tensor... X) {
-            return csp(new CoreSin<>(sp_func, alpha, beta), X);
-        }
+        public final Tensor[] sin(float alpha, float beta, Tensor... X) { return csp(new CoreSin<>(sp_func, alpha, beta), X); }
+        
         public final Tensor[] cos(Tensor... X) { return csp(new CoreCos<>(sp_func, 1.0f, 0), X); }
-        public final Tensor[] cos(float alpha, float beta, Tensor... X) {
-            return csp(new CoreCos<>(sp_func, alpha, beta), X);
-        }
+        public final Tensor[] cos(float alpha, float beta, Tensor... X) { return csp(new CoreCos<>(sp_func, alpha, beta), X); }
         
         public final Tensor[] csc(Tensor... X) { return csp(new CoreCsc<>(sp_func, 1.0f, 0.0f), X); }
-        public final Tensor[] csc(float alpha, float beta, Tensor... X) {
-            return csp(new CoreCsc<>(sp_func, alpha, beta), X);
-        }
+        public final Tensor[] csc(float alpha, float beta, Tensor... X) { return csp(new CoreCsc<>(sp_func, alpha, beta), X); }
+        
         public final Tensor[] sec(Tensor... X) { return csp(new CoreSec<>(sp_func, 1.0f, 0.0f), X); }
-        public final Tensor[] sec(float alpha, float beta, Tensor... X) {
-            return csp(new CoreSec<>(sp_func, alpha, beta), X);
-        }
+        public final Tensor[] sec(float alpha, float beta, Tensor... X) { return csp(new CoreSec<>(sp_func, alpha, beta), X); }
         
         public final Tensor[] gelu(Tensor... X) { return csp(new CoreGelu<>(sp_func), X); }
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="functional: simple.math2">
-        public final Tensor[] max(float vmax, Tensor... X) {
-            return fsp(new CoreMax<>(sp_func, simple_math2_inplace, 1.0f, 0.0f, vmax), X); 
-        }
+        public final Tensor[] max(float vmax, Tensor... X) { return fsp(new CoreMax<>(sp_func, sp_math2_inplace, 1.0f, 0.0f, vmax), X); }
         public final Tensor[] max(float alpha, float beta, float vmax, Tensor... X) {
-            return fsp(new CoreMax<>(sp_func, simple_math2_inplace, alpha, beta, vmax), X);
+            return fsp(new CoreMax<>(sp_func, sp_math2_inplace, alpha, beta, vmax), X);
         }
-        public final Tensor[] max(boolean inplace, float vmax, Tensor... X) {
-            return csp(inplace, new CoreMax<>(sp_func, inplace, 1.0f, 0.0f, vmax), X);
-        } 
+        public final Tensor[] max(boolean inplace, float vmax, Tensor... X) { return csp(inplace, new CoreMax<>(sp_func, inplace, 1.0f, 0.0f, vmax), X); }  
         public final Tensor[] max(boolean inplace, float alpha, float beta, float vmax, Tensor... X) {
             return csp(inplace, new CoreMax<>(sp_func, inplace, alpha, beta, vmax), X);
         }
         
-        public final Tensor[] min(float vmin, Tensor...X) {
-            return fsp(new CoreMin<>(sp_func, simple_math2_inplace, 1.0f, 0.0f, vmin), X);
-        }
+        public final Tensor[] min(float vmin, Tensor...X) { return fsp(new CoreMin<>(sp_func, sp_math2_inplace, 1.0f, 0.0f, vmin), X); }
         public final Tensor[] min(float alpha, float beta, float vmin, Tensor... X) {
-            return fsp(new CoreMin<>(sp_func, simple_math2_inplace, alpha, beta, vmin), X);
+            return fsp(new CoreMin<>(sp_func, sp_math2_inplace, alpha, beta, vmin), X);
         }
-        public final Tensor[] min(boolean inplace, float vmin, Tensor... X) {
-            return csp(inplace, new CoreMin<>(sp_func, inplace, 1.0f, 0.0f, vmin), X);
-        }
+        public final Tensor[] min(boolean inplace, float vmin, Tensor... X) { return csp(inplace, new CoreMin<>(sp_func, inplace, 1.0f, 0.0f, vmin), X); }
         public final Tensor[] min(boolean inplace, float alpha, float beta, float vmin, Tensor... X) {
             return csp(inplace, new CoreMin<>(sp_func, inplace, alpha, beta, vmin), X);
         }
         
-        public final Tensor[] clip(float vmin, float vmax, Tensor... X) {
-            return fsp(new CoreClip<>(sp_func, simple_math2_inplace, 1.0f, 0.0f, vmin, vmax), X);
-        }
+        public final Tensor[] clip(float vmin, float vmax, Tensor... X) { return fsp(new CoreClip<>(sp_func, sp_math2_inplace, 1.0f, 0.0f, vmin, vmax), X); }
         public final Tensor[] clip(float alpha, float beta, float vmin, float vmax, Tensor... X) {
-            return fsp(new CoreClip<>(sp_func, simple_math2_inplace, alpha, beta, vmin, vmax), X);
+            return fsp(new CoreClip<>(sp_func, sp_math2_inplace, alpha, beta, vmin, vmax), X);
         }
-        public final Tensor[] clip(boolean inplace, float vmin, float vmax, Tensor... X) {
-            return csp(inplace, new CoreClip<>(sp_func, inplace, 1.0f, 0.0f, vmin, vmax), X);
-        }
+        public final Tensor[] clip(boolean inplace, float vmin, float vmax, Tensor... X) { return csp(inplace, new CoreClip<>(sp_func, inplace, 1.0f, 0.0f, vmin, vmax), X); }
         public final Tensor[] clip(boolean inplace, float alpha, float beta, float vmin, float vmax, Tensor... X) {
             return csp(inplace, new CoreClip<>(sp_func, inplace, alpha, beta, vmin, vmax), X);
         }
         
-        public final Tensor[] rpl(Tensor... X) { 
-            return fsp(new CoreRpl<>(sp_func, simple_math2_inplace, 1.0f, 0.0f, 0.0f), X); 
-        }
+        public final Tensor[] rpl(Tensor... X) { return fsp(new CoreRpl<>(sp_func, sp_math2_inplace, 1.0f, 0.0f, 0.0f), X); }
         public final Tensor[] rpl(float alpha, float beta, float gamma, Tensor... X) {
-            return fsp(new CoreRpl<>(sp_func, simple_math2_inplace, alpha, beta, gamma), X);
+            return fsp(new CoreRpl<>(sp_func, sp_math2_inplace, alpha, beta, gamma), X);
         }
-        public final Tensor[] rpl(boolean inplace, Tensor... X) { 
-            return csp(inplace, new CoreRpl<>(sp_func, inplace, 1.0f, 0.0f, 0.0f), X);
-        }
+        public final Tensor[] rpl(boolean inplace, Tensor... X) { return csp(inplace, new CoreRpl<>(sp_func, inplace, 1.0f, 0.0f, 0.0f), X); }
         public final Tensor[] rpl(boolean inplace, float alpha, float beta, float gamma, Tensor... X) {
             return csp(inplace, new CoreRpl<>(sp_func, inplace, alpha, beta, gamma), X);
         }
         
-        public final Tensor[] sadd(float C, Tensor... X) {
-            return fsp(new CoreLinear<>(sp_func, simple_math2_inplace, 1.0f, C), X); 
-        }
-        public final Tensor[] ssub(float C, Tensor... X) {
-            return fsp(new CoreLinear<>(sp_func, simple_math2_inplace, 1.0f, -C), X); 
-        }
-        public final Tensor[] smul(float C, Tensor... X) {
-            return fsp(new CoreLinear<>(sp_func, simple_math2_inplace,  C, 0.0f), X); 
-        }
-        public final Tensor[] sdiv(float C, Tensor... X) {
-            return fsp(new CoreLinear<>(sp_func, simple_math2_inplace, (1.0f / C), 0.0f), X); 
-        }
+        public final Tensor[] sadd(float C, Tensor... X) { return fsp(new CoreLinear<>(sp_func, sp_math2_inplace, 1.0f, C), X);  }
+        public final Tensor[] ssub(float C, Tensor... X) { return fsp(new CoreLinear<>(sp_func, sp_math2_inplace, 1.0f, -C), X); }
+        public final Tensor[] smul(float C, Tensor... X) { return fsp(new CoreLinear<>(sp_func, sp_math2_inplace,  C, 0.0f), X); }
+        public final Tensor[] sdiv(float C, Tensor... X) { return fsp(new CoreLinear<>(sp_func, sp_math2_inplace, (1.0f / C), 0.0f), X);  }
         public final Tensor[] linear(float alpha, float beta, Tensor... X) {
-            return fsp(new CoreLinear<>(sp_func, simple_math2_inplace, alpha, beta), X);
+            return fsp(new CoreLinear<>(sp_func, sp_math2_inplace, alpha, beta), X); 
         }
-        
-        public final Tensor[] sadd(boolean inplace, float C, Tensor... X){
-            return csp(inplace, new CoreLinear<>(sp_func, inplace, 1.0f, C), X); 
-        }
-        public final Tensor[] ssub(boolean inplace, float C, Tensor... X){
-            return csp(inplace, new CoreLinear<>(sp_func, inplace, 1.0f, -C), X); 
-        }
-        public final Tensor[] smul(boolean inplace, float C, Tensor... X){
-            return csp(inplace, new CoreLinear<>(sp_func, inplace, C, 0.0f), X); 
-        }
-        public final Tensor[] sdiv(boolean inplace, float C, Tensor... X){
-            return csp(inplace, new CoreLinear<>(sp_func, inplace, (1.0f / C), 0.0f), X); 
-        }
+        public final Tensor[] sadd(boolean inplace, float C, Tensor... X){ return csp(inplace, new CoreLinear<>(sp_func, inplace, 1.0f, C), X); }
+        public final Tensor[] ssub(boolean inplace, float C, Tensor... X){ return csp(inplace, new CoreLinear<>(sp_func, inplace, 1.0f, -C), X); }
+        public final Tensor[] smul(boolean inplace, float C, Tensor... X){ return csp(inplace, new CoreLinear<>(sp_func, inplace, C, 0.0f), X); }
+        public final Tensor[] sdiv(boolean inplace, float C, Tensor... X){ return csp(inplace, new CoreLinear<>(sp_func, inplace, (1.0f / C), 0.0f), X); }
         public final Tensor[] linear(boolean inplace, float alpha, float beta, Tensor... X) {
             return csp(inplace, new CoreLinear<>(sp_func, inplace, alpha, beta), X);
         }
         
-        public final Tensor[] exp(Tensor... X) { 
-            return fsp(new CoreExp<>(sp_func, simple_math2_inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] exp(Tensor... X) { return fsp(new CoreExp<>(sp_func, sp_math2_inplace, 1.0f, 0.0f), X); }
         public final Tensor[] exp(float alpha, float beta, Tensor... X) { 
-            return fsp(new CoreExp<>(sp_func, simple_math2_inplace, alpha, beta), X); 
+            return fsp(new CoreExp<>(sp_func, sp_math2_inplace, alpha, beta), X); 
         }
-        public final Tensor[] exp(boolean inplace, Tensor... X) {
-            return csp(inplace, new CoreExp<>(sp_func, inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] exp(boolean inplace, Tensor... X) { return csp(inplace, new CoreExp<>(sp_func, inplace, 1.0f, 0.0f), X); }
         public final Tensor[] exp(boolean inplace, float alpha, float beta, Tensor... X) {
             return csp(inplace, new CoreExp<>(sp_func, inplace, alpha, beta), X);
         }
         
-        public final Tensor[] log(Tensor... X) { 
-            return fsp(new CoreLog<>(sp_func, simple_math2_inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] log(Tensor... X) { return fsp(new CoreLog<>(sp_func, sp_math2_inplace, 1.0f, 0.0f), X); }
         public final Tensor[] log(float alpha, float beta, Tensor... X) { 
-            return fsp(new CoreLog<>(sp_func, simple_math2_inplace, alpha, beta), X); 
+            return fsp(new CoreLog<>(sp_func, sp_math2_inplace, alpha, beta), X); 
         }
-        public final Tensor[] log(boolean inplace, Tensor... X) {
-            return csp(inplace, new CoreLog<>(sp_func, inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] log(boolean inplace, Tensor... X) { return csp(inplace, new CoreLog<>(sp_func, inplace, 1.0f, 0.0f), X); }
         public final Tensor[] log(boolean inplace, float alpha, float beta, Tensor... X) {
             return csp(inplace, new CoreLog<>(sp_func, inplace, alpha, beta), X);
         }
         
-        public final Tensor[] sqrt(Tensor... X) {
-            return fsp(new CoreSqrt<>(sp_func, simple_math2_inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] sqrt(Tensor... X) { return fsp(new CoreSqrt<>(sp_func, sp_math2_inplace, 1.0f, 0.0f), X); }
         public final Tensor[] sqrt(float alpha, float beta, Tensor... X) { 
-            return fsp(new CoreSqrt<>(sp_func, simple_math2_inplace, alpha, beta), X); 
+            return fsp(new CoreSqrt<>(sp_func, sp_math2_inplace, alpha, beta), X); 
         }
-        public final Tensor[] sqrt(boolean inplace,  Tensor... X) { 
-            return csp(inplace, new CoreSqrt<>(sp_func, inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] sqrt(boolean inplace,  Tensor... X) { return csp(inplace, new CoreSqrt<>(sp_func, inplace, 1.0f, 0.0f), X); }
         public final Tensor[] sqrt(boolean inplace, float alpha, float beta, Tensor... X) {
             return csp(inplace, new CoreSqrt<>(sp_func, inplace, alpha, beta), X);
         }
         
-        public final Tensor[] relu(Tensor... X) { 
-            return fsp(new CoreRelu<>(sp_func, simple_math2_inplace), X); 
-        }
-        public final Tensor[] relu(boolean inplace, Tensor... X) {
-           return csp(inplace, new CoreRelu<>(sp_func, inplace), X);
-        }
+        public final Tensor[] relu(Tensor... X) { return fsp(new CoreRelu<>(sp_func, sp_math2_inplace), X); }
+        public final Tensor[] relu(boolean inplace, Tensor... X) { return csp(inplace, new CoreRelu<>(sp_func, inplace), X); }
         
-         public final Tensor[] relu6(Tensor... X) {
-            return fsp(new CoreReluN<>(sp_func, simple_math2_inplace, 6.0f), X);
-        }
-        public final Tensor[] relu6(boolean inplace, Tensor... X) {
-            return csp(inplace, new CoreReluN<>(sp_func, inplace, 6.0f), X);
-        }
+        public final Tensor[] relu6(Tensor... X) { return fsp(new CoreReluN<>(sp_func, sp_math2_inplace, 6.0f), X); }
+        public final Tensor[] relu6(boolean inplace, Tensor... X) { return csp(inplace, new CoreReluN<>(sp_func, inplace, 6.0f), X); }
         
-        public final Tensor[] reluN(float N, Tensor... X) {
-            return fsp(new CoreReluN<>(sp_func, simple_math2_inplace, N), X);
-        }
-        public final Tensor[] reluN(boolean inplace, float N, Tensor... X) {
-            return csp(inplace, new CoreReluN<>(sp_func, inplace, N), X);
-        }
+        public final Tensor[] reluN(float N, Tensor... X) { return fsp(new CoreReluN<>(sp_func, sp_math2_inplace, N), X); }
+        public final Tensor[] reluN(boolean inplace, float N, Tensor... X) { return csp(inplace, new CoreReluN<>(sp_func, inplace, N), X); }
         
-        public final Tensor[] leakyRelu(Tensor... X) { 
-            return fsp(new CoreLeakyRelu<>(sp_func, simple_math2_inplace, 
-                    leakyRelu_negative_slope), X); 
-        }
+        public final Tensor[] leakyRelu(Tensor... X) { return fsp(new CoreLeakyRelu<>(sp_func, sp_math2_inplace, leakyRelu_neg_slope), X); }
         public final Tensor[] leakyRelu(float negative_slope, Tensor... X) {
-            return fsp(new CoreLeakyRelu<>(sp_func, simple_math2_inplace,
-                    negative_slope), X);
+            return fsp(new CoreLeakyRelu<>(sp_func, sp_math2_inplace, negative_slope), X);
         }
-        public final Tensor[] leakyRelu(boolean inplace, Tensor... X) { 
-            return csp(inplace, new CoreLeakyRelu<>(sp_func, inplace, 
-                    leakyRelu_negative_slope), X);
-        }
+        public final Tensor[] leakyRelu(boolean inplace, Tensor... X) { return csp(inplace, new CoreLeakyRelu<>(sp_func, inplace, leakyRelu_neg_slope), X);}
         public final Tensor[] leakyRelu(boolean inplace, float negative_slope, Tensor... X) {
-            return csp(inplace, new CoreLeakyRelu<>(sp_func, inplace, 
-                    negative_slope), X);
+            return csp(inplace, new CoreLeakyRelu<>(sp_func, inplace, negative_slope), X);
         }
 
-        public final Tensor[] softplus(Tensor... X) {
-            return fsp(new CoreSoftplus<>(sp_func, simple_math2_inplace), X); 
-        }
-        public final Tensor[] softplus(boolean inplace, Tensor... X) {
-            return csp(inplace, new CoreSoftplus<>(sp_func, inplace), X);
-        }
+        public final Tensor[] softplus(Tensor... X) { return fsp(new CoreSoftplus<>(sp_func, sp_math2_inplace), X); }
+        public final Tensor[] softplus(boolean inplace, Tensor... X) { return csp(inplace, new CoreSoftplus<>(sp_func, inplace), X); }
 
-        public final Tensor[] elu(Tensor... X) {
-            return fsp(new CoreElu<>(sp_func, simple_math2_inplace,
-                    elu_alpha, elu_negative_slope), X); 
-        }
-        public final Tensor[] elu(float negative_slope, Tensor... X) { 
-            return fsp(new CoreElu<>(sp_func, simple_math2_inplace, 
-                    elu_alpha, negative_slope), X); 
-        }
+        public final Tensor[] elu(Tensor... X) { return fsp(new CoreElu<>(sp_func, sp_math2_inplace, elu_alpha, elu_neg_slope), X); }
         public final Tensor[] elu(float alpha, float negative_slope, Tensor... X) {
-            return fsp(new CoreElu<>(sp_func, simple_math2_inplace, 
-                    alpha, negative_slope), X);
+            return fsp(new CoreElu<>(sp_func, sp_math2_inplace, alpha, negative_slope), X);
         }
-        public final Tensor[] elu(boolean inplace, Tensor... X) {
-            return csp(inplace, new CoreElu<>(sp_func, inplace, 
-                    elu_alpha, elu_negative_slope), X); 
-        }
-        public final Tensor[] elu(boolean inplace, float negative_slope, Tensor... X) {  
-            return csp(inplace, new CoreElu<>(sp_func, inplace, 
-                    elu_alpha, negative_slope), X);
-        }
+        public final Tensor[] elu(boolean inplace, Tensor... X) { return csp(inplace, new CoreElu<>(sp_func, inplace, elu_alpha, elu_neg_slope), X); }
         public final Tensor[] elu(boolean inplace, float alpha, float negative_slope, Tensor... X) {
-            return csp(inplace, new CoreElu<>(sp_func, inplace, 
-                    alpha, negative_slope), X);
+            return csp(inplace, new CoreElu<>(sp_func, inplace, alpha, negative_slope), X);
         }
         
-        public final Tensor[] sigmoid(Tensor... X) { 
-            return fsp(new CoreSigmoid<>(sp_func, simple_math2_inplace), X); 
-        }
-        public final Tensor[] sigmoid(boolean inplace, Tensor... X) {
-            return csp(inplace, new CoreSigmoid<>(sp_func, inplace), X);
-        }
+        public final Tensor[] sigmoid(Tensor... X) { return fsp(new CoreSigmoid<>(sp_func, sp_math2_inplace), X); }
+        public final Tensor[] sigmoid(boolean inplace, Tensor... X) { return csp(inplace, new CoreSigmoid<>(sp_func, inplace), X); }
         
-        public final Tensor[] hard_sigmoid(Tensor... X) {
-            return fsp(new CoreHardSigmoid<>(sp_func, simple_math2_inplace), X);
-        }
-        public final Tensor[] hard_sigmoid(boolean inplace, Tensor... X) {
-            return csp(inplace, new CoreHardSigmoid<>(sp_func, inplace), X);
-        }
+        public final Tensor[] hard_sigmoid(Tensor... X) { return fsp(new CoreHardSigmoid<>(sp_func, sp_math2_inplace), X); }
+        public final Tensor[] hard_sigmoid(boolean inplace, Tensor... X) { return csp(inplace, new CoreHardSigmoid<>(sp_func, inplace), X); }
 
-        public final Tensor[] tanh(Tensor... X) { 
-            return fsp(new CoreTanh<>(sp_func, simple_math2_inplace), X); 
-        }
-        public final Tensor[] tanh(boolean inplace, Tensor... X) {
-            return csp(inplace, new CoreTanh<>(sp_func, inplace), X);
-        }
+        public final Tensor[] tanh(Tensor... X) { return fsp(new CoreTanh<>(sp_func, sp_math2_inplace), X); }
+        public final Tensor[] tanh(boolean inplace, Tensor... X) { return csp(inplace, new CoreTanh<>(sp_func, inplace), X); }
 
-        public final Tensor[] softmax(Tensor... X) {
-            return fsp(new CoreSoftmax<>(sp_func, simple_math2_inplace, -1), X);
-        }
+        public final Tensor[] softmax(Tensor... X) { return fsp(new CoreSoftmax<>(sp_func, sp_math2_inplace, -1), X); }
         public final Tensor[] softmax(int features, Tensor... X) {
-            return fsp(new CoreSoftmax<>(sp_func, simple_math2_inplace, features), X);
+            return fsp(new CoreSoftmax<>(sp_func, sp_math2_inplace, features), X);
         }
-        public final Tensor[] softmax(boolean inplace, Tensor... X) {
-            return csp(inplace, new CoreSoftmax<>(sp_func, inplace, -1), X);
-        }
+        public final Tensor[] softmax(boolean inplace, Tensor... X) { return csp(inplace, new CoreSoftmax<>(sp_func, inplace, -1), X); }
         public final Tensor[] softmax(boolean inplace, int features, Tensor... X) {
             return csp(inplace, new CoreSoftmax<>(sp_func, inplace, features), X);
         }
         
-        public final Tensor[] log_softmax(Tensor... X) {
-            return fsp(new CoreLogSoftmax<>(sp_func, simple_math2_inplace, -1), X);
-        }
+        public final Tensor[] log_softmax(Tensor... X) { return fsp(new CoreLogSoftmax<>(sp_func, sp_math2_inplace, -1), X); }
         public final Tensor[] log_softmax(int features, Tensor... X) {
-            return fsp(new CoreLogSoftmax<>(sp_func, simple_math2_inplace, features), X);
+            return fsp(new CoreLogSoftmax<>(sp_func, sp_math2_inplace, features), X);
         }
-        public final Tensor[] log_softmax(boolean inplace, Tensor... X) {
-            return csp(inplace, new CoreLogSoftmax<>(sp_func, inplace, -1), X);
-        }
+        public final Tensor[] log_softmax(boolean inplace, Tensor... X) { return csp(inplace, new CoreLogSoftmax<>(sp_func, inplace, -1), X); }
         public final Tensor[] log_softmax(boolean inplace, int features, Tensor... X) {
             return csp(inplace, new CoreLogSoftmax<>(sp_func, inplace, features), X);
         }
 
-        public final Tensor[] halfSin(float Amp, Tensor... X) { 
-            return fsp(new CoreHalfSin<>(sp_func, simple_math2_inplace, Amp, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] halfSin(float Amp, Tensor... X) { return fsp(new CoreHalfSin<>(sp_func, sp_math2_inplace, Amp, 1.0f, 0.0f), X); }
         public final Tensor[] halfSin(float Amp, float alpha, float beta, Tensor... X) {
-            return fsp(new CoreHalfSin<>(sp_func, simple_math2_inplace, Amp, alpha, beta), X);
+            return fsp(new CoreHalfSin<>(sp_func, sp_math2_inplace, Amp, alpha, beta), X);
         }
-        public final Tensor[] halfSin(boolean inplace, float Amp, Tensor... X) {
-            return csp(inplace, new CoreHalfSin<>(sp_func, inplace, Amp, 1.0f, 0.0f), X);
-        }
+        public final Tensor[] halfSin(boolean inplace, float Amp, Tensor... X) { return csp(inplace, new CoreHalfSin<>(sp_func, inplace, Amp, 1.0f, 0.0f), X); }
         public final Tensor[] halfSin(boolean inplace, float Amp, float alpha, float beta, Tensor... X) {
             return csp(inplace, new CoreHalfSin<>(sp_func, inplace, Amp, alpha, beta), X);
         }
         
-        public final Tensor[] tan(Tensor...X) { 
-            return fsp(new CoreTan<>(sp_func, simple_math2_inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] tan(Tensor...X) { return fsp(new CoreTan<>(sp_func, sp_math2_inplace, 1.0f, 0.0f), X); }
         public final Tensor[] tan(float alpha, float beta, Tensor...X) { 
-            return fsp(new CoreTan<>(sp_func, simple_math2_inplace, alpha, beta), X); 
+            return fsp(new CoreTan<>(sp_func, sp_math2_inplace, alpha, beta), X); 
         }
-        public final Tensor[] tan(boolean inplace, Tensor...X) { 
-            return csp(inplace, new CoreTan<>(sp_func, inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] tan(boolean inplace, Tensor...X) { return csp(inplace, new CoreTan<>(sp_func, inplace, 1.0f, 0.0f), X); }
         public final Tensor[] tan(boolean inplace, float alpha, float beta, Tensor...X) {
             return csp(inplace, new CoreTan<>(sp_func, inplace, alpha, beta), X);
         }
         
-        public final Tensor[] cot(Tensor...X) { 
-            return fsp(new CoreCot<>(sp_func, simple_math2_inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] cot(Tensor...X) { return fsp(new CoreCot<>(sp_func, sp_math2_inplace, 1.0f, 0.0f), X); }
         public final Tensor[] cot(float alpha, float beta, Tensor...X) { 
-            return fsp(new CoreCot<>(sp_func, simple_math2_inplace, alpha, beta), X); 
+            return fsp(new CoreCot<>(sp_func, sp_math2_inplace, alpha, beta), X); 
         }
-        public final Tensor[] cot(boolean inplace, Tensor...X) { 
-            return csp(inplace, new CoreCot<>(sp_func, inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] cot(boolean inplace, Tensor...X) { return csp(inplace, new CoreCot<>(sp_func, inplace, 1.0f, 0.0f), X); }
         public final Tensor[] cot(boolean inplace, float alpha, float beta, Tensor...X) {
             return csp(inplace, new CoreCot<>(sp_func, inplace, alpha, beta), X);
         }
         
-        public final Tensor[] arcsin(Tensor...X) { 
-            return fsp(new CoreArcsin<>(sp_func, simple_math2_inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] arcsin(Tensor...X) { return fsp(new CoreArcsin<>(sp_func, sp_math2_inplace, 1.0f, 0.0f), X);  }
         public final Tensor[] arcsin(float alpha, float beta, Tensor...X) {
-            return fsp(new CoreArcsin<>(sp_func, simple_math2_inplace, alpha, beta), X); 
+            return fsp(new CoreArcsin<>(sp_func, sp_math2_inplace, alpha, beta), X); 
         }
-        public final Tensor[] arcsin(boolean inplace, Tensor...X) {
-            return csp(inplace, new CoreArcsin<>(sp_func, inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] arcsin(boolean inplace, Tensor...X) { return csp(inplace, new CoreArcsin<>(sp_func, inplace, 1.0f, 0.0f), X); }
         public final Tensor[] arcsin(boolean inplace, float alpha, float beta, Tensor...X) {
             return csp(inplace, new CoreArcsin<>(sp_func, inplace, alpha, beta), X);
         }
         
-        public final Tensor[] arctan(Tensor...X) { 
-            return fsp(new CoreArctan<>(sp_func, simple_math2_inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] arctan(Tensor...X) { return fsp(new CoreArctan<>(sp_func, sp_math2_inplace, 1.0f, 0.0f), X); }
         public final Tensor[] arctan(float alpha, float beta, Tensor...X) {
-            return fsp(new CoreArctan<>(sp_func, simple_math2_inplace, alpha, beta), X); 
+            return fsp(new CoreArctan<>(sp_func, sp_math2_inplace, alpha, beta), X); 
         }
-        public final Tensor[] arctan(boolean inplace, Tensor...X) { 
-            return csp(inplace, new CoreArctan<>(sp_func, inplace, 1.0f, 0.0f), X); 
-        }
+        public final Tensor[] arctan(boolean inplace, Tensor...X) { return csp(inplace, new CoreArctan<>(sp_func, inplace, 1.0f, 0.0f), X); }
         public final Tensor[] arctan(boolean inplace, float alpha, float beta, Tensor...X) {
             return csp(inplace, new CoreArctan<>(sp_func, inplace, alpha, beta), X);
-        }
-        
-        public final Tensor[] bernouliMul(float p, float v1, float v2, Tensor... X) {
-            return fsp(new CoreBernouliMul<>(sp_func, simple_math2_inplace, 
-                    true, p, v1, v2), X);
-        }
-        public final Tensor[] bernouliMul(boolean inplace, float p, float v1, float v2, Tensor... X) {
-            return csp(inplace, new CoreBernouliMul<>(sp_func, inplace, 
-                    true, p, v1, v2), X);
-        }
-        
-        public final Tensor[] eval_bernouliMul(float p, float v1, float v2, Tensor... X) {
-            return fsp(new CoreBernouliMul<>(sp_func, simple_math2_inplace, 
-                    false, p, v1, v2), X);
-        }
-        public final Tensor[] eval_bernouliMul(boolean inplace, float p, float v1, float v2, Tensor... X) {
-            return csp(inplace, new CoreBernouliMul<>(sp_func, inplace, 
-                    false, p, v1, v2), X);
-        }
-        
-        public Tensor[] dropout(float nonzero_p, Tensor...X) {
-            return fsp(new CoreDropout<>(sp_func, simple_math2_inplace,
-                    true, nonzero_p), X); 
-        }
-        public Tensor[] dropout(boolean inplace, float nonzero_p, Tensor...X) {
-            return csp(inplace, new CoreDropout<>(sp_func, inplace, 
-                    true, nonzero_p), X);
-        }
-        
-        public Tensor[] eval_dropout(float nonzero_p, Tensor...X) {
-            return fsp(new CoreDropout<>(sp_func, simple_math2_inplace,
-                    false, nonzero_p), X); 
-        }
-        public Tensor[] eval_dropout(boolean inplace, float nonzero_p, Tensor...X) {
-            return csp(inplace, new CoreDropout<>(sp_func, inplace, 
-                    false, nonzero_p), X);
         }
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="functional: simple.tensor">
         public final Tensor[] flatten(Tensor... X) { 
-            return fsp(new CoreFlatten<>(sp_func, simple_tensor_inplace), X); 
+            return fsp(new CoreFlatten<>(sp_func, sp_tensor_inplace), X); 
         }
         public final Tensor[] flatten(boolean inplace, Tensor... X) {
             return csp(inplace, new CoreFlatten<>(sp_func, inplace), X);
         }
         
         public final Tensor[] view(Tensor[] X, int... out_dim) { 
-            return fsp(new CoreView<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreView<>(sp_func, sp_tensor_inplace, 
                     out_dim), X); 
         }
         public final Tensor[] view(boolean inplace, Tensor[] X, int... out_dim) {
@@ -2112,7 +2034,7 @@ public final class Alpha
         }
         
         public final Tensor[] view_flatten(Tensor... X) { 
-            return fsp(new CoreView<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreView<>(sp_func, sp_tensor_inplace, 
                     X[0].dim(0), -1), X); 
         }
         public final Tensor[] view_flatten(boolean inplace, Tensor... X) {
@@ -2121,7 +2043,7 @@ public final class Alpha
         }
         
         public final Tensor[] reshape(Tensor[] X, int... out_dim) { 
-            return fsp(new CoreReshape<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreReshape<>(sp_func, sp_tensor_inplace, 
                     out_dim), X); 
         }
         public final Tensor[] reshape(boolean inplace, Tensor[] X, int... out_dim) {
@@ -2130,7 +2052,7 @@ public final class Alpha
         }
         
         public final Tensor[] transpose(int dimIdx1, int dimIdx2, Tensor... X) {
-            return fsp(new CoreTranspose<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreTranspose<>(sp_func, sp_tensor_inplace, 
                     dimIdx1, dimIdx2), X);
         }
         public final Tensor[] transpose(boolean inplace, int dimIdx1, int dimIdx2, Tensor... X) {
@@ -2139,18 +2061,18 @@ public final class Alpha
         }
         
         public final Tensor[] rot180(Tensor... X) { 
-            return fsp(new CoreRot180<>(sp_func, simple_tensor_inplace), X); 
+            return fsp(new CoreRot180<>(sp_func, sp_tensor_inplace), X); 
         }
         public final Tensor[] rot180(boolean inplace, Tensor... X) {
             return csp(inplace, new CoreRot180<>(sp_func, inplace), X);
         }
         
         public final Tensor[] pad(Tensor[] X, int... p) { 
-            return fsp(new CorePad<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CorePad<>(sp_func, sp_tensor_inplace, 
                     p, Vector.arrayCopy(p)), X); 
         }
         public final Tensor[] pad(Tensor[] X, int[] p0, int[] p1) { 
-            return fsp(new CorePad<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CorePad<>(sp_func, sp_tensor_inplace, 
                     p0, p1), X); 
         }
         public final Tensor[] pad(boolean inplace, Tensor[] X, int... p) {
@@ -2163,11 +2085,11 @@ public final class Alpha
         }
         
         public final Tensor[] trim(Tensor[] X, int... t) { 
-            return fsp(new CoreTrim<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreTrim<>(sp_func, sp_tensor_inplace, 
                     t, Vector.arrayCopy(t)), X); 
         }
         public final Tensor[] trim(Tensor[] X, int[] t0, int[] t1) { 
-            return fsp(new CoreTrim<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreTrim<>(sp_func, sp_tensor_inplace, 
                     t0, t1), X); 
         }
         public final Tensor[] trim(boolean inplace, Tensor[] X, int... t) {
@@ -2180,11 +2102,11 @@ public final class Alpha
         }
         
         public final Tensor[] pad2D(Tensor[] X, int... p) { 
-            return fsp(new CorePad<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CorePad<>(sp_func, sp_tensor_inplace, 
                     Vector.append(p, 0), Vector.append(p, 0)), X); 
         }
         public final Tensor[] pad2D(Tensor[] X, int[] p0, int[] p1) { 
-            return fsp(new CorePad<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CorePad<>(sp_func, sp_tensor_inplace, 
                     Vector.append(p0, 0), Vector.append(p1, 0)), X); 
         }
         public final Tensor[] pad2D(boolean inplace, Tensor[] X, int... p) {
@@ -2197,11 +2119,11 @@ public final class Alpha
         }
         
         public final Tensor[] trim2D(Tensor[] X, int... t) { 
-            return fsp(new CoreTrim<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreTrim<>(sp_func, sp_tensor_inplace, 
                     Vector.append(t, 0), Vector.append(t, 0)), X); 
         }
         public final Tensor[] trim2D(Tensor[] X, int[] t0, int[] t1) {
-            return fsp(new CoreTrim<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreTrim<>(sp_func, sp_tensor_inplace, 
                     Vector.append(t0, 0), Vector.append(t1, 0)), X); 
         }
         public final Tensor[] trim2D(boolean inplace, Tensor[] X, int... t) {
@@ -2214,11 +2136,11 @@ public final class Alpha
         }
         
         public final Tensor[] expand(Tensor[] X, int... out_dim) {
-            return fsp(new CoreExpand<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreExpand<>(sp_func, sp_tensor_inplace, 
                     Engine.from_center, out_dim), X);
         }
         public final Tensor[] expand(Tensor[] X, int[] start, int[] out_dim) {
-            return fsp(new CoreExpand<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreExpand<>(sp_func, sp_tensor_inplace, 
                     start, out_dim), X);
         }
         public final Tensor[] expand(boolean inplace, Tensor[] X, int... out_dim) {
@@ -2231,11 +2153,11 @@ public final class Alpha
         }
         
         public final Tensor[] crop(Tensor[] X, int... out_dim) {
-            return fsp(new CoreCrop<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreCrop<>(sp_func, sp_tensor_inplace, 
                     Engine.from_center, out_dim), X);
         }
         public final Tensor[] crop(Tensor[] X, int[] start, int[] out_dim) {
-            return fsp(new CoreCrop<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreCrop<>(sp_func, sp_tensor_inplace, 
                     start, out_dim), X);
         }
         public final Tensor[] crop(boolean inplace, Tensor[] X, int... out_dim) {
@@ -2248,11 +2170,11 @@ public final class Alpha
         }
         
         public final Tensor[] expand2D(Tensor[] X, int... out_dim) {
-            return fsp(new CoreExpand<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreExpand<>(sp_func, sp_tensor_inplace, 
                     Engine.from_center, Vector.append(out_dim, -1)), X);
         }
         public final Tensor[] expand2D(Tensor[] X, int[] start, int[] out_dim) {
-            return fsp(new CoreExpand<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreExpand<>(sp_func, sp_tensor_inplace, 
                     Vector.append(start, 0), Vector.append(out_dim, -1)), X);
         }
         public final Tensor[] expand2D(boolean inplace, Tensor[] X, int... out_dim) {
@@ -2265,11 +2187,11 @@ public final class Alpha
         }
         
         public final Tensor[] crop2D(Tensor[] X, int... out_dim) {
-            return fsp(new CoreCrop<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreCrop<>(sp_func, sp_tensor_inplace, 
                     Engine.from_center, Vector.append(out_dim, -1)), X);
         }
         public final Tensor[] crop2D(Tensor[] X, int[] start, int[] out_dim) {
-            return fsp(new CoreCrop<>(sp_func, simple_tensor_inplace, 
+            return fsp(new CoreCrop<>(sp_func, sp_tensor_inplace, 
                     Vector.append(start, 0), Vector.append(out_dim, -1)), X);
         }
         public final Tensor[] crop2D(boolean inplace, Tensor[] X, int... out_dim) {
@@ -2282,14 +2204,14 @@ public final class Alpha
         }
         //</editor-fold>
         
-        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool2d.AvgPool2D">
+        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool.AvgPool2D">
         public final Tensor[] avgPool2D(int div, Tensor... X) { 
-            return csp(new CoreAvgPool2D<>(sp_func, avgpool2D_ignore_padding, 
+            return csp(new CoreAvgPool2D<>(sp_func, avgpool2D_igpad, 
                     div, div, div, div, 0, 0, 
                     -1, -1), X);
         }
         public final Tensor[] avgPool2D(int kernel, int stride, int padding, Tensor... X) {
-            return csp(new CoreAvgPool2D<>(sp_func, avgpool2D_ignore_padding,
+            return csp(new CoreAvgPool2D<>(sp_func, avgpool2D_igpad,
                     kernel, kernel, stride, stride, padding, padding,
                     -1, -1), X);
         }
@@ -2298,37 +2220,14 @@ public final class Alpha
                 int stride_height, int stride_width,
                 int padding_height, int padding_width, 
                 Tensor... X) {
-            return csp(new CoreAvgPool2D<>(sp_func, avgpool2D_ignore_padding,
+            return csp(new CoreAvgPool2D<>(sp_func, avgpool2D_igpad,
                     kernel_height, kernel_width,
                     stride_height, stride_width,
                     padding_height, padding_width, 
                     -1, -1), X);
         }
         //</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool2d.NaiveMaxPool2D">
-        public final Tensor[] naive_maxPool2D(int div, Tensor... X) {
-            return csp(new CoreNaiveMaxPool2D<>(sp_func,
-                    div, div, div, div, 0, 0, 
-                    -1, -1), X);
-        }
-        public final Tensor[] naive_maxPool2D(int kernel, int stride, int padding, Tensor... X) {
-            return csp(new CoreNaiveMaxPool2D<>(sp_func, 
-                    kernel, kernel, stride, stride, padding, padding, 
-                    -1, -1), X);
-        }
-        public final Tensor[] naive_maxPool2D(
-                int kernel_height, int kernel_width,
-                int stride_height, int stride_width,
-                int padding_height, int padding_width, 
-                Tensor... X)  {
-            return csp(new CoreNaiveMaxPool2D<>(sp_func,
-                    kernel_height, kernel_width,
-                    stride_height, stride_width, 
-                    padding_height, padding_width, 
-                    -1, -1), X);
-        }
-        //</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool2d.MaxPool2D">
+        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool.MaxPool2D">
         public final Tensor[] maxPool2D(int div, Tensor... X) {
             return csp_maxPool(new CoreMaxPool2D<>(sp_func, true, 
                     div, div, div, div, 0, 0, 
@@ -2374,12 +2273,12 @@ public final class Alpha
         }
 
         public final Tensor[] maxPool2D_with_Index(int div, Tensor... X) {
-            return csp_maxPool_with_Index(new CoreMaxPool2D<>(sp_func, true, 
+            return csp_maxPool_with_Idx(new CoreMaxPool2D<>(sp_func, true, 
                     div, div, div, div, 0, 0,
                     -1, -1), X);
         }
         public final Tensor[] maxPool2D_with_Index(int kernel, int stride, int padding, Tensor... X) {
-            return csp_maxPool_with_Index(new CoreMaxPool2D<>(sp_func, true, 
+            return csp_maxPool_with_Idx(new CoreMaxPool2D<>(sp_func, true, 
                     kernel, kernel, stride, stride, padding, padding, 
                     -1, -1), X);
         }
@@ -2388,61 +2287,14 @@ public final class Alpha
                 int stride_height, int stride_width,
                 int padding_height, int padding_width, 
                 Tensor... X) {
-            return csp_maxPool_with_Index(new CoreMaxPool2D<>(sp_func, true,
+            return csp_maxPool_with_Idx(new CoreMaxPool2D<>(sp_func, true,
                     kernel_height, kernel_width,
                     stride_height, stride_width, 
                     padding_height, padding_width, 
                     -1, -1), X);
         }
         //</editor-fold>
-        
-        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool2d.AdpativeAvgPool2D">
-        public final Tensor[] adaptive_avgPool2D(int out_size, Tensor... X) {
-            return csp(new CoreAdaptiveAvgPool2D<>(sp_func, avgpool2D_ignore_padding,
-                    out_size, out_size), X);
-        }
-        public final Tensor[] adaptive_avgPool2D(int out_height, int out_width, Tensor... X) {
-            return csp(new CoreAdaptiveAvgPool2D<>(sp_func, avgpool2D_ignore_padding,
-                    out_height, out_width), X);
-        }
-        //</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool2d.AdaptiveNaiveMaxPool2D">
-        public final Tensor[] adaptive_naive_maxPool2D(int out_size, Tensor... X) {
-            return csp(new CoreAdaptiveNaiveMaxPool2D<>(sp_func, out_size, out_size), X);
-        }
-        public final Tensor[] adaptive_naive_maxPool2D(int out_height, int out_width, Tensor... X) {
-            return csp(new CoreAdaptiveNaiveMaxPool2D<>(sp_func, out_height, out_width), X);
-        }
-        //</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool2d.AdaptiveMaxPool2D">
-        public final Tensor[] adaptive_maxPool2D(int out_size, Tensor... X) {
-            return csp_maxPool(new CoreAdaptiveMaxPool2D<>(sp_func, 
-                    true, out_size, out_size), X);
-        }
-        public final Tensor[] adaptive_maxPool2D(int out_height, int out_width, Tensor... X) {
-            return csp_maxPool(new CoreAdaptiveMaxPool2D<>(sp_func,
-                    true, out_height, out_width), X);
-        }
-        
-        public final Tensor[] eval_adaptive_maxPool2D(int out_size, Tensor... X) {
-            return csp_maxPool(new CoreAdaptiveMaxPool2D<>(sp_func,
-                    false, out_size, out_size), X);
-        }
-        public final Tensor[] eval_adaptive_maxPool2D(int out_height, int out_width, Tensor... X) {
-            return csp_maxPool(new CoreAdaptiveMaxPool2D<>(sp_func,
-                    false, out_height, out_width), X);
-        }
-
-        public final Tensor[] adaptive_maxPool2D_with_Index(int out_size, Tensor... X) {
-            return csp_maxPool_with_Index(new CoreAdaptiveMaxPool2D<>(sp_func, 
-                    true, out_size, out_size), X);
-        }
-        public final Tensor[] adaptive_maxPool2D_with_Index(int out_height, int out_width, Tensor... X) {
-            return csp_maxPool_with_Index(new CoreAdaptiveMaxPool2D<>(sp_func, 
-                    true, out_height, out_width), X);
-        }
-        //</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool2D.AvgUnpool2d">
+        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool.AvgUnpool2d">
         public final Tensor[] avgUnpool2D(int mul, Tensor...X) { 
             return csp(new CoreAvgUnpool2D<>(sp_func, avgunpool2D_ignore_padding, 
                     mul, mul, mul, mul, 0, 0, 
@@ -2465,28 +2317,111 @@ public final class Alpha
                     -1, -1), X);
         }
         //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool.AdpativeAvgPool2D">
+        public final Tensor[] adaptive_avgPool2D(int out_size, Tensor... X) {
+            return csp(new CoreAdaptiveAvgPool2D<>(sp_func, avgpool2D_igpad,
+                    out_size, out_size), X);
+        }
+        public final Tensor[] adaptive_avgPool2D(int out_height, int out_width, Tensor... X) {
+            return csp(new CoreAdaptiveAvgPool2D<>(sp_func, avgpool2D_igpad,
+                    out_height, out_width), X);
+        }
+        //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool.AdaptiveMaxPool2D">
+        public final Tensor[] adaptive_maxPool2D(int out_size, Tensor... X) {
+            return csp_maxPool(new CoreAdaptiveMaxPool2D<>(sp_func, 
+                    true, out_size, out_size), X);
+        }
+        public final Tensor[] adaptive_maxPool2D(int out_height, int out_width, Tensor... X) {
+            return csp_maxPool(new CoreAdaptiveMaxPool2D<>(sp_func,
+                    true, out_height, out_width), X);
+        }
+        
+        public final Tensor[] eval_adaptive_maxPool2D(int out_size, Tensor... X) {
+            return csp_maxPool(new CoreAdaptiveMaxPool2D<>(sp_func,
+                    false, out_size, out_size), X);
+        }
+        public final Tensor[] eval_adaptive_maxPool2D(int out_height, int out_width, Tensor... X) {
+            return csp_maxPool(new CoreAdaptiveMaxPool2D<>(sp_func,
+                    false, out_height, out_width), X);
+        }
+
+        public final Tensor[] adaptive_maxPool2D_with_Index(int out_size, Tensor... X) {
+            return csp_maxPool_with_Idx(new CoreAdaptiveMaxPool2D<>(sp_func, 
+                    true, out_size, out_size), X);
+        }
+        public final Tensor[] adaptive_maxPool2D_with_Index(int out_height, int out_width, Tensor... X) {
+            return csp_maxPool_with_Idx(new CoreAdaptiveMaxPool2D<>(sp_func, 
+                    true, out_height, out_width), X);
+        }
+        //</editor-fold>
+        
+        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool.Pool1D">
+        public final Tensor[] avgPool1D(int div, Tensor... X) { 
+            return csp(new CoreAvgPool1D<>(sp_func, avgpool1D_igpad, div, div, 0,  -1), X);
+        }
+        public final Tensor[] avgPool1D(int kernel_width, int stride_width, int padding_width, Tensor... X) {
+            return csp(new CoreAvgPool1D<>(sp_func, avgpool1D_igpad, kernel_width, stride_width, padding_width, -1), X);
+        }
+        
+        public final Tensor[] maxPool1D(int div, Tensor... X) {
+            return csp_maxPool(new CoreMaxPool1D<>(sp_func, true, div, div, 0, -1), X);
+        }
+        public final Tensor[] maxPool1D(int kernel_width, int stride_width, int padding_width, Tensor... X) {
+            return csp_maxPool(new CoreMaxPool1D<>(sp_func, true, kernel_width, stride_width, padding_width, -1), X);
+        }
+
+        public final Tensor[] eval_maxPool1D(int div, Tensor... X) {
+            return csp_maxPool(new CoreMaxPool1D<>(sp_func, false, div, div, 0, -1), X);
+        }
+        public final Tensor[] eval_maxPool1D(int kernel_width, int stride_width, int padding_width, Tensor... X) {
+            return csp_maxPool(new CoreMaxPool1D<>(sp_func, false,  kernel_width, stride_width, padding_width, -1), X);
+        }
+
+        public final Tensor[] maxPool1D_with_Index(int div, Tensor... X) {
+            return csp_maxPool_with_Idx(new CoreMaxPool1D<>(sp_func, true, div, div, 0,-1), X);
+        }
+        public final Tensor[] maxPool1D_with_Index(int kernel_width, int stride_width, int padding_width, Tensor... X) {
+            return csp_maxPool_with_Idx(new CoreMaxPool1D<>(sp_func, true, kernel_width, stride_width, padding_width, -1), X);
+        }
+        //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="functional: simple.pool.AdpativeAvgPool1D">
+        public final Tensor[] adaptive_avgPool1D(int out_width, Tensor... X) {
+            return csp(new CoreAdaptiveAvgPool1D<>(sp_func, avgpool1D_igpad, out_width), X);
+        }
+        
+        public final Tensor[] adaptive_maxPool1D(int out_width, Tensor... X) {
+            return csp_maxPool(new CoreAdaptiveMaxPool1D<>(sp_func, true, out_width), X);
+        }
+        public final Tensor[] eval_adaptive_maxPool1D(int out_width, Tensor... X) {
+            return csp_maxPool(new CoreAdaptiveMaxPool1D<>(sp_func, false, out_width), X);
+        }
+        public final Tensor[] adaptive_maxPool1D_with_Index(int out_width, Tensor... X) {
+            return csp_maxPool_with_Idx(new CoreAdaptiveMaxPool1D<>(sp_func, true, out_width), X);
+        }
+        //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="functioal: dual.blas">
         public final Tensor[] matMul(Tensor...X) { return cdu(new CoreMatMul<>(du_func), X); }
         public final Tensor[] matMulT1(Tensor...X) { return cdu(new CoreMatMulT1<>(du_func), X); }
         public final Tensor[] matMulT2(Tensor...X) { return cdu(new CoreMatMulT2<>(du_func), X); }
         
-        public final Tensor[] batchMatMul(Tensor...X) { return cdu(new CoreBatchMatMul<>(du_func, dual_likeX1), X); }
+        public final Tensor[] batchMatMul(Tensor...X) { return cdu(new CoreBatchMatMul<>(du_func, dl_likeX1), X); }
         public final Tensor[] batchMatMul(boolean likeX1, Tensor...X) { return cdu(new CoreBatchMatMul<>(du_func, likeX1), X); }
         
-        public final Tensor[] batchMatMulT1(Tensor...X) { return cdu(new CoreBatchMatMulT1<>(du_func, dual_likeX1), X); }
+        public final Tensor[] batchMatMulT1(Tensor...X) { return cdu(new CoreBatchMatMulT1<>(du_func, dl_likeX1), X); }
         public final Tensor[] batchMatMulT1(boolean likeX1, Tensor...X) { return cdu(new CoreBatchMatMulT1<>(du_func, likeX1), X); }
        
-        public final Tensor[] batchMatMulT2(Tensor... X) { return cdu(new CoreBatchMatMulT2<>(du_func, dual_likeX1), X); }
+        public final Tensor[] batchMatMulT2(Tensor... X) { return cdu(new CoreBatchMatMulT2<>(du_func, dl_likeX1), X); }
         public final Tensor[] batchMatMulT2(boolean likeX1, Tensor... X) { return cdu(new CoreBatchMatMulT2<>(du_func, likeX1), X); }
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="functioal: dual.math">
-        public final Tensor[] add(Tensor... X) { return cdu(new CoreLinear2<>(du_func, dual_likeX1, 1.0f,  1.0f, 0.0f), X); }
-        public final Tensor[] sub(Tensor... X) { return cdu(new CoreLinear2<>(du_func, dual_likeX1, 1.0f, -1.0f, 0.0f), X); }
-        public final Tensor[] add(float alpha, float beta, Tensor... X) { return cdu(new CoreLinear2<>(du_func, dual_likeX1, alpha,  beta, 0.0f), X); }
-        public final Tensor[] sub(float alpha, float beta, Tensor... X) { return cdu(new CoreLinear2<>(du_func, dual_likeX1, alpha, -beta, 0.0f), X); }
+        public final Tensor[] add(Tensor... X) { return cdu(new CoreLinear2<>(du_func, dl_likeX1, 1.0f,  1.0f, 0.0f), X); }
+        public final Tensor[] sub(Tensor... X) { return cdu(new CoreLinear2<>(du_func, dl_likeX1, 1.0f, -1.0f, 0.0f), X); }
+        public final Tensor[] add(float alpha, float beta, Tensor... X) { return cdu(new CoreLinear2<>(du_func, dl_likeX1, alpha,  beta, 0.0f), X); }
+        public final Tensor[] sub(float alpha, float beta, Tensor... X) { return cdu(new CoreLinear2<>(du_func, dl_likeX1, alpha, -beta, 0.0f), X); }
         public final Tensor[] linear2(float alpha, float beta, float gamma, Tensor... X) {
-            return cdu(new CoreLinear2<>(du_func, dual_likeX1, alpha, beta, gamma), X);
+            return cdu(new CoreLinear2<>(du_func, dl_likeX1, alpha, beta, gamma), X);
         }
         
         public Tensor[] add(boolean likeX1, Tensor... X) { return cdu(new CoreLinear2<>(du_func, likeX1, 1.0f, 1.0f, 0.0f), X); }
@@ -2505,24 +2440,20 @@ public final class Alpha
             return cdu(new CoreLinear2Row<>(du_func, alpha, beta, gamma), X);
         }
         
-        public Tensor[] mul(Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, dual_likeX1, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f), X); }
-        public Tensor[] mul(float alpha, Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, dual_likeX1, 0.0f, alpha, 0.0f, 0.0f, 0.0f, 0.0f), X); }
-        public Tensor[] sqadd(Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, dual_likeX1, 1.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f), X); }
-        public Tensor[] sqsub(Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, dual_likeX1, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f), X); }
-        public Tensor[] sqadd(float alpha, float beta, Tensor... X) { 
-            return cdu(new CoreQuadratic2<>(du_func, dual_likeX1, alpha, 0.0f, beta, 0.0f, 0.0f, 0.0f), X); 
-        }
+        public Tensor[] mul(Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, dl_likeX1, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f), X); }
+        public Tensor[] mul(float alpha, Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, dl_likeX1, 0.0f, alpha, 0.0f, 0.0f, 0.0f, 0.0f), X); }
+        public Tensor[] sqadd(Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, dl_likeX1, 1.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f), X); }
+        public Tensor[] sqsub(Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, dl_likeX1, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f), X); }
+        public Tensor[] sqadd(float alpha, float beta, Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, dl_likeX1, alpha, 0.0f, beta, 0.0f, 0.0f, 0.0f), X); }
         public Tensor[] quadratic2(float k11, float k12, float k22, float k1, float k2, float C, Tensor... X) {
-            return cdu(new CoreQuadratic2<>(du_func, dual_likeX1, k11, k12, k22, k1, k2, C), X);
+            return cdu(new CoreQuadratic2<>(du_func, dl_likeX1, k11, k12, k22, k1, k2, C), X);
         }
         
         public Tensor[] mul(boolean likeX1, Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, likeX1, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f), X); }
         public Tensor[] mul(boolean likeX1, float alpha, Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, likeX1, 0.0f, alpha, 0.0f, 0.0f, 0.0f, 0.0f), X); }
         public Tensor[] sqadd(boolean likeX1, Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, likeX1, 1.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f), X); }
         public Tensor[] sqsub(boolean likeX1, Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, likeX1, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f), X); }
-        public Tensor[] sqadd(boolean likeX1, float alpha, float beta, Tensor... X) { 
-            return cdu(new CoreQuadratic2<>(du_func, likeX1, alpha, 0.0f, beta, 0.0f, 0.0f, 0.0f), X); 
-        }
+        public Tensor[] sqadd(boolean likeX1, float alpha, float beta, Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, likeX1, alpha, 0.0f, beta, 0.0f, 0.0f, 0.0f), X); }
         public Tensor[] quadratic2(boolean likeX1, float k11, float k12, float k22, float k1, float k2, float C, Tensor... X) {
             return cdu(new CoreQuadratic2<>(du_func, likeX1, k11, k12, k22, k1, k2, C), X);
         }
@@ -2536,74 +2467,104 @@ public final class Alpha
             return cdu(new CoreQuadratic2Row<>(du_func, k11, k12, k22, k1, k2, C), X);
         }
         
-       
         public Tensor[] mul_center(Tensor... X) { return cdu(new CoreQuadratic2Center<>(du_func, -1, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f), X); }
         public Tensor[] mul_center(float alpha, Tensor... X) { return cdu(new CoreQuadratic2Center<>(du_func, -1, 0.0f, alpha, 0.0f, 0.0f, 0.0f, 0.0f), X); }
         public Tensor[] sqadd_center(Tensor... X) { return cdu(new CoreQuadratic2Center<>(du_func, -1, 1.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f), X); }
         public Tensor[] sqsub_center(Tensor... X) { return cdu(new CoreQuadratic2Center<>(du_func, -1, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f), X); }
         public Tensor[] sqadd_center(float alpha, float beta, Tensor... X) { return cdu(new CoreQuadratic2Center<>(du_func, -1,  alpha, 0.0f, beta, 0.0f, 0.0f, 0.0f), X); }
-        public Tensor[] quadratic2_center(float k11, float k12, float k22, float k1, float k2, float C, Tensor... X) {
+        public Tensor[] quadratic2_center(float k11, float k12, float k22, float k1, float k2, float C, Tensor... X) { 
             return cdu(new CoreQuadratic2Center<>(du_func, -1, k11, k12, k22, k1, k2, C), X);
         }
         public Tensor[] quadratic2_center(int dim2, float k11, float k12, float k22, float k1, float k2, float C, Tensor... X) {
             return cdu(new CoreQuadratic2Center<>(du_func, dim2, k11, k12, k22, k1, k2, C), X);
         }
         
-        
-        public Tensor[] div(Tensor... X) { return cdu(new CoreDiv<>(du_func, dual_likeX1, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f), X); }
+        public Tensor[] div(Tensor... X) { return cdu(new CoreDiv<>(du_func, dl_likeX1, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f), X); }
         public Tensor[] div(float alpha1, float beta1, float alpha2, float beta2, float gamma, Tensor... X) {
-            return cdu(new CoreDiv<>(du_func, dual_likeX1, alpha1, beta1, alpha2, beta2, gamma), X);
+            return cdu(new CoreDiv<>(du_func, dl_likeX1, alpha1, beta1, alpha2, beta2, gamma), X);
         }
         public Tensor[] div(boolean likeX1, Tensor... X) { return cdu(new CoreDiv<>(du_func, likeX1, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f), X); }
         public Tensor[] div(boolean likeX1, float alpha1, float beta1, float alpha2, float beta2, float gamma, Tensor... X){
             return cdu(new CoreDiv<>(du_func, likeX1, alpha1, beta1, alpha2, beta2, gamma), X);
         }
         
-        public Tensor[] add_relu(Tensor... X) { return cdu(new CoreLinear2_Relu<>(du_func, dual_likeX1, 1.0f, 1.0f, 0.0f), X); }
+        public Tensor[] add_relu(Tensor... X) { return cdu(new CoreLinear2_Relu<>(du_func, dl_likeX1, 1.0f, 1.0f, 0.0f), X); }
         public Tensor[] linear2_relu(float alpha, float beta, float gamma, Tensor... X) {
-            return cdu(new CoreLinear2_Relu<>(du_func, dual_likeX1, 
-                    alpha, beta, gamma), X);
+            return cdu(new CoreLinear2_Relu<>(du_func, dl_likeX1, alpha, beta, gamma), X); 
         }
         public Tensor[] add_relu(boolean likeX1, Tensor... X) { return cdu(new CoreLinear2_Relu<>(du_func, likeX1, 1.0f, 1.0f, 0.0f), X); }
         public Tensor[] linear2_relu(boolean likeX1, float alpha, float beta, float gamma, Tensor... X) {
-            return cdu(new CoreLinear2_Relu<>(du_func, likeX1, 
-                    alpha, beta, gamma), X);
+            return cdu(new CoreLinear2_Relu<>(du_func, likeX1, alpha, beta, gamma), X);
         }
         
-        public Tensor[] add_leakyRelu(Tensor... X) {
-            return cdu(new CoreLinear2_LeakyRelu<>(du_func, dual_likeX1, 
-                    1.0f, 1.0f, 0.0f, leakyRelu_negative_slope), X);
+        public Tensor[] add_leakyRelu(Tensor... X) { return cdu(new CoreLinear2_LeakyRelu<>(du_func, dl_likeX1, 1.0f, 1.0f, 0.0f, leakyRelu_neg_slope), X); }
+        public Tensor[] add_leakyRelu(float negative_slope, Tensor... X) { return cdu(new CoreLinear2_LeakyRelu<>(du_func, dl_likeX1, 1.0f, 1.0f, 0.0f, negative_slope), X); }
+        public Tensor[] linear2_leakyRelu(float alpha, float beta, float gamma, Tensor... X) { 
+            return cdu(new CoreLinear2_LeakyRelu<>(du_func, dl_likeX1, alpha, beta, gamma, leakyRelu_neg_slope), X);
         }
-        public Tensor[] add_leakyRelu(float negative_slope, Tensor... X) {
-            return cdu(new CoreLinear2_LeakyRelu<>(du_func, dual_likeX1, 
-                    1.0f, 1.0f, 0.0f, negative_slope), X);
+        public Tensor[] linear2_leakyRelu(float alpha, float beta, float gamma, float negative_slope, Tensor... X) {
+            return cdu(new CoreLinear2_LeakyRelu<>(du_func, dl_likeX1, alpha, beta, gamma, negative_slope), X);
         }
-        public Tensor[] linear2_leakyRelu(float alpha, float beta, float gamma, Tensor... X) {
-            return cdu(new CoreLinear2_LeakyRelu<>(du_func, dual_likeX1, 
-                    alpha, beta, gamma, leakyRelu_negative_slope), X);
-        }
-        public Tensor[] linear2_leakyRelu(float alpha, float beta, float gamma, 
-                float negative_slope, Tensor... X) {
-            return cdu(new CoreLinear2_LeakyRelu<>(du_func, dual_likeX1, 
-                    alpha, beta, gamma, negative_slope), X);
-        }
-        
-        public Tensor[] add_leakyRelu(boolean likeX1, Tensor... X) {
-            return cdu(new CoreLinear2_LeakyRelu<>(du_func, likeX1, 
-                    1.0f, 1.0f, 0.0f, leakyRelu_negative_slope), X);
-        }
-        public Tensor[] add_leakyRelu(boolean likeX1, float negative_slope, Tensor... X) {
-            return cdu(new CoreLinear2_LeakyRelu<>(du_func, likeX1, 
-                    1.0f, 1.0f, 0.0f, negative_slope), X);
-        }
+        public Tensor[] add_leakyRelu(boolean likeX1, Tensor... X) { return cdu(new CoreLinear2_LeakyRelu<>(du_func, likeX1, 1.0f, 1.0f, 0.0f, leakyRelu_neg_slope), X); }
+        public Tensor[] add_leakyRelu(boolean likeX1, float negative_slope, Tensor... X) { return cdu(new CoreLinear2_LeakyRelu<>(du_func, likeX1, 1.0f, 1.0f, 0.0f, negative_slope), X); }
         public Tensor[] linear2_leakyRelu(boolean likeX1, float alpha, float beta, float gamma, Tensor... X) {
-            return cdu(new CoreLinear2_LeakyRelu<>(du_func, likeX1, 
-                    alpha, beta, gamma, leakyRelu_negative_slope), X);
+            return cdu(new CoreLinear2_LeakyRelu<>(du_func, likeX1, alpha, beta, gamma, leakyRelu_neg_slope), X);
         }
-        public Tensor[] linear2_leakyRelu(boolean likeX1, float alpha, float beta, float gamma, 
-                float negative_slope, Tensor... X) {
-            return cdu(new CoreLinear2_LeakyRelu<>(du_func, likeX1, 
-                    alpha, beta, gamma, negative_slope), X);
+        public Tensor[] linear2_leakyRelu(boolean likeX1, float alpha, float beta, float gamma, float negative_slope, Tensor... X) {
+            return cdu(new CoreLinear2_LeakyRelu<>(du_func, likeX1, alpha, beta, gamma, negative_slope), X);
+        }
+        
+        public Tensor[] add_elu(Tensor... X) { return cdu(new CoreLinear2_Elu<>(du_func, dl_likeX1, 1.0f, 1.0f, 0.0f, elu_alpha, elu_neg_slope), X); }
+        public Tensor[] add_elu(float theta, float negative_slope, Tensor... X) { return cdu(new CoreLinear2_Elu<>(du_func, dl_likeX1, 1.0f, 1.0f, 0.0f, theta, negative_slope), X); }
+        public Tensor[] linear2_elu(float alpha, float beta, float gamma, Tensor... X) { 
+            return cdu(new CoreLinear2_Elu<>(du_func, dl_likeX1, alpha, beta, gamma, elu_alpha, elu_neg_slope), X);
+        }
+        public Tensor[] linear2_elu(float alpha, float beta, float gamma, float theta, float negative_slope, Tensor... X) {
+            return cdu(new CoreLinear2_Elu<>(du_func, dl_likeX1, alpha, beta, gamma, theta, negative_slope), X);
+        }
+        public Tensor[] add_elu(boolean likeX1, Tensor... X) { return cdu(new CoreLinear2_Elu<>(du_func, likeX1, 1.0f, 1.0f, 0.0f, elu_alpha, elu_neg_slope), X); }
+        public Tensor[] add_elu(boolean likeX1, float theta, float negative_slope, Tensor... X) { return cdu(new CoreLinear2_Elu<>(du_func, likeX1, 1.0f, 1.0f, 0.0f, theta, negative_slope), X); }
+        public Tensor[] linear2_elu(boolean likeX1, float alpha, float beta, float gamma, Tensor... X) {
+            return cdu(new CoreLinear2_Elu<>(du_func, likeX1, alpha, beta, gamma, elu_alpha, elu_neg_slope), X);
+        }
+        public Tensor[] linear2_elu(boolean likeX1, float alpha, float beta, float gamma, float theta, float negative_slope, Tensor... X) {
+            return cdu(new CoreLinear2_Elu<>(du_func, likeX1, alpha, beta, gamma, theta, negative_slope), X);
+        }
+        
+        public Tensor[] add_softplus(Tensor... X) { return cdu(new CoreLinear2_Softplus<>(du_func, dl_likeX1, 1.0f, 1.0f, 0.0f), X); }
+        public Tensor[] linear2_softplus(float alpha, float beta, float gamma, Tensor... X) {
+            return cdu(new CoreLinear2_Softplus<>(du_func, dl_likeX1, alpha, beta, gamma), X);
+        }
+        public Tensor[] add_softplus(boolean likeX1, Tensor... X) { return cdu(new CoreLinear2_Softplus<>(du_func, likeX1, 1.0f, 1.0f, 0.0f), X); }
+        public Tensor[] linear2_softplus(boolean likeX1, float alpha, float beta, float gamma, Tensor... X) {
+            return cdu(new CoreLinear2_Softplus<>(du_func, likeX1, alpha, beta, gamma), X);
+        }
+        
+        public Tensor[] add_gelu(Tensor... X) { return cdu(new CoreLinear2_Gelu<>(du_func, dl_likeX1, 1.0f, 1.0f, 0.0f), X); }
+        public Tensor[] linear2_gelu(float alpha, float beta, float gamma, Tensor... X) {
+            return cdu(new CoreLinear2_Gelu<>(du_func, dl_likeX1, alpha, beta, gamma), X);
+        }
+        public Tensor[] add_gelu(boolean likeX1, Tensor... X) { return cdu(new CoreLinear2_Gelu<>(du_func, likeX1, 1.0f, 1.0f, 0.0f), X); }
+        public Tensor[] linear2_gelu(boolean likeX1, float alpha, float beta, float gamma, Tensor... X) {
+            return cdu(new CoreLinear2_Gelu<>(du_func, likeX1, alpha, beta, gamma), X);
+        }
+        
+        public Tensor[] add_sigmoid(Tensor... X) { return cdu(new CoreLinear2_Sigmoid<>(du_func, dl_likeX1, 1.0f, 1.0f, 0.0f), X); }
+        public Tensor[] linear2_sigmoid(float alpha, float beta, float gamma, Tensor... X) {
+            return cdu(new CoreLinear2_Sigmoid<>(du_func, dl_likeX1, alpha, beta, gamma), X);
+        }
+        public Tensor[] add_sigmoid(boolean likeX1, Tensor... X) { return cdu(new CoreLinear2_Sigmoid<>(du_func, likeX1, 1.0f, 1.0f, 0.0f), X); }
+        public Tensor[] linear2_sigmoid(boolean likeX1, float alpha, float beta, float gamma, Tensor... X) {
+            return cdu(new CoreLinear2_Sigmoid<>(du_func, likeX1, alpha, beta, gamma), X);
+        }
+        
+        public Tensor[] add_tanh(Tensor... X) { return cdu(new CoreLinear2_Tanh<>(du_func, dl_likeX1, 1.0f, 1.0f, 0.0f), X); }
+        public Tensor[] linear2_tanh(float alpha, float beta, float gamma, Tensor... X) {
+            return cdu(new CoreLinear2_Tanh<>(du_func, dl_likeX1, alpha, beta, gamma), X);
+        }
+        public Tensor[] add_tanh(boolean likeX1, Tensor... X) { return cdu(new CoreLinear2_Tanh<>(du_func, likeX1, 1.0f, 1.0f, 0.0f), X); }
+        public Tensor[] linear2_tanh(boolean likeX1, float alpha, float beta, float gamma, Tensor... X) {
+            return cdu(new CoreLinear2_Tanh<>(du_func, likeX1, alpha, beta, gamma), X);
         }
         //</editor-fold>
         
@@ -2672,8 +2633,7 @@ public final class Alpha
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="class: Loss">
-    public static class Loss 
-    {
+    public static class Loss {
         protected Loss() {}
         public static final Loss loss = new Loss();
         
@@ -2700,21 +2660,16 @@ public final class Alpha
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="CrossEntropy">
-        public CrossEntropy crossEntropy() { 
-            return new CrossEntropy(); 
-        }
+        public CrossEntropy crossEntropy() { return new CrossEntropy(); }
        
-        public SoftmaxCrossEntropy softmax_crossEntropy() {
-            return new SoftmaxCrossEntropy(-1);
-        }
+        public SoftmaxCrossEntropy softmax_crossEntropy() { return new SoftmaxCrossEntropy(-1); }
         public SoftmaxCrossEntropy softmax_crossEntropy(int features) {
             return new SoftmaxCrossEntropy(features);
         }
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="class: LossSummaryCreator">
-        public static final class WeightedSummaryCreator 
-        {
+        public static final class WeightedSummaryCreator {
             private final List<Float> weights = new ArrayList<>(4);
             private final List<LossFunction> loss_funcs = new ArrayList<>(4);
             
@@ -2752,9 +2707,7 @@ public final class Alpha
             }
         }
         //</editor-fold>
-        public WeightedSummaryCreator weighted_sum() { 
-            return new WeightedSummaryCreator();
-        }
+        public WeightedSummaryCreator weighted_sum() { return new WeightedSummaryCreator(); }
         public WeightedSummary weighted_sum(float[] weight, LossFunction[] loss) {
             return new WeightedSummary(weight, loss);
         }

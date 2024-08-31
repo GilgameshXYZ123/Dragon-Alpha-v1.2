@@ -36,7 +36,6 @@ public class Net
         @Override
         public Tensor[] __forward__(Tensor... X) {
             Tensor[] res = X;
-            
             X = bn1.forward(conv1.forward(X));
             X = bn2.forward(conv2.forward(X));
             

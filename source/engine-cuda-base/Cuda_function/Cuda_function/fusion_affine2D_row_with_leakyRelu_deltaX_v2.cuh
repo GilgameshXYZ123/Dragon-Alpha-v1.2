@@ -45,8 +45,9 @@
 //(1) flag = (A*X + B) > 0
 //(1) deltaY1 = deltaY2 * (flag > 0 ? 1 : k), deltaY2 = deltaY
 //(2) deltaX = A * deltaY1
+
 __global__ void affine2D_row_with_leakyRelu_deltaX_v2_kernel_4(
-	float* __restrict__ deltaX,
+	      float* __restrict__ deltaX,
 	const float* __restrict__ deltaY, float k,
 	const float* __restrict__ X, 
 	const float* __restrict__ A,

@@ -21,7 +21,7 @@ import z.util.math.vector.Vector;
  */
 public class Cuda_upool2D_avg_test 
 {
-    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha");}
+    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2");}
     static Engine eg = alpha.engine.cuda_float32(0, alpha.engine.memp1());
     
     public static void testCorrect(int OH, int OW, int FH, int FW, int N, int IC,

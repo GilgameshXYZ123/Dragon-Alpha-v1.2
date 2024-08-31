@@ -54,9 +54,9 @@
 //
 //[Backward Propagation]
 //(1) flag = A*X_norm + B > 0
-//(2) deltaY1 = deltaY2 * (flag ? 1 : k)
-//(3) (deltaXp1 = deltaB) = sum_each_field: deltaY
-//(4) (deltaXp2 = deltaA) = sum_each_field: deltaY * Xnorm
+//(2) deltaY1 = deltaY2 * (flag ? 1 : k), deltaY2 = deltaY
+//(3) (deltaXp1 = deltaB) = sum_each_field: deltaY1
+//(4) (deltaXp2 = deltaA) = sum_each_field: deltaY1 * Xnorm
 //(5) X_rstd = 1 / X_std
 //(6) deltaX = (A * X_rstd) * (deltaY - deltaXp1 / N - deltaXp2 * X_norm / N)
 //    deltaX = (A * X_rstd) * (deltaY - (deltaXp1 + deltaXp2 * X_norm) / N)\

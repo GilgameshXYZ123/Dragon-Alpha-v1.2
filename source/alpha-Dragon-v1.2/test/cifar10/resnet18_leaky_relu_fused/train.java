@@ -26,7 +26,7 @@ import z.util.lang.SimpleTimer;
 public class train 
 {
     static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2"); }
-    static Mempool memp = alpha.engine.memp1(alpha.MEM_1GB * 8);
+    static Mempool memp = alpha.engine.memp2(alpha.MEM_1GB * 8);
     static Engine eg = alpha.engine.cuda_float32(0, memp, alpha.MEM_1MB * 1024);
 //    static Engine eg = alpha.engine.cuda_float32(0, 1, memp, alpha.MEM_1MB*1024, true);//30.167
     static {

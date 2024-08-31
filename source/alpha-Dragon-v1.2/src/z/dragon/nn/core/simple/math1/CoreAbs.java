@@ -15,8 +15,7 @@ import z.dragon.nn.core.simple.SimpleCore;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreAbs<T extends SimpleUnit> extends SimpleCore<T>
-{
+public class CoreAbs<T extends SimpleUnit> extends SimpleCore<T> {
     protected float alpha;
     protected float beta;
     

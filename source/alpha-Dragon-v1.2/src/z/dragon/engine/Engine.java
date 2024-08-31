@@ -2067,7 +2067,7 @@ public class Engine implements MemStatus {
     //</editor-fold>
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Convlution 3D">
+    //<editor-fold defaultstate="collapsed" desc="Convlution 3D (NHWC)">
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y)">
     public Tensor conv3D(Tensor Y, Tensor X, Tensor W, int sh, int sw) { return conv3D(Y, X, W, sh, sw, -1, -1); }
     @Passed("CudaFloat32EngieBase")
@@ -2083,8 +2083,8 @@ public class Engine implements MemStatus {
         }
         
         int[] dimY = Y.dim, dimX = X.dim, dimW = W.dim;
-        int OH = dimY[1], OW = dimY[2];//Y[ N, OH, OW, OC]
-        int XN  = dimX[0], IH = dimX[1], IW = dimX[2];//X[ N, IH, IW, IC]
+        int OH = dimY[1], OW = dimY[2];//Y[N, OH, OW, OC]
+        int XN  = dimX[0], IH = dimX[1], IW = dimX[2];//X[N, IH, IW, IC]
         int WOC = dimW[0], FH = dimW[1], FW = dimW[2], WIC = dimW[3];//W[OC, FH, FW, IC]
         
         if(ph == -1) ph = ((OH - 1)*sh + FH - IH + 1) >> 1;//ceiling
@@ -2116,7 +2116,7 @@ public class Engine implements MemStatus {
         }
         
         int[] dimY = Y.dim, dimX = X.dim, dimW = W.dim;
-        int OH = dimY[1], OW = dimY[2];//Y[N, OH, OW, OC]
+        int OH  = dimY[1], OW = dimY[2];//Y[N, OH, OW, OC]
         int XN  = dimX[0], IH = dimX[1], IW = dimX[2];//X[N, IH, IW, IC]
         int WOC = dimW[0], FH = dimW[1], FW = dimW[2], WIC = dimW[3];//W[OC, FH, FW, IC]
         
@@ -2165,7 +2165,7 @@ public class Engine implements MemStatus {
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (OH, OW, bias)-> Y">
     public Tensor conv3D_biased(Tensor X, Tensor W, int sh, int sw, int ph, int pw, Tensor Bias) { return conv3D_biased(X, W, -1, -1, sh, sw, ph, pw, Bias); }
-   @Passed("CudaFloat32EngieBase")
+    @Passed("CudaFloat32EngieBase")
     public Tensor conv3D_biased(Tensor X, Tensor W, int OH, int OW, 
             int sh, int sw, int ph, int pw, Tensor Bias) { 
         if(check) {
@@ -2211,8 +2211,8 @@ public class Engine implements MemStatus {
         }
         
         int[] dimY = deltaY.dim, dimX = X.dim, dimW = deltaW.dim;
-        int OH = dimY[1], OW = dimY[2];//Y[ N, OH, OW, OC]
-        int XN  = dimX[0], IH = dimX[1], IW = dimX[2];//X[ N, IH, IW, IC]
+        int OH  = dimY[1], OW = dimY[2];//Y[N, OH, OW, OC]
+        int XN  = dimX[0], IH = dimX[1], IW = dimX[2];//X[N, IH, IW, IC]
         int WOC = dimW[0], FH = dimW[1], FW = dimW[2], WIC = dimW[3];//W[OC, FH, FW, IC]
 
         if(ph == -1) ph = ((OH - 1)*sh + FH - IH + 1) >> 1;//ceiling
@@ -2241,7 +2241,7 @@ public class Engine implements MemStatus {
         
         int[] dimY = deltaY.dim, dimX = X.dim;
         int OH = dimY[1], OW = dimY[2], YOC = dimY[3];//Y[N, OH, OW, OC]
-        int XN = dimX[0], IH = dimX[1], IW = dimX[2], XIC = dimX[3];//X[ N, IH, IW, IC]
+        int XN = dimX[0], IH = dimX[1], IW = dimX[2], XIC = dimX[3];//X[N, IH, IW, IC]
         
         if(FH == -1) FH = IH + (ph << 1) - (OH - 1)*sh;//ceiling
         if(FW == -1) FW = IW + (pw << 1) - (OW - 1)*sw;//ceiling
@@ -2249,7 +2249,7 @@ public class Engine implements MemStatus {
         
         Syncer sc = core.conv3D_deltaW(
                 deltaW.address, FH, FW,
-                X.address, IH, IW, 
+                X.address,      IH, IW, 
                 deltaY.address, OH, OW, 
                 XN, XIC, YOC, 
                 sh, sw, ph, pw);
@@ -2273,8 +2273,8 @@ public class Engine implements MemStatus {
         }
         
         int[] dimY = deltaY.dim, dimW = W.dim, dimX = deltaX.dim;
-        int IH = dimX[1], IW = dimX[2];//X[N, IH, IW, IC]
-        int YN = dimY[0], OH = dimY[1], OW = dimY[2];//Y[ N, OH, OW, OC]
+        int IH  = dimX[1], IW = dimX[2];//X[N, IH, IW, IC]
+        int YN  = dimY[0], OH = dimY[1], OW = dimY[2];//Y[N, OH, OW, OC]
         int WOC = dimW[0], FH = dimW[1], FW = dimW[2], WIC = dimW[3];//W[OC, FH, FW, IC]
         
         if(ph == -1) ph = ((OH - 1)*sh + FH - IH + 1) >> 1;//ceiling
@@ -2283,7 +2283,7 @@ public class Engine implements MemStatus {
         Syncer sc = core.conv3D_deltaX(
                 deltaX.address, IH, IW, 
                 deltaY.address, OH, OW, 
-                W.address, FH, FW, 
+                W.address,      FH, FW, 
                 YN, WIC, WOC, 
                 sh, sw, ph, pw);
         if(sync) sc.sync(); else deltaX.setSyncer(sc);
@@ -2302,7 +2302,7 @@ public class Engine implements MemStatus {
         }
         
         int[] dimY = deltaY.dim, dimW = W.dim;
-        int YN = dimY[0], OH = dimY[1], OW = dimY[2];//Y[ N, OH, OW, OC]
+        int YN  = dimY[0], OH = dimY[1], OW = dimY[2];//Y[N, OH, OW, OC]
         int WOC = dimW[0], FH = dimW[1], FW = dimW[2], WIC = dimW[3];//W[OC, FH, FW, IC]
         
         if(IH == -1) IH = (OH - 1)*sh + FH - (ph << 1);//floor
@@ -2312,7 +2312,7 @@ public class Engine implements MemStatus {
         Syncer sc = core.conv3D_deltaX(
                 deltaX.address, IH, IW, 
                 deltaY.address, OH, OW, 
-                W.address, FH, FW, 
+                W.address,      FH, FW, 
                 YN, WIC, WOC, 
                 sh, sw, ph, pw);
         if(sync) sc.sync(); else deltaX.setSyncer(sc);
@@ -2320,8 +2320,7 @@ public class Engine implements MemStatus {
     }
     //</editor-fold>
     //</editor-fold>
-    
-    //<editor-fold defaultstate="collapsed" desc="Deconvolution 3D">
+    //<editor-fold defaultstate="collapsed" desc="Deconvolution 3D (NHWC)">
     //<editor-fold defaultstate="collapsed" desc="forward-propagation">
     public Tensor deconv3D(Tensor Y, Tensor X, Tensor W, int sh, int sw) { return conv3D_deltaX(Y, X, W, sh, sw, -1, -1); }
     public Tensor deconv3D(Tensor Y, Tensor X, Tensor W, int sh, int sw, int ph, int pw) {
@@ -2430,6 +2429,339 @@ public class Engine implements MemStatus {
     public Tensor deconv3D_deltaX(Tensor deltaY, Tensor W, int IH, int IW, int sh, int sw, int ph, int pw) {
         return conv3D(deltaY, W, IH, IW, sh, sw, ph, pw);
     }
+    //</editor-fold>
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="Convlution 2D (NWC)">
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y)">
+    public Tensor conv2D(Tensor Y, Tensor X, Tensor W, int sw) { return conv2D(Y, X, W, sw, -1); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor conv2D(Tensor Y, Tensor X, Tensor W, int sw, int pw) {
+       if(check) {
+            require_dtype(Y, "Y"); require_dtype(X, "X"); require_dtype(W, "W"); 
+            equals(Y.ndim(), "Y.ndim", 3);
+            equals(X.ndim(), "X.ndim", 3);
+            equals(W.ndim(), "W.ndim", 3);
+            equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
+            equals(W.dim(0), "W.OC", Y.dim(2), "Y.OC");
+            equals(W.dim(2), "W.IC", X.dim(2), "X.IC");
+        }
+        
+        int[] dimY = Y.dim, dimX = X.dim, dimW = W.dim;
+        int OW  = dimY[1];//Y[N, OW, OC]
+        int XN  = dimX[0], IW = dimX[1];//X[N, IW, IC]
+        int WOC = dimW[0], FW = dimW[1], WIC = dimW[2];//W[OC, FW, IC]
+        
+        if(pw == -1) pw = ((OW - 1)*sw + FW - IW + 1) >> 1;//ceiling
+        
+        Syncer sc = core.conv2D(
+                Y.address, OW,
+                X.address, IW,
+                W.address, FW,
+                XN, WIC, WOC,
+                sw, pw);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y, bias)">
+    public Tensor conv2D_biased(Tensor Y, Tensor X, Tensor W, int sw, Tensor Bias) { return conv2D_biased(Y, X, W, sw, -1, Bias); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor conv2D_biased(Tensor Y, Tensor X, Tensor W, int sw, int pw, Tensor Bias) {
+        if(check) {
+            require_dtype(Y, "Y"); require_dtype(X, "X"); require_dtype(W, "W"); 
+            equals(Y.ndim(), "Y.ndim", 3);
+            equals(X.ndim(), "X.ndim", 3);
+            equals(W.ndim(), "W.ndim", 3);
+            equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
+            equals(W.dim(0), "W.OC", Y.dim(2), "Y.OC");
+            equals(W.dim(2), "W.IC", X.dim(2), "X.IC");
+            equals(Bias.lastDim(), "Bias.lastDim", W.dim(0), "W.OC");
+        }
+        
+        int[] dimY = Y.dim, dimX = X.dim, dimW = W.dim;
+        int OW  = dimY[1];//Y[N, OW, OC]
+        int XN  = dimX[0], IW = dimX[1];//X[N, IW, IC]
+        int WOC = dimW[0], FW = dimW[1], WIC = dimW[2];//W[OC, FW, IC]
+        
+        if(pw == -1) pw = ((OW - 1)*sw + FW - IW + 1) >> 1;//ceiling
+        
+        Syncer sc = core.conv2D_biased(
+                Y.address, OW,
+                X.address, IW,
+                W.address, FW, 
+                XN, WIC, WOC, 
+                sw, pw, 
+                Bias.address, Y.lengthv);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (OW) -> Y">
+    public Tensor conv2D(Tensor X, Tensor W, int sw, int pw) { return conv2D(X, W, -1, sw, pw); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor conv2D(Tensor X, Tensor W, int OW, int sw, int pw) {
+        if(check) {
+            require_dtype(X, "W"); require_dtype(W, "W"); 
+            equals(X.ndim(), "X.ndim", 3);
+            equals(W.ndim(), "W.ndim", 3);
+            equals(W.dim(2), "W.IC ", X.dim(2), "X.IC");
+        }
+        
+        int[] dimX = X.dim, dimW = W.dim;
+        int XN  = dimX[0], IW = dimX[1];//X[N, IW, IC]
+        int WOC = dimW[0], FW = dimW[1], WIC = dimW[2];//W[OC, FW, IC]
+        
+        if(OW == -1) OW = (IW - FW + (pw << 1)) / sw + 1;//floor
+        Tensor Y = this.empty(XN, OW, WOC).c();
+         
+        Syncer sc = core.conv2D(
+                Y.address, OW,
+                X.address, IW,
+                W.address, FW,
+                XN, WIC, WOC,
+                sw, pw);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (OW, bias)-> Y">
+    public Tensor conv2D_biased(Tensor X, Tensor W, int sw, int pw, Tensor Bias) { return conv2D_biased(X, W, -1, sw, pw, Bias); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor conv2D_biased(Tensor X, Tensor W, int OW, int sw, int pw, Tensor Bias) { 
+        if(check) {
+            require_dtype(X, "W"); require_dtype(W, "W"); 
+            equals(X.ndim(), "X.ndim", 3);
+            equals(W.ndim(), "W.ndim", 3);
+            equals(W.dim(2), "W.IC ", X.dim(2), "X.IC");
+            equals(Bias.lastDim(), "Bias.lastDim", W.dim(0), "W.OC");
+        }
+        
+        int[] dimX = X.dim, dimW = W.dim;
+        int XN  = dimX[0], IW = dimX[1];//X[N, IW, IC]
+        int WOC = dimW[0], FW = dimW[1], WIC = dimW[2];//W[OC, FW, IC]
+        
+        if(OW == -1) OW = (IW - FW + (pw << 1)) / sw + 1;//floor
+        Tensor Y = this.empty(XN, OW, WOC).c();
+        
+        Syncer sc = core.conv2D_biased(
+                Y.address, OW,
+                X.address, IW,
+                W.address, FW, 
+                XN, WIC, WOC, 
+                sw, pw, 
+                Bias.address, Y.lengthv);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="backward propagation: (deltaW)">
+    public Tensor conv2D_deltaW(Tensor deltaW, Tensor X, Tensor deltaY, int sw) { return conv2D_deltaW(deltaW, X, deltaY, sw, -1); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor conv2D_deltaW(Tensor deltaW, Tensor X, Tensor deltaY, int sw, int pw) {
+        if(check) {
+            require_dtype(deltaW, "deltaW"); require_dtype(X, "X"); require_dtype(deltaY, "deltaY"); 
+            equals(deltaY.ndim(), "deltaY.ndim", 3);
+            equals(X.ndim(), "X.ndim", 3);
+            equals(deltaW.ndim(), "deltaW.ndim", 3);
+            equals(deltaY.dim(0), "deltaY.batch", X.dim(0), "X.batch");
+            equals(deltaW.dim(0), "deltaW.OC", deltaY.dim(2), "deltaY.OC");
+            equals(deltaW.dim(2), "deltaW.IC", X.dim(2), "X.IC");
+        }
+        
+        int[] dimY = deltaY.dim, dimX = X.dim, dimW = deltaW.dim;
+        int OW  = dimY[1];//Y[N, OW, OC]
+        int XN  = dimX[0], IW = dimX[1];//X[N, IW, IC]
+        int WOC = dimW[0], FW = dimW[1], WIC = dimW[2];//W[OC, FW, IC]
+
+        if(pw == -1) pw = ((OW - 1)*sw + FW - IW + 1) >> 1;//ceiling
+        
+        Syncer sc = core.conv2D_deltaW(
+                deltaW.address, FW,
+                X.address,      IW,
+                deltaY.address, OW,
+                XN, WIC, WOC,
+                sw, pw);
+        if(sync) sc.sync(); else deltaW.setSyncer(sc);
+        return deltaW;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward propagation: (FW) -> deltaW">
+    public Tensor conv2D_deltaW(Tensor X, Tensor deltaY, int sw, int pw) { return conv2D_deltaW(X, deltaY, -1, sw, pw); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor conv2D_deltaW(Tensor X, Tensor deltaY, int FW, int sw, int pw) {
+        if(check) {
+            require_dtype(X, "X"); require_dtype(deltaY, "deltaY"); 
+            equals(deltaY.ndim(), "deltaY.ndim", 3);
+            equals(X.ndim(), "X.ndim", 3);
+            equals(deltaY.dim(0), "deltaY.batch", X.dim(0), "X.batch");
+        }
+        
+        int[] dimY = deltaY.dim, dimX = X.dim;
+        int OW = dimY[1], YOC = dimY[2];//Y[N, OW, OC]
+        int XN = dimX[0], IW  = dimX[1], XIC = dimX[2];//X[N, IW, IC]
+        
+        if(FW == -1) FW = IW + (pw << 1) - (OW - 1)*sw;//ceiling
+        Tensor deltaW = this.empty(YOC, FW, XIC).c();
+        
+        Syncer sc = core.conv2D_deltaW(
+                deltaW.address, FW,
+                X.address,      IW, 
+                deltaY.address, OW, 
+                XN, XIC, YOC, 
+                sw, pw);
+        if(sync) sc.sync(); else deltaW.setSyncer(sc);
+        return deltaW;
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="backward propagation: (deltaX)">
+    public Tensor conv2D_deltaX(Tensor deltaX, Tensor deltaY, Tensor W, int sw) { return conv2D_deltaX(deltaX, deltaY, W, sw, -1); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor conv2D_deltaX(Tensor deltaX, Tensor deltaY, Tensor W, int sw, int pw) {
+        if(check) {
+            require_dtype(deltaX, "deltaX"); require_dtype(deltaY, "deltaY"); require_dtype(W, "W"); 
+            equals(deltaX.ndim(), "deltaX.ndim", 3);
+            equals(deltaY.ndim(), "deltaY.ndim", 3);
+            equals(W.ndim(), "W.ndim", 3);
+            equals(W.dim(0), "W.OC", deltaY.dim(2), "Y.OC");
+            equals(deltaX.dim(0), "deltaX.batch", deltaY.dim(0), "deltaY.batch");
+            equals(deltaX.dim(2), "deltaX.IC", W.dim(2), "W.IC");
+        }
+        
+        int[] dimY = deltaY.dim, dimW = W.dim, dimX = deltaX.dim;
+        int IW  = dimX[1];//X[N, IW, IC]
+        int YN  = dimY[0], OW = dimY[1];//Y[N, OW, OC]
+        int WOC = dimW[0], FW = dimW[1], WIC = dimW[2];//W[OC, FW, IC]
+        
+        if(pw == -1) pw = ((OW - 1)*sw + FW - IW + 1) >> 1;//ceiling
+        
+        Syncer sc = core.conv2D_deltaX(
+                deltaX.address, IW, 
+                deltaY.address, OW, 
+                W.address,      FW, 
+                YN, WIC, WOC, 
+                sw, pw);
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward propagation: (IW) -> deltaX">
+    public Tensor conv2D_deltaX(Tensor deltaY, Tensor W, int sw, int pw) { return conv2D_deltaX(deltaY, W, -1, sw, pw); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor conv2D_deltaX(Tensor deltaY, Tensor W, int IW, int sw, int pw) {
+         if(check) {
+            require_dtype(deltaY, "deltaY"); require_dtype(W, "W"); 
+            equals(deltaY.ndim(), "deltaY.ndim", 3);
+            equals(W.ndim(), "W.ndim", 3);
+            equals(W.dim(0), "W.OC", deltaY.dim(2), "Y.OC");
+        }
+        
+        int[] dimY = deltaY.dim, dimW = W.dim;
+        int YN =  dimY[0], OW = dimY[1];//Y[N, OW, OC]
+        int WOC = dimW[0], FW = dimW[1], WIC = dimW[2];//W[OC, FW, IC]
+        
+        if(IW == -1) IW = (OW - 1)*sw + FW - (pw << 1);//floor
+        Tensor deltaX = this.empty(YN, IW, WIC).c();
+        
+        Syncer sc = core.conv2D_deltaX(
+                deltaX.address, IW, 
+                deltaY.address, OW, 
+                W.address,      FW, 
+                YN, WIC, WOC, 
+                sw, pw);
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Deconvolution 2D (NWC)">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public Tensor deconv2D(Tensor Y, Tensor X, Tensor W, int sw) { return conv2D_deltaX(Y, X, W, sw, -1); }
+    public Tensor deconv2D(Tensor Y, Tensor X, Tensor W, int sw, int pw) { return conv2D_deltaX(Y, X, W, sw, pw); }
+    
+    public Tensor deconv2D(Tensor X, Tensor W, int sw, int pw) { return conv2D_deltaX(X, W, -1, sw, pw); }
+    public Tensor deconv2D(Tensor X, Tensor W, int OW, int sw, int pw) { return conv2D_deltaX(X, W, OW, sw,  pw); }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y, bias)">
+    public Tensor deconv2D_biased(Tensor Y, Tensor X, Tensor W, int sh, int sw, Tensor Bias) { return deconv3D_biased(Y, X, W, sh, sw, -1, -1, Bias);}
+    @Passed("CudaFloat32EngieBase")
+    public Tensor deconv2D_biased(Tensor Y, Tensor X, Tensor W, int sh, int sw, int ph, int pw, Tensor Bias) {
+        if(check) {
+            require_dtype(Y, "Y"); require_dtype(X, "X"); require_dtype(W, "W"); 
+            equals(Y.ndim(), "Y.ndim", 4);
+            equals(X.ndim(), "X.ndim", 4);
+            equals(W.ndim(), "W.ndim", 4);
+            equals(Y.dim(0), "Y.N", X.dim(0), "N");
+            equals(W.dim(3), "W.OC", Y.dim(3), "Y.OC");
+            equals(W.dim(0), "W.IC", X.dim(3), "X.IC");
+            equals(Bias.lastDim(), "Bias.lastDim", W.dim(3), "W.OC");
+        }
+        
+        int[] dimY = Y.dim, dimX = X.dim, dimW = W.dim;
+        int OH = dimY[1], OW = dimY[2];//Y[N, OH, OW, OC]
+        int XN  = dimX[0], IH = dimX[1], IW = dimX[2];//X[N, IH, IW, IC]
+        int WIC = dimW[0], FH = dimW[1], FW = dimW[2], WOC = dimW[3];//W[IC, FH, FW, OC]
+        
+        if(ph == -1) ph = ((IH - 1)*sh + FH - OH + 1) >> 1;//ceiling
+        if(pw == -1) pw = ((IW - 1)*sw + FW - OW + 1) >> 1;//ceiling
+        
+        Syncer sc = core.deconv3D_biased(
+                Y.address, OH, OW,
+                X.address, IH, IW, 
+                W.address, FH, FW, 
+                XN, WIC, WOC,
+                sh, sw, ph, pw, 
+                Bias.address, Y.lengthv);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (OH, OW, bias) -> Y">
+    public Tensor deconv2D_biased(Tensor X, Tensor W, int sw, int pw, Tensor Bias) { return deconv2D_biased(X, W, -1, sw, pw, Bias); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor deconv2D_biased(Tensor X, Tensor W, int OW, int sw, int pw, Tensor Bias) {
+        if(check) {
+            require_dtype(X, "X"); require_dtype(W, "W"); 
+            equals(X.ndim(), "X.ndim", 3);
+            equals(W.ndim(), "W.ndim", 3);
+            equals(W.dim(0), "W.IC", X.dim(2), "X.IC");
+            equals(Bias.lastDim(), "Bias.lastDim", W.dim(2), "W.OC");
+        }
+        
+        int[] dimX = X.dim, dimW = W.dim;
+        int XN  = dimX[0], IW = dimX[1];//X[N, IW, IC]
+        int WIC = dimW[0], FW = dimW[1], WOC = dimW[2];//W[IC, FW, OC]
+        
+        if(OW == -1) OW = (IW - 1)*sw + FW - (pw << 1);//floor
+        Tensor Y = this.empty(XN, OW, WOC).c();
+        
+        Syncer sc = core.deconv2D_biased(
+                Y.address, OW,
+                X.address, IW, 
+                W.address, FW, 
+                XN, WIC, WOC,
+                sw, pw, 
+                Bias.address, Y.lengthv);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaW">
+    public Tensor deconv2D_deltaW(Tensor deltaW, Tensor deltaY, Tensor X, int sw) { return conv2D_deltaW(deltaW, X, deltaY, sw, -1); }//X is the filters
+    public Tensor deconv2D_deltaW(Tensor deltaW, Tensor deltaY, Tensor X, int sw, int pw) { return conv2D_deltaW(deltaW, X, deltaY, sw, pw); }//X is the filters
+    
+    public Tensor deconv2D_deltaW(Tensor deltaY, Tensor X, int sw, int pw) { return conv2D_deltaW(X, deltaY, -1, sw, pw); }//X is the filters
+    public Tensor deconv2D_deltaW(Tensor deltaY, Tensor X, int FW, int sw, int pw) { return conv2D_deltaW(X, deltaY, FW, sw, pw); }//X is the filters
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    public Tensor deconv2D_deltaX(Tensor deltaX, Tensor deltaY, Tensor W, int sw) { return conv2D(deltaX, deltaY, W, sw, -1); }
+    public Tensor deconv2D_deltaX(Tensor deltaX, Tensor deltaY, Tensor W, int sw, int pw) { return conv2D(deltaX, deltaY, W, sw, pw); }
+    
+    public Tensor deconv2D_deltaX(Tensor deltaY, Tensor W, int sw, int pw) { return conv2D(deltaY, W, -1, sw, pw); }
+    public Tensor deconv2D_deltaX(Tensor deltaY, Tensor W, int IW, int sw, int pw) { return conv2D(deltaY, W, IW, sw, pw); }
     //</editor-fold>
     //</editor-fold>
     
@@ -2560,7 +2892,6 @@ public class Engine implements MemStatus {
     }
     //</editor-fold>
     //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="DepthWise Deconvlution 3D">
     
     
@@ -2569,12 +2900,11 @@ public class Engine implements MemStatus {
     //<editor-fold defaultstate="collapsed" desc="Pooling2D">
     //<editor-fold defaultstate="collapsed" desc="Max Pooling 2D">
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y)">
-    public Tensor pool2D_max(Tensor Y, Tensor X, int FH, int FW, int sh, int sw) {
+    public Tensor pool2D_max(Tensor Y, Tensor X, int FH, int FW, int sh, int sw) { 
         return pool2D_max(Y, X, FH, FW, sh, sw, -1, -1);
     }
     @Passed("CudaFloat32EngieBase")
-    public Tensor pool2D_max(Tensor Y, Tensor X, int FH, int FW, 
-            int sh, int sw, int ph, int pw)  {
+    public Tensor pool2D_max(Tensor Y, Tensor X, int FH, int FW, int sh, int sw, int ph, int pw)  {
         if(check) {
             require_dtype(Y, "Y"); require_dtype(X, "X");
             equals(Y.ndim(), "Y.ndim", 4);
@@ -2582,9 +2912,10 @@ public class Engine implements MemStatus {
             equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
             equals(Y.dim(3), "Y.IC", X.dim(3), "X.IC");
         }
+        
         int[] dimY = Y.dim, dimX = X.dim;
-        int OH = dimY[1], OW = dimY[2];//Y[ N, OH, OW, OC]
-        int XN = dimX[0], IH = dimX[1], IW = dimX[2], XIC = dimX[3];//X[ N, IH, IW, IC]
+        int OH = dimY[1], OW = dimY[2];//Y[N, OH, OW, OC]
+        int XN = dimX[0], IH = dimX[1], IW = dimX[2], XIC = dimX[3];//X[N, IH, IW, IC]
         
         if(ph == -1) ph = ((OH - 1)*sh + FH - IH) >> 1;//floor
         if(pw == -1) pw = ((OW - 1)*sw + FW - IW) >> 1;//floor
@@ -2603,9 +2934,7 @@ public class Engine implements MemStatus {
         return pool2D_max(X, FH, FW, -1, -1, sh, sw, ph, pw);
     }
     @Passed("CudaFloat32EngieBase")
-    public Tensor pool2D_max(Tensor X, int FH, int FW, int OH, int OW, 
-            int sh, int sw, int ph, int pw) 
-    {
+    public Tensor pool2D_max(Tensor X, int FH, int FW, int OH, int OW, int sh, int sw, int ph, int pw) {
         if(check) { require_dtype(X, "X"); must_greater_equal(X.ndim(), "X.ndim", 3); }
         
         int[] dimX = X.dim;
@@ -2847,13 +3176,13 @@ public class Engine implements MemStatus {
     
     //<editor-fold defaultstate="collapsed" desc="Avg Pooling 2D">
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y)">
-    public Tensor pool2D_avg(boolean ignore_padding, Tensor Y, Tensor X, 
-            int FH, int FW, int sh, int sw) {
+    public Tensor pool2D_avg(boolean ignore_padding, 
+            Tensor Y, Tensor X, int FH, int FW, int sh, int sw) {
         return pool2D_avg(ignore_padding, Y, X, FH, FW, sh, sw, -1, -1);
     }
     @Passed("CudaFloat32EngieBase")
-    public Tensor pool2D_avg(boolean ignore_padding, Tensor Y, Tensor X,
-            int FH, int FW, int sh, int sw, int ph, int pw) 
+    public Tensor pool2D_avg(boolean ignore_padding, 
+            Tensor Y, Tensor X, int FH, int FW, int sh, int sw, int ph, int pw) 
     {
         if(check) {
             require_dtype(Y, "Y"); require_dtype(X, "X");
@@ -2870,23 +3199,25 @@ public class Engine implements MemStatus {
         if(ph == -1) ph = ((OH - 1)*sh + FH - IH) >> 1;//floor
         if(pw == -1) pw = ((OW - 1)*sw + FW - IW) >> 1;//floor
         
-        Syncer sc = (ignore_padding ?
-                core.pool2D_avg_ignore_padding(Y.address, OH, OW, X.address, IH, IW, 
-                       FH, FW, XN, XIC, sh, sw, ph, pw) :
-                core.pool2D_avg(Y.address, OH, OW, X.address, IH, IW, 
-                        FH, FW, XN, XIC, sh, sw, ph, pw));
-        
+        Syncer sc = core.pool2D_avg(ignore_padding,
+                Y.address, OH, OW, 
+                X.address, IH, IW, 
+                FH, FW, 
+                XN, XIC, 
+                sh, sw, ph, pw);
         if(sync) sc.sync(); else Y.setSyncer(sc);
         return Y;
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (OH, OW) -> Y">
-    public Tensor pool2D_avg(boolean ignore_padding, Tensor X, int FH, int FW, int sh, int sw, int ph, int pw) {
+    public Tensor pool2D_avg(boolean ignore_padding, 
+            Tensor X, int FH, int FW, 
+            int sh, int sw, int ph, int pw) {
         return pool2D_avg(ignore_padding, X, FH, FW, -1, -1, sh, sw, ph, pw);
     }
     @Passed("CudaFloat32EngieBase")
     public Tensor pool2D_avg(boolean ignore_padding, 
-            Tensor X, int FH, int FW, int OH, int OW,
+            Tensor X, int FH, int FW, int OH, int OW, 
             int sh, int sw, int ph, int pw) 
     {
         if(check) { require_dtype(X, "X"); this.must_greater_equal(X.ndim(), "X,ndim", 3); }
@@ -2899,11 +3230,11 @@ public class Engine implements MemStatus {
             if(OW == -1) OW = (IW - FW + (pw << 1))/sw + 1;//floor
             Tensor Y = this.empty(OH, OW, XIC).c();
             
-            Syncer sc = (ignore_padding?
-                core.pool2D_avg_ignore_padding(Y.address, OH, OW, X.address, IH, IW,
-                        FH, FW, XIC, sh, sw, ph, pw) :
-                core.pool2D_avg(Y.address, OH, OW, X.address, IH, IW,
-                        FH, FW, XIC, sh, sw, ph, pw));
+            Syncer sc = core.pool2D_avg(ignore_padding,
+                    Y.address, OH, OW, 
+                    X.address, IH, IW,
+                    FH, FW, XIC, 
+                    sh, sw, ph, pw);
             if(sync) sc.sync(); else Y.setSyncer(sc);
             return Y;
         }
@@ -2915,11 +3246,11 @@ public class Engine implements MemStatus {
         if(OW == -1) OW = (IW - FW + (pw << 1))/sw + 1;//floor
         Tensor Y = this.empty(XN, OH, OW, XIC).c();
         
-        Syncer sc = (ignore_padding?
-                core.pool2D_avg_ignore_padding(Y.address, OH, OW, X.address, IH, IW,
-                        FH, FW, XN, XIC, sh, sw, ph, pw) :
-                core.pool2D_avg(Y.address, OH, OW, X.address, IH, IW,
-                        FH, FW, XN, XIC, sh, sw, ph, pw));
+        Syncer sc = core.pool2D_avg(ignore_padding,
+                Y.address, OH, OW,
+                X.address, IH, IW,
+                FH, FW, XN, XIC, 
+                sh, sw, ph, pw);
         if(sync) sc.sync(); else Y.setSyncer(sc);
         return Y;
     }
@@ -2949,13 +3280,9 @@ public class Engine implements MemStatus {
         if(ph == -1) ph = ((OH - 1)*sh + FH - IH) >> 1;//floor
         if(pw == -1) pw = ((OW - 1)*sw + FW - IW) >> 1;//floor
         
-        Syncer sc = (ignore_padding ?
-                core.unpool2D_avg_ignore_padding(
-                        deltaX.address, IH, IW, deltaY.address, OH, OW,
-                        FH, FW, YN, XIC, sh, sw, ph, pw):
-                core.unpool2D_avg(
-                        deltaX.address, IH, IW, deltaY.address, OH, OW,
-                        FH, FW, YN, XIC, sh, sw, ph, pw));
+        Syncer sc = core.unpool2D_avg(ignore_padding,
+                deltaX.address, IH, IW, deltaY.address, OH, OW,
+                FH, FW, YN, XIC, sh, sw, ph, pw);
         if(sync) sc.sync(); else deltaX.setSyncer(sc);
         return deltaX;
     }
@@ -2980,13 +3307,345 @@ public class Engine implements MemStatus {
         if(IW == -1) IW = (OW - 1)*sw + FW - (pw << 1);//floor
         Tensor deltaX = this.empty(YN, IH, IW, YIC).c();  
         
-        Syncer sc = (ignore_padding ?
-                core.unpool2D_avg_ignore_padding(
-                        deltaX.address, IH, IW, deltaY.address, OH, OW,
-                        FH, FW, YN, YIC, sh, sw, ph, pw):
-                core.unpool2D_avg(
-                        deltaX.address, IH, IW, deltaY.address, OH, OW,
-                        FH, FW, YN, YIC, sh, sw, ph, pw));
+        Syncer sc = core.unpool2D_avg(ignore_padding,
+                deltaX.address, IH, IW, deltaY.address, OH, OW,
+                FH, FW, YN, YIC, sh, sw, ph, pw);
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="Pooling1D">
+    //<editor-fold defaultstate="collapsed" desc="Max Pooling 1D">
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y)">
+    public Tensor pool1D_max(Tensor Y, Tensor X, int FW, int sw) { return pool1D_max(Y, X, FW, sw, -1); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor pool1D_max(Tensor Y, Tensor X, int FW, int sw, int pw)  {
+        if(check) {
+            require_dtype(Y, "Y"); require_dtype(X, "X");
+            equals(Y.ndim(), "Y.ndim", 3);
+            equals(X.ndim(), "X.ndim", 3);
+            equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
+            equals(Y.dim(2), "Y.IC", X.dim(2), "X.IC");
+        }
+        
+        int[] dimY = Y.dim, dimX = X.dim;
+        int OW = dimY[1];//Y[N, OW, OC]
+        int XN = dimX[0], IW = dimX[1], XIC = dimX[2];//X[N, IW, IC]
+        
+        if(pw == -1) pw = ((OW - 1)*sw + FW - IW) >> 1;//floor
+        
+        Syncer sc = core.pool1D_max(
+                Y.address, OW, 
+                X.address, IW, 
+                FW, XN, XIC, 
+                sw, pw);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (OW) -> Y">
+    public Tensor pool1D_max(Tensor X, int FW, int sw, int pw) { return pool1D_max(X, FW, -1, sw, pw); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor pool1D_max(Tensor X, int FW, int OW, int sw, int pw) {
+        if(check) { require_dtype(X, "X"); must_greater_equal(X.ndim(), "X.ndim", 3); }
+       
+        int[] dimX = X.dim;
+        int XN = dimX[0], IW = dimX[1], XIC = dimX[2];//[N, IW, IC]
+        
+        if(OW == -1) OW = (IW - FW + (pw << 1))/sw + 1;//floor
+        Tensor Y = this.empty(XN, OW, XIC).c();
+        
+        Syncer sc = core.pool1D_max(
+                Y.address, OW, 
+                X.address, IW,
+                FW, XN, XIC, 
+                sw, pw);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="backward propagation: (deltaX)">
+    public Tensor unpool1D_max(Tensor deltaX, Tensor deltaY, Tensor Y, Tensor X, int FW, int sw) {
+        return unpool1D_max(deltaX, deltaY, Y, X, FW, sw, -1);
+    }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor unpool1D_max(Tensor deltaX, Tensor deltaY, Tensor Y, Tensor X, int FW, int sw, int pw) {
+        if(check) {
+            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y"); 
+            require_dtype(deltaX, "deltaX"); require_dtype(X, "X");
+            equals(deltaX.ndim(), "deltaX.ndim", 3);
+            equals(deltaY.ndim(), "deltaY.ndim", 3);
+            equals_valueStructure(deltaY, "deltaY", Y, "Y");
+            equals_valueStructure(deltaX, "deltaX", X, "X");
+            equals(X.dim(0), "X.batch", Y.dim(0), "Y.batch");
+            equals(X.dim(2), "X.IC", Y.dim(2), "Y.IC");
+        }
+        
+        int[] dimY = deltaY.dim, dimX = deltaX.dim;
+        int OW = dimY[1];//Y[N, OW, OC]
+        int XN = dimX[0], IW = dimX[1], XIC = dimX[2];//X[N, IW, IC]
+        
+        if(pw == -1) pw = ((OW - 1)*sw + FW - IW) >> 1;//floor
+        
+        Syncer sc = core.unpool1D_max(
+                deltaY.address, Y.address, OW, 
+                deltaX.address, X.address, IW, 
+                FW, XN, XIC, 
+                sw, pw);
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward propagation: (X) -> deltaX">
+    public Tensor unpool1D_max(Tensor deltaY, Tensor Y, Tensor X, int FW, int sw) {
+        return unpool1D_max(deltaY, Y, X, FW, sw, -1);
+    }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor unpool1D_max(Tensor deltaY, Tensor Y, Tensor X, int FW, int sw, int pw)  {
+        if(check) {
+            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y"); require_dtype(X, "X");
+            equals(deltaY.ndim(), "deltaY.ndim", 3);
+            equals_valueStructure(deltaY, "deltaY", Y, "Y");
+            equals(X.dim(0), "X.batch", Y.dim(0), "Y.batch");
+            equals(X.dim(2), "X.IC", Y.dim(2), "Y.IC");
+        }
+        
+        int[] dimY = deltaY.dim, dimX = X.dim;
+        int OW = dimY[1];//Y[N, OW, IC]
+        int XN = dimX[0], IW = dimX[1], XIC = dimX[2];//X[N, IW, IC]
+                
+        if(pw == -1) pw = ((OW - 1)*sw + FW - IW) >> 1;//floor
+        Tensor deltaX = this.empty(XN, IW, XIC).c();
+        
+        Syncer sc = core.unpool1D_max(
+                deltaY.address, Y.address, OW, 
+                deltaX.address, X.address, IW, 
+                FW, XN, XIC, 
+                sw, pw);
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="Max Pooling 1D indexed">
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y, Index)">
+    public Tensor pool1D_max_indexed(Tensor Y, Tensor Index, Tensor X, int FW, int sw)  {
+        return pool1D_max_indexed(Y, Index, X, FW, sw, -1);
+    }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor pool1D_max_indexed(Tensor Y, Tensor Index, Tensor X, int FW, int sw, int pw)  {
+        if(check) {
+            require_dtype(Y, "X"); require_int32(Index, "Index"); require_dtype(X, "X");
+            equals(Y.ndim(), "Y.ndim", 3);
+            equals(X.ndim(), "X.ndim", 3);
+            equals(Index.ndim(), "Index.ndim", 3);
+            equals_dim(Index, "Index<int32>", Y, "Y");
+            equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
+            equals(Y.dim(2), "Y.IC", X.dim(2), "X.IC");
+        }
+        
+        int[] dimY = Y.dim, dimX = X.dim;
+        int OW = dimY[1];//Y[N, OW, OC]
+        int XN = dimX[0], IW = dimX[1], XIC = dimX[2];//X[N, IW, IC]
+        
+        if(pw == -1) pw = ((OW - 1)*sw + FW - IW) >> 1;//floor
+        
+        Syncer sc = core.pool1D_max_indexed(
+                Y.address, Index.address, OW,
+                X.address,IW, 
+                FW, XN, XIC, 
+               sw,  pw);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (OW) -> [Y, Index]">
+    public Tensor[] pool1D_max_indexed(Tensor X, int FW, int sw, int pw) {
+        return pool1D_max_indexed(X, FW, -1, sw, pw);
+    }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] pool1D_max_indexed(Tensor X, int FW, int OW, int sw, int pw)  {
+        if(check) { require_dtype(X, "X"); equals(X.ndim(), "X.ndim", 3); }
+        
+        int[] dimX = X.dim;//X[N, IW, IC]
+        int XN = dimX[0], IW = dimX[2], XIC = dimX[3];
+        
+        if(OW == -1) OW = (IW - FW + (pw << 1))/sw + 1;//floor
+        Tensor Y = this.empty(XN, OW, XIC);
+        Tensor Index = this.empty_int32(XN, OW, XIC);
+        
+        Syncer sc = core.pool1D_max_indexed(
+                Y.c().address, Index.c().address, OW,
+                X.address, IW,
+                FW, XN, XIC, 
+                sw, pw);
+        if(sync) sc.sync(); else { Y.setSyncer(sc); Index.setSyncer(sc); }
+        return new Tensor[]{ Y, Index };
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="backward propagation: (deltaX, Index)">
+    public Tensor unpool1D_max_indexed(Tensor deltaX, Tensor deltaY, Tensor Index, int FW, int sw) {
+        return unpool1D_max_indexed(deltaX, deltaY, Index, FW, sw, -1);
+    }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor unpool1D_max_indexed(Tensor deltaX, Tensor deltaY, Tensor Index, int FW, int sw, int pw) {
+         if(check) {
+            require_dtype(deltaX, "deltaX"); require_int32(Index, "Index"); require_dtype(deltaY, "deltaY");
+            equals(deltaX.ndim(), "deltaX.ndim", 3);
+            equals(deltaY.ndim(), "deltaY.ndim", 3);
+            equals_valueStructure(Index, "Index<int32>", deltaY, "Y");
+            equals(deltaY.dim(0), "deltaY.batch", deltaX.dim(0), "deltaX.batch");
+            equals(deltaY.dim(2), "deltaY.IC", deltaX.dim(2), "deltaX.IC");
+        }
+        
+        int[] dimY = deltaY.dim, dimX = deltaX.dim;
+        int OW = dimY[1];//Y[N, OW, IC]
+        int XN = dimX[0], IW = dimX[1], XIC = dimX[2];//X[N, IW, IC]
+       
+        if(pw == -1) pw = ((OW - 1)*sw + FW - IW) >> 1;//floor
+        
+        Syncer sc = core.unpool1D_max_Indexed(
+                deltaX.address, IW, 
+                deltaY.address, Index.address, OW, 
+                FW, XN, XIC, 
+                sw, pw);
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward propagation: (Index) -> deltaX">
+    public Tensor unpool1D_max_indexed(Tensor deltaY, Tensor Index, int IW, int FW, int sw) {
+        return unpool1D_max_indexed(deltaY, Index, IW, FW, sw, -1);
+    }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor unpool1D_max_indexed(Tensor deltaY, Tensor Index, int IW, int FW, int sw, int pw) {
+        if(check) {
+            require_dtype(deltaY, "deltaY"); require_int32(Index, "Index");
+            equals(deltaY.ndim(), "deltaY.ndim", 3);
+            equals_valueStructure(Index, "Index<in32>", deltaY, "deltaY");
+        }
+        
+        int[] dimY = deltaY.dim;//Y[N, OW, OC]
+        int YN = dimY[0], OW = dimY[1], YIC = dimY[2];
+        
+        if(pw == -1) pw = ((OW - 1)*sw + FW - IW) >> 1;//floor
+        Tensor deltaX = this.empty(YN, IW, YIC).c();
+        
+        Syncer sc = core.unpool1D_max_Indexed(
+                deltaX.address, IW, 
+                deltaY.address, Index.address, OW, 
+                FW, YN, YIC, 
+                sw, pw);
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="Avg Pooling 1D">
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y)">
+    public Tensor pool1D_avg(boolean ignore_padding, Tensor Y, Tensor X, int FW, int sw) {
+        return pool1D_avg(ignore_padding, Y, X, FW, sw, -1);
+    }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor pool1D_avg(boolean ignore_padding, Tensor Y, Tensor X, int FW, int sw, int pw) {
+        if(check) {
+            require_dtype(Y, "Y"); require_dtype(X, "X");
+            equals(Y.ndim(), "Y.ndim", 3);
+            equals(X.ndim(), "X.ndim", 3);
+            equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
+            equals(Y.dim(2), "Y.IC", X.dim(2), "X.IC");
+        }
+          
+        int[] dimY = Y.dim, dimX = X.dim;
+        int OW = dimY[1];//Y[N, OW, IC]
+        int XN = dimX[0], IW = dimX[1], XIC = dimX[2];//X[N, IW, IC]
+        
+        if(pw == -1) pw = ((OW - 1)*sw + FW - IW) >> 1;//floor
+        
+        Syncer sc = core.pool1D_avg(ignore_padding,
+                Y.address, OW, 
+                X.address, IW, 
+                FW, XN, XIC, 
+                sw, pw);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (OW) -> Y">
+    public Tensor pool1D_avg(boolean ignore_padding, Tensor X, int FW, int sw, int pw) {
+        return pool1D_avg(ignore_padding, X, FW, -1, sw, pw);
+    }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor pool1D_avg(boolean ignore_padding, Tensor X, int FW, int OW, int sw, int pw) {
+        if(check) { require_dtype(X, "X"); this.must_greater_equal(X.ndim(), "X,ndim", 3); }
+
+        int[] dimX = X.dim;
+        int XN = dimX[0], IW = dimX[1], XIC = dimX[2];//X[N, IW, IC]
+        
+        if(OW == -1) OW = (IW - FW + (pw << 1))/sw + 1;//floor
+        Tensor Y = this.empty(XN, OW, XIC).c();
+        
+        Syncer sc = core.pool1D_avg(ignore_padding,
+                Y.address, OW,
+                X.address, IW,
+                FW, XN, XIC, 
+                sw, pw);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="backward propagation: (deltaX)">
+    public Tensor unpool1D_avg(boolean ignore_padding, Tensor deltaX, Tensor deltaY, int FW, int sw) {
+        return unpool1D_avg(ignore_padding, deltaX, deltaY, FW, sw, -1);
+    }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor unpool1D_avg(boolean ignore_padding, Tensor deltaX, Tensor deltaY, int FW, int sw, int pw) {
+        if(check) {
+            require_dtype(deltaX, "deltaX"); require_dtype(deltaY, "deltaY");
+            equals(deltaX.ndim(), "deltaX.ndim", 3);
+            equals(deltaY.ndim(), "deltaY.ndim", 3);
+            equals(deltaY.dim(0), "deltaY.batch", deltaX.dim(0), "deltaX.batch");
+            equals(deltaY.dim(2), "deltaY.IC", deltaX.dim(2), "deltaX.IC");
+        }
+        
+        int[] dimY = deltaY.dim, dimX = deltaX.dim;
+        int YN = dimY[0], OW = dimY[1];//Y[N, OW, OC]
+        int IW = dimX[1], XIC = dimX[2];//X[N, IW, IC]
+        
+        if(pw == -1) pw = ((OW - 1)*sw + FW - IW) >> 1;//floor
+        
+        Syncer sc = core.unpool1D_avg(ignore_padding,
+                deltaX.address, IW, deltaY.address, OW,
+                FW, YN, XIC, sw, pw);
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward propagation: (IW) -> deltaX">
+    public Tensor unpool1D_avg(boolean ignore_padding, Tensor deltaY, int FW, int sw, int pw) {
+        return unpool1D_avg(ignore_padding, deltaY, FW, -1, sw, pw);
+    }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor unpool1D_avg(boolean ignore_padding, Tensor deltaY, int FW, int IW, int sw, int pw) {
+        if(check) { require_dtype(deltaY, "deltaY"); equals(deltaY.ndim(), "deltaY.ndim", 3); }
+        
+        int[] dimY = deltaY.dim;
+        int YN = dimY[0], OW = dimY[1], YIC = dimY[2];//Y[N, OW, OC]
+        
+        if(IW == -1) IW = (OW - 1)*sw + FW - (pw << 1);//floor
+        Tensor deltaX = this.empty(YN, IW, YIC).c();  
+        
+        Syncer sc = core.unpool1D_avg(ignore_padding,
+                deltaX.address, IW, deltaY.address, OW,
+                FW, YN, YIC, sw,pw);
         if(sync) sc.sync(); else deltaX.setSyncer(sc);
         return deltaX;
     }
@@ -3829,17 +4488,17 @@ public class Engine implements MemStatus {
     //<editor-fold defaultstate="collapsed" desc="BP: quadratic2_center">
     //<editor-fold defaultstate="collapsed" desc="forward-propagation">
     public Tensor mul_center(boolean inplace, Tensor X1, Tensor X2) { return quadratic2_center(inplace, X1, X2, -1, 0, 1.0f, 0, 0, 0, 0); }
-    public Tensor mul_center(boolean inplace, float alpha, Tensor X1, Tensor X2) {
+    public Tensor mul_center(boolean inplace, float alpha, Tensor X1, Tensor X2) {//alpha * X1 * XX2
         return quadratic2_center(inplace, X1, X2, -1, 0, alpha, 0, 0, 0, 0);
     }
     
     public Tensor sqadd_center(boolean inplace, Tensor X1, Tensor X2) { return quadratic2_center(inplace, X1, X2, -1, 1.0f, 0, 1.0f, 0, 0, 0); }
-    public Tensor sqadd_center(boolean inplace, float alpha, Tensor X1, float beta, Tensor X2) {
+    public Tensor sqadd_center(boolean inplace, float alpha, Tensor X1, float beta, Tensor X2) {//alpha*X1^2 + beta*X2^2
         return quadratic2_center(inplace, X1, X2, -1, alpha, 0, beta, 0, 0, 0);
     }
     
     public Tensor sqsub_center(boolean inplace, Tensor X1, Tensor X2) { return quadratic2_center(inplace, X1, X2, -1, 1.0f, 0, -1.0f, 0, 0, 0); }
-    public Tensor sqsub_center(boolean inplace, float alpha, Tensor X1, float beta, Tensor X2) {
+    public Tensor sqsub_center(boolean inplace, float alpha, Tensor X1, float beta, Tensor X2) {//X1^2 + X2^2
         return quadratic2_center(inplace, X1, X2, -1, alpha, 0, -beta, 0, 0, 0);
     }
     
@@ -3861,8 +4520,8 @@ public class Engine implements MemStatus {
         }
         
         Tensor Y = (inplace? X1 : empty(X1.dim));
-        int dim1 = X1.length / X2.length;
-        int dim0 = X2.length / dim2;
+        int dim1 = X1.length / X2.length;//[dim0, dim1, dim2] / [dim0, dim2]
+        int dim0 = X2.length / dim2;//[dim0, dim2] / dim2
         
         Syncer sc = core.quadratic2_2D_center(Y.c().address, 
                 X1.address, X2.address,
@@ -4894,8 +5553,7 @@ public class Engine implements MemStatus {
         return linear2_relu(inplace, true, X1, X2, 1.0f, 1.0f, 0.0f);
     }
     public Tensor linear2_relu(boolean inplace,//default likeX1 
-            Tensor X1, Tensor X2, 
-            float alpha, float beta, float gamma) {
+            Tensor X1, Tensor X2, float alpha, float beta, float gamma) {
         return linear2_relu(inplace, true, X1, X2, alpha, beta, gamma);
     }
     @Passed("CudaFloat32EngieBase")//relu(alpha*X1 + beta*X2 + gamma)
@@ -4949,7 +5607,8 @@ public class Engine implements MemStatus {
     }
     @Passed("CudaFloat32EngieBase")
     public Tensor[] linear2_leakyRelu_deltaX_v1(boolean inplace, Tensor deltaY,
-            Tensor Y, float alpha, float beta, float k)//V1: holdY(), Y is not changed
+            Tensor Y,//V1: holdY(), Y is not changed
+            float alpha, float beta, float k)
     {
         if(check) {
             require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y");
@@ -4994,6 +5653,221 @@ public class Engine implements MemStatus {
                 deltaY.address, 
                 X1.address, X2.address, 
                 alpha, beta, gamma, k, 
+                deltaY.lengthv, deltaY.lastDim());
+       if(sync) sc.sync(); else { deltaX1.setSyncer(sc); deltaX2.setSyncer(sc); }
+        return new Tensor[]{ deltaX1, deltaX2 };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_elu">
+    //<editor-fold defaultstate="collapsed" desc="forward_propagation">
+    public Tensor add_elu(boolean inplace, Tensor X1, Tensor X2, float k) { 
+        return linear2_elu(inplace, true, X1, X2, 1.0f, 1.0f, 0.0f, 1.0f, k);
+    }
+    public Tensor linear2_elu(boolean inplace,//default likeX1
+            Tensor X1, Tensor X2, float alpha, float beta, float gamma, 
+            float theta, float k) {
+        return linear2_elu(inplace, true, X1, X2, alpha, beta, gamma, theta, k);
+    }
+    @Passed("CudaFloat32EngieBase")//elu(alpha*X1 + beta*X2 + gamma)
+    public Tensor linear2_elu(boolean inplace, boolean likeX1, 
+            Tensor X1, Tensor X2, 
+            float alpha, float beta, float gamma, 
+            float theta, float k) 
+    {
+        if(check) {
+            require_dtype(X1); require_dtype(X2);
+            equals_valueStructure(X1, "X1", X2, "X2"); 
+        }
+        Tensor Y = (inplace? (likeX1? X1 : X2) : this.empty(likeX1? X1.dim : X2.dim).c());
+        Syncer sc = core.linear2_elu2D(Y.address,
+                X1.address, X2.address, 
+                alpha, beta, gamma, 
+                theta, k,
+                X1.lengthv, X1.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward_propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] linear2_elu_deltaX_v1(boolean inplace, Tensor deltaY,
+            Tensor Y,//V1: holdY(), Y is not changed
+            float alpha, float beta,
+            float theta, float k)
+    {
+        if(check) {
+            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y");
+            equals_valueStructure(deltaY, "deltaY", Y, "Y");
+        }
+         
+        Tensor deltaX1 = (inplace?  deltaY : this.empty(Y.dim));
+        Tensor deltaX2 = this.empty(Y.dim);
+        
+        Syncer sc = core.linear2_elu2D_deltaX_v1(
+                deltaX1.c().address,
+                deltaX2.c().address, 
+                deltaY.address, 
+                Y.address, alpha, beta,
+                theta, k,
+                deltaY.lengthv, deltaY.lastDim());
+       if(sync) sc.sync(); else { deltaX1.setSyncer(sc); deltaX2.setSyncer(sc); }
+        return new Tensor[]{ deltaX1, deltaX2 };
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] linear2_elu_deltaX_v2(boolean inplace, Tensor deltaY,
+            Tensor X1, Tensor X2,//V2: holdX(), {X1, X2} is not changed
+            float alpha, float beta, float gamma, 
+            float theta, float k)
+    {
+        if(check) {
+            require_dtype(deltaY); require_dtype(X1); require_dtype(X2);
+            equals_valueStructure(deltaY, "deltaY", X2, "X1");
+            equals_valueStructure(deltaY, "deltaY", X2, "X2");
+        }
+         
+        Tensor deltaX1 = (inplace?  deltaY : this.empty(X1.dim));
+        Tensor deltaX2 = this.empty(X2.dim);
+        
+        Syncer sc = core.linear2_elu2D_deltaX_v2(
+                deltaX1.c().address, 
+                deltaX2.c().address,
+                deltaY.address, 
+                X1.address, X2.address, 
+                alpha, beta, gamma,
+                theta, k, 
+                deltaY.lengthv, deltaY.lastDim());
+       if(sync) sc.sync(); else { deltaX1.setSyncer(sc); deltaX2.setSyncer(sc); }
+        return new Tensor[]{ deltaX1, deltaX2 };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_softplus">
+    //<editor-fold defaultstate="collapsed" desc="forward_propagation">
+    public Tensor add_softplus(boolean inplace, Tensor X1, Tensor X2) { 
+        return linear2_softplus(inplace, true, X1, X2, 1.0f, 1.0f, 0.0f);
+    }
+    public Tensor linear2_softplus(boolean inplace,//default likeX1
+            Tensor X1, Tensor X2, float alpha, float beta, float gamma) {
+        return linear2_softplus(inplace, true, X1, X2, alpha, beta, gamma);
+    }
+    @Passed("CudaFloat32EngieBase")//softplus(alpha*X1 + beta*X2 + gamma)
+    public Tensor linear2_softplus(boolean inplace, boolean likeX1, 
+            Tensor X1, Tensor X2,
+            float alpha, float beta, float gamma) 
+    {
+        if(check) {
+            require_dtype(X1); require_dtype(X2);
+            equals_valueStructure(X1, "X1", X2, "X2"); 
+        }
+        Tensor Y = (inplace? (likeX1? X1 : X2) : this.empty(likeX1? X1.dim : X2.dim).c());
+        Syncer sc = core.linear2_softplus2D(Y.address,
+                X1.address, X2.address, 
+                alpha, beta, gamma,
+                X1.lengthv, X1.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward_propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] linear2_softplus_deltaX_v1(boolean inplace, Tensor deltaY,
+            Tensor Y,//V1: holdY(), Y is not changed
+            float alpha, float beta)
+    {
+        if(check) {
+            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y");
+            equals_valueStructure(deltaY, "deltaY", Y, "Y");
+        }
+         
+        Tensor deltaX1 = (inplace?  deltaY : this.empty(Y.dim));
+        Tensor deltaX2 = this.empty(Y.dim);
+        
+        Syncer sc = core.linear2_softplus2D_deltaX_v1(
+                deltaX1.c().address,
+                deltaX2.c().address, 
+                deltaY.address, 
+                Y.address, alpha, beta,
+                deltaY.lengthv, deltaY.lastDim());
+       if(sync) sc.sync(); else { deltaX1.setSyncer(sc); deltaX2.setSyncer(sc); }
+        return new Tensor[]{ deltaX1, deltaX2 };
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] linear2_softplus_deltaX_v2(boolean inplace, Tensor deltaY,
+            Tensor X1, Tensor X2,//V2: holdX(), {X1, X2} is not changed
+            float alpha, float beta, float gamma)
+    {
+        if(check) {
+            require_dtype(deltaY); require_dtype(X1); require_dtype(X2);
+            equals_valueStructure(deltaY, "deltaY", X2, "X1");
+            equals_valueStructure(deltaY, "deltaY", X2, "X2");
+        }
+         
+        Tensor deltaX1 = (inplace?  deltaY : this.empty(X1.dim));
+        Tensor deltaX2 = this.empty(X2.dim);
+        
+        Syncer sc = core.linear2_softplus2D_deltaX_v2(
+                deltaX1.c().address, 
+                deltaX2.c().address,
+                deltaY.address, 
+                X1.address, X2.address, 
+                alpha, beta, gamma,
+                deltaY.lengthv, deltaY.lastDim());
+       if(sync) sc.sync(); else { deltaX1.setSyncer(sc); deltaX2.setSyncer(sc); }
+        return new Tensor[]{ deltaX1, deltaX2 };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_gelu">
+    //<editor-fold defaultstate="collapsed" desc="forward_propagation">
+    public Tensor add_gelu(boolean inplace, Tensor X1, Tensor X2) { 
+        return linear2_gelu(inplace, true, X1, X2, 1.0f, 1.0f, 0.0f);
+    }
+    public Tensor linear2_gelu(boolean inplace,//default likeX1
+            Tensor X1, Tensor X2, float alpha, float beta, float gamma) {
+        return linear2_gelu(inplace, true, X1, X2, alpha, beta, gamma);
+    }
+    @Passed("CudaFloat32EngieBase")//gelu(alpha*X1 + beta*X2 + gamma)
+    public Tensor linear2_gelu(boolean inplace, boolean likeX1, 
+            Tensor X1, Tensor X2,
+            float alpha, float beta, float gamma)
+    {
+        if(check) {
+            require_dtype(X1); require_dtype(X2);
+            equals_valueStructure(X1, "X1", X2, "X2"); 
+        }
+        Tensor Y = (inplace? (likeX1? X1 : X2) : this.empty(likeX1? X1.dim : X2.dim).c());
+        Syncer sc = core.linear2_gelu2D(Y.address,
+                X1.address, X2.address, 
+                alpha, beta, gamma,
+                X1.lengthv, X1.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward_propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] linear2_gelu_deltaX_v2(boolean inplace, Tensor deltaY,
+            Tensor X1, Tensor X2,//V2: holdX(), {X1, X2} is not changed
+            float alpha, float beta, float gamma)
+    {
+        if(check) {
+            require_dtype(deltaY); require_dtype(X1); require_dtype(X2);
+            equals_valueStructure(deltaY, "deltaY", X2, "X1");
+            equals_valueStructure(deltaY, "deltaY", X2, "X2");
+        }
+         
+        Tensor deltaX1 = (inplace?  deltaY : this.empty(X1.dim));
+        Tensor deltaX2 = this.empty(X2.dim);
+        
+        Syncer sc = core.linear2_gelu2D_deltaX_v2(
+                deltaX1.c().address, 
+                deltaX2.c().address,
+                deltaY.address, 
+                X1.address, X2.address, 
+                alpha, beta, gamma,
                 deltaY.lengthv, deltaY.lastDim());
        if(sync) sc.sync(); else { deltaX1.setSyncer(sc); deltaX2.setSyncer(sc); }
         return new Tensor[]{ deltaX1, deltaX2 };
@@ -5182,6 +6056,161 @@ public class Engine implements MemStatus {
         if(sync) sc.sync(); else deltaX.setSyncer(sc);
         return deltaX;
     }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_sigmoid">
+    //<editor-fold defaultstate="collapsed" desc="forward_propagation">
+    public Tensor add_sigmoid(boolean inplace, Tensor X1, Tensor X2) { 
+        return linear2_sigmoid(inplace, true, X1, X2, 1.0f, 1.0f, 0.0f);
+    }
+    public Tensor linear2_sigmoid(boolean inplace,//default likeX1
+            Tensor X1, Tensor X2, float alpha, float beta, float gamma) {
+        return linear2_sigmoid(inplace, true, X1, X2, alpha, beta, gamma);
+    }
+    @Passed("CudaFloat32EngieBase")//sigmoid(alpha*X1 + beta*X2 + gamma)
+    public Tensor linear2_sigmoid(boolean inplace, boolean likeX1, 
+            Tensor X1, Tensor X2, 
+            float alpha, float beta, float gamma)
+    {
+        if(check) {
+            require_dtype(X1); require_dtype(X2);
+            equals_valueStructure(X1, "X1", X2, "X2"); 
+        }
+        Tensor Y = (inplace? (likeX1? X1 : X2) : this.empty(likeX1? X1.dim : X2.dim).c());
+        Syncer sc = core.linear2_sigmoid2D(Y.address,
+                X1.address, X2.address, 
+                alpha, beta, gamma,
+                X1.lengthv, X1.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward_propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] linear2_sigmoid_deltaX_v1(boolean inplace, Tensor deltaY,
+            Tensor Y,//V1: holdY(), Y is not changed
+            float alpha, float beta)
+    {
+        if(check) {
+            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y");
+            equals_valueStructure(deltaY, "deltaY", Y, "Y");
+        }
+         
+        Tensor deltaX1 = (inplace?  deltaY : this.empty(Y.dim));
+        Tensor deltaX2 = this.empty(Y.dim);
+        
+        Syncer sc = core.linear2_sigmoid2D_deltaX_v1(
+                deltaX1.c().address,
+                deltaX2.c().address, 
+                deltaY.address, 
+                Y.address, alpha, beta,
+                deltaY.lengthv, deltaY.lastDim());
+       if(sync) sc.sync(); else { deltaX1.setSyncer(sc); deltaX2.setSyncer(sc); }
+        return new Tensor[]{ deltaX1, deltaX2 };
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] linear2_sigmoid_deltaX_v2(boolean inplace, Tensor deltaY,
+            Tensor X1, Tensor X2,//V2: holdX(), {X1, X2} is not changed
+            float alpha, float beta, float gamma)
+    {
+        if(check) {
+            require_dtype(deltaY); require_dtype(X1); require_dtype(X2);
+            equals_valueStructure(deltaY, "deltaY", X2, "X1");
+            equals_valueStructure(deltaY, "deltaY", X2, "X2");
+        }
+         
+        Tensor deltaX1 = (inplace?  deltaY : this.empty(X1.dim));
+        Tensor deltaX2 = this.empty(X2.dim);
+        
+        Syncer sc = core.linear2_sigmoid2D_deltaX_v2(
+                deltaX1.c().address, 
+                deltaX2.c().address,
+                deltaY.address, 
+                X1.address, X2.address, 
+                alpha, beta, gamma,
+                deltaY.lengthv, deltaY.lastDim());
+       if(sync) sc.sync(); else { deltaX1.setSyncer(sc); deltaX2.setSyncer(sc); }
+        return new Tensor[]{ deltaX1, deltaX2 };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_tanh">
+    //<editor-fold defaultstate="collapsed" desc="forward_propagation">
+    public Tensor add_tanh(boolean inplace, Tensor X1, Tensor X2) { 
+        return linear2_tanh(inplace, true, X1, X2, 1.0f, 1.0f, 0.0f);
+    }
+    public Tensor linear2_tanh(boolean inplace,//default likeX1
+            Tensor X1, Tensor X2, float alpha, float beta, float gamma) {
+        return linear2_tanh(inplace, true, X1, X2, alpha, beta, gamma);
+    }
+    @Passed("CudaFloat32EngieBase")//tanh(alpha*X1 + beta*X2 + gamma)
+    public Tensor linear2_tanh(boolean inplace, boolean likeX1, 
+            Tensor X1, Tensor X2,
+            float alpha, float beta, float gamma)
+    {
+        if(check) {
+            require_dtype(X1); require_dtype(X2);
+            equals_valueStructure(X1, "X1", X2, "X2"); 
+        }
+        Tensor Y = (inplace? (likeX1? X1 : X2) : this.empty(likeX1? X1.dim : X2.dim).c());
+        Syncer sc = core.linear2_tanh2D(Y.address,
+                X1.address, X2.address, 
+                alpha, beta, gamma,
+                X1.lengthv, X1.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward_propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] linear2_tanh_deltaX_v1(boolean inplace, Tensor deltaY,
+            Tensor Y,//V1: holdY(), Y is not changed
+            float alpha, float beta)
+    {
+        if(check) {
+            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y");
+            equals_valueStructure(deltaY, "deltaY", Y, "Y");
+        }
+         
+        Tensor deltaX1 = (inplace?  deltaY : this.empty(Y.dim));
+        Tensor deltaX2 = this.empty(Y.dim);
+        
+        Syncer sc = core.linear2_tanh2D_deltaX_v1(
+                deltaX1.c().address,
+                deltaX2.c().address, 
+                deltaY.address, 
+                Y.address, alpha, beta,
+                deltaY.lengthv, deltaY.lastDim());
+       if(sync) sc.sync(); else { deltaX1.setSyncer(sc); deltaX2.setSyncer(sc); }
+        return new Tensor[]{ deltaX1, deltaX2 };
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] linear2_tanh_deltaX_v2(boolean inplace, Tensor deltaY,
+            Tensor X1, Tensor X2,//V2: holdX(), {X1, X2} is not changed
+            float alpha, float beta, float gamma)
+    {
+        if(check) {
+            require_dtype(deltaY); require_dtype(X1); require_dtype(X2);
+            equals_valueStructure(deltaY, "deltaY", X2, "X1");
+            equals_valueStructure(deltaY, "deltaY", X2, "X2");
+        }
+         
+        Tensor deltaX1 = (inplace?  deltaY : this.empty(X1.dim));
+        Tensor deltaX2 = this.empty(X2.dim);
+        
+        Syncer sc = core.linear2_tanh2D_deltaX_v2(
+                deltaX1.c().address, 
+                deltaX2.c().address,
+                deltaY.address, 
+                X1.address, X2.address, 
+                alpha, beta, gamma,
+                deltaY.lengthv, deltaY.lastDim());
+       if(sync) sc.sync(); else { deltaX1.setSyncer(sc); deltaX2.setSyncer(sc); }
+        return new Tensor[]{ deltaX1, deltaX2 };
+    }
+    //</editor-fold>
     //</editor-fold>
     //</editor-fold>
     
@@ -5681,18 +6710,139 @@ public class Engine implements MemStatus {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Affine">
+    //<editor-fold defaultstate="collapsed" desc="affine_param_check">
+    protected final void check_affine(Tensor X, Tensor A, Tensor B) {
+        require_dtype(X, "X"); require_dtype(A, "A"); require_dtype(B, "B");
+        must_greater_equal(X.ndim(), "X.ndim", 2);
+        equals(X.lastDim(), "X.lastDim", A.lastDim(), "A.lastDim");
+        equals(X.lastDim(), "X.lastDim", B.lastDim(), "B.lastDim");
+        equals(A.length, "A.length", B.length, "B.length");
+    }
+    
+    protected final void check_affine_fuction_deltaX_v1(Tensor deltaY, Tensor Y, Tensor A) {
+        require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y"); require_dtype(A, "A");
+        equals_valueStructure(deltaY, "deltaY", Y, "Y"); 
+        equals(Y.lastDim(), "Y.lastDim", A.lastDim(), "A.lastDim");
+    }
+    
+    protected final void check_affine_function_deltaX_v2(Tensor deltaY, Tensor X, Tensor A, Tensor B) {
+        require_dtype(deltaY, "deltaY"); require_dtype(X, "X");
+        require_dtype(A, "A"); require_dtype(B, "B");
+        equals_valueStructure(deltaY, "deltaY", X, "X"); 
+        equals(X.lastDim(), "X.lastDim", A.lastDim(), "A.lastDim");
+        equals(X.lastDim(), "X.lastDim", B.lastDim(), "B.lastDim");
+    }
+    
+    protected final void check_affine_deltaAB_v1(Tensor deltaY, Tensor Y, Tensor A, Tensor B) {
+        require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y"); 
+        require_dtype(A, "A"); require_dtype(B, "B");
+        must_greater_equal(Y.ndim(), "Y.ndim", 2);
+        must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
+        equals_valueStructure(deltaY, "deltaY", Y, "Y");
+        equals(Y.lastDim(), "Y.lastDim", A.lastDim(), "A.lastDim");
+        equals(Y.lastDim(), "Y.lastDim", B.lastDim(), "B.lastDim");
+        equals(A.length, "A.length", B.length, "B.length");
+    }
+    
+    protected final void check_affine_funcion_deltaAB_v2(Tensor deltaY, Tensor X, Tensor A, Tensor B) {
+        require_dtype(deltaY, "deltaY"); require_dtype(X, "X"); 
+        require_dtype(A, "A"); require_dtype(B, "B");
+        must_greater_equal(X.ndim(), "X.ndim", 2);
+        must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
+        equals_valueStructure(deltaY, "deltaY", X, "X");
+        equals(X.lastDim(), "Y.lastDim", A.lastDim(), "A.lastDim");
+        equals(X.lastDim(), "Y.lastDim", B.lastDim(), "B.lastDim");
+        equals(A.length, "A.length", B.length, "B.length");
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="batchNorm_param_check">
+    protected final void check_batchNorm(Tensor X, Tensor X_mean, Tensor X_var) {
+        require_dtype(X, "X"); require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var");
+        must_greater_equal(X.ndim(), "X.ndim", 2);
+        equals(X.lastDim(), "X.lastDim", X_mean.lastDim(), "X_mean.lastDim");
+        equals(X.lastDim(), "X.lastDim", X_var.lastDim(), "X_var.lastDim()");
+        equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
+    }
+    
+    protected final void check_batchNorm(Tensor X, Tensor X_mean, Tensor X_var, Tensor A, Tensor B) {
+        require_dtype(X, "X"); require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var");
+        require_dtype(A, "A"); require_dtype(B, "B");
+        must_greater_equal(X.ndim(), "X.ndim", 2);
+        equals(X.lastDim(), "X.lastDim", X_mean.lastDim(), "X_mean.lastDim");
+        equals(X.lastDim(), "X.lastDim", X_var.lastDim(), "X_var.lastDim");
+        equals(X.lastDim(), "X.lastDim", A.lastDim(), "A.lastDim");
+        equals(X.lastDim(), "X.lastDim", B.lastDim(), "B.lastDim");
+        equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
+        equals(X_mean.length, "X_mean.length", A.length, "A.length");
+        equals(X_mean.length, "X_mean.length", B.length, "B.length");
+    }
+    
+    protected final void check_batchNorm_deltaX_v1(Tensor deltaY, Tensor Y, Tensor X_var) {
+        require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y"); require_dtype(X_var, "X_var"); 
+        must_greater_equal(Y.ndim(), "Y.ndim", 2);
+        must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
+        equals_valueStructure(deltaY, "deltaY", Y, "Y");
+        equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim()");
+    }
+    
+    protected final void check_batchNorm_deltaX_v2(Tensor deltaY, Tensor X, Tensor X_mean, Tensor X_var) {
+        require_dtype(deltaY, "deltaY"); require_dtype(X, "X");
+        require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var");
+        must_greater_equal(X.ndim(), "X.ndim", 2);
+        must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
+        equals_valueStructure(deltaY, "deltaY", X, "X");
+        equals(deltaY.lastDim(), "deltaY.lastDim", X_mean.lastDim(), "X_mean.lastDim()");
+        equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim()");
+        equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
+    }
+    
+    protected final void check_batchNorm_gradients_v1(Tensor deltaY, Tensor Y, Tensor X_var, Tensor A, Tensor B) {
+        require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y");
+        require_dtype(X_var, "X_var"); require_dtype(A, "A"); require_dtype(B, "B");
+        must_greater_equal(Y.ndim(), "Y.ndim", 2);
+        must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
+        equals_valueStructure(deltaY, "deltaY", Y, "Y");
+        equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim");
+        equals(deltaY.lastDim(), "deltaY.lastDim", A.lastDim(), "A.lastDim");
+        equals(deltaY.lastDim(), "deltaY.lastDim", B.lastDim(), "B.lastDim");
+        equals(X_var.length, "X_var.length", A.length, "A.length");
+        equals(X_var.length, "X_var.length", B.length, "B.length");
+    }
+    
+    protected final void check_batchNorm_gradients_v2(Tensor deltaY, Tensor X, Tensor X_mean, Tensor X_var, Tensor A) {
+        require_dtype(deltaY, "deltaY"); require_dtype(X, "X");
+        require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var"); require_dtype(A, "A");
+        must_greater_equal(X.ndim(), "X.ndim", 2);
+        must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
+        equals_valueStructure(deltaY, "deltaY", X, "X");
+        equals(deltaY.lastDim(), "deltaY.lastDim", X_mean.lastDim(), "X_mean.lastDim");
+        equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim");
+        equals(deltaY.lastDim(), "deltaY.lastDim", A.lastDim(), "A.lastDim()");
+        equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
+        equals(X_mean.length, "X_mean.length", A.length, "A.length");
+    }
+    
+    protected final void check_batchNorm_gradients_v2(Tensor deltaY, Tensor X, Tensor X_mean, Tensor X_var, Tensor A, Tensor B) {
+        require_dtype(deltaY, "deltaY"); require_dtype(X, "X");
+        require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var"); require_dtype(A, "A");
+        must_greater_equal(X.ndim(), "X.ndim", 2);
+        must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
+        equals_valueStructure(deltaY, "deltaY", X, "X");
+        equals(deltaY.lastDim(), "deltaY.lastDim", X_mean.lastDim(), "X_mean.lastDim");
+        equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim");
+        equals(deltaY.lastDim(), "deltaY.lastDim", A.lastDim(), "A.lastDim()");
+        equals(deltaY.lastDim(), "deltaY.lastDim", B.lastDim(), "B.lastDim()");
+        equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
+        equals(X_mean.length, "X_mean.length", A.length, "A.length");
+        equals(X_mean.length, "X_mean.length", B.length, "B.length");
+    }
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="BP: affine">
     //<editor-fold defaultstate="collapsed" desc="forward-propagation">
     @Passed("CudaFloat32EngieBase")
     public Tensor affine(boolean inplace, Tensor X, Tensor A, Tensor B) {
-        if(check) {
-            require_dtype(X, "X"); require_dtype(A, "A"); require_dtype(B, "B");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            equals(X.lastDim(), "X.lastDim", A.lastDim(), "A.lastDim");
-            equals(X.lastDim(), "X.lastDim", B.lastDim(), "B.lastDim");
-            equals(A.length, "A.length", B.length, "B.length");
-        }
-        
+        if(check) check_affine(X, A, B);
         Tensor Y = (inplace? X : this.empty(X.dim).c());
         Syncer sc = core.affine2D(Y.address,
                 X.address, 
@@ -5705,17 +6855,7 @@ public class Engine implements MemStatus {
     //<editor-fold defaultstate="collapsed" desc="backward-propagation">
     @Passed("CudaFloat32EngieBase")
     public Tensor affine_deltaA_v1(Tensor deltaY, Tensor Y, Tensor A, Tensor B) {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y"); 
-            require_dtype(A, "A"); require_dtype(B, "B");
-            must_greater_equal(Y.ndim(), "Y.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", Y, "Y");
-            equals(Y.lastDim(), "Y.lastDim", A.lastDim(), "A.lastDim");
-            equals(Y.lastDim(), "Y.lastDim", B.lastDim(), "B.lastDim");
-            equals(A.length, "A.length", B.length, "B.length");
-        }
-        
+        if(check) check_affine_deltaAB_v1(deltaY, Y, A, B);
         Tensor deltaA = this.empty(A.dim).c();
         Syncer sc = core.affine2D_deltaA_v1(deltaA.address,
                 deltaY.address,
@@ -5728,17 +6868,7 @@ public class Engine implements MemStatus {
     
     @Passed("CudaFloat32EngieBase")
     public Tensor[] affine_deltaAB_v1(Tensor deltaY, Tensor Y, Tensor A, Tensor B) {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y"); 
-            require_dtype(A, "A"); require_dtype(B, "B");
-            must_greater_equal(Y.ndim(), "Y.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", Y, "Y");
-            equals(Y.lastDim(), "Y.lastDim", A.lastDim(), "A.lastDim");
-            equals(Y.lastDim(), "Y.lastDim", B.lastDim(), "B.lastDim");
-            equals(A.length, "A.length", B.length, "B.length");
-        }
-        
+        if(check) check_affine_deltaAB_v1(deltaY, Y, A, B);         
         Tensor deltaA = this.empty(A.dim);
         Tensor deltaB = this.empty(B.dim);
         
@@ -5752,7 +6882,7 @@ public class Engine implements MemStatus {
         return new Tensor[] { deltaA, deltaB };
     }
     
-    public Tensor affine_deltaA_v2(Tensor deltaY, Tensor X, int row_length) { return Engine.this.field_mul(deltaY, X, row_length); }
+    public Tensor affine_deltaA_v2(Tensor deltaY, Tensor X, int row_length) { return field_mul(deltaY, X, row_length); }
     @Passed("CudaFloat32EngieBase")
     public Tensor[] affine_deltaAB_v2(Tensor deltaY, Tensor X, int row_length) {
         if(check) {
@@ -5782,14 +6912,7 @@ public class Engine implements MemStatus {
     //<editor-fold defaultstate="collapsed" desc="forward-propagation">
     @Passed("CudaFloat32EngieBase")
     public Tensor affine_relu(boolean inplace, Tensor X, Tensor A, Tensor B) {
-        if(check) {
-            require_dtype(X, "X"); require_dtype(A, "A"); require_dtype(B, "B");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            equals(X.lastDim(), "X.lastDim", A.lastDim(), "A.lastDim");
-            equals(X.lastDim(), "X.lastDim", B.lastDim(), "B.lastDim");
-            equals(A.length, "A.length", B.length, "B.length");
-        }
-        
+        if(check) check_affine(X, A, B);
         Tensor Y = (inplace? X : this.empty(X.dim).c());
         Syncer sc = core.affine_relu2D(Y.address,
                 X.address, 
@@ -5802,14 +6925,7 @@ public class Engine implements MemStatus {
     
     @Passed("CudaFloat32EngieBase")
     public Tensor affine_leakyRelu(boolean inplace, Tensor X, Tensor A, Tensor B, float k) {
-        if(check) {
-            require_dtype(X, "X"); require_dtype(A, "A"); require_dtype(B, "B");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            equals(X.lastDim(), "X.lastDim", A.lastDim(), "A.lastDim");
-            equals(X.lastDim(), "X.lastDim", B.lastDim(), "B.lastDim");
-            equals(A.length, "A.length", B.length, "B.length");
-        }
-        
+        if(check) check_affine(X, A, B);
         Tensor Y = (inplace? X : this.empty(X.dim).c());
         Syncer sc = core.affine_leakyRelu2D(Y.address,
                 X.address, 
@@ -5825,12 +6941,7 @@ public class Engine implements MemStatus {
     public Tensor affine_leakyRelu_deltaX_v1(boolean inplace, 
             Tensor deltaY, float k, Tensor Y, Tensor A)//V1: holdY(), Y is not changed
     {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y"); require_dtype(A, "A");
-            equals_valueStructure(deltaY, "deltaY", Y, "Y"); 
-            equals(Y.lastDim(), "Y.lastDim", A.lastDim(), "A.lastDim");
-        }
-        
+        if(check) check_affine_fuction_deltaX_v1(deltaY, Y, A);
         Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
         Syncer sc = core.affine_leakyRelu2D_deltaX_v1(deltaX.address,
                 deltaY.address, k,
@@ -5848,14 +6959,7 @@ public class Engine implements MemStatus {
     public Tensor affine_leakyRelu_deltaX_v2(boolean inplace, 
             Tensor deltaY, float k, Tensor X, Tensor A, Tensor B)//V2: holdX(), X is not changed
     {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(X, "X");
-            require_dtype(A, "A"); require_dtype(B, "B");
-            equals_valueStructure(deltaY, "deltaY", X, "X"); 
-            equals(X.lastDim(), "X.lastDim", A.lastDim(), "A.lastDim");
-            equals(X.lastDim(), "X.lastDim", B.lastDim(), "B.lastDim");
-        }
-        
+        if(check) check_affine_function_deltaX_v2(deltaY, X, A, B);
         Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
         Syncer sc = core.affine_leakyRelu2D_deltaX_v2(deltaX.address, 
                 deltaY.address, k,
@@ -5871,17 +6975,7 @@ public class Engine implements MemStatus {
     public Tensor[] affine_leakyRelu_deltaAB_v1(Tensor deltaY, float k,
             Tensor Y, Tensor A, Tensor B)//V1: holdY(), Y is not changed
     {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y"); 
-            require_dtype(A, "A"); require_dtype(B, "B");
-            must_greater_equal(Y.ndim(), "Y.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", Y, "Y");
-            equals(Y.lastDim(), "Y.lastDim", A.lastDim(), "A.lastDim");
-            equals(Y.lastDim(), "Y.lastDim", B.lastDim(), "B.lastDim");
-            equals(A.length, "A.length", B.length, "B.length");
-        }
-        
+        if(check) check_affine_deltaAB_v1(deltaY, Y, A, B);
         Tensor deltaA = this.empty(A.dim);
         Tensor deltaB = this.empty(B.dim);
         
@@ -5903,17 +6997,7 @@ public class Engine implements MemStatus {
     public Tensor[] affine_leakyRelu_deltaAB_v2(Tensor deltaY, float k,
             Tensor X, Tensor A, Tensor B)//V2: holdX(), X is not changed
     {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(X, "X"); 
-            require_dtype(A, "A"); require_dtype(B, "B");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", X, "X");
-            equals(X.lastDim(), "Y.lastDim", A.lastDim(), "A.lastDim");
-            equals(X.lastDim(), "Y.lastDim", B.lastDim(), "B.lastDim");
-            equals(A.length, "A.length", B.length, "B.length");
-        }
-        
+        if(check) check_affine_funcion_deltaAB_v2(deltaY, X, A, B);
         Tensor deltaA = this.empty(A.dim);
         Tensor deltaB = this.empty(B.dim);
         
@@ -5921,6 +7005,400 @@ public class Engine implements MemStatus {
                 deltaA.c().address,//result0
                 deltaB.c().address,//tesult1
                 deltaY.address, k, 
+                X.address, 
+                A.address, B.address, 
+                A.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else { deltaA.setSyncer(sc); deltaB.setSyncer(sc); }
+        return new Tensor[] { deltaA, deltaB };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_elu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_elu(boolean inplace, 
+            Tensor X, Tensor A, Tensor B, float alpha, float k)
+    {
+        if(check) check_affine(X, A, B);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.affine_elu2D(Y.address,
+                X.address, 
+                A.address, B.address, A.lengthv, 
+                alpha, k,
+                Y.lengthv, Y.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_elu_deltaX_v1(boolean inplace, 
+            Tensor deltaY, float alpha, float k, Tensor Y, Tensor A)//V1: holdY(), Y is not changed
+    {
+        if(check) check_affine_fuction_deltaX_v1(deltaY, Y, A);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.affine_elu2D_deltaX_v1(deltaX.address,
+                deltaY.address, alpha, k,
+                Y.address, 
+                A.address, A.lengthv, 
+                deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_elu_deltaX_v2(boolean inplace, 
+            Tensor deltaY, float alpha, float k, Tensor X, Tensor A, Tensor B)//V2: holdX(), X is not changed
+    {
+        if(check) check_affine_function_deltaX_v2(deltaY, X, A, B);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.affine_elu2D_deltaX_v2(deltaX.address, 
+                deltaY.address, alpha, k,
+                X.address,
+                A.address, B.address, A.lengthv,
+                deltaY.lengthv(), deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: {deltaA, deltaB}">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] affine_elu_deltaAB_v1(Tensor deltaY, float alpha, float k,
+            Tensor Y, Tensor A, Tensor B)//V1: holdY(), Y is not changed
+    {
+        if(check) check_affine_deltaAB_v1(deltaY, Y, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(B.dim);
+        
+        Syncer sc = core.affine_elu2D_deltaAB_v1(
+                deltaA.c().address,//result0
+                deltaB.c().address,//result1
+                deltaY.address, alpha, k, 
+                Y.address,
+                A.address, B.address, 
+                A.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else { deltaA.setSyncer(sc); deltaB.setSyncer(sc); }
+        return new Tensor[] { deltaA, deltaB };
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] affine_elu_deltaAB_v2(Tensor deltaY, float alpha, float k,
+            Tensor X, Tensor A, Tensor B)//V2: holdX(), X is not changed
+    {
+        if(check) check_affine_funcion_deltaAB_v2(deltaY, X, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(B.dim);
+        
+        Syncer sc = core.affine_elu2D_deltaAB_v2(
+                deltaA.c().address,//result0
+                deltaB.c().address,//tesult1
+                deltaY.address, alpha, k, 
+                X.address, 
+                A.address, B.address, 
+                A.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else { deltaA.setSyncer(sc); deltaB.setSyncer(sc); }
+        return new Tensor[] { deltaA, deltaB };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_softplus">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_softplus(boolean inplace, Tensor X, Tensor A, Tensor B) {
+        if(check) check_affine(X, A, B);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.affine_softplus2D(Y.address,
+                X.address, 
+                A.address, B.address, A.lengthv, 
+                Y.lengthv, Y.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_softplus_deltaX_v1(boolean inplace, 
+            Tensor deltaY, Tensor Y, Tensor A)//V1: holdY(), Y is not changed
+    {
+        if(check) check_affine_fuction_deltaX_v1(deltaY, Y, A);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.affine_softplus2D_deltaX_v1(deltaX.address,
+                deltaY.address,
+                Y.address, 
+                A.address, A.lengthv, 
+                deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_softplus_deltaX_v2(boolean inplace, 
+            Tensor deltaY, Tensor X, Tensor A, Tensor B)//V2: holdX(), X is not changed
+    {
+        if(check) check_affine_function_deltaX_v2(deltaY, X, A, B);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.affine_softplus2D_deltaX_v2(deltaX.address, 
+                deltaY.address,
+                X.address,
+                A.address, B.address, A.lengthv,
+                deltaY.lengthv(), deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: {deltaA, deltaB}">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] affine_softplus_deltaAB_v1(Tensor deltaY,
+            Tensor Y, Tensor A, Tensor B)//V1: holdY(), Y is not changed
+    {
+        if(check) check_affine_deltaAB_v1(deltaY, Y, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(B.dim);
+        
+        Syncer sc = core.affine_softplus2D_deltaAB_v1(
+                deltaA.c().address,//result0
+                deltaB.c().address,//result1
+                deltaY.address,
+                Y.address,
+                A.address, B.address, 
+                A.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else { deltaA.setSyncer(sc); deltaB.setSyncer(sc); }
+        return new Tensor[] { deltaA, deltaB };
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] affine_softplus_deltaAB_v2(Tensor deltaY,
+            Tensor X, Tensor A, Tensor B)//V2: holdX(), X is not changed
+    {
+        if(check) check_affine_funcion_deltaAB_v2(deltaY, X, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(B.dim);
+        
+        Syncer sc = core.affine_softplus2D_deltaAB_v2(
+                deltaA.c().address,//result0
+                deltaB.c().address,//tesult1
+                deltaY.address,
+                X.address, 
+                A.address, B.address, 
+                A.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else { deltaA.setSyncer(sc); deltaB.setSyncer(sc); }
+        return new Tensor[] { deltaA, deltaB };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_gelu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_gelu(boolean inplace, Tensor X, Tensor A, Tensor B) {
+        if(check) check_affine(X, A, B);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.affine_gelu2D(Y.address,
+                X.address, 
+                A.address, B.address, A.lengthv, 
+                Y.lengthv, Y.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_gelu_deltaX_v2(boolean inplace, 
+            Tensor deltaY, Tensor X, Tensor A, Tensor B)//V2: holdX(), X is not changed
+    {
+        if(check) check_affine_function_deltaX_v2(deltaY, X, A, B);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.affine_gelu2D_deltaX_v2(deltaX.address, 
+                deltaY.address,
+                X.address,
+                A.address, B.address, A.lengthv,
+                deltaY.lengthv(), deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: {deltaA, deltaB}">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] affine_gelu_deltaAB_v2(Tensor deltaY,
+            Tensor X, Tensor A, Tensor B)//V2: holdX(), X is not changed
+    {
+        if(check) check_affine_funcion_deltaAB_v2(deltaY, X, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(B.dim);
+        
+        Syncer sc = core.affine_gelu2D_deltaAB_v2(
+                deltaA.c().address,//result0
+                deltaB.c().address,//tesult1
+                deltaY.address,
+                X.address, 
+                A.address, B.address, 
+                A.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else { deltaA.setSyncer(sc); deltaB.setSyncer(sc); }
+        return new Tensor[] { deltaA, deltaB };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_sigmoid">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_sigmoid(boolean inplace, Tensor X, Tensor A, Tensor B) {
+        if(check) check_affine(X, A, B);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.affine_sigmoid2D(Y.address,
+                X.address, 
+                A.address, B.address, A.lengthv, 
+                Y.lengthv, Y.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_sigmoid_deltaX_v1(boolean inplace, 
+            Tensor deltaY, Tensor Y, Tensor A)//V1: holdY(), Y is not changed
+    {
+        if(check) check_affine_fuction_deltaX_v1(deltaY, Y, A);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.affine_sigmoid2D_deltaX_v1(deltaX.address,
+                deltaY.address,
+                Y.address, 
+                A.address, A.lengthv, 
+                deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_sigmoid_deltaX_v2(boolean inplace, 
+            Tensor deltaY, Tensor X, Tensor A, Tensor B)//V2: holdX(), X is not changed
+    {
+        if(check) check_affine_function_deltaX_v2(deltaY, X, A, B);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.affine_sigmoid2D_deltaX_v2(deltaX.address, 
+                deltaY.address,
+                X.address,
+                A.address, B.address, A.lengthv,
+                deltaY.lengthv(), deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: {deltaA, deltaB}">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] affine_sigmoid_deltaAB_v1(Tensor deltaY,
+            Tensor Y, Tensor A, Tensor B)//V1: holdY(), Y is not changed
+    {
+        if(check) check_affine_deltaAB_v1(deltaY, Y, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(B.dim);
+        
+        Syncer sc = core.affine_sigmoid2D_deltaAB_v1(
+                deltaA.c().address,//result0
+                deltaB.c().address,//result1
+                deltaY.address,
+                Y.address,
+                A.address, B.address, 
+                A.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else { deltaA.setSyncer(sc); deltaB.setSyncer(sc); }
+        return new Tensor[] { deltaA, deltaB };
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] affine_sigmoid_deltaAB_v2(Tensor deltaY,
+            Tensor X, Tensor A, Tensor B)//V2: holdX(), X is not changed
+    {
+        if(check) check_affine_funcion_deltaAB_v2(deltaY, X, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(B.dim);
+        
+        Syncer sc = core.affine_sigmoid2D_deltaAB_v2(
+                deltaA.c().address,//result0
+                deltaB.c().address,//tesult1
+                deltaY.address,
+                X.address, 
+                A.address, B.address, 
+                A.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else { deltaA.setSyncer(sc); deltaB.setSyncer(sc); }
+        return new Tensor[] { deltaA, deltaB };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_tanh">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_tanh(boolean inplace, Tensor X, Tensor A, Tensor B) {
+        if(check) check_affine(X, A, B);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.affine_tanh2D(Y.address,
+                X.address, 
+                A.address, B.address, A.lengthv, 
+                Y.lengthv, Y.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_tanh_deltaX_v1(boolean inplace, 
+            Tensor deltaY, Tensor Y, Tensor A)//V1: holdY(), Y is not changed
+    {
+        if(check) check_affine_fuction_deltaX_v1(deltaY, Y, A);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.affine_tanh2D_deltaX_v1(deltaX.address,
+                deltaY.address,
+                Y.address, 
+                A.address, A.lengthv, 
+                deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor affine_tanh_deltaX_v2(boolean inplace, 
+            Tensor deltaY, Tensor X, Tensor A, Tensor B)//V2: holdX(), X is not changed
+    {
+        if(check) check_affine_function_deltaX_v2(deltaY, X, A, B);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.affine_tanh2D_deltaX_v2(deltaX.address, 
+                deltaY.address,
+                X.address,
+                A.address, B.address, A.lengthv,
+                deltaY.lengthv(), deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: {deltaA, deltaB}">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] affine_tanh_deltaAB_v1(Tensor deltaY,
+            Tensor Y, Tensor A, Tensor B)//V1: holdY(), Y is not changed
+    {
+        if(check) check_affine_deltaAB_v1(deltaY, Y, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(B.dim);
+        
+        Syncer sc = core.affine_tanh2D_deltaAB_v1(
+                deltaA.c().address,//result0
+                deltaB.c().address,//result1
+                deltaY.address,
+                Y.address,
+                A.address, B.address, 
+                A.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else { deltaA.setSyncer(sc); deltaB.setSyncer(sc); }
+        return new Tensor[] { deltaA, deltaB };
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] affine_tanh_deltaAB_v2(Tensor deltaY,
+            Tensor X, Tensor A, Tensor B)//V2: holdX(), X is not changed
+    {
+        if(check) check_affine_funcion_deltaAB_v2(deltaY, X, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(B.dim);
+        
+        Syncer sc = core.affine_tanh2D_deltaAB_v2(
+                deltaA.c().address,//result0
+                deltaB.c().address,//tesult1
+                deltaY.address,
                 X.address, 
                 A.address, B.address, 
                 A.lengthv, deltaY.lengthv, deltaY.lastDim());
@@ -6256,14 +7734,7 @@ public class Engine implements MemStatus {
     public Tensor batchNorm(boolean inplace, Tensor X,
             Tensor X_mean, Tensor X_var, float eps)
     {
-        if(check) {
-            require_dtype(X, "X"); require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            equals(X.lastDim(), "X.lastDim", X_mean.lastDim(), "X_mean.lastDim");
-            equals(X.lastDim(), "X.lastDim", X_var.lastDim(), "X_var.lastDim()");
-            equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
-        }
-        
+        if(check) check_batchNorm(X, X_mean, X_var);
         Tensor Y = (inplace? X : this.empty(X.dim).c());
         Syncer sc = core.batchNorm2D(Y.address,
                 X.address, 
@@ -6278,19 +7749,7 @@ public class Engine implements MemStatus {
             Tensor X_mean, Tensor X_var, float eps,
             Tensor A, Tensor B)
     {
-        if(check) {
-            require_dtype(X, "X"); require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var");
-            require_dtype(A, "A"); require_dtype(B, "B");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            equals(X.lastDim(), "X.lastDim", X_mean.lastDim(), "X_mean.lastDim");
-            equals(X.lastDim(), "X.lastDim", X_var.lastDim(), "X_var.lastDim");
-            equals(X.lastDim(), "X.lastDim", A.lastDim(), "A.lastDim");
-            equals(X.lastDim(), "X.lastDim", B.lastDim(), "B.lastDim");
-            equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
-            equals(X_mean.length, "X_mean.length", A.length, "A.length");
-            equals(X_mean.length, "X_mean.length", B.length, "B.length");
-        }
-        
+        if(check) check_batchNorm(X, X_mean, X_var, A, B);
         Tensor Y = (inplace? X : this.empty(X.dim).c());
         Syncer sc = core.batchNorm2D(Y.address,
                 X.address, 
@@ -6307,14 +7766,7 @@ public class Engine implements MemStatus {
             Tensor deltaY, Tensor Y,//V1: holdY(), Y is not changed
             Tensor X_var, float eps)
     {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y"); require_dtype(X_var, "X_var"); 
-            must_greater_equal(Y.ndim(), "Y.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", Y, "Y");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim()");
-        }
-        
+        if(check) check_batchNorm_deltaX_v1(deltaY, Y, X_var);
         Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
         Syncer sc = core.batchNorm2D_deltaX_v1(deltaX.address, 
                 deltaY.address,
@@ -6330,17 +7782,7 @@ public class Engine implements MemStatus {
             Tensor deltaY, Tensor X,//V2: holdX(), X is not changed
             Tensor X_mean, Tensor X_var, float eps)
     {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(X, "X");
-            require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", X, "X");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_mean.lastDim(), "X_mean.lastDim()");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim()");
-            equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
-        }
-        
+        if(check) check_batchNorm_deltaX_v2(deltaY, X, X_mean, X_var);
         Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
         Syncer sc = core.batchNorm2D_deltaX_v2(deltaX.address, 
                 deltaY.address, 
@@ -6358,18 +7800,7 @@ public class Engine implements MemStatus {
             Tensor X_var, float eps, 
             Tensor A, Tensor B)
     {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y"); require_dtype(X_var, "X_var");
-            must_greater_equal(Y.ndim(), "Y.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", Y, "Y");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim");
-            equals(deltaY.lastDim(), "deltaY.lastDim", A.lastDim(), "A.lastDim");
-            equals(deltaY.lastDim(), "deltaY.lastDim", B.lastDim(), "B.lastDim");
-            equals(X_var.length, "X_var.length", A.length, "A.length");
-            equals(X_var.length, "X_var.length", B.length, "B.length");
-        }
-        
+        if(check) check_batchNorm_gradients_v1(deltaY, Y, X_var, A, B);
         Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
         Syncer sc = core.batchNorm2D_deltaX_v1(deltaX.address,
                 deltaY.address, 
@@ -6387,19 +7818,7 @@ public class Engine implements MemStatus {
             Tensor X_mean, Tensor X_var, float eps, 
             Tensor A)
     {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(X, "X");
-            require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", X, "X");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_mean.lastDim(), "X_mean.lastDim()");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim()");
-            equals(deltaY.lastDim(), "deltaY.lastDim", A.lastDim(), "A.lastDim()");
-            equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
-            equals(X_mean.length, "X_mean.length", A.length, "A.length");
-        }
-        
+        if(check) check_batchNorm_gradients_v2(deltaY, X, X_mean, X_var, A);
         Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
         Syncer sc = core.batchNorm2D_deltaX_v2(deltaX.address, 
                 deltaY.address, 
@@ -6418,7 +7837,6 @@ public class Engine implements MemStatus {
     public Tensor[] batchNorm_deltaAB_v1(Tensor deltaY, Tensor Y, Tensor A, Tensor B) {
         return affine_deltaAB_v1(deltaY, Y, A, B);
     }
-    
     @Passed("CudaFloat32EngieBase")
     public Tensor batchNorm_deltaA_v2(Tensor deltaY, Tensor X, 
             Tensor X_mean, Tensor X_var, float eps)
@@ -6485,19 +7903,7 @@ public class Engine implements MemStatus {
             Tensor X_var, float eps, 
             Tensor A, Tensor B)
     {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y");
-            require_dtype(X_var, "X_var"); require_dtype(A, "A"); require_dtype(B, "B");
-            must_greater_equal(Y.ndim(), "Y.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", Y, "Y");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim");
-            equals(deltaY.lastDim(), "deltaY.lastDim", A.lastDim(), "A.lastDim");
-            equals(deltaY.lastDim(), "deltaY.lastDim", B.lastDim(), "B.lastDim");
-            equals(X_var.length, "X_var.length", A.length, "A.length");
-            equals(X_var.length, "X_var.length", B.length, "B.length");
-        }
-        
+        if(check) check_batchNorm_gradients_v1(deltaY, Y, X_var, A, B);
         Tensor deltaA = this.empty(A.dim);
         Tensor deltaB = this.empty(B.dim);
         Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
@@ -6526,19 +7932,7 @@ public class Engine implements MemStatus {
             Tensor X_mean, Tensor X_var, float eps, 
             Tensor A)
     {
-        if(check) {
-            require_dtype(deltaY); require_dtype(X);
-            require_dtype(X_mean); require_dtype(X_var); require_dtype(A);
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", X, "X");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_mean.lastDim(), "X_mean.lastDim");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim");
-            equals(deltaY.lastDim(), "deltaY.lastDim", A.lastDim(), "A.lastDim()");
-            equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
-            equals(X_mean.length, "X_mean.length", A.length, "A.length");
-        }
-        
+        if(check) check_batchNorm_gradients_v2(deltaY, X, X_mean, X_var, A);
         Tensor deltaA = this.empty(A.dim);
         Tensor deltaB = this.empty(A.dim);//A.dim = B.dim
         Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
@@ -6568,14 +7962,7 @@ public class Engine implements MemStatus {
     public Tensor batchNorm_relu(boolean inplace, Tensor X,
             Tensor X_mean, Tensor X_var, float eps)
     {
-        if(check) {
-            require_dtype(X, "X"); require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            equals(X.lastDim(), "X.lastDim", X_mean.lastDim(), "X_mean.lastDim");
-            equals(X.lastDim(), "X.lastDim", X_var.lastDim(), "X_var.lastDim()");
-            equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
-        }
-        
+        if(check) this.check_batchNorm(X, X_mean, X_var);
         Tensor Y = (inplace? X : this.empty(X.dim).c());
         Syncer sc = core.batchNorm_relu2D(Y.address,
                 X.address, 
@@ -6591,19 +7978,7 @@ public class Engine implements MemStatus {
             Tensor X_mean, Tensor X_var, float eps, 
             Tensor A, Tensor B)
     {
-        if(check) {
-            require_dtype(X, "X"); require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var");
-            require_dtype(A, "A"); require_dtype(B, "B");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            equals(X.lastDim(), "X.lastDim", X_mean.lastDim(), "X_mean.lastDim");
-            equals(X.lastDim(), "X.lastDim", X_var.lastDim(), "X_var.lastDim");
-            equals(X.lastDim(), "X.lastDim", A.lastDim(), "A.lastDim");
-            equals(X.lastDim(), "X.lastDim", B.lastDim(), "B.lastDim");
-            equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
-            equals(X_mean.length, "X_mean.length", A.length, "A.length");
-            equals(X_mean.length, "X_mean.length", B.length, "B.length");
-        }
-        
+        if(check) check_batchNorm(X, X_mean, X_var, A, B);
         Tensor Y = (inplace? X : this.empty(X.dim).c());
         Syncer sc = core.batchNorm_relu2D(Y.address, 
                 X.address, 
@@ -6620,14 +7995,7 @@ public class Engine implements MemStatus {
     public Tensor batchNorm_leakyRelu(boolean inplace, Tensor X,
             Tensor X_mean, Tensor X_var, float eps, float k)
     {
-        if(check) {
-            require_dtype(X, "X"); require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            equals(X.lastDim(), "X.lastDim", X_mean.lastDim(), "X_mean.lastDim");
-            equals(X.lastDim(), "X.lastDim", X_var.lastDim(), "X_var.lastDim()");
-            equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
-        }
-        
+        if(check) this.check_batchNorm(X, X_mean, X_var);
         Tensor Y = (inplace? X : this.empty(X.dim).c());
         Syncer sc = core.batchNorm_leakyRelu2D(Y.address,
                 X.address, 
@@ -6643,19 +8011,7 @@ public class Engine implements MemStatus {
             Tensor X_mean, Tensor X_var, float eps, 
             Tensor A, Tensor B, float k)
     {
-        if(check) {
-            require_dtype(X, "X"); require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var");
-            require_dtype(A, "A"); require_dtype(B, "B");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            equals(X.lastDim(), "X.lastDim", X_mean.lastDim(), "X_mean.lastDim");
-            equals(X.lastDim(), "X.lastDim", X_var.lastDim(), "X_var.lastDim");
-            equals(X.lastDim(), "X.lastDim", A.lastDim(), "A.lastDim");
-            equals(X.lastDim(), "X.lastDim", B.lastDim(), "B.lastDim");
-            equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
-            equals(X_mean.length, "X_mean.length", A.length, "A.length");
-            equals(X_mean.length, "X_mean.length", B.length, "B.length");
-        }
-        
+        if(check) check_batchNorm(X, X_mean, X_var, A, B);
         Tensor Y = (inplace? X : this.empty(X.dim).c());
         Syncer sc = core.batchNorm_leakyRelu2D(Y.address, 
                 X.address, 
@@ -6673,14 +8029,7 @@ public class Engine implements MemStatus {
             Tensor deltaY, float k, Tensor Y,//V1: holdY(), Y is not changed
             Tensor X_var, float eps)
     {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y"); require_dtype(X_var, "X_var"); 
-            must_greater_equal(Y.ndim(), "Y.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", Y, "Y");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim()");
-        }
-        
+        if(check) check_batchNorm_deltaX_v1(deltaY, Y, X_var);
         Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
         Syncer sc = core.batchNorm_leakyRelu2D_deltaX_v1(deltaX.address, 
                 deltaY.address, k,
@@ -6700,17 +8049,7 @@ public class Engine implements MemStatus {
             Tensor deltaY, float k, Tensor X,//V2: holdX(), X is not changed
             Tensor X_mean, Tensor X_var, float eps)
     {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(X, "X");
-            require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", X, "X");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_mean.lastDim(), "X_mean.lastDim()");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim()");
-            equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
-        }
-        
+        if(check) check_batchNorm_deltaX_v2(deltaY, X, X_mean, X_var);
         Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
         Syncer sc = core.batchNorm_leakyRelu2D_deltaX_v2(deltaX.address,
                 deltaY.address, k, 
@@ -6728,19 +8067,7 @@ public class Engine implements MemStatus {
             Tensor X_var, float eps, 
             Tensor A, Tensor B)
     {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(Y, "Y");
-            require_dtype(X_var, "X_var"); require_dtype(A, "A"); require_dtype(B, "B");
-            must_greater_equal(Y.ndim(), "Y.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", Y, "Y");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim");
-            equals(deltaY.lastDim(), "deltaY.lastDim", A.lastDim(), "A.lastDim");
-            equals(deltaY.lastDim(), "deltaY.lastDim", B.lastDim(), "B.lastDim");
-            equals(X_var.length, "X_var.length", A.length, "A.length");
-            equals(X_var.length, "X_var.length", B.length, "B.length");
-        }
-        
+        if (check) check_batchNorm_gradients_v1(deltaY, Y, X_var, A, B);
         Tensor deltaA = this.empty(A.dim);
         Tensor deltaB = this.empty(B.dim);
         Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
@@ -6768,7 +8095,7 @@ public class Engine implements MemStatus {
             Tensor X_mean, Tensor X_var, float eps, 
             Tensor A, Tensor B) {
         return batchNorm_leakyRelu_gradients_v2(inplace, 
-                deltaY, 0.0f, X, X_mean, X_var, eps,  A, B);
+                deltaY, 0.0f, X, X_mean, X_var, eps, A, B);
     }
     @Passed("CudaFloat32EngieBase")
     public Tensor[] batchNorm_leakyRelu_gradients_v2(boolean inplace, 
@@ -6776,21 +8103,7 @@ public class Engine implements MemStatus {
             Tensor X_mean, Tensor X_var, float eps, 
             Tensor A, Tensor B)
     {
-        if(check) {
-            require_dtype(deltaY, "deltaY"); require_dtype(X, "X");
-            require_dtype(X_mean, "X_mean"); require_dtype(X_var, "X_var"); require_dtype(A, "A");
-            must_greater_equal(X.ndim(), "X.ndim", 2);
-            must_greater_equal(deltaY.ndim(), "deltaY.ndim", 2);
-            equals_valueStructure(deltaY, "deltaY", X, "X");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_mean.lastDim(), "X_mean.lastDim");
-            equals(deltaY.lastDim(), "deltaY.lastDim", X_var.lastDim(), "X_var.lastDim");
-            equals(deltaY.lastDim(), "deltaY.lastDim", A.lastDim(), "A.lastDim()");
-            equals(deltaY.lastDim(), "deltaY.lastDim", B.lastDim(), "B.lastDim()");
-            equals(X_mean.length, "X_mean.length", X_var.length, "X_var.length");
-            equals(X_mean.length, "X_mean.length", A.length, "A.length");
-            equals(X_mean.length, "X_mean.length", B.length, "B.length");
-        }
-        
+        if(check) check_batchNorm_gradients_v2(deltaY, X, X_mean, X_var, A, B);
         Tensor deltaA = this.empty(A.dim);
         Tensor deltaB = this.empty(A.dim);//A.dim = B.dim
         Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
@@ -6800,6 +8113,598 @@ public class Engine implements MemStatus {
                 deltaA.c().address,//result1
                 deltaB.c().address,//result2 
                 deltaY.address, k, 
+                X.address,
+                X_mean.address, X_var.address, eps,
+                A.address, B.address, 
+                X_mean.lengthv, deltaY.lengthv, deltaY.lastDim());
+        
+        if(sync) sc.sync(); else {
+            deltaX.setSyncer(sc);
+            deltaA.setSyncer(sc);
+            deltaB.setSyncer(sc);
+        }
+        return new Tensor[] { deltaX, deltaA, deltaB };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_elu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_elu(boolean inplace, Tensor X,
+            Tensor X_mean, Tensor X_var, float eps, 
+            float alpha, float k)
+    {
+        if(check) this.check_batchNorm(X, X_mean, X_var);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.batchNorm_elu2D(Y.address,
+                X.address, 
+                X_mean.address, X_var.address, eps, 
+                X_mean.lengthv, alpha, k,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_elu(boolean inplace, Tensor X,
+            Tensor X_mean, Tensor X_var, float eps, 
+            Tensor A, Tensor B,
+            float alpha, float k)
+    {
+        if(check) check_batchNorm(X, X_mean, X_var, A, B);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.batchNorm_elu2D(Y.address, 
+                X.address, 
+                X_mean.address, X_var.address, eps,
+                A.address, B.address, 
+                X_mean.lengthv, alpha, k,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_elu_deltaX_v1(boolean inplace,
+            Tensor deltaY, float alpha, float k, Tensor Y,//V1: holdY(), Y is not changed
+            Tensor X_var, float eps)
+    {
+        if(check) check_batchNorm_deltaX_v1(deltaY, Y, X_var);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.batchNorm_elu2D_deltaX_v1(deltaX.address, 
+                deltaY.address, alpha, k,
+                Y.address,
+                X_var.address, eps,
+                X_var.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_elu_deltaX_v2(boolean inplace,
+            Tensor deltaY, float alpha, float k, Tensor X,//V2: holdX(), X is not changed
+            Tensor X_mean, Tensor X_var, float eps)
+    {
+        if(check) check_batchNorm_deltaX_v2(deltaY, X, X_mean, X_var);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.batchNorm_elu2D_deltaX_v2(deltaX.address,
+                deltaY.address, alpha, k, 
+                X.address,
+                X_mean.address, X_var.address, eps, 
+                X_mean.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): { deltaX, deltaA, deltaB }">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] batchNorm_elu_gradients_v1(boolean inplace, 
+            Tensor deltaY, float alpha, float k, Tensor Y,//V1: holdY(), Y is not changed
+            Tensor X_var, float eps, 
+            Tensor A, Tensor B)
+    {
+        if(check) check_batchNorm_gradients_v1(deltaY, Y, X_var, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(B.dim);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        
+        Syncer sc = core.batchNorm_elu2D_gradients_v1(
+                deltaX.address,//result0
+                deltaA.c().address,//result1
+                deltaB.c().address,//result2 
+                deltaY.address, alpha, k, 
+                Y.address, 
+                X_var.address, eps,
+                A.address, B.address, 
+                X_var.lengthv, deltaY.lengthv, deltaY.lastDim());
+
+        if(sync) sc.sync(); else {
+            deltaX.setSyncer(sc);
+            deltaA.setSyncer(sc);
+            deltaB.setSyncer(sc);
+        }
+        return new Tensor[] { deltaX, deltaA, deltaB };
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] batchNorm_elu_gradients_v2(boolean inplace, 
+            Tensor deltaY, float alpha, float k, Tensor X,//V2: holdX(), X is not changed
+            Tensor X_mean, Tensor X_var, float eps, 
+            Tensor A, Tensor B)
+    {
+        if(check) check_batchNorm_gradients_v2(deltaY, X, X_mean, X_var, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(A.dim);//A.dim = B.dim
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        
+        Syncer sc = core.batchNorm_elu2D_gradients_v2(
+                deltaX.address,//result0
+                deltaA.c().address,//result1
+                deltaB.c().address,//result2 
+                deltaY.address, alpha, k, 
+                X.address,
+                X_mean.address, X_var.address, eps,
+                A.address, B.address, 
+                X_mean.lengthv, deltaY.lengthv, deltaY.lastDim());
+        
+        if(sync) sc.sync(); else {
+            deltaX.setSyncer(sc);
+            deltaA.setSyncer(sc);
+            deltaB.setSyncer(sc);
+        }
+        return new Tensor[] { deltaX, deltaA, deltaB };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_softplus">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_softplus(boolean inplace, Tensor X,
+            Tensor X_mean, Tensor X_var, float eps)
+    {
+        if(check) this.check_batchNorm(X, X_mean, X_var);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.batchNorm_softplus2D(Y.address,
+                X.address, 
+                X_mean.address, X_var.address, eps, 
+                X_mean.lengthv,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_softplus(boolean inplace, Tensor X,
+            Tensor X_mean, Tensor X_var, float eps, 
+            Tensor A, Tensor B)
+    {
+        if(check) check_batchNorm(X, X_mean, X_var, A, B);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.batchNorm_softplus2D(Y.address, 
+                X.address, 
+                X_mean.address, X_var.address, eps,
+                A.address, B.address, 
+                X_mean.lengthv,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_softplus_deltaX_v1(boolean inplace,
+            Tensor deltaY, Tensor Y,//V1: holdY(), Y is not changed
+            Tensor X_var, float eps)
+    {
+        if(check) check_batchNorm_deltaX_v1(deltaY, Y, X_var);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.batchNorm_softplus2D_deltaX_v1(deltaX.address, 
+                deltaY.address,
+                Y.address,
+                X_var.address, eps,
+                X_var.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_softplus_deltaX_v2(boolean inplace,
+            Tensor deltaY, Tensor X,//V2: holdX(), X is not changed
+            Tensor X_mean, Tensor X_var, float eps)
+    {
+        if(check) check_batchNorm_deltaX_v2(deltaY, X, X_mean, X_var);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.batchNorm_softplus2D_deltaX_v2(deltaX.address,
+                deltaY.address,
+                X.address,
+                X_mean.address, X_var.address, eps, 
+                X_mean.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): { deltaX, deltaA, deltaB }">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] batchNorm_softplus_gradients_v1(boolean inplace, 
+            Tensor deltaY, Tensor Y,//V1: holdY(), Y is not changed
+            Tensor X_var, float eps, 
+            Tensor A, Tensor B)
+    {
+        if(check) check_batchNorm_gradients_v1(deltaY, Y, X_var, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(B.dim);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        
+        Syncer sc = core.batchNorm_softplus2D_gradients_v1(
+                deltaX.address,//result0
+                deltaA.c().address,//result1
+                deltaB.c().address,//result2 
+                deltaY.address,
+                Y.address, 
+                X_var.address, eps,
+                A.address, B.address, 
+                X_var.lengthv, deltaY.lengthv, deltaY.lastDim());
+
+        if(sync) sc.sync(); else {
+            deltaX.setSyncer(sc);
+            deltaA.setSyncer(sc);
+            deltaB.setSyncer(sc);
+        }
+        return new Tensor[] { deltaX, deltaA, deltaB };
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] batchNorm_softplus_gradients_v2(boolean inplace, 
+            Tensor deltaY, Tensor X,//V2: holdX(), X is not changed
+            Tensor X_mean, Tensor X_var, float eps, 
+            Tensor A, Tensor B)
+    {
+        if(check) check_batchNorm_gradients_v2(deltaY, X, X_mean, X_var, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(A.dim);//A.dim = B.dim
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        
+        Syncer sc = core.batchNorm_softplus2D_gradients_v2(
+                deltaX.address,//result0
+                deltaA.c().address,//result1
+                deltaB.c().address,//result2 
+                deltaY.address,
+                X.address,
+                X_mean.address, X_var.address, eps,
+                A.address, B.address, 
+                X_mean.lengthv, deltaY.lengthv, deltaY.lastDim());
+        
+        if(sync) sc.sync(); else {
+            deltaX.setSyncer(sc);
+            deltaA.setSyncer(sc);
+            deltaB.setSyncer(sc);
+        }
+        return new Tensor[] { deltaX, deltaA, deltaB };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_gelu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_gelu(boolean inplace, Tensor X,
+            Tensor X_mean, Tensor X_var, float eps)
+    {
+        if(check) this.check_batchNorm(X, X_mean, X_var);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.batchNorm_gelu2D(Y.address,
+                X.address, 
+                X_mean.address, X_var.address, eps, 
+                X_mean.lengthv,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_gelu(boolean inplace, Tensor X,
+            Tensor X_mean, Tensor X_var, float eps, 
+            Tensor A, Tensor B)
+    {
+        if(check) check_batchNorm(X, X_mean, X_var, A, B);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.batchNorm_gelu2D(Y.address, 
+                X.address, 
+                X_mean.address, X_var.address, eps,
+                A.address, B.address, 
+                X_mean.lengthv,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_gelu_deltaX_v2(boolean inplace,
+            Tensor deltaY, Tensor X,//V2: holdX(), X is not changed
+            Tensor X_mean, Tensor X_var, float eps)
+    {
+        if(check) check_batchNorm_deltaX_v2(deltaY, X, X_mean, X_var);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.batchNorm_gelu2D_deltaX_v2(deltaX.address,
+                deltaY.address,
+                X.address,
+                X_mean.address, X_var.address, eps, 
+                X_mean.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): { deltaX, deltaA, deltaB }">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] batchNorm_gelu_gradients_v2(boolean inplace, 
+            Tensor deltaY, Tensor X,//V2: holdX(), X is not changed
+            Tensor X_mean, Tensor X_var, float eps, 
+            Tensor A, Tensor B)
+    {
+        if(check) check_batchNorm_gradients_v2(deltaY, X, X_mean, X_var, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(A.dim);//A.dim = B.dim
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        
+        Syncer sc = core.batchNorm_gelu2D_gradients_v2(
+                deltaX.address,//result0
+                deltaA.c().address,//result1
+                deltaB.c().address,//result2 
+                deltaY.address,
+                X.address,
+                X_mean.address, X_var.address, eps,
+                A.address, B.address, 
+                X_mean.lengthv, deltaY.lengthv, deltaY.lastDim());
+        
+        if(sync) sc.sync(); else {
+            deltaX.setSyncer(sc);
+            deltaA.setSyncer(sc);
+            deltaB.setSyncer(sc);
+        }
+        return new Tensor[] { deltaX, deltaA, deltaB };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_sigmoid">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_sigmoid(boolean inplace, Tensor X,
+            Tensor X_mean, Tensor X_var, float eps)
+    {
+        if(check) this.check_batchNorm(X, X_mean, X_var);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.batchNorm_sigmoid2D(Y.address,
+                X.address, 
+                X_mean.address, X_var.address, eps, 
+                X_mean.lengthv,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_sigmoid(boolean inplace, Tensor X,
+            Tensor X_mean, Tensor X_var, float eps, 
+            Tensor A, Tensor B)
+    {
+        if(check) check_batchNorm(X, X_mean, X_var, A, B);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.batchNorm_sigmoid2D(Y.address, 
+                X.address, 
+                X_mean.address, X_var.address, eps,
+                A.address, B.address, 
+                X_mean.lengthv,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_sigmoid_deltaX_v1(boolean inplace,
+            Tensor deltaY, Tensor Y,//V1: holdY(), Y is not changed
+            Tensor X_var, float eps)
+    {
+        if(check) check_batchNorm_deltaX_v1(deltaY, Y, X_var);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.batchNorm_sigmoid2D_deltaX_v1(deltaX.address, 
+                deltaY.address,
+                Y.address,
+                X_var.address, eps,
+                X_var.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_sigmoid_deltaX_v2(boolean inplace,
+            Tensor deltaY, Tensor X,//V2: holdX(), X is not changed
+            Tensor X_mean, Tensor X_var, float eps)
+    {
+        if(check) check_batchNorm_deltaX_v2(deltaY, X, X_mean, X_var);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.batchNorm_sigmoid2D_deltaX_v2(deltaX.address,
+                deltaY.address,
+                X.address,
+                X_mean.address, X_var.address, eps, 
+                X_mean.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): { deltaX, deltaA, deltaB }">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] batchNorm_sigmoid_gradients_v1(boolean inplace, 
+            Tensor deltaY, Tensor Y,//V1: holdY(), Y is not changed
+            Tensor X_var, float eps, 
+            Tensor A, Tensor B)
+    {
+        if(check) check_batchNorm_gradients_v1(deltaY, Y, X_var, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(B.dim);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        
+        Syncer sc = core.batchNorm_sigmoid2D_gradients_v1(
+                deltaX.address,//result0
+                deltaA.c().address,//result1
+                deltaB.c().address,//result2 
+                deltaY.address,
+                Y.address, 
+                X_var.address, eps,
+                A.address, B.address, 
+                X_var.lengthv, deltaY.lengthv, deltaY.lastDim());
+
+        if(sync) sc.sync(); else {
+            deltaX.setSyncer(sc);
+            deltaA.setSyncer(sc);
+            deltaB.setSyncer(sc);
+        }
+        return new Tensor[] { deltaX, deltaA, deltaB };
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] batchNorm_sigmoid_gradients_v2(boolean inplace, 
+            Tensor deltaY, Tensor X,//V2: holdX(), X is not changed
+            Tensor X_mean, Tensor X_var, float eps, 
+            Tensor A, Tensor B)
+    {
+        if(check) check_batchNorm_gradients_v2(deltaY, X, X_mean, X_var, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(A.dim);//A.dim = B.dim
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        
+        Syncer sc = core.batchNorm_sigmoid2D_gradients_v2(
+                deltaX.address,//result0
+                deltaA.c().address,//result1
+                deltaB.c().address,//result2 
+                deltaY.address,
+                X.address,
+                X_mean.address, X_var.address, eps,
+                A.address, B.address, 
+                X_mean.lengthv, deltaY.lengthv, deltaY.lastDim());
+        
+        if(sync) sc.sync(); else {
+            deltaX.setSyncer(sc);
+            deltaA.setSyncer(sc);
+            deltaB.setSyncer(sc);
+        }
+        return new Tensor[] { deltaX, deltaA, deltaB };
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_tanh">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_tanh(boolean inplace, Tensor X,
+            Tensor X_mean, Tensor X_var, float eps)
+    {
+        if(check) this.check_batchNorm(X, X_mean, X_var);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.batchNorm_tanh2D(Y.address,
+                X.address, 
+                X_mean.address, X_var.address, eps, 
+                X_mean.lengthv,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_tanh(boolean inplace, Tensor X,
+            Tensor X_mean, Tensor X_var, float eps, 
+            Tensor A, Tensor B)
+    {
+        if(check) check_batchNorm(X, X_mean, X_var, A, B);
+        Tensor Y = (inplace? X : this.empty(X.dim).c());
+        Syncer sc = core.batchNorm_tanh2D(Y.address, 
+                X.address, 
+                X_mean.address, X_var.address, eps,
+                A.address, B.address, 
+                X_mean.lengthv,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_tanh_deltaX_v1(boolean inplace,
+            Tensor deltaY, Tensor Y,//V1: holdY(), Y is not changed
+            Tensor X_var, float eps)
+    {
+        if(check) check_batchNorm_deltaX_v1(deltaY, Y, X_var);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.batchNorm_tanh2D_deltaX_v1(deltaX.address, 
+                deltaY.address,
+                Y.address,
+                X_var.address, eps,
+                X_var.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor batchNorm_tanh_deltaX_v2(boolean inplace,
+            Tensor deltaY, Tensor X,//V2: holdX(), X is not changed
+            Tensor X_mean, Tensor X_var, float eps)
+    {
+        if(check) check_batchNorm_deltaX_v2(deltaY, X, X_mean, X_var);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        Syncer sc = core.batchNorm_tanh2D_deltaX_v2(deltaX.address,
+                deltaY.address,
+                X.address,
+                X_mean.address, X_var.address, eps, 
+                X_mean.lengthv, deltaY.lengthv, deltaY.lastDim());
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): { deltaX, deltaA, deltaB }">
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] batchNorm_tanh_gradients_v1(boolean inplace, 
+            Tensor deltaY, Tensor Y,//V1: holdY(), Y is not changed
+            Tensor X_var, float eps, 
+            Tensor A, Tensor B)
+    {
+        if(check) check_batchNorm_gradients_v1(deltaY, Y, X_var, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(B.dim);
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        
+        Syncer sc = core.batchNorm_tanh2D_gradients_v1(
+                deltaX.address,//result0
+                deltaA.c().address,//result1
+                deltaB.c().address,//result2 
+                deltaY.address,
+                Y.address, 
+                X_var.address, eps,
+                A.address, B.address, 
+                X_var.lengthv, deltaY.lengthv, deltaY.lastDim());
+
+        if(sync) sc.sync(); else {
+            deltaX.setSyncer(sc);
+            deltaA.setSyncer(sc);
+            deltaB.setSyncer(sc);
+        }
+        return new Tensor[] { deltaX, deltaA, deltaB };
+    }
+    
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] batchNorm_tanh_gradients_v2(boolean inplace, 
+            Tensor deltaY, Tensor X,//V2: holdX(), X is not changed
+            Tensor X_mean, Tensor X_var, float eps, 
+            Tensor A, Tensor B)
+    {
+        if(check) check_batchNorm_gradients_v2(deltaY, X, X_mean, X_var, A, B);
+        Tensor deltaA = this.empty(A.dim);
+        Tensor deltaB = this.empty(A.dim);//A.dim = B.dim
+        Tensor deltaX = (inplace? deltaY : this.empty(deltaY.dim).c());
+        
+        Syncer sc = core.batchNorm_tanh2D_gradients_v2(
+                deltaX.address,//result0
+                deltaA.c().address,//result1
+                deltaB.c().address,//result2 
+                deltaY.address,
                 X.address,
                 X_mean.address, X_var.address, eps,
                 A.address, B.address, 
@@ -8682,7 +10587,7 @@ public class Engine implements MemStatus {
     //</editor-fold>  
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="field reduce function">
+    //<editor-fold defaultstate="collapsed" desc="field [field, row] reduce function">
     //<editor-fold defaultstate="collapsed" desc="field linear">
     public Tensor field_mean(Tensor X) { return field_mean(X, -1); }
     public Tensor field_mean(Tensor X, int row_length) {
@@ -9065,7 +10970,7 @@ public class Engine implements MemStatus {
     //</editor-fold>
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="center reduce function">
+    //<editor-fold defaultstate="collapsed" desc="center [dim0, dim1, dim2] reduce function">
     //<editor-fold defaultstate="collapsed" desc="center_reduce_param_check">
     private void center_reduce_param_check(Tensor X, String name, int dim0, int dim2) {
         if(X.ndim() < 3) throw new RuntimeException(String.format(
@@ -9077,19 +10982,107 @@ public class Engine implements MemStatus {
     }
     //</editor-fold>
     
+    //<editor-fold defaultstate="collapsed" desc="center_linear">
+    public Tensor center_mean(Tensor X) { return center_mean(X, -1, -1); }
+    public Tensor center_mean(Tensor X, int dim0, int dim2) { 
+        if(dim0 == -1) dim0 = X.firstDim();
+        if(dim2 == -1) dim2 = X.lastDim();
+        int n = X.length / (dim0 * dim2);
+        float alpha = (float) (1.0 / n);
+        return center_linear(X, dim0, dim2, alpha, 0);
+    }
+    
+    public Tensor center_sum(Tensor X) { return center_sum(X, -1, -1); }
+    public Tensor center_sum(Tensor X, int dim0, int dim2) { return center_linear(X, dim0, dim2, 1.0f, 0.0f); }//sum(X)
+    public Tensor center_sum(Tensor X, int dim0, int dim2, float alpha) {//sum(alpha*X)
+        return center_linear(X, dim0, dim2, alpha, 0.0f);
+    }
+    
+    public Tensor center_linear(Tensor X, float alpha, float beta) { return center_linear(X, -1, -1, alpha, beta); }
+    @Passed("CudaFloat32EngieBase")//sum(alpha*X + beta)
+    public Tensor center_linear(Tensor X, int dim0, int dim2,
+            float alpha, float beta) 
+    {
+        if(dim0 == -1) dim0 = X.firstDim();
+        if(dim2 == -1) dim2 = X.lastDim();
+        if(check) {//X[dim0, dim1, dim2] -> Y[dim0, dim2]
+            require_dtype(X, "X");
+            center_reduce_param_check(X, "X", dim0, dim2);
+        }
+       
+        int length = dim0 * dim2;
+        int width = X.lastDim(), height = length / width;
+        Tensor Y = this.empty(height, width);
+        
+        int dim1 = X.length / length;
+        Syncer sc = core.center_linear(Y.c().address, 
+                X.address, 
+                alpha, beta, 
+                dim0, dim1, dim2, 
+                width);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="center_quadratic">
+    public Tensor center_sqmean(Tensor X) { return center_sqmean(X, -1, -1); }
+    public Tensor center_sqmean(Tensor X, int dim0, int dim2) { 
+        if(dim0 == -1) dim0 = X.firstDim();
+        if(dim2 == -1) dim2 = X.lastDim();
+        int n = X.length / (dim0 * dim2);
+        float alpha = (float) (1.0 / n);
+        return center_quadratic(X, dim0, dim2, alpha, 0, 0);
+    }
+    
+    public Tensor center_sqsum(Tensor X) { return center_sqsum(X, -1, -1); }
+    public Tensor center_sqsum(Tensor X, int dim0, int dim2) { return center_quadratic(X, dim0, dim2, 1.0f, 0.0f, 0.0f); }//sum(X^2)
+    public Tensor center_sqsum(Tensor X, int dim0, int dim2, float alpha) {//sum(alpha*X^2)
+        return center_quadratic(X, dim0, dim2, alpha, 0.0f, 0.0f);
+    }
+    
+    public Tensor center_quadratic(Tensor X, float alpha, float beta, float gamma) {
+        return center_quadratic(X, -1, -1, alpha, beta, gamma);
+    }
+    @Passed("CudaFloat32EngieBase")//sum(alpha*X^2 + beta*X + gamma)
+    public Tensor center_quadratic(Tensor X, int dim0, int dim2,
+            float alpha, float beta, float gamma) 
+    {
+        if(dim0 == -1) dim0 = X.firstDim();
+        if(dim2 == -1) dim2 = X.lastDim();
+        if(check) {//X[dim0, dim1, dim2] -> Y [dim0, dim2]
+            require_dtype(X, "X");
+            center_reduce_param_check(X, "X", dim0, dim2);
+        }
+       
+        int length = dim0 * dim2;
+        int width = X.lastDim(), height = length / width;
+        Tensor Y = this.empty(height, width);
+        
+        int dim1 = X.length / length;
+        Syncer sc = core.center_quadratic(Y.c().address, 
+                X.address, 
+                alpha, beta, gamma, 
+                dim0, dim1, dim2, 
+                width);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="center_quadratic2">
     public Tensor center_mul(Tensor X1, Tensor X2) { return center_quadratic2(X1, X2, -1, -1, 0, 1.0f, 0, 0, 0, 0); }
-    public Tensor center_mul(Tensor X1, Tensor X2, int dim0, int dim2) {
+    public Tensor center_mul(Tensor X1, Tensor X2, int dim0, int dim2) {//X1 * X2
         return center_quadratic2(X1, X2, dim0, dim2, 0, 1.0f, 0, 0, 0, 0);
     }
     
     public Tensor center_sqadd(Tensor X1, Tensor X2) { return center_quadratic2(X1, X2, -1, -1, 1.0f, 0, 1.0f, 0, 0, 0); }
-    public Tensor center_sqadd(Tensor X1, Tensor X2, int dim0, int dim2) {
+    public Tensor center_sqadd(Tensor X1, Tensor X2, int dim0, int dim2) {//X1^2 + X2^2
         return center_quadratic2(X1, X2, dim0, dim2, 1.0f, 0, 1.0f, 0, 0, 0);
     }
     
     public Tensor center_sqsub(Tensor X1, Tensor X2) { return center_quadratic2(X1, X2, -1, -1, 1.0f, 0, -1.0f, 0, 0, 0); }
-    public Tensor center_sqsub(Tensor X1, Tensor X2, int dim0, int dim2) {
+    public Tensor center_sqsub(Tensor X1, Tensor X2, int dim0, int dim2) {//X1^2 - X2^2
         return center_quadratic2(X1, X2, dim0, dim2, 1.0f, 0, -1.0f, 0, 0, 0);
     }
     
@@ -9098,7 +11091,7 @@ public class Engine implements MemStatus {
             float k1, float k2, float C) {
         return center_quadratic2(X1, X2, -1, -1, k11, k12, k22, k1, k2, C);
     }
-    @Passed("CudaFloat32EngieBase")//sum(alpha*X + beta)
+    @Passed("CudaFloat32EngieBase")
     public Tensor center_quadratic2(Tensor X1, Tensor X2, int dim0, int dim2,
             float k11, float k12, float k22,
             float k1, float k2, float C) 
@@ -9129,7 +11122,7 @@ public class Engine implements MemStatus {
     //</editor-fold>
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="row reduce function">
+    //<editor-fold defaultstate="collapsed" desc="row [field, row] reduce function">
     //<editor-fold defaultstate="collapsed" desc="row_reduce_param_check">
     protected void row_reduce_param_check(Tensor X, int row_length) {
         if(X.ndim() <= 1) throw new IllegalArgumentException(String.format(

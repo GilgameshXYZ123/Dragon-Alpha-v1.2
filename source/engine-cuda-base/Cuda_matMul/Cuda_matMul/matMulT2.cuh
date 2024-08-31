@@ -8,7 +8,7 @@
 #include "matMulT2SK_kernel.cuh"
 #include "matMulT2SK_uernel.cuh"
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 //Common
 #ifndef MAT_MUL4X_T2

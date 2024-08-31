@@ -11,7 +11,7 @@
 //(6) [y, x] -> [row_num, field_stride]
 //(7) [N, M] = [row_num, field_stride], A.lengthv = N*M
 //(8) for Affine: V2: holdX(), X is not changed
-//(9) for Norm:   V1: holdY(), Y is not changed &&  affine = false
+//(9) for Norm:   V1: holdY(), Y is not changed && affine = false
 #ifndef FIELD_AFFINE_WITH_LEAKY_RELU_DELTA_AB_V2_CALL
 #define FIELD_AFFINE_WITH_LEAKY_RELU_DELTA_AB_V2_CALL
 
@@ -51,7 +51,7 @@
 //STEP:
 //(1) rK = 1 / k
 //(2) flag = (A*X - B > 0) = (A*X > B)
-//(3) deltaY1 = deltaY2 * (flag > 0 ? 1 : k)
+//(3) deltaY1 = deltaY2 * (flag > 0 ? 1 : k), deltaY2 = deltaY
 //(4) deltaA = field_sum: deltaY1 * X 
 //(5) deltaB = field_sum: deltaY1
 //======[Document]============================================
@@ -61,10 +61,9 @@ __global__ void field_affine_with_leakyRelu_deltaAB_v2_kernel_4(
 	const float* __restrict__ deltaY, float k,
 	const float* __restrict__ X,
 	const float* __restrict__ A,
-	const float* __restrict__ B,
-	int N, int M,
-	float* __restrict__ deltaA,
-	float* __restrict__ deltaB,
+	const float* __restrict__ B, int N, int M,
+	      float* __restrict__ deltaA,
+	      float* __restrict__ deltaB,
 	int width, int stride)
 {
 	const int by = blockIdx.y, bx = blockIdx.x;
@@ -194,10 +193,10 @@ __global__ void field_affine_with_leakyRelu_deltaAB_v2_kernel_4(
 void __field_affine_with_leakyRelu_deltaAB_v2_stage(cudaStream_t stream,
 	const float* deltaY, float k,
 	const float* X,
-	const float* A, const float* B,
-	int N, int M,
-	float* deltaA,
-	float* deltaB,
+	const float* A, 
+	const float* B, int N, int M,
+	      float* deltaA,
+	      float* deltaB,
 	int width, int stride)
 {
 	if (M > 15) {
@@ -223,10 +222,10 @@ int __field_affine_with_leakyRelu_deltaAB_v2(JNIEnv *env,
 	cudaStream_t stream1, cudaStream_t stream2,
 	const float* deltaY, float k,
 	const float* X,
-	const float* A, const float* B,
-	int N, int M,
-	float* deltaA_buf, float* deltaA,
-	float* deltaB_buf, float* deltaB,
+	const float* A, 
+	const float* B, int N, int M,
+	      float* deltaA_buf, float* deltaA,
+	      float* deltaB_buf, float* deltaB,
 	int width, int stride,
 	int partNum)
 {

@@ -15,8 +15,7 @@ import z.dragon.nn.unit.simple.SimpleInplaceInline;
  *
  * @author Gilgamesh
  */
-public class ReluN extends SimpleInplaceFunction
-{
+public class ReluN extends SimpleInplaceFunction {
     private static final long serialVersionUID = 629971624120001L;
     
     protected float N;

@@ -24,6 +24,7 @@ public final class Cuda_expk2
      * (2) mem_strideY = (Ydim1 + 3) / 4 * 4
      * (3) Xdim1 = Ydim0, Xdim0 = Ydim1
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_address
      * @param dY_address
@@ -31,14 +32,14 @@ public final class Cuda_expk2
      * @param Ydim1
      * @param mem_strideX
      * @param mem_strideY
-     * @param length 
+     * @param length
      */
     public static native void transpose2D(long cudaStream_address,
             long dX_address, long dY_address,
             int Xdim1, int Ydim1,
             int mem_strideX, int mem_strideY,
             int length);
-    
+
     /**
      * <pre>
      * transpose3D; X[Xdim0, Xdim1, Xdim2] -> Y[Ydim0, Ydim1, Ydim].
@@ -46,6 +47,7 @@ public final class Cuda_expk2
      * (2) mem_strideY = (Ydim1 + 3) / 4 * 4
      * (3) mul(Xdim) = mul(Ydim) = length
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_address
      * @param dY_address
@@ -57,7 +59,7 @@ public final class Cuda_expk2
      * @param dimIndex2
      * @param mem_strideX
      * @param mem_strideY
-     * @param length 
+     * @param length
      */
     public static native void transpose3D(long cudaStream_address,
             long dX_address, long dY_address,
@@ -66,7 +68,7 @@ public final class Cuda_expk2
             int dimIndex1, int dimIndex2,
             int mem_strideX, int mem_strideY,
             int length);
-  
+
     /**
      * <pre>
      * transpose4D; X[Xdim0, Xdim1, Xdim2, Xdim3] -> Y[Ydim0, Ydim1, Ydim, Ydim3].
@@ -74,6 +76,7 @@ public final class Cuda_expk2
      * (2) mem_strideY = (Ydim1 + 3) / 4 * 4
      * (3) mul(Xdim) = mul(Ydim) = length
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_address
      * @param dY_address
@@ -87,13 +90,13 @@ public final class Cuda_expk2
      * @param dimIndex2
      * @param mem_strideX
      * @param mem_strideY
-     * @param length 
+     * @param length
      */
     public static native void transpose4D(long cudaStream_address,
             long dX_address, long dY_address,
             int Xdim1, int Xdim2, int Xdim3,
             int Ydim1, int Ydim2, int Ydim3,
-            int dimIndex1, int dimIndex2, 
+            int dimIndex1, int dimIndex2,
             int mem_strideX, int mem_strideY,
             int length);
     //</editor-fold>
@@ -104,8 +107,9 @@ public final class Cuda_expk2
      * |[width][gapX]|: width + gapX = strideX
      * |[width][gapY]|: width + gapY = strideY.
      * (1) (strideX, strideY) % 4 == 0
-     * (2) (strideX, strideY) >= width 
+     * (2) (strideX, strideY) >= width
      * </pre>
+     *
      * @param stream_address
      * @param dX_address
      * @param Xstart
@@ -114,7 +118,7 @@ public final class Cuda_expk2
      * @param Ystart
      * @param strideY
      * @param width
-     * @param length 
+     * @param length
      */
     @Passed
     public static native void gappedMemcpy2D(long stream_address,
@@ -132,17 +136,18 @@ public final class Cuda_expk2
      * (2) N % 4 != 0
      * (3) length = N*IH*IW*IC %4 == 0
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_address
      * @param dY_address
      * @param IH
      * @param IW
      * @param IC
-     * @param length 
+     * @param length
      */
     public static native void rot180(long cudaStream_address,
             long dX_address, long dY_address,
-            int IH, int IW, int IC, 
+            int IH, int IW, int IC,
             int length);
     //</editor-fold>
     
@@ -201,6 +206,7 @@ public final class Cuda_expk2
      * [1] (IN, ON) % 4 != 0 (ignore the mem-alginment on N)
      * [2] (IC, OC) % 4 == 0
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_address
      * @param IN
@@ -209,13 +215,13 @@ public final class Cuda_expk2
      * @param ON
      * @param OC
      * @param pn0
-     * @param pc0 
+     * @param pc0
      */
     public static native void pad2D(long cudaStream_address,
             long dX_address, int IN, int IC,
             long dY_address, int ON, int OC,
             int pn0, int pc0);
-  
+
     /**
      * <pre>
      * X[IN, IW, IC] -> Y[ON, OW, OC]
@@ -225,6 +231,7 @@ public final class Cuda_expk2
      * [1] (IN, ON) % 4 != 0 (ignore the mem-alginment on N)
      * [2] (IC, OC) % 4 == 0
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_adresss
      * @param IN
@@ -236,13 +243,13 @@ public final class Cuda_expk2
      * @param OC
      * @param pn0
      * @param pw0
-     * @param pc0 
+     * @param pc0
      */
     public static native void pad3D(long cudaStream_address,
             long dX_adresss, int IN, int IW, int IC,
             long dY_address, int ON, int OW, int OC,
             int pn0, int pw0, int pc0);
-    
+
     /**
      * <pre>
      * X[IN, IH, IW, IC] -> Y[ON, OH, OW, OC]
@@ -253,6 +260,7 @@ public final class Cuda_expk2
      * [1] (IN, ON) % 4 != 0 (ignore the mem-alginment on N)
      * [2] (IC, OC) % 4 == 0
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_address
      * @param IN
@@ -267,14 +275,14 @@ public final class Cuda_expk2
      * @param pn0
      * @param ph0
      * @param pw0
-     * @param pc0 
+     * @param pc0
      */
     public static native void pad4D(long cudaStream_address,
             long dX_address, int IN, int IH, int IW, int IC,
             long dY_address, int ON, int OH, int OW, int OC,
             int pn0, int ph0, int pw0, int pc0);
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="trim(2D -> 4D)">
     /**
      * <pre>
@@ -284,6 +292,7 @@ public final class Cuda_expk2
      * [1] (IN, ON) % 4 != 0 (ignore the mem-alginment on N)
      * [2] (IC, OC) % 4 == 0
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_address
      * @param IN
@@ -292,13 +301,13 @@ public final class Cuda_expk2
      * @param ON
      * @param OC
      * @param pn0
-     * @param pc0 
+     * @param pc0
      */
     public static native void trim2D(long cudaStream_address,
             long dX_address, int IN, int IC,
             long dY_address, int ON, int OC,
             int pn0, int pc0);
-  
+
     /**
      * <pre>
      * X[IN, IW, IC] -> Y[ON, OW, OC]
@@ -308,6 +317,7 @@ public final class Cuda_expk2
      * [1] (IN, ON) % 4 != 0 (ignore the mem-alginment on N)
      * [2] (IC, OC) % 4 == 0
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_adresss
      * @param IN
@@ -319,13 +329,13 @@ public final class Cuda_expk2
      * @param OC
      * @param pn0
      * @param pw0
-     * @param pc0 
+     * @param pc0
      */
     public static native void trim3D(long cudaStream_address,
             long dX_adresss, int IN, int IW, int IC,
             long dY_address, int ON, int OW, int OC,
             int pn0, int pw0, int pc0);
-    
+
     /**
      * <pre>
      * X[IN, IH, IW, IC] -> Y[ON, OH, OW, OC]
@@ -336,6 +346,7 @@ public final class Cuda_expk2
      * [1] (IN, ON) % 4 != 0 (ignore the mem-alginment on N)
      * [2] (IC, OC) % 4 == 0
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_address
      * @param IN
@@ -350,22 +361,22 @@ public final class Cuda_expk2
      * @param pn0
      * @param ph0
      * @param pw0
-     * @param pc0 
+     * @param pc0
      */
     public static native void trim4D(long cudaStream_address,
             long dX_address, int IN, int IH, int IW, int IC,
             long dY_address, int ON, int OH, int OW, int OC,
             int pn0, int ph0, int pw0, int pc0);
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="check mem alignment">
-      public static void checkMemAlign(Tensor X) {
+    public static void checkMemAlign(Tensor X) {
         int width = X.lastDim();
         int stride = ((width + 3) >> 2) << 2;
         System.out.println("check_mem_align");
         check_mem_alignment(0, X.address(), X.lengthv(), width, stride);
     }
-    
+
     /**
      * <pre>
      * check the correctless of memAlignment.
@@ -374,14 +385,15 @@ public final class Cuda_expk2
      * (3) stride = (width + 3)/4 * 4
      * (4) linear(beta) != 0
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_address
      * @param lengthv
      * @param width
-     * @param stride 
+     * @param stride
      */
     public static native void check_mem_alignment(long cudaStream_address,
-            long dX_address, 
-            int lengthv, int width, int stride); 
+            long dX_address,
+            int lengthv, int width, int stride);
     //</editor-fold>
 }

@@ -1874,7 +1874,7 @@ public final class Vector
     //<editor-fold defaultstate="collapsed" desc="math: trigonometric Function">
     public static float[] sin(float[] X) {
         float[] Y = new float[X.length];
-        for(int i=0; i<X.length; i++) Y[i] = (float) Math.sin(X[i]);
+        for (int i=0; i<X.length; i++) Y[i] = (float) Math.sin(X[i]);
         return Y;
     }
     public static float[] sin(float alpha, float[] X, float beta) {
@@ -2302,8 +2302,7 @@ public final class Vector
     public static float[] div(
             float alpha1, float[] X1, float beta1,
             float alpha2, float[] X2, float beta2, 
-            float gamma)
-    {
+            float gamma)  {
         float[] Y = new float[X1.length];
         for(int i=0; i<X1.length; i++) {
             float x1 = alpha1*X1[i] + beta1;
@@ -2315,8 +2314,7 @@ public final class Vector
     public static void div_Deri(float[] deriX1, float[] deriX2,
             float[] X1, float alpha1, float beta1,
             float[] X2, float alpha2, float beta2,
-            int length)
-    {
+            int length) {
         for(int i=0; i<length; i++) {
             float x1 = X1[i];
             float x2 = X2[i];
@@ -2713,47 +2711,41 @@ public final class Vector
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Logarithm">
-    public static void log2(float[] X, float[] Y, int length)
-    {
-        float log2=(float) Math.log(2);
-        for(int i=0;i<length;i++) Y[i]=(float) Math.log(X[i])/log2;
+    public static final float log2f = (float) Math.log(2);
+    public static float[] log2(float[] X) {
+        float[] Y = new float[X.length];
+        for (int i=0; i<X.length; i++) Y[i] = (float) Math.log(X[i]) / log2f;
+        return Y;
     } 
-    public static void log2(float alpha, float[] X, float beta, float[] Y, int length)
-    {
-        float log2=(float) Math.log(2);
-        for(int i=0;i<length;i++) Y[i]=(float) Math.log(alpha*X[i] + beta)/log2;
+    public static float[] log2(float alpha, float[] X, float beta) {
+        float[] Y = new float[X.length];
+        for (int i=0; i<X.length; i++) Y[i] = (float) Math.log(alpha*X[i] + beta) / log2f;
+        return Y;
     } 
     
-    public static void log10(float[] X, float[] Y, int length)
-    {
-        for(int i=0;i<length;i++) Y[i]=(float) Math.log10(X[i]);
+    public static float[] log10(float[] X) {
+        float[] Y = new float[X.length];
+        for (int i=0; i<X.length; i++) Y[i] = (float) Math.log10(X[i]);
+        return Y;
     }
-    public static void log10(float alpha, float[] X, float beta, float[] Y, int length)
-    {
-        for(int i=0;i<length;i++) Y[i]=(float) Math.log10(alpha*X[i] + beta);
+    public static float[] log10(float alpha, float[] X, float beta) {
+        float[] Y = new float[X.length];
+        for(int i=0; i<X.length; i++) Y[i]=(float) Math.log10(alpha*X[i] + beta);
+        return Y;
     }
     
-   
-    
-    public static void log(float v, float[] X, float[] Y, int length) {
+    public static float[] log(float v, float[] X) {
         float logv = (float) Math.log(v);
-        for(int i=0;i<length;i++) Y[i]=(float) (Math.log(X[i]) / logv);
+        float[] Y = new float[X.length];
+        for (int i=0;i<X.length; i++) Y[i] = (float) (Math.log(X[i]) / logv);
+        return Y;
     }
-    public static void log(float v, float alpha, float[] X, float beta, float[] Y, int length)
-    {
-        float logv=(float) Math.log(v);
-        for(int i=0;i<length;i++) Y[i]=Y[i]=(float) (Math.log(alpha*X[i] + beta) / logv);
+    public static float[] log(float v, float alpha, float[] X, float beta) {
+        float logv = (float) Math.log(v);
+        float[] Y = new float[X.length];
+        for(int i=0; i<X.length; i++) Y[i] = (float) (Math.log(alpha*X[i] + beta) / logv);
+        return Y;
     }
-   
-    public static void log(float[] X, float[] Y, float[] Z, int length)
-    {
-        for(int i=0;i<length;i++) Z[i]=(float) (Math.log(Y[i])/Math.log(X[i]));
-    }
-    public static void log(float a1, float[] X, float b1, float a2, float[] Y, float b2, float[] Z, int length)
-    {
-        for(int i=0;i<length;i++) Z[i]=(float) (Math.log(a2*Y[i]+b2)/Math.log(a1*X[i] + b1));
-    }
-    
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Difference & Pertinence">
@@ -4448,32 +4440,56 @@ public final class Vector
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="toND(float)">  
     public static float[][] to2D(float[] X, int dim0, int dim1) {
-        float[][] Y = new float[dim0][dim1];
-        int index = 0;
-        for(int i=0; i<dim0; i++)
-            for(int j=0; j<dim1; j++)
-                    Y[i][j] = X[index++];//X[index++]
+        float[][] Y = new float[dim0][dim1]; int index = 0;
+        if (dim1 < 64) {
+            for(int d0=0; d0<dim0; d0++)
+            for(int d1=0; d1<dim1; d1++)
+                Y[d0][d1] = X[index++];
+        }
+        else {
+            for(int d0=0; d0<dim0; d0++) {
+                System.arraycopy(X, index, Y[d0], 0, dim1);
+                index += dim1;
+            }
+        }
         return Y;
     }
     
     public static float[][][] to3D(float[] X, int dim0, int dim1, int dim2) {
-        float[][][] Y = new float[dim0][dim1][dim2];
-        int index = 0;
-        for(int i=0; i<dim0; i++)
-            for(int j=0; j<dim1; j++)
-                for(int k=0; k<dim2; k++)
-                    Y[i][j][k] = X[index++];
+        float[][][] Y = new float[dim0][dim1][dim2]; int index = 0;
+        if (dim2 < 64) {
+            for(int d0=0; d0<dim0; d0++)
+            for(int d1=0; d1<dim1; d1++)
+            for(int d2=0; d2<dim2; d2++)
+                Y[d0][d1][d2] = X[index++];
+        }
+        else {
+            for(int d0=0; d0<dim0; d0++)
+            for(int d1=0; d1<dim1; d1++) {
+                System.arraycopy(X, index, Y[d0][d1], 0, dim2);
+                index += dim2;
+            }
+        }
         return Y;
     }
     
     public static float[][][][] to4D(float[] X, int dim0, int dim1, int dim2, int dim3) {
-        float[][][][] Y = new float[dim0][dim1][dim2][dim3];
-        int index = 0;
-        for(int d0=0; d0<dim0; d0++)
+        float[][][][] Y = new float[dim0][dim1][dim2][dim3]; int index = 0;
+        if (dim3 < 64) {
+            for(int d0=0; d0<dim0; d0++)
             for(int d1=0; d1<dim1; d1++)
-                for(int d2=0; d2<dim2; d2++)
-                    for(int d3=0; d3<dim3; d3++)
-                        Y[d0][d1][d2][d3] = X[index++];
+            for(int d2=0; d2<dim2; d2++)
+            for(int d3=0; d3<dim3; d3++)
+                Y[d0][d1][d2][d3] = X[index++];
+        }
+        else {
+            for(int d0=0; d0<dim0; d0++)
+            for(int d1=0; d1<dim1; d1++)
+            for(int d2=0; d2<dim2; d2++) {
+                System.arraycopy(X, index, Y[d0][d1][d2], 0, dim3);
+                index += dim3;
+            }
+        }
         return Y;
     }
     //</editor-fold>

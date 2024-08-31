@@ -12,8 +12,7 @@ import z.dragon.nn.unit.Unit;
  * one input, and one output.
  * @author Gilgamesh
  */
-public abstract class SimpleUnit extends Unit
-{
+public abstract class SimpleUnit extends Unit{
     private static final long serialVersionUID = 56278124000000000L;
     
     @Override public boolean is_complex() { return false; }

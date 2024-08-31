@@ -97,11 +97,18 @@
     <ClInclude Include="func_tensor_trick.cuh">
       <Filter>tensor_trick</Filter>
     </ClInclude>
-    <ClInclude Include="func_elementwise.cuh">
-      <Filter>elementwise</Filter>
-    </ClInclude>
     <ClInclude Include="img_quadratic2D.cuh">
       <Filter>elementwise</Filter>
+    </ClInclude>
+    <ClInclude Include="img_threshold.cuh">
+      <Filter>elementwise</Filter>
+    </ClInclude>
+    <ClInclude Include="func_elementwise.cuh" />
+    <ClInclude Include="img_dualLinear2_normalize2D_row.cuh">
+      <Filter>pixel2float</Filter>
+    </ClInclude>
+    <ClInclude Include="img_dualLinear2_normalize2D_center.cuh">
+      <Filter>pixel2float</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

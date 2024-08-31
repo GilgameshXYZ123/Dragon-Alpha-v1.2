@@ -181,6 +181,28 @@
     <ClInclude Include="center_quadratic_dual_deltaX.cuh">
       <Filter>center_reduce</Filter>
     </ClInclude>
+    <ClInclude Include="center_quadratic.cuh">
+      <Filter>center_reduce</Filter>
+    </ClInclude>
+    <ClInclude Include="center_linear.cuh">
+      <Filter>center_reduce</Filter>
+    </ClInclude>
+    <ClInclude Include="FP32_function.cuh" />
+    <ClInclude Include="field_affine_with_function_deltaAB_v1.cuh">
+      <Filter>fusion_affine_with_function</Filter>
+    </ClInclude>
+    <ClInclude Include="field_affine_with_function_deltaAB_v2.cuh">
+      <Filter>fusion_affine_with_function</Filter>
+    </ClInclude>
+    <ClInclude Include="field_batchNorm_with_function_deltaAB_v2.cuh">
+      <Filter>fusion_affine_with_function</Filter>
+    </ClInclude>
+    <ClInclude Include="field_batchNorm_with_function_deltaXp_v2.cuh">
+      <Filter>fusion_affine_with_function</Filter>
+    </ClInclude>
+    <ClInclude Include="field_batchNorm_with_function_deltaXp_v1.cuh">
+      <Filter>fusion_affine_with_function</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="row_reduce">
@@ -206,6 +228,9 @@
     </Filter>
     <Filter Include="center_reduce">
       <UniqueIdentifier>{ecdfa8cc-003b-41ab-8f59-246c374a5481}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fusion_affine_with_function">
+      <UniqueIdentifier>{4ef9302d-051d-44ce-a9b8-0087d49b4bd4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

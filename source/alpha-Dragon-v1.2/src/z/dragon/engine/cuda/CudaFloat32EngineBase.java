@@ -28,6 +28,8 @@ import z.dragon.engine.cuda.impl.math.Cuda_pool2D;
 import z.dragon.engine.cuda.impl.math.Cuda_random;
 import z.dragon.engine.cuda.impl.math.Cuda_reduce;
 import z.dragon.engine.cuda.impl.math.Cuda_upool2D;
+import z.dragon.engine.cuda.impl.math.FloatFunc;
+import z.dragon.engine.cuda.impl.math.FloatFunc.FloatFuncConfig;
 import z.util.math.ExMath;
 import z.util.math.Num;
 import z.util.math.vector.Vector;
@@ -37,8 +39,7 @@ import z.util.function.Int2Float;
  *
  * @author Gilgamesh
  */
-public class CudaFloat32EngineBase extends EngineBase 
-{ 
+public class CudaFloat32EngineBase extends EngineBase { 
     //<editor-fold defaultstate="collapsed" desc="native-lib">
     private static final String PATH = "native-lib\\cuda_float32";
     
@@ -2114,13 +2115,13 @@ public class CudaFloat32EngineBase extends EngineBase
             float Im2col_Winograd_s8 = 0;
             if (conv3D_Im2colWinograd_s8 && Im2col_Winograd && 
                     (FW + OW > 8) && (OC >= 64) && 
-                    (FW >= wgrad_s8_FW_min && FW <= wgrad_s8_FW_max) && (FH >= 2 && FH <= 7)) 
+                    (FW >= wgrad_s8_FW_min && FW <= wgrad_s8_FW_max) && (FH >= 1 && FH <= 9)) 
                 Im2col_Winograd_s8 = WGrad_s8_Derailleur[FW - wgrad_s8_FW_min].apply(OW);
             
             float Im2col_Winograd_s16 = 0; 
             if (conv3D_Im2colWinograd_s16 && Im2col_Winograd &&
                     (FW + OW > 16) && (OC >= 32) && 
-                    (FW >= wgrad_s16_FW_min && FW <= wgrad_s16_FW_max) && (FH >= 7 && FH <= 9) &&
+                    (FW >= wgrad_s16_FW_min && FW <= wgrad_s16_FW_max) && (FH >= 1 && FH <= 9) &&
                     (pw <= (FW >> 1)) && (OW - IW - pw + ((FW-1) >> 1) <= 0))
                 Im2col_Winograd_s16 = Winograd_s16_Derailleur[FW - wgrad_s16_FW_min].apply(OW);
             
@@ -3597,13 +3598,13 @@ public class CudaFloat32EngineBase extends EngineBase
             float Im2col_Winograd_s8 = 0;
             if (conv3D_dX_Im2colWinograd_s8 && Im2col_Winograd_C &&
                     (FW + IW > 8) && (IC >= 64) &&
-                    (FW >= wgrad_s8_FW_min && FW <= wgrad_s8_FW_max) && (FH >= 2 && FH <= 7))
+                    (FW >= wgrad_s8_FW_min && FW <= wgrad_s8_FW_max) && (FH >= 1 && FH <= 9))
                 Im2col_Winograd_s8 = WGrad_s8_Derailleur[FW - wgrad_s8_FW_min].apply(IW);
             
             float Im2col_Winograd_s16 = 0;
             if (conv3D_dX_Im2colWinograd_s16 && Im2col_Winograd_C &&
                     (FW + IW > 16) && (IC >= 32) && 
-                    (FW >= wgrad_s16_FW_min && FW <= wgrad_s16_FW_max) && (FH >= 7 && FH <= 9) && 
+                    (FW >= wgrad_s16_FW_min && FW <= wgrad_s16_FW_max) && (FH >= 1 && FH <= 9) && 
                     (pw >= ((FW - 1) >> 1)) && (OW - IW - pw + (FW >> 1 << 1)- ((FW - 1) >> 1) >= 0))
                 Im2col_Winograd_s16 = Winograd_s16_Derailleur[FW - wgrad_s16_FW_min].apply(IW);
             
@@ -3830,7 +3831,7 @@ public class CudaFloat32EngineBase extends EngineBase
     }
     
     @Override
-    public Syncer pool2D_avg(
+    public Syncer pool2D_avg(boolean ignore_padding,
             long Y_address, int OH, int OW,
             long X_address, int IH, int IW,
             int FH, int FW,
@@ -3839,31 +3840,20 @@ public class CudaFloat32EngineBase extends EngineBase
     {
         int length = Cuda_pool2D.nstream(OH, OW, N, IC);
         long[] streamArray = streamPool.getStreamArray(length);
-        Cuda_pool2D.pool2D_avg(streamArray, length, 
-                X_address, IH, IW, 
-                FH, FW,
-                Y_address, OH, OW,
-                N, IC, 
-                sh, sw, ph, pw);
-        return new StreamArraySyncer(streamPool, streamArray);
-    }
-    
-    @Override
-    public Syncer pool2D_avg_ignore_padding(
-            long Y_address, int OH, int OW, 
-            long X_address, int IH, int IW, 
-            int FH, int FW,
-            int N, int IC,
-            int sh, int sw, int ph, int pw) 
-    {
-        int length = Cuda_pool2D.nstream(OH, OW, N, IC);
-        long[] streamArray = streamPool.getStreamArray(length);
-        Cuda_pool2D.pool2D_avg_ignore_padding(streamArray, length, 
-                X_address, IH, IW,
-                FH, FW, 
-                Y_address, OH, OW,
-                N, IC,
-                sh, sw, ph, pw);
+        if (ignore_padding)  
+            Cuda_pool2D.pool2D_avg_ignore_padding(streamArray, length, 
+                    X_address, IH, IW,
+                    FH, FW, 
+                    Y_address, OH, OW,
+                    N, IC,
+                    sh, sw, ph, pw);
+        else /*ignore_padding = false*/
+            Cuda_pool2D.pool2D_avg(streamArray, length,
+                    X_address, IH, IW, 
+                    FH, FW,
+                    Y_address, OH, OW,
+                    N, IC, 
+                    sh, sw, ph, pw);
         return new StreamArraySyncer(streamPool, streamArray);
     }
     //</editor-fold>
@@ -3916,7 +3906,6 @@ public class CudaFloat32EngineBase extends EngineBase
 //            return new StreamSyncer(streamPool, stream);
 //        }
         //</editor-fold>
-
         int length = Cuda_upool2D.nstream(IH, IW, N, IC);
         long[] streamArray = streamPool.getStreamArray(length);
         Cuda_upool2D.upool2D_max_Indexed(streamArray, length,
@@ -3929,7 +3918,7 @@ public class CudaFloat32EngineBase extends EngineBase
     }
     
     @Override
-    public Syncer unpool2D_avg(
+    public Syncer unpool2D_avg(boolean ignore_padding,
             long deltaX_address, int IH, int IW,
             long deltaY_address, int OH, int OW, 
             int FH, int FW,
@@ -3940,55 +3929,38 @@ public class CudaFloat32EngineBase extends EngineBase
         if(FH == sh && FW == sw) {//tiled average pool2D
             int length = Cuda_pool2D.nstream(OH, OW, N, IC);
             streamArray = streamPool.getStreamArray(length);
-            Cuda_upool2D.upool2D_avg_tiled(streamArray, length, 
-                    deltaY_address, OH, OW,
-                    FH, FW, 
-                    deltaX_address, IH, IW, 
-                    N, IC, 
-                    sh, sw, ph, pw);
+            if (ignore_padding)
+                Cuda_upool2D.upool2D_avg_ignore_padding_tiled(streamArray, length, 
+                        deltaY_address, OH, OW,
+                        FH, FW,
+                        deltaX_address, IH, IW,
+                        N, IC,
+                        sh, sw, ph, pw);
+            else /*ignore_padding = false*/
+                Cuda_upool2D.upool2D_avg_tiled(streamArray, length,
+                        deltaY_address, OH, OW,
+                        FH, FW,
+                        deltaX_address, IH, IW,
+                        N, IC,
+                        sh, sw, ph, pw);
         }
         else {
             int length = Cuda_upool2D.nstream(IH, IW, N, IC);
             streamArray = streamPool.getStreamArray(length);          
-            Cuda_upool2D.upool2D_avg(streamArray, length,
-                deltaY_address, OH, OW, 
-                FH, FW, 
-                deltaX_address, IH, IW, 
-                N, IC,
-                sh, sw, ph, pw);
-        }
-        return new StreamArraySyncer(streamPool, streamArray);
-    }
-    
-    @Override
-    public Syncer upool2D_avg_ignore_padding(
-            long deltaX_address, int IH, int IW,
-            long deltaY_address, int OH, int OW,
-            int FH, int FW, 
-            int N, int IC, 
-            int sh, int sw, int ph, int pw) 
-    {
-        long[] streamArray;
-        if(FH == sh && FW == sw) {//tiled average pool2D
-            int length = Cuda_pool2D.nstream(OH, OW, N, IC);
-            streamArray = streamPool.getStreamArray(length);    
-            Cuda_upool2D.upool2D_avg_ignore_padding_tiled(streamArray, length, 
-                    deltaY_address, OH, OW,
-                    FH, FW, 
-                    deltaX_address, IH, IW, 
-                    N, IC, 
-                    sh, sw, ph, pw);
-        }
-        else {
-            int length = Cuda_upool2D.nstream(IH, IW, N, IC);
-            streamArray = streamPool.getStreamArray(length);
-            
-            Cuda_upool2D.upool2D_avg_ignore_padding(streamArray, length,
-                deltaY_address, OH, OW, 
-                FH, FW, 
-                deltaX_address, IH, IW, 
-                N, IC,
-                sh, sw, ph, pw);
+            if (ignore_padding)
+                Cuda_upool2D.upool2D_avg_ignore_padding(streamArray, length,
+                        deltaY_address, OH, OW,
+                        FH, FW,
+                        deltaX_address, IH, IW,
+                        N, IC,
+                        sh, sw, ph, pw);
+            else /*ignore_padding = false*/
+                Cuda_upool2D.upool2D_avg(streamArray, length,
+                        deltaY_address, OH, OW,
+                        FH, FW,
+                        deltaX_address, IH, IW,
+                        N, IC,
+                        sh, sw, ph, pw);
         }
         return new StreamArraySyncer(streamPool, streamArray);
     }
@@ -4189,7 +4161,7 @@ public class CudaFloat32EngineBase extends EngineBase
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="linear_dual">
+    //<editor-fold defaultstate="collapsed" desc="linear2">
     @Override
     public Syncer linear2_2D(long Y_address, 
             long X1_address, 
@@ -4249,7 +4221,7 @@ public class CudaFloat32EngineBase extends EngineBase
         return new StreamSyncer(streamPool, stream);
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="linear_dual_row">
+    //<editor-fold defaultstate="collapsed" desc="linear2_row">
     @Override
     public Syncer linear2_2D_row(long Y_address, 
             long X1_address,
@@ -4266,7 +4238,7 @@ public class CudaFloat32EngineBase extends EngineBase
         return new StreamSyncer(streamPool, stream);
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="linear_dual_center">
+    //<editor-fold defaultstate="collapsed" desc="linear2_center">
     @Override
     public Syncer linear2_2D_center(long Y_address, 
             long X1_address, long X2_address,
@@ -4284,7 +4256,7 @@ public class CudaFloat32EngineBase extends EngineBase
         return new StreamSyncer(streamPool, stream);
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="linear_dual_field">
+    //<editor-fold defaultstate="collapsed" desc="linear2_field">
     @Override
     public Syncer linear2_2D_field(long Y_address,
             long X1_address, 
@@ -4316,7 +4288,7 @@ public class CudaFloat32EngineBase extends EngineBase
         return new StreamSyncer(streamPool, stream);   
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="mul_linear_dual2D">
+    //<editor-fold defaultstate="collapsed" desc="mul_linear2_2D">
     @Override
     public Syncer mul_linear2_2D(long Y_address, 
             long X_address, long X1_address, long X2_address, 
@@ -4362,7 +4334,7 @@ public class CudaFloat32EngineBase extends EngineBase
         return new StreamSyncer(streamPool, stream);
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="BP: quadratic_dual">
+    //<editor-fold defaultstate="collapsed" desc="BP: quadratic2">
     @Override
     public Syncer quadratic2_2D(long Y_address,
             long X1_address, long X2_address,
@@ -4449,7 +4421,7 @@ public class CudaFloat32EngineBase extends EngineBase
         return new StreamSyncer(streamPool, stream);
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="quadratic_dual_row">
+    //<editor-fold defaultstate="collapsed" desc="quadratic2_row">
     @Override
     public Syncer quadratic2_2D_row(long Y_address, 
             long X1_address, 
@@ -4470,7 +4442,7 @@ public class CudaFloat32EngineBase extends EngineBase
         return new StreamSyncer(streamPool, stream);
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="BP: quadratic_dual_center">
+    //<editor-fold defaultstate="collapsed" desc="BP: quadratic2_center">
     @Override
     public Syncer quadratic2_2D_center(long Y_address, 
             long X1_address, long X2_address,
@@ -4528,7 +4500,7 @@ public class CudaFloat32EngineBase extends EngineBase
                 new StreamBlockSyncer(streamPool, stream, core, block));
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="quadratic_dual_field">
+    //<editor-fold defaultstate="collapsed" desc="quadratic2_field">
     @Override
     public Syncer quadratic2_2D_field(long Y_address, 
             long X1_address, 
@@ -5220,53 +5192,166 @@ public class CudaFloat32EngineBase extends EngineBase
         return new StreamSyncer(streamPool, stream);
     }
     //</editor-fold>
-    //</editor-fold>
-    
-    //<editor-fold defaultstate="collapsed" desc="hypherbolic functions">
-    //<editor-fold defaultstate="collapsed" desc="BP: tanh">
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_elu2D">
     @Override
-    public Syncer tanh2D(long Y_address,
-            long X_address,
-            int lengthv, int width, int stride)
+    public Syncer linear2_elu2D(long Y_address, 
+            long X1_address, long X2_address, 
+            float alpha, float beta, float gamma, 
+            float theta, float k,
+            int lengthv, int width, int stride) 
     {
         long stream = streamPool.getStream();
-        Cuda_function.tanh2D(stream, 
-                X_address,
+        FloatFuncConfig func = FloatFunc.elu(theta, k);
+        Cuda_function.linear_dual2D_with_function(stream, 
+                X1_address, X2_address,
+                alpha, beta, gamma, 
+                func.type, func.params, func.params.length, 
                 Y_address, 
                 lengthv, width, stride);
         return new StreamSyncer(streamPool, stream);
     }
 
     @Override
-    public Syncer tanh2D_deltaX_v1(long deltaX_address,
+    public Syncer linear2_elu2D_deltaX_v1(
+            long deltaX1_address, long deltaX2_address, 
             long deltaY_address,
             long Y_address,//V1: holdY(), Y is not changed
+            float alpha, float beta,
+            float theta, float k, 
             int lengthv, int width, int stride) 
     {
         long stream = streamPool.getStream();
-        Cuda_function.tanh2D_deltaX_v1(stream, 
-                deltaX_address, 
-                deltaY_address,
+        FloatFuncConfig func = FloatFunc.elu(theta, k);
+        Cuda_function.linear_dual2D_with_function_deltaX_v1(stream,
+                deltaX1_address, deltaX2_address,
+                deltaY_address, 
                 Y_address,
+                alpha, beta, 
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+
+    @Override
+    public Syncer linear2_elu2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address, 
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma,
+            float theta, float k,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.elu(theta, k);
+        Cuda_function.linear_dual2D_with_function_deltaX_v2(stream, 
+                deltaX1_address, deltaX2_address, 
+                deltaY_address, 
+                X1_address, X2_address,
+                alpha, beta, gamma,
+                func.type, func.params, func.params.length, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_softplus">
+    @Override
+    public Syncer linear2_softplus2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_function.linear_dual2D_with_function(stream, 
+                X1_address, X2_address,
+                alpha, beta, gamma, 
+                func.type, func.params, func.params.length, 
+                Y_address, 
                 lengthv, width, stride);
         return new StreamSyncer(streamPool, stream);
     }
     
     @Override
-    public Syncer tanh2D_deltaX_v2(long deltaX_address,
+    public Syncer linear2_softplus2D_deltaX_v1(
+            long deltaX1_address, long deltaX2_address,
             long deltaY_address,
-            long X_address,//V2: holdX(), X is not changed
-            int lengthv, int width, int stride) 
+            long Y_address,//V1: holdY(), Y is not changed
+            float alpha, float beta, 
+            int lengthv, int width, int stride)
     {
         long stream = streamPool.getStream();
-        Cuda_function.tanh2D_deltaX_v2(stream, 
-                deltaX_address,
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_function.linear_dual2D_with_function_deltaX_v1(stream,
+                deltaX1_address, deltaX2_address,
                 deltaY_address, 
-                X_address,
+                Y_address,
+                alpha, beta, 
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer linear2_softplus2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_function.linear_dual2D_with_function_deltaX_v2(stream, 
+                deltaX1_address, deltaX2_address, 
+                deltaY_address, 
+                X1_address, X2_address,
+                alpha, beta, gamma,
+                func.type, func.params, func.params.length, 
                 lengthv, width, stride);
         return new StreamSyncer(streamPool, stream);
     }
     //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_gelu">
+    @Override
+    public Syncer linear2_gelu2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.gelu();
+        Cuda_function.linear_dual2D_with_function(stream, 
+                X1_address, X2_address,
+                alpha, beta, gamma, 
+                func.type, func.params, func.params.length, 
+                Y_address, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer linear2_gelu2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.gelu();
+        Cuda_function.linear_dual2D_with_function_deltaX_v2(stream, 
+                deltaX1_address, deltaX2_address, 
+                deltaY_address, 
+                X1_address, X2_address,
+                alpha, beta, gamma,
+                func.type, func.params, func.params.length, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="hypherbolic functions">
     //<editor-fold defaultstate="collapsed" desc="BP: sigmoid">
     @Override
     public Syncer sigmoid2D(long Y_address,
@@ -5312,6 +5397,51 @@ public class CudaFloat32EngineBase extends EngineBase
     }
 
     //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: tanh">
+    @Override
+    public Syncer tanh2D(long Y_address,
+            long X_address,
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        Cuda_function.tanh2D(stream, 
+                X_address,
+                Y_address, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+
+    @Override
+    public Syncer tanh2D_deltaX_v1(long deltaX_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        Cuda_function.tanh2D_deltaX_v1(stream, 
+                deltaX_address, 
+                deltaY_address,
+                Y_address,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer tanh2D_deltaX_v2(long deltaX_address,
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        Cuda_function.tanh2D_deltaX_v2(stream, 
+                deltaX_address,
+                deltaY_address, 
+                X_address,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="BP: softmax">
     @Override
     public Syncer softmax2D(long Y_address, 
@@ -5458,6 +5588,122 @@ public class CudaFloat32EngineBase extends EngineBase
                 lengthv, width, stride);
         
         return new StreamBlockSyncer(streamPool, stream, core, blockV);
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_sigmoid">
+    @Override
+    public Syncer linear2_sigmoid2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_function.linear_dual2D_with_function(stream, 
+                X1_address, X2_address,
+                alpha, beta, gamma, 
+                func.type, func.params, func.params.length, 
+                Y_address, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer linear2_sigmoid2D_deltaX_v1(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            float alpha, float beta, 
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_function.linear_dual2D_with_function_deltaX_v1(stream,
+                deltaX1_address, deltaX2_address,
+                deltaY_address, 
+                Y_address,
+                alpha, beta, 
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer linear2_sigmoid2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_function.linear_dual2D_with_function_deltaX_v2(stream, 
+                deltaX1_address, deltaX2_address, 
+                deltaY_address, 
+                X1_address, X2_address,
+                alpha, beta, gamma,
+                func.type, func.params, func.params.length, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_tanh">
+    @Override
+    public Syncer linear2_tanh2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_function.linear_dual2D_with_function(stream, 
+                X1_address, X2_address,
+                alpha, beta, gamma, 
+                func.type, func.params, func.params.length, 
+                Y_address, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer linear2_tanh2D_deltaX_v1(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            float alpha, float beta, 
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_function.linear_dual2D_with_function_deltaX_v1(stream,
+                deltaX1_address, deltaX2_address,
+                deltaY_address, Y_address,
+                alpha, beta, 
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer linear2_tanh2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_function.linear_dual2D_with_function_deltaX_v2(stream, 
+                deltaX1_address, deltaX2_address, 
+                deltaY_address, 
+                X1_address, X2_address,
+                alpha, beta, gamma,
+                func.type, func.params, func.params.length, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
     }
     //</editor-fold>
     //</editor-fold>
@@ -5929,7 +6175,7 @@ public class CudaFloat32EngineBase extends EngineBase
                 lengthv, width, stride);
         return new StreamSyncer(streamPool, stream);
     }
-    
+
     @Override
     public Syncer affine2D_deltaA_v1(long deltaA_address, 
             long deltaY_address, 
@@ -6037,6 +6283,7 @@ public class CudaFloat32EngineBase extends EngineBase
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="BP: affine_leakyRelu (relu)">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
     @Override
     public Syncer affine_relu2D(long Y_address, 
             long X_address, 
@@ -6067,7 +6314,8 @@ public class CudaFloat32EngineBase extends EngineBase
                 lengthv, width, stride);
         return new StreamSyncer(streamPool, stream);
     }
-    
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation {deltaX}">
     @Override
     public Syncer affine_leakyRelu2D_deltaX_v1(long deltaX_address, 
             long deltaY_address, float k,
@@ -6103,7 +6351,8 @@ public class CudaFloat32EngineBase extends EngineBase
                 lengthv, width, stride);
         return new StreamSyncer(streamPool, stream);
     }
-    
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation {deltaA, deletaB}">
     @Override
     public Syncer affine_leakyRelu2D_deltaAB_v1(
             long deltaA_address,//result0
@@ -6181,6 +6430,668 @@ public class CudaFloat32EngineBase extends EngineBase
                 new StreamArraySyncer(streamPool, streamArray):
                 new StreamArrayBlock2Syncer(streamPool, streamArray, core, blockA, blockB));
     }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_elu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Override
+    public Syncer affine_elu2D(long Y_address, 
+            long X_address, 
+            long A_address, long B_address, int row_lengthv,
+            float alpha, float k,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.elu(alpha, k);
+        Cuda_function.affine2D_row_with_function(stream, 
+                X_address, 
+                A_address, B_address, row_lengthv,
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation {deltaX}">
+    @Override
+    public Syncer affine_elu2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address, float alpha, float k,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.elu(alpha, k);
+        Cuda_function.affine2D_row_with_function_deltaX_v1(stream, 
+                deltaX_address,
+                deltaY_address, 
+                Y_address,
+                func.type, func.params, func.params.length, 
+                A_address, row_lengthv, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer affine_elu2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address, float alpha, float k,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.elu(alpha, k);
+        Cuda_function.affine2D_row_with_function_deltaX_v2(stream, 
+                deltaX_address, 
+                deltaY_address, 
+                func.type, func.params, func.params.length, 
+                X_address,
+                A_address,
+                B_address, row_lengthv, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation {deltaA, deletaB}">
+    @Override
+    public Syncer affine_elu2D_deltaAB_v1(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address, float alpha, float k,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];  
+        long deltaA_buf_address = 0L; long blockA[] = null;
+        long deltaB_buf_address = 0L; long blockB[] = null;
+        
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        if(nextN != 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            blockA = core.malloc(mem_length);
+            blockB = core.malloc(mem_length);
+            deltaA_buf_address = blockA[1];
+            deltaB_buf_address = blockB[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.elu(alpha, k);
+        Cuda_reduce.field_affine_with_function_deltaAB_v1(stream1, stream2,
+                deltaY_address,
+                Y_address,
+                A_address, B_address, 
+                field_length, row_lengthv, 
+                deltaA_buf_address, deltaA_address,
+                deltaB_buf_address, deltaB_address,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        return (nextN == 1?
+                new StreamArraySyncer(streamPool, streamArray):
+                new StreamArrayBlock2Syncer(streamPool, streamArray, core, blockA, blockB));
+    }
+    
+    @Override
+    public Syncer affine_elu2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1 
+            long deltaY_address, float alpha, float k,
+            long X_address,//V2 holdX(), X is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv,
+            int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];  
+        long deltaA_buf_address = 0L; long blockA[] = null;
+        long deltaB_buf_address = 0L; long blockB[] = null;
+        
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        if(nextN != 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            blockA = core.malloc(mem_length);
+            blockB = core.malloc(mem_length);
+            deltaA_buf_address = blockA[1];
+            deltaB_buf_address = blockB[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.elu(alpha, k);
+        Cuda_reduce.field_affine_with_function_deltaAB_v2(stream1, stream2, 
+                deltaY_address,
+                X_address, 
+                A_address, B_address,
+                field_length, row_lengthv,
+                deltaA_buf_address, deltaA_address,
+                deltaB_buf_address, deltaB_address,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        return (nextN == 1?
+                new StreamArraySyncer(streamPool, streamArray):
+                new StreamArrayBlock2Syncer(streamPool, streamArray, core, blockA, blockB));
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_softplus">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Override
+    public Syncer affine_softplus2D(long Y_address, 
+            long X_address, 
+            long A_address, long B_address, int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_function.affine2D_row_with_function(stream, 
+                X_address, 
+                A_address, B_address, row_lengthv,
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation {deltaX}">
+    @Override
+    public Syncer affine_softplus2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_function.affine2D_row_with_function_deltaX_v1(stream, 
+                deltaX_address,
+                deltaY_address, 
+                Y_address,
+                func.type, func.params, func.params.length, 
+                A_address, row_lengthv, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer affine_softplus2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_function.affine2D_row_with_function_deltaX_v2(stream, 
+                deltaX_address, 
+                deltaY_address, 
+                func.type, func.params, func.params.length, 
+                X_address,
+                A_address,
+                B_address, row_lengthv, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation {deltaA, deletaB}">
+    @Override
+    public Syncer affine_softplus2D_deltaAB_v1(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];  
+        long deltaA_buf_address = 0L; long blockA[] = null;
+        long deltaB_buf_address = 0L; long blockB[] = null;
+        
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        if(nextN != 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            blockA = core.malloc(mem_length);
+            blockB = core.malloc(mem_length);
+            deltaA_buf_address = blockA[1];
+            deltaB_buf_address = blockB[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_reduce.field_affine_with_function_deltaAB_v1(stream1, stream2,
+                deltaY_address,
+                Y_address,
+                A_address, B_address, 
+                field_length, row_lengthv, 
+                deltaA_buf_address, deltaA_address,
+                deltaB_buf_address, deltaB_address,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        return (nextN == 1?
+                new StreamArraySyncer(streamPool, streamArray):
+                new StreamArrayBlock2Syncer(streamPool, streamArray, core, blockA, blockB));
+    }
+    
+    @Override
+    public Syncer affine_softplus2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1 
+            long deltaY_address,
+            long X_address,//V2 holdX(), X is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv,
+            int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];  
+        long deltaA_buf_address = 0L; long blockA[] = null;
+        long deltaB_buf_address = 0L; long blockB[] = null;
+        
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        if(nextN != 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            blockA = core.malloc(mem_length);
+            blockB = core.malloc(mem_length);
+            deltaA_buf_address = blockA[1];
+            deltaB_buf_address = blockB[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_reduce.field_affine_with_function_deltaAB_v2(stream1, stream2, 
+                deltaY_address,
+                X_address, 
+                A_address, B_address,
+                field_length, row_lengthv,
+                deltaA_buf_address, deltaA_address,
+                deltaB_buf_address, deltaB_address,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        return (nextN == 1?
+                new StreamArraySyncer(streamPool, streamArray):
+                new StreamArrayBlock2Syncer(streamPool, streamArray, core, blockA, blockB));
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_gelu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Override
+    public Syncer affine_gelu2D(long Y_address, 
+            long X_address, 
+            long A_address, long B_address, int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.gelu();
+        Cuda_function.affine2D_row_with_function(stream, 
+                X_address, 
+                A_address, B_address, row_lengthv,
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation {deltaX}">
+    @Override
+    public Syncer affine_gelu2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.gelu();
+        Cuda_function.affine2D_row_with_function_deltaX_v2(stream, 
+                deltaX_address, 
+                deltaY_address, 
+                func.type, func.params, func.params.length, 
+                X_address,
+                A_address,
+                B_address, row_lengthv, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation {deltaA, deletaB}">
+    @Override
+    public Syncer affine_gelu2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1 
+            long deltaY_address,
+            long X_address,//V2 holdX(), X is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv,
+            int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];  
+        long deltaA_buf_address = 0L; long blockA[] = null;
+        long deltaB_buf_address = 0L; long blockB[] = null;
+        
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        if(nextN != 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            blockA = core.malloc(mem_length);
+            blockB = core.malloc(mem_length);
+            deltaA_buf_address = blockA[1];
+            deltaB_buf_address = blockB[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.gelu();
+        Cuda_reduce.field_affine_with_function_deltaAB_v2(stream1, stream2, 
+                deltaY_address,
+                X_address, 
+                A_address, B_address,
+                field_length, row_lengthv,
+                deltaA_buf_address, deltaA_address,
+                deltaB_buf_address, deltaB_address,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        return (nextN == 1?
+                new StreamArraySyncer(streamPool, streamArray):
+                new StreamArrayBlock2Syncer(streamPool, streamArray, core, blockA, blockB));
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_sigmoid">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Override
+    public Syncer affine_sigmoid2D(long Y_address, 
+            long X_address, 
+            long A_address, long B_address, int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_function.affine2D_row_with_function(stream, 
+                X_address, 
+                A_address, B_address, row_lengthv,
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation {deltaX}">
+    @Override
+    public Syncer affine_sigmoid2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_function.affine2D_row_with_function_deltaX_v1(stream, 
+                deltaX_address,
+                deltaY_address, 
+                Y_address,
+                func.type, func.params, func.params.length, 
+                A_address, row_lengthv, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer affine_sigmoid2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_function.affine2D_row_with_function_deltaX_v2(stream, 
+                deltaX_address, 
+                deltaY_address, 
+                func.type, func.params, func.params.length, 
+                X_address,
+                A_address,
+                B_address, row_lengthv, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation {deltaA, deletaB}">
+    @Override
+    public Syncer affine_sigmoid2D_deltaAB_v1(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];  
+        long deltaA_buf_address = 0L; long blockA[] = null;
+        long deltaB_buf_address = 0L; long blockB[] = null;
+        
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        if(nextN != 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            blockA = core.malloc(mem_length);
+            blockB = core.malloc(mem_length);
+            deltaA_buf_address = blockA[1];
+            deltaB_buf_address = blockB[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_reduce.field_affine_with_function_deltaAB_v1(stream1, stream2,
+                deltaY_address,
+                Y_address,
+                A_address, B_address, 
+                field_length, row_lengthv, 
+                deltaA_buf_address, deltaA_address,
+                deltaB_buf_address, deltaB_address,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        return (nextN == 1?
+                new StreamArraySyncer(streamPool, streamArray):
+                new StreamArrayBlock2Syncer(streamPool, streamArray, core, blockA, blockB));
+    }
+    
+    @Override
+    public Syncer affine_sigmoid2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1 
+            long deltaY_address,
+            long X_address,//V2 holdX(), X is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv,
+            int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];  
+        long deltaA_buf_address = 0L; long blockA[] = null;
+        long deltaB_buf_address = 0L; long blockB[] = null;
+        
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        if(nextN != 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            blockA = core.malloc(mem_length);
+            blockB = core.malloc(mem_length);
+            deltaA_buf_address = blockA[1];
+            deltaB_buf_address = blockB[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_reduce.field_affine_with_function_deltaAB_v2(stream1, stream2, 
+                deltaY_address,
+                X_address, 
+                A_address, B_address,
+                field_length, row_lengthv,
+                deltaA_buf_address, deltaA_address,
+                deltaB_buf_address, deltaB_address,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        return (nextN == 1?
+                new StreamArraySyncer(streamPool, streamArray):
+                new StreamArrayBlock2Syncer(streamPool, streamArray, core, blockA, blockB));
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_tanh">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Override
+    public Syncer affine_tanh2D(long Y_address, 
+            long X_address, 
+            long A_address, long B_address, int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_function.affine2D_row_with_function(stream, 
+                X_address, 
+                A_address, B_address, row_lengthv,
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation {deltaX}">
+    @Override
+    public Syncer affine_tanh2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_function.affine2D_row_with_function_deltaX_v1(stream, 
+                deltaX_address,
+                deltaY_address, 
+                Y_address,
+                func.type, func.params, func.params.length, 
+                A_address, row_lengthv, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer affine_tanh2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_function.affine2D_row_with_function_deltaX_v2(stream, 
+                deltaX_address, 
+                deltaY_address, 
+                func.type, func.params, func.params.length, 
+                X_address,
+                A_address,
+                B_address, row_lengthv, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation {deltaA, deletaB}">
+    @Override
+    public Syncer affine_tanh2D_deltaAB_v1(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];  
+        long deltaA_buf_address = 0L; long blockA[] = null;
+        long deltaB_buf_address = 0L; long blockB[] = null;
+        
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        if(nextN != 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            blockA = core.malloc(mem_length);
+            blockB = core.malloc(mem_length);
+            deltaA_buf_address = blockA[1];
+            deltaB_buf_address = blockB[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_reduce.field_affine_with_function_deltaAB_v1(stream1, stream2,
+                deltaY_address,
+                Y_address,
+                A_address, B_address, 
+                field_length, row_lengthv, 
+                deltaA_buf_address, deltaA_address,
+                deltaB_buf_address, deltaB_address,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        return (nextN == 1?
+                new StreamArraySyncer(streamPool, streamArray):
+                new StreamArrayBlock2Syncer(streamPool, streamArray, core, blockA, blockB));
+    }
+    
+    @Override
+    public Syncer affine_tanh2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1 
+            long deltaY_address,
+            long X_address,//V2 holdX(), X is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv,
+            int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];  
+        long deltaA_buf_address = 0L; long blockA[] = null;
+        long deltaB_buf_address = 0L; long blockB[] = null;
+        
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        if(nextN != 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            blockA = core.malloc(mem_length);
+            blockB = core.malloc(mem_length);
+            deltaA_buf_address = blockA[1];
+            deltaB_buf_address = blockB[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_reduce.field_affine_with_function_deltaAB_v2(stream1, stream2, 
+                deltaY_address,
+                X_address, 
+                A_address, B_address,
+                field_length, row_lengthv,
+                deltaA_buf_address, deltaA_address,
+                deltaB_buf_address, deltaB_address,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        return (nextN == 1?
+                new StreamArraySyncer(streamPool, streamArray):
+                new StreamArrayBlock2Syncer(streamPool, streamArray, core, blockA, blockB));
+    }
+    //</editor-fold>
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="BP: sqBatchNorm">
@@ -7258,6 +8169,1204 @@ public class CudaFloat32EngineBase extends EngineBase
 
         Cuda_function.batchNorm_affined2D_row_with_leakyRelu_deltaX_v2(stream1,
                 deltaY_address, k, 
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                A_address, B_address, 
+                deltaB_address,//deltaXp1 = deltaB
+                deltaA_address,//deltaXp2 = deltaA
+                row_lengthv, 
+                deltaX_address, 
+                lengthv, width, stride);
+        
+        Cuda.deleteEvent(event);
+        return (nextN == 1?
+                new Stream2Syncer_1(streamPool, stream1, stream2)://block1, block are null
+                new Stream2Block2Syncer_1(streamPool, stream1, stream2, core, block1, block2));
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_elu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Override
+    public Syncer batchNorm_elu2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv, float alpha, float k, 
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.elu(alpha, k);
+        Cuda_function.batchNorm2D_row_with_function(stream, 
+                X_address,
+                X_mean_address,
+                X_var_address, eps, row_lengthv,
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+
+    @Override
+    public Syncer batchNorm_elu2D(long Y_address,
+            long X_address, 
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address, 
+            int row_lengthv, float alpha, float k,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.elu(alpha, k);
+        Cuda_function.batchNorm_affined2D_row_with_function(stream,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                A_address, B_address, row_lengthv, 
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    @Override
+    public Syncer batchNorm_elu2D_deltaX_v1(long deltaX_address,
+            long deltaY_address, float alpha, float k,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //======[stage1: find deltaXp1, deltaXp2]===============================
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]s
+        long[] block1 = core.malloc(mem_length); long deltaXp1 = block1[1];
+        long[] block2 = core.malloc(mem_length); long deltaXp2 = block2[1];
+        
+        FloatFuncConfig func = FloatFunc.elu(alpha, k);
+        Cuda_reduce.field_batchNorm_with_function_deltaXp_v1(stream1, stream2, 
+                deltaY_address, 
+                Y_address,
+                field_length, row_lengthv, 
+                deltaXp1, deltaXp1,
+                deltaXp2, deltaXp2, 
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //======[stage2: find deltaX]===========================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+        
+        Cuda_function.batchNorm2D_row_with_function_deltaX_v1(stream1, 
+                deltaY_address,
+                Y_address,
+                func.type, func.params, func.params.length,
+                X_var_address, eps, 
+                deltaXp1, deltaXp2, row_lengthv, 
+                deltaX_address, 
+                lengthv, width, stride);
+        
+        Cuda.deleteEvent(event);
+        return new Stream2Block2Syncer_1(streamPool, stream1, stream2,//only sync stream1
+                core, block1, block2);
+    }
+
+    @Override
+    public Syncer batchNorm_elu2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address, float alpha, float k,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    { 
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //stage1: find deltaXp1, deltaXp2=======================================
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]s
+        long[] block1 = core.malloc(mem_length); long deltaXp1 = block1[1];
+        long[] block2 = core.malloc(mem_length); long deltaXp2 = block2[1];
+        
+        FloatFuncConfig func = FloatFunc.elu(alpha, k);
+        Cuda_reduce.field_batchNorm_with_function_deltaXp_v2(stream1, stream2,
+                deltaY_address, 
+                X_address, 
+                X_mean_address, X_var_address, eps, 
+                field_length, row_lengthv, 
+                deltaXp1, deltaXp1,
+                deltaXp2, deltaXp2,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+        
+        Cuda_function.batchNorm2D_row_with_function_deltaX_v2(stream1,
+                deltaY_address,
+                func.type, func.params, func.params.length,
+                X_address, 
+                X_mean_address, X_var_address, eps, 
+                deltaXp1, deltaXp2, row_lengthv, 
+                deltaX_address,
+                lengthv, width, stride);
+      
+        Cuda.deleteEvent(event);
+        return new Stream2Block2Syncer_1(streamPool, stream1, stream2,//only sync stream1
+                core, block1, block2);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    @Override
+    public Syncer batchNorm_elu2D_gradients_v1(
+            long deltaX_address,//result0
+            long deltaA_address,//result1 
+            long deltaB_address,//result2
+            long deltaY_address, float alpha, float k,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps, 
+            long A_address, long B_address, 
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //======[stage1: find { deltaXp1, deltaXp2, deltaA, deltaB }]===========
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        long[] block1 = null; long deltaXp1 = 0L;//deltaXp1 = deltaB_buf
+        long[] block2 = null; long deltaXp2 = 0L;//deltaXp2 = deltaA_buf
+        
+        if(nextN > 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            block1 = core.malloc(mem_length); deltaXp1 = block1[1];
+            block2 = core.malloc(mem_length); deltaXp2 = block2[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.elu(alpha, k);
+        Cuda_reduce.field_affine_with_function_deltaAB_v1(stream1, stream2,
+                deltaY_address, Y_address,
+                A_address, B_address,
+                field_length, row_lengthv, 
+                deltaXp2, deltaA_address,//deltaXp2 = deltaA_buf
+                deltaXp1, deltaB_address,//deltaXp1 = deltaB_buf
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+        
+        Cuda_function.batchNorm_affined2D_row_with_function_deltaX_v1(stream1, 
+                deltaY_address, 
+                Y_address,
+                func.type, func.params, func.params.length,
+                X_var_address, eps, 
+                A_address, B_address, 
+                deltaB_address,//deltaXp1 = deltaB
+                deltaA_address,//deltaXp2 = deltaA
+                row_lengthv, 
+                deltaX_address, 
+                lengthv, width, stride);
+        
+        Cuda.deleteEvent(event);
+        return (nextN == 1?
+                new Stream2Syncer_1(streamPool, stream1, stream2)://block1, block are null
+                new Stream2Block2Syncer_1(streamPool, stream1, stream2, core, block1, block2));
+    }
+
+    @Override
+    public Syncer batchNorm_elu2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address, float alpha, float k,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //======[stage1: find { deltaXp1, deltaXp2, deltaA, deltaB }]===========
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        long[] block1 = null; long deltaXp1 = 0L;//deltaXp1 = deltaB_buf
+        long[] block2 = null; long deltaXp2 = 0L;//deltaXp2 = deltaA_buf
+        
+        if(nextN > 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            block1 = core.malloc(mem_length); deltaXp1 = block1[1];
+            block2 = core.malloc(mem_length); deltaXp2 = block2[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.elu(alpha, k);
+        Cuda_reduce.field_batchNorm_with_function_deltaAB_v2(stream1, stream2, 
+                deltaY_address,
+                X_address,
+                X_mean_address, X_var_address, eps,
+                A_address, B_address,
+                field_length, row_lengthv,
+                deltaXp2, deltaA_address,//deltaXp2 = deltaA_buf
+                deltaXp1, deltaB_address,//deltaXp1 = deltaB_buf
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+
+        Cuda_function.batchNorm_affined2D_row_with_function_deltaX_v2(stream1,
+                deltaY_address,
+                func.type, func.params, func.params.length,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                A_address, B_address, 
+                deltaB_address,//deltaXp1 = deltaB
+                deltaA_address,//deltaXp2 = deltaA
+                row_lengthv, 
+                deltaX_address, 
+                lengthv, width, stride);
+        
+        Cuda.deleteEvent(event);
+        return (nextN == 1?
+                new Stream2Syncer_1(streamPool, stream1, stream2)://block1, block are null
+                new Stream2Block2Syncer_1(streamPool, stream1, stream2, core, block1, block2));
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_softplus">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Override
+    public Syncer batchNorm_softplus2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv,
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_function.batchNorm2D_row_with_function(stream, 
+                X_address,
+                X_mean_address,
+                X_var_address, eps, row_lengthv,
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+
+    @Override
+    public Syncer batchNorm_softplus2D(long Y_address,
+            long X_address, 
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address, 
+            int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_function.batchNorm_affined2D_row_with_function(stream,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                A_address, B_address, row_lengthv, 
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    @Override
+    public Syncer batchNorm_softplus2D_deltaX_v1(long deltaX_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //======[stage1: find deltaXp1, deltaXp2]===============================
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]s
+        long[] block1 = core.malloc(mem_length); long deltaXp1 = block1[1];
+        long[] block2 = core.malloc(mem_length); long deltaXp2 = block2[1];
+        
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_reduce.field_batchNorm_with_function_deltaXp_v1(stream1, stream2, 
+                deltaY_address, 
+                Y_address,
+                field_length, row_lengthv, 
+                deltaXp1, deltaXp1,
+                deltaXp2, deltaXp2, 
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //======[stage2: find deltaX]===========================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+        
+        Cuda_function.batchNorm2D_row_with_function_deltaX_v1(stream1, 
+                deltaY_address,
+                Y_address,
+                func.type, func.params, func.params.length,
+                X_var_address, eps, 
+                deltaXp1, deltaXp2, row_lengthv, 
+                deltaX_address, 
+                lengthv, width, stride);
+        
+        Cuda.deleteEvent(event);
+        return new Stream2Block2Syncer_1(streamPool, stream1, stream2,//only sync stream1
+                core, block1, block2);
+    }
+
+    @Override
+    public Syncer batchNorm_softplus2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    { 
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //stage1: find deltaXp1, deltaXp2=======================================
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]s
+        long[] block1 = core.malloc(mem_length); long deltaXp1 = block1[1];
+        long[] block2 = core.malloc(mem_length); long deltaXp2 = block2[1];
+        
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_reduce.field_batchNorm_with_function_deltaXp_v2(stream1, stream2,
+                deltaY_address, 
+                X_address, 
+                X_mean_address, X_var_address, eps, 
+                field_length, row_lengthv, 
+                deltaXp1, deltaXp1,
+                deltaXp2, deltaXp2,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+        
+        Cuda_function.batchNorm2D_row_with_function_deltaX_v2(stream1,
+                deltaY_address,
+                func.type, func.params, func.params.length,
+                X_address, 
+                X_mean_address, X_var_address, eps, 
+                deltaXp1, deltaXp2, row_lengthv, 
+                deltaX_address,
+                lengthv, width, stride);
+      
+        Cuda.deleteEvent(event);
+        return new Stream2Block2Syncer_1(streamPool, stream1, stream2,//only sync stream1
+                core, block1, block2);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    @Override
+    public Syncer batchNorm_softplus2D_gradients_v1(
+            long deltaX_address,//result0
+            long deltaA_address,//result1 
+            long deltaB_address,//result2
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps, 
+            long A_address, long B_address, 
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //======[stage1: find { deltaXp1, deltaXp2, deltaA, deltaB }]===========
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        long[] block1 = null; long deltaXp1 = 0L;//deltaXp1 = deltaB_buf
+        long[] block2 = null; long deltaXp2 = 0L;//deltaXp2 = deltaA_buf
+        
+        if(nextN > 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            block1 = core.malloc(mem_length); deltaXp1 = block1[1];
+            block2 = core.malloc(mem_length); deltaXp2 = block2[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_reduce.field_affine_with_function_deltaAB_v1(stream1, stream2,
+                deltaY_address, Y_address,
+                A_address, B_address,
+                field_length, row_lengthv, 
+                deltaXp2, deltaA_address,//deltaXp2 = deltaA_buf
+                deltaXp1, deltaB_address,//deltaXp1 = deltaB_buf
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+        
+        Cuda_function.batchNorm_affined2D_row_with_function_deltaX_v1(stream1, 
+                deltaY_address, 
+                Y_address,
+                func.type, func.params, func.params.length,
+                X_var_address, eps, 
+                A_address, B_address, 
+                deltaB_address,//deltaXp1 = deltaB
+                deltaA_address,//deltaXp2 = deltaA
+                row_lengthv, 
+                deltaX_address, 
+                lengthv, width, stride);
+        
+        Cuda.deleteEvent(event);
+        return (nextN == 1?
+                new Stream2Syncer_1(streamPool, stream1, stream2)://block1, block are null
+                new Stream2Block2Syncer_1(streamPool, stream1, stream2, core, block1, block2));
+    }
+
+    @Override
+    public Syncer batchNorm_softplus2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //======[stage1: find { deltaXp1, deltaXp2, deltaA, deltaB }]===========
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        long[] block1 = null; long deltaXp1 = 0L;//deltaXp1 = deltaB_buf
+        long[] block2 = null; long deltaXp2 = 0L;//deltaXp2 = deltaA_buf
+        
+        if(nextN > 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            block1 = core.malloc(mem_length); deltaXp1 = block1[1];
+            block2 = core.malloc(mem_length); deltaXp2 = block2[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_reduce.field_batchNorm_with_function_deltaAB_v2(stream1, stream2, 
+                deltaY_address,
+                X_address,
+                X_mean_address, X_var_address, eps,
+                A_address, B_address,
+                field_length, row_lengthv,
+                deltaXp2, deltaA_address,//deltaXp2 = deltaA_buf
+                deltaXp1, deltaB_address,//deltaXp1 = deltaB_buf
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+
+        Cuda_function.batchNorm_affined2D_row_with_function_deltaX_v2(stream1,
+                deltaY_address,
+                func.type, func.params, func.params.length,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                A_address, B_address, 
+                deltaB_address,//deltaXp1 = deltaB
+                deltaA_address,//deltaXp2 = deltaA
+                row_lengthv, 
+                deltaX_address, 
+                lengthv, width, stride);
+        
+        Cuda.deleteEvent(event);
+        return (nextN == 1?
+                new Stream2Syncer_1(streamPool, stream1, stream2)://block1, block are null
+                new Stream2Block2Syncer_1(streamPool, stream1, stream2, core, block1, block2));
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_gelu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Override
+    public Syncer batchNorm_gelu2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv,
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.gelu();
+        Cuda_function.batchNorm2D_row_with_function(stream, 
+                X_address,
+                X_mean_address,
+                X_var_address, eps, row_lengthv,
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+
+    @Override
+    public Syncer batchNorm_gelu2D(long Y_address,
+            long X_address, 
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address, 
+            int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.gelu();
+        Cuda_function.batchNorm_affined2D_row_with_function(stream,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                A_address, B_address, row_lengthv, 
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    @Override
+    public Syncer batchNorm_gelu2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    { 
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //stage1: find deltaXp1, deltaXp2=======================================
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]s
+        long[] block1 = core.malloc(mem_length); long deltaXp1 = block1[1];
+        long[] block2 = core.malloc(mem_length); long deltaXp2 = block2[1];
+        
+        FloatFuncConfig func = FloatFunc.gelu();
+        Cuda_reduce.field_batchNorm_with_function_deltaXp_v2(stream1, stream2,
+                deltaY_address, 
+                X_address, 
+                X_mean_address, X_var_address, eps, 
+                field_length, row_lengthv, 
+                deltaXp1, deltaXp1,
+                deltaXp2, deltaXp2,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+        
+        Cuda_function.batchNorm2D_row_with_function_deltaX_v2(stream1,
+                deltaY_address,
+                func.type, func.params, func.params.length,
+                X_address, 
+                X_mean_address, X_var_address, eps, 
+                deltaXp1, deltaXp2, row_lengthv, 
+                deltaX_address,
+                lengthv, width, stride);
+      
+        Cuda.deleteEvent(event);
+        return new Stream2Block2Syncer_1(streamPool, stream1, stream2,//only sync stream1
+                core, block1, block2);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    @Override
+    public Syncer batchNorm_gelu2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //======[stage1: find { deltaXp1, deltaXp2, deltaA, deltaB }]===========
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        long[] block1 = null; long deltaXp1 = 0L;//deltaXp1 = deltaB_buf
+        long[] block2 = null; long deltaXp2 = 0L;//deltaXp2 = deltaA_buf
+        
+        if(nextN > 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            block1 = core.malloc(mem_length); deltaXp1 = block1[1];
+            block2 = core.malloc(mem_length); deltaXp2 = block2[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.gelu();
+        Cuda_reduce.field_batchNorm_with_function_deltaAB_v2(stream1, stream2, 
+                deltaY_address,
+                X_address,
+                X_mean_address, X_var_address, eps,
+                A_address, B_address,
+                field_length, row_lengthv,
+                deltaXp2, deltaA_address,//deltaXp2 = deltaA_buf
+                deltaXp1, deltaB_address,//deltaXp1 = deltaB_buf
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+
+        Cuda_function.batchNorm_affined2D_row_with_function_deltaX_v2(stream1,
+                deltaY_address,
+                func.type, func.params, func.params.length,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                A_address, B_address, 
+                deltaB_address,//deltaXp1 = deltaB
+                deltaA_address,//deltaXp2 = deltaA
+                row_lengthv, 
+                deltaX_address, 
+                lengthv, width, stride);
+        
+        Cuda.deleteEvent(event);
+        return (nextN == 1?
+                new Stream2Syncer_1(streamPool, stream1, stream2)://block1, block are null
+                new Stream2Block2Syncer_1(streamPool, stream1, stream2, core, block1, block2));
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_sigmoid">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Override
+    public Syncer batchNorm_sigmoid2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv,
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_function.batchNorm2D_row_with_function(stream, 
+                X_address,
+                X_mean_address,
+                X_var_address, eps, row_lengthv,
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+
+    @Override
+    public Syncer batchNorm_sigmoid2D(long Y_address,
+            long X_address, 
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address, 
+            int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_function.batchNorm_affined2D_row_with_function(stream,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                A_address, B_address, row_lengthv, 
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    @Override
+    public Syncer batchNorm_sigmoid2D_deltaX_v1(long deltaX_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //======[stage1: find deltaXp1, deltaXp2]===============================
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]s
+        long[] block1 = core.malloc(mem_length); long deltaXp1 = block1[1];
+        long[] block2 = core.malloc(mem_length); long deltaXp2 = block2[1];
+        
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_reduce.field_batchNorm_with_function_deltaXp_v1(stream1, stream2, 
+                deltaY_address, 
+                Y_address,
+                field_length, row_lengthv, 
+                deltaXp1, deltaXp1,
+                deltaXp2, deltaXp2, 
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //======[stage2: find deltaX]===========================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+        
+        Cuda_function.batchNorm2D_row_with_function_deltaX_v1(stream1, 
+                deltaY_address,
+                Y_address,
+                func.type, func.params, func.params.length,
+                X_var_address, eps, 
+                deltaXp1, deltaXp2, row_lengthv, 
+                deltaX_address, 
+                lengthv, width, stride);
+        
+        Cuda.deleteEvent(event);
+        return new Stream2Block2Syncer_1(streamPool, stream1, stream2,//only sync stream1
+                core, block1, block2);
+    }
+
+    @Override
+    public Syncer batchNorm_sigmoid2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    { 
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //stage1: find deltaXp1, deltaXp2=======================================
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]s
+        long[] block1 = core.malloc(mem_length); long deltaXp1 = block1[1];
+        long[] block2 = core.malloc(mem_length); long deltaXp2 = block2[1];
+        
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_reduce.field_batchNorm_with_function_deltaXp_v2(stream1, stream2,
+                deltaY_address, 
+                X_address, 
+                X_mean_address, X_var_address, eps, 
+                field_length, row_lengthv, 
+                deltaXp1, deltaXp1,
+                deltaXp2, deltaXp2,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+        
+        Cuda_function.batchNorm2D_row_with_function_deltaX_v2(stream1,
+                deltaY_address,
+                func.type, func.params, func.params.length,
+                X_address, 
+                X_mean_address, X_var_address, eps, 
+                deltaXp1, deltaXp2, row_lengthv, 
+                deltaX_address,
+                lengthv, width, stride);
+      
+        Cuda.deleteEvent(event);
+        return new Stream2Block2Syncer_1(streamPool, stream1, stream2,//only sync stream1
+                core, block1, block2);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    @Override
+    public Syncer batchNorm_sigmoid2D_gradients_v1(
+            long deltaX_address,//result0
+            long deltaA_address,//result1 
+            long deltaB_address,//result2
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps, 
+            long A_address, long B_address, 
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //======[stage1: find { deltaXp1, deltaXp2, deltaA, deltaB }]===========
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        long[] block1 = null; long deltaXp1 = 0L;//deltaXp1 = deltaB_buf
+        long[] block2 = null; long deltaXp2 = 0L;//deltaXp2 = deltaA_buf
+        
+        if(nextN > 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            block1 = core.malloc(mem_length); deltaXp1 = block1[1];
+            block2 = core.malloc(mem_length); deltaXp2 = block2[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_reduce.field_affine_with_function_deltaAB_v1(stream1, stream2,
+                deltaY_address, Y_address,
+                A_address, B_address,
+                field_length, row_lengthv, 
+                deltaXp2, deltaA_address,//deltaXp2 = deltaA_buf
+                deltaXp1, deltaB_address,//deltaXp1 = deltaB_buf
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+        
+        Cuda_function.batchNorm_affined2D_row_with_function_deltaX_v1(stream1, 
+                deltaY_address, 
+                Y_address,
+                func.type, func.params, func.params.length,
+                X_var_address, eps, 
+                A_address, B_address, 
+                deltaB_address,//deltaXp1 = deltaB
+                deltaA_address,//deltaXp2 = deltaA
+                row_lengthv, 
+                deltaX_address, 
+                lengthv, width, stride);
+        
+        Cuda.deleteEvent(event);
+        return (nextN == 1?
+                new Stream2Syncer_1(streamPool, stream1, stream2)://block1, block are null
+                new Stream2Block2Syncer_1(streamPool, stream1, stream2, core, block1, block2));
+    }
+
+    @Override
+    public Syncer batchNorm_sigmoid2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //======[stage1: find { deltaXp1, deltaXp2, deltaA, deltaB }]===========
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        long[] block1 = null; long deltaXp1 = 0L;//deltaXp1 = deltaB_buf
+        long[] block2 = null; long deltaXp2 = 0L;//deltaXp2 = deltaA_buf
+        
+        if(nextN > 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            block1 = core.malloc(mem_length); deltaXp1 = block1[1];
+            block2 = core.malloc(mem_length); deltaXp2 = block2[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_reduce.field_batchNorm_with_function_deltaAB_v2(stream1, stream2, 
+                deltaY_address,
+                X_address,
+                X_mean_address, X_var_address, eps,
+                A_address, B_address,
+                field_length, row_lengthv,
+                deltaXp2, deltaA_address,//deltaXp2 = deltaA_buf
+                deltaXp1, deltaB_address,//deltaXp1 = deltaB_buf
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+
+        Cuda_function.batchNorm_affined2D_row_with_function_deltaX_v2(stream1,
+                deltaY_address,
+                func.type, func.params, func.params.length,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                A_address, B_address, 
+                deltaB_address,//deltaXp1 = deltaB
+                deltaA_address,//deltaXp2 = deltaA
+                row_lengthv, 
+                deltaX_address, 
+                lengthv, width, stride);
+        
+        Cuda.deleteEvent(event);
+        return (nextN == 1?
+                new Stream2Syncer_1(streamPool, stream1, stream2)://block1, block are null
+                new Stream2Block2Syncer_1(streamPool, stream1, stream2, core, block1, block2));
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_tanh">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Override
+    public Syncer batchNorm_tanh2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv,
+            int lengthv, int width, int stride)
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_function.batchNorm2D_row_with_function(stream, 
+                X_address,
+                X_mean_address,
+                X_var_address, eps, row_lengthv,
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+
+    @Override
+    public Syncer batchNorm_tanh2D(long Y_address,
+            long X_address, 
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address, 
+            int row_lengthv,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_function.batchNorm_affined2D_row_with_function(stream,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                A_address, B_address, row_lengthv, 
+                Y_address,
+                func.type, func.params, func.params.length,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    @Override
+    public Syncer batchNorm_tanh2D_deltaX_v1(long deltaX_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //======[stage1: find deltaXp1, deltaXp2]===============================
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]s
+        long[] block1 = core.malloc(mem_length); long deltaXp1 = block1[1];
+        long[] block2 = core.malloc(mem_length); long deltaXp2 = block2[1];
+        
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_reduce.field_batchNorm_with_function_deltaXp_v1(stream1, stream2, 
+                deltaY_address, 
+                Y_address,
+                field_length, row_lengthv, 
+                deltaXp1, deltaXp1,
+                deltaXp2, deltaXp2, 
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //======[stage2: find deltaX]===========================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+        
+        Cuda_function.batchNorm2D_row_with_function_deltaX_v1(stream1, 
+                deltaY_address,
+                Y_address,
+                func.type, func.params, func.params.length,
+                X_var_address, eps, 
+                deltaXp1, deltaXp2, row_lengthv, 
+                deltaX_address, 
+                lengthv, width, stride);
+        
+        Cuda.deleteEvent(event);
+        return new Stream2Block2Syncer_1(streamPool, stream1, stream2,//only sync stream1
+                core, block1, block2);
+    }
+
+    @Override
+    public Syncer batchNorm_tanh2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    { 
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //stage1: find deltaXp1, deltaXp2=======================================
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]s
+        long[] block1 = core.malloc(mem_length); long deltaXp1 = block1[1];
+        long[] block2 = core.malloc(mem_length); long deltaXp2 = block2[1];
+        
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_reduce.field_batchNorm_with_function_deltaXp_v2(stream1, stream2,
+                deltaY_address, 
+                X_address, 
+                X_mean_address, X_var_address, eps, 
+                field_length, row_lengthv, 
+                deltaXp1, deltaXp1,
+                deltaXp2, deltaXp2,
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+        
+        Cuda_function.batchNorm2D_row_with_function_deltaX_v2(stream1,
+                deltaY_address,
+                func.type, func.params, func.params.length,
+                X_address, 
+                X_mean_address, X_var_address, eps, 
+                deltaXp1, deltaXp2, row_lengthv, 
+                deltaX_address,
+                lengthv, width, stride);
+      
+        Cuda.deleteEvent(event);
+        return new Stream2Block2Syncer_1(streamPool, stream1, stream2,//only sync stream1
+                core, block1, block2);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    @Override
+    public Syncer batchNorm_tanh2D_gradients_v1(
+            long deltaX_address,//result0
+            long deltaA_address,//result1 
+            long deltaB_address,//result2
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps, 
+            long A_address, long B_address, 
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //======[stage1: find { deltaXp1, deltaXp2, deltaA, deltaB }]===========
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        long[] block1 = null; long deltaXp1 = 0L;//deltaXp1 = deltaB_buf
+        long[] block2 = null; long deltaXp2 = 0L;//deltaXp2 = deltaA_buf
+        
+        if(nextN > 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            block1 = core.malloc(mem_length); deltaXp1 = block1[1];
+            block2 = core.malloc(mem_length); deltaXp2 = block2[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_reduce.field_affine_with_function_deltaAB_v1(stream1, stream2,
+                deltaY_address, Y_address,
+                A_address, B_address,
+                field_length, row_lengthv, 
+                deltaXp2, deltaA_address,//deltaXp2 = deltaA_buf
+                deltaXp1, deltaB_address,//deltaXp1 = deltaB_buf
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+        
+        Cuda_function.batchNorm_affined2D_row_with_function_deltaX_v1(stream1, 
+                deltaY_address, 
+                Y_address,
+                func.type, func.params, func.params.length,
+                X_var_address, eps, 
+                A_address, B_address, 
+                deltaB_address,//deltaXp1 = deltaB
+                deltaA_address,//deltaXp2 = deltaA
+                row_lengthv, 
+                deltaX_address, 
+                lengthv, width, stride);
+        
+        Cuda.deleteEvent(event);
+        return (nextN == 1?
+                new Stream2Syncer_1(streamPool, stream1, stream2)://block1, block are null
+                new Stream2Block2Syncer_1(streamPool, stream1, stream2, core, block1, block2));
+    }
+
+    @Override
+    public Syncer batchNorm_tanh2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride) 
+    {
+        long[] streamArray = streamPool.getStreamArray(2);
+        long stream1 = streamArray[0];
+        long stream2 = streamArray[1];
+        
+        //======[stage1: find { deltaXp1, deltaXp2, deltaA, deltaB }]===========
+        int nextN = Cuda_reduce.field_nextN(field_length, row_lengthv);
+        long[] block1 = null; long deltaXp1 = 0L;//deltaXp1 = deltaB_buf
+        long[] block2 = null; long deltaXp2 = 0L;//deltaXp2 = deltaA_buf
+        
+        if(nextN > 1) {
+            int mem_length = nextN * row_lengthv;//V[HV: nextN, M: row_lengthv]
+            block1 = core.malloc(mem_length); deltaXp1 = block1[1];
+            block2 = core.malloc(mem_length); deltaXp2 = block2[1];
+        }
+        
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_reduce.field_batchNorm_with_function_deltaAB_v2(stream1, stream2, 
+                deltaY_address,
+                X_address,
+                X_mean_address, X_var_address, eps,
+                A_address, B_address,
+                field_length, row_lengthv,
+                deltaXp2, deltaA_address,//deltaXp2 = deltaA_buf
+                deltaXp1, deltaB_address,//deltaXp1 = deltaB_buf
+                width, stride, 1,
+                func.type, func.params, func.params.length);
+        
+        //stage2: find deltaX===================================================
+        long event = Cuda.newEvent_DisableTiming();
+        Cuda.eventRecord(event, streamArray, 2);
+        Cuda.streamWaitEvent_default(stream1, event);//wait stage1 is ended
+
+        Cuda_function.batchNorm_affined2D_row_with_function_deltaX_v2(stream1,
+                deltaY_address,
+                func.type, func.params, func.params.length,
                 X_address, 
                 X_mean_address, X_var_address, eps,
                 A_address, B_address, 
@@ -9005,6 +11114,62 @@ public class CudaFloat32EngineBase extends EngineBase
     //</editor-fold>
      
     //<editor-fold defaultstate="collapsed" desc="center reduce function">
+    @Override
+    public Syncer center_linear(long Y_address, 
+            long X_address, 
+            float alpha, float beta,
+            int dim0, int dim1, int dim2, 
+            int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        long V_address = 0L; long[] block = null;
+
+        int N = dim1, M = dim0 * dim2;
+        int nextN = Cuda_reduce.center_nextN(N, M);
+        if(nextN != 1) {//V[HV: nextN, M: row_lengthv], [HV, dim0*dim2]
+            block = core.malloc(nextN * M);
+            V_address = block[1];
+        }
+        
+        Cuda_reduce.center_linear(stream, 
+                X_address,
+                alpha, beta, 
+                dim0, dim1, dim2,
+                V_address, Y_address,
+                width, stride, 1);
+        return (nextN == 1? 
+                new StreamSyncer(streamPool, stream):
+                new StreamBlockSyncer(streamPool, stream, core, block));
+    }
+
+    @Override
+    public Syncer center_quadratic(long Y_address,
+            long X_address,
+            float alpha, float beta, float gamma,
+            int dim0, int dim1, int dim2,
+            int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        long V_address = 0L; long[] block = null;
+
+        int N = dim1, M = dim0 * dim2;
+        int nextN = Cuda_reduce.center_nextN(N, M);
+        if(nextN != 1) {//V[HV: nextN, M: row_lengthv], [HV, dim0*dim2]
+            block = core.malloc(nextN * M);
+            V_address = block[1];
+        }
+        
+        Cuda_reduce.center_quadratic(stream, 
+                X_address, 
+                alpha, beta, gamma, 
+                dim0, dim1, dim2,
+                V_address, Y_address,
+                width, stride, 1);
+        return (nextN == 1? 
+                new StreamSyncer(streamPool, stream):
+                new StreamBlockSyncer(streamPool, stream, core, block));
+    }
+    
     //<editor-fold defaultstate="collapsed" desc="center_quadratic_dual">
     @Override
     public Syncer center_quadratic2(long Y_address,
@@ -9626,11 +11791,52 @@ public class CudaFloat32EngineBase extends EngineBase
     {
         long stream = streamPool.getStream();
         Cuda_image.img_dualLinear2_div2D(stream, 
-                X_address, X1_address, X2_address, 
+                X_address, 
+                X1_address, X2_address, 
                 alpha1, beta1, gamma1, 
                 alpha2, beta2, gamma2, C, 
                 Y_address, 
                 lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer img_dualLinear2_normalize2D_row(long Y_address, 
+            long X_address,
+            long X1_address, long X2_address, int row_lengthv, 
+            float alpha1, float beta1, float gamma1,
+            float alpha2, float beta2, float gamma2, float C, 
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        Cuda_image.img_dualLinear2_noramlize2D_row(stream, 
+                X_address, 
+                X1_address, X2_address, row_lengthv,
+                alpha1, beta1, gamma1, 
+                alpha2, beta2, gamma2, C, 
+                Y_address, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer img_dualLinear2_normalize2D_center(long Y_address, 
+            long X_address, 
+            long X1_address, long X2_address, 
+            float alpha1, float beta1, float gamma1, 
+            float alpha2, float beta2, float gamma2, float C,
+            int dim0, int dim1, int dim2,
+            int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        Cuda_image.img_dualLinear2_noramlize2D_center(stream, 
+                X_address,
+                X1_address, X2_address, 
+                alpha1, beta1, gamma1, 
+                alpha2, beta2, gamma2, C, 
+                Y_address,
+                dim0, dim1, dim2,
+                width, stride);
         return new StreamSyncer(streamPool, stream);
     }
     

@@ -12,8 +12,7 @@ import z.dragon.nn.unit.Unit;
  * two input, and two output.
  * @author Gilgamesh
  */
-public abstract class DualUnit extends Unit
-{
+public abstract class DualUnit extends Unit {
     private static final long serialVersionUID = 1L;
  
     @Override public boolean is_complex() { return false; }

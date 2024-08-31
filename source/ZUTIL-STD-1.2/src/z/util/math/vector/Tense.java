@@ -60,9 +60,7 @@ public class Tense
         for(int y=0; y<dimY; y++)
         for(int x=0; x<dimX; x++) T[w][z][y][x] = V[index++];
     }
-    public static float[][][][] vectorToTensor_4D(float[] V, int dimW, int dimZ, int dimY, int dimX)
-    {
-        
+    public static float[][][][] vectorToTensor_4D(float[] V, int dimW, int dimZ, int dimY, int dimX) {
         float[][][][] T=new float[dimW][dimZ][dimY][dimX];
         Tense.vectorToTensor_4D(T, V, dimW, dimZ, dimY, dimX);
         return T;
@@ -326,6 +324,7 @@ public class Tense
         Tense.conv3D_naive(deltaY_p, OH_p, OW_p, W_r, FH, FW, deltaX, IH, IW, N, OC, IC, 1, 1, oph, opw);
         //Tensor.conv3D_img2col(deltaY_p, OH_p, OW_p, W_r, FH, FW, deltaX, IH, IW, N, OC, IC, 1, 1, oph, opw);
     }
+    //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="deconv3D_deltaX_img2col">
     //GN = IC
@@ -1401,6 +1400,107 @@ public class Tense
     }
     //</editor-fold>
     
+    //<editor-fold defaultstate="collapsed" desc="2D convolution">
+    public static void conv2D_naive(
+        float[][][] X, int IW,
+	float[][][] W, int FW,
+	float[][][] Y, int OW,
+	int N, int IC, int OC,
+	int sw, int pw)
+    {
+        System.out.format("(IH, IW, FH, FW, OH, OW) = (%d, %d, %d)\n", IW, FW, OW);
+        System.out.format("(N, IC, OC) = (%d, %d, %d)\n", N, IC, OC);
+        System.out.format("(ph, pw, sh, sw) = (%d, %d)\n", pw, sw);
+        
+	for (int n = 0; n < N; n++)
+        for (int oc = 0; oc < OC; oc++) {
+            int iw_s, ow;
+            for (iw_s = -pw, ow = 0; iw_s <= (IW + pw - FW) && ow < OW; iw_s += sw, ow++) {//ow < OW
+                double v = 0;
+                for (int fw = 0; fw < FW; fw++)
+                for (int ic = 0; ic < IC; ic++) {  
+                    int iw = iw_s + fw;
+                    if (iw < 0 || iw >= IW) continue;
+                    v += X[n][iw][ic] * W[oc][fw][ic];
+		}
+                Y[n][ow][oc] = (float) v;
+            }
+        }
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="deconv2D_deltaX_img2col">
+    //GN = IC
+    //GM = N*IH*IW
+    //GK = OC*FH*FW
+    public static void deconv2D_deltaX_img2col(
+	float[][][] deltaY, int OW, 
+	float[][][] W,      int FW, 
+	float[][][] deltaX, int IW, 
+	int N, int IC, int OC,
+	int sw, int pw)
+    {
+	int GN = IC;
+        int GM = N * IW;
+	int GK = OC *  FW;
+        
+        int OWp = OW + (OW-1)*(sw-1);
+        int opw = FW - pw - 1;
+        
+	for (int i = 0; i < GN; i++) {
+            int ic = i;
+            for (int j = 0; j < GM; j++) {
+		int n = j / IW, iw = j % IW;
+                
+		float v = 0.0f;
+		for (int k = 0; k < GK; k++) {
+                    int oc = k / FW, fw = k % FW;
+                    int ow = iw - opw + fw;
+                    
+                    if (ow < 0 || ow >= OWp) continue;
+                    if (ow % sw != 0) continue;
+                    
+                    float dy = deltaY[n][ow / sw][oc];
+                    float w = W[oc][FW - 1 - fw][ic];
+                    v += dy * w;
+		}
+                deltaX[n][iw][ic] = v;
+            }
+	}
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="deconv2D_deltaW_img2col2">
+    public static void deconv2D_deltaW_img2col2(
+        float[][][] X,      int IW,
+        float[][][] deltaY, int OW,
+        float[][][] deltaW, int FW,
+        int N, int IC, int OC, 
+        int sw, int pw)
+    {
+	int GN = OC;
+        int GM = IC * FW;
+	int GK = N * OW;
+        int opw = pw;
+	for (int i = 0; i < GN; i++) {
+            int oc = i;
+            for (int j = 0; j < GM; j++) {
+		int ic = j / FW, fw = j % FW;
+                
+		float v = 0.0f;
+		for (int k = 0; k < GK; k++) {
+                    int n = k / OW, ow = k % OW;
+                    int iw = fw - opw + (ow*sw);
+
+                    if (iw < 0 || iw >= IW) continue;
+                    float x = X[n][iw][ic];
+                    float dy = deltaY[n][ow][oc];
+                    v += x * dy;
+		}
+                deltaW[oc][fw][ic] = v;
+            }
+        }
+    }
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="2D pooling">
     public static void pool2D_avg_naive_ignore_padding(
         float[][][][] X, int IH, int IW,
@@ -1430,7 +1530,7 @@ public class Tense
         }
     }
     
-      public static void pool2D_avg_naive(
+    public static void pool2D_avg_naive(
         float[][][][] X, int IH, int IW,
 	int FH, int FW,
 	float[][][][] Y, int OH, int OW,
@@ -1521,9 +1621,68 @@ public class Tense
             }
 	}
     }
-      
-      
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="1D pooling">
+    public static void pool1D_avg_naive_ignore_padding(
+        float[][][] X, int IW, int FW,
+	float[][][] Y, int OW,
+	int N, int IC,
+	int sw, int pw)
+    {
+	for (int n = 0; n < N; n++)
+        for (int ic = 0; ic < IC; ic++) {
+            for (int ow = 0; ow < OW; ow++) {//ow < OW
+                float v = 0; int count = 0;//the padding part is not included
+                for (int fw = 0; fw < FW; fw++) {
+                    int iw = ow*sw - pw + fw;
+                    if (iw < 0 || iw >= IW) continue;
+                    v += X[n][iw][ic]; count++;
+		}
+                Y[n][ow][ic] = v / count;
+            }
+        }
+    }
     
+    public static void pool1D_avg_naive(
+        float[][][] X, int IW, int FW,
+	float[][][] Y, int OW,
+	int N, int IC,
+	int sw, int pw)
+    {
+	for (int n = 0; n < N; n++)
+        for (int ic = 0; ic < IC; ic++) {
+            for (int ow = 0; ow<OW; ow++) {//ow < OW
+                float v = 0; 
+                for (int fw = 0; fw < FW; fw++) {
+                    int iw = ow*sw - pw + fw;
+                    if (iw < 0 || iw >= IW) continue;
+                    v += X[n][iw][ic]; 
+		}
+                Y[n][ow][ic] = v / FW;
+            }
+        }
+    }
+    
+    public static void pool1D_max_naive(
+            float[][][] X, int IW, int FW,
+            float[][][] Y, int OW,
+            int N, int IC,
+            int sw, int pw)
+    {
+	for (int n = 0; n < N; n++)
+        for (int ic = 0; ic < IC; ic++) {
+            for (int ow = 0; ow < OW; ow++) {//ow < OW
+                float v = - Float.MAX_VALUE;//the padding part is not included
+                for (int fw = 0; fw < FW; fw++) {
+                    int iw = ow*sw - pw + fw;
+                    if (iw < 0 || iw >= IW) continue;
+                    float x = X[n][iw][ic];
+                    if(v < x) v = x;
+		}
+                Y[n][ow][ic] = v;
+            }
+        }
+    }
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="2D unpooing_average">

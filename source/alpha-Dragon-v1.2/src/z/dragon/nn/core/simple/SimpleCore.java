@@ -43,7 +43,7 @@ public abstract class SimpleCore<T extends SimpleUnit> extends UnitCore<T>
     public final Tensor deltaY() { return deltaY; }
     
     protected final Tensor holdX() { return (X.check()?  X.hold(X_mod_count, name() + ".X") : X); } 
-    protected final Tensor holdY() { return (Y.check()?  Y.hold(Y_mod_count, name() + ".Y") : X); }
+    protected final Tensor holdY() { return (Y.check()?  Y.hold(Y_mod_count, name() + ".Y") : Y); }
     
     protected final boolean is_holdX() { return X.is_hold(X_mod_count); }
     protected final boolean is_holdY() { return Y.is_hold(Y_mod_count); }

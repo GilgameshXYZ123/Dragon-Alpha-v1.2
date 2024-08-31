@@ -66,12 +66,48 @@ public class EngineAlloc
         return eg.empty(XN, OH, OW, WOC);
     }
     //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="conv2D / deconv2D">
+    public Tensor conv2D(Tensor X, Tensor W, int OW, int sw, int pw) {
+        if(eg.check) {
+            eg.require_dtype(X); eg.require_dtype(W); 
+            eg.equals(X.ndim(), "X.ndim", 3);
+            eg.equals(W.ndim(), "W.ndim", 3);
+            eg.equals(W.dim(2), "W,IC ", X.dim(2), "X.IC");
+        }
+        
+        int[] dimX = X.dim, dimW = W.dim;
+        int XN  = dimX[0], IW = dimX[1];//X[N,  IW, IC]
+        int WOC = dimW[0], FW = dimW[1];//W[OC, FW, IC]
+        
+        if(OW == -1) OW = (IW - FW + (pw << 1)) / sw + 1;//floor
+        return eg.empty(XN, OW, WOC);
+    }
+    
+    public Tensor deconv2D(Tensor X, Tensor W, int OW, int sw, int pw) {
+        if(eg.check) {
+            eg.require_dtype(X); eg.require_dtype(W); 
+            eg.equals(X.ndim(), "X.ndim", 3);
+            eg.equals(W.ndim(), "W.ndim", 3);
+            eg.equals(W.dim(0), "W.IC", X.dim(2), "X.IC");
+        }
+        
+        int[] dimX = X.dim, dimW = W.dim;
+        int XN = dimX[0], IW  = dimX[1];//X[N,  IW, IC]
+        int FW = dimW[1], WOC = dimW[2];//W[IC, FW, OC]
+        
+        if(OW == -1) OW = (IW - 1)*sw + FW - (pw << 1);//floor
+        return eg.empty(XN, OW, WOC);
+    }
+    //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="poo2D">
-    public Tensor pool2D(Tensor X, int FH, int FW, int OH, int OW, int sh, int sw, int ph, int pw) {
+    public Tensor pool2D(Tensor X, 
+            int FH, int FW, int OH, int OW, 
+            int sh, int sw, int ph, int pw) 
+    {
         if(eg.check) { eg.require_dtype(X, "X"); eg.equals(X.ndim(), "X.ndim", 4); }
         
-        int[] Xdim = X.dim;//X[ N, IH, IW, IC]
+        int[] Xdim = X.dim;//X[N, IH, IW, IC]
         int XN = Xdim[0], IH = Xdim[1], IW = Xdim[2], XIC = Xdim[3];
         
         if(OH == -1) OH = (IH - FH + (ph << 1))/sh + 1;//floor
@@ -85,7 +121,7 @@ public class EngineAlloc
     {
         if(eg.check) { eg.require_dtype(X, "X"); eg.equals(X.ndim(), "X.ndim", 4); }
         
-        int[] Xdim = X.dim;//X[ N, IH, IW, IC]
+        int[] Xdim = X.dim;//X[N, IH, IW, IC]
         int XN = Xdim[0], IH = Xdim[1], IW = Xdim[2], XIC = Xdim[3];
         
         if(OH == -1) OH = (IH - FH + (ph << 1))/sh + 1;//floor
@@ -93,6 +129,32 @@ public class EngineAlloc
         
         Tensor Y = eg.empty(XN, OH, OW, XIC);
         Tensor Index = eg.empty_int32(XN, OH, OW, XIC);
+        return new Tensor[] { Y, Index };
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="poo1D">
+    public Tensor pool1D(Tensor X, int FW, int OW, int sw, int pw) {
+        if(eg.check) { eg.require_dtype(X, "X"); eg.equals(X.ndim(), "X.ndim", 4); }
+        
+        int[] Xdim = X.dim;
+        int XN = Xdim[0], IW = Xdim[1], XIC = Xdim[2];//X[N, IW, IC]
+        
+        if(OW == -1) OW = (IW - FW + (pw << 1))/sw + 1;//floor
+        return eg.empty(XN, OW, XIC).c();
+    }
+    
+    public Tensor[] pool1D_indexed(Tensor X,
+            int FW, int OW, int sw, int pw)
+    {
+        if(eg.check) { eg.require_dtype(X, "X"); eg.equals(X.ndim(), "X.ndim", 4); }
+        
+        int[] Xdim = X.dim;
+        int XN = Xdim[0], IW = Xdim[1], XIC = Xdim[2];//X[N, IW, IC]
+        
+        if(OW == -1) OW = (IW - FW + (pw << 1))/sw + 1;//floor
+        
+        Tensor Y = eg.empty(XN, OW, XIC);
+        Tensor Index = eg.empty_int32(XN, OW, XIC);
         return new Tensor[] { Y, Index };
     }
     //</editor-fold>

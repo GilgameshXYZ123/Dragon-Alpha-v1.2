@@ -20,14 +20,25 @@
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/ui/JUI.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/math/vector/c/dllmain.c</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/function/Function_int16.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/function/Predicate_float32.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/math/Num.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/math/vector/MatMul.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/function/Predicate_int8.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/function/Predicate_int16.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/math/vector/MatMul_naive.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/xml/exception/DocTypeMismatchedException.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/json/JSONClassParser.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/lang/Lang.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/function/Predicate_int32.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/math/KAverage.java</file>
-            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/math/ExRandom.java</file>
-            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/math/Num.java</file>
-            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/math/vector/Matrix.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/function/Predicate_float64.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/json/JSON.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/function/Function_float32.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/function/Predicate_int64.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/net/TCP.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/ZUTIL-STD-1.2/src/z/util/math/vector/ExMatrix.java</file>
         </group>
     </open-files>
 </project-private>

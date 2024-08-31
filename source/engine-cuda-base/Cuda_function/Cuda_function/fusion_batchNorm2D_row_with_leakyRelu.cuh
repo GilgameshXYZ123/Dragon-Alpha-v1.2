@@ -96,7 +96,7 @@ void __batchNorm2D_row_with_leakyRelu(cudaStream_t stream,
 	const float* X,
 	const float* X_mean,
 	const float* X_var, float eps, int row_lengthv,
-	float* __restrict__ Y, float k,
+	float*  Y, float k,
 	int lengthv, int width, int stride)
 {
 	if (lengthv < 256) { batchNorm2d_row_with_leakyRelu_k4_small(stream, X, X_mean, X_var, eps, row_lengthv, Y, k, lengthv); return; }

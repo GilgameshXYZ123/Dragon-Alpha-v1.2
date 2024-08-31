@@ -3,7 +3,7 @@
 #ifndef TEST_H
 #define TEST_H
 
-#ifndef COMPLIE
+#ifndef COMPILE
 
 
 #ifndef UTIL
@@ -108,9 +108,9 @@ void testCorrect(int N, int M, int K)
 	cudaError_t error;
 
 	//CPU------------------------------
-	//multiply(A, B, C1, N, M, K); int GZ = matMul_gridZ(N, M, K);
+	multiply(A, B, C1, N, M, K); int GZ = matMul_gridZ(N, M, K);
 	//multiplyT1(A, B, C1, N, M, K);
-	multiplyT2(A, B, C1, N, M, K); int GZ = matMulT2_gridZ(N, M, K);
+	//multiplyT2(A, B, C1, N, M, K); int GZ = matMulT2_gridZ(N, M, K);
 
 	cout << "CPU: "; println(C1, 10);
 
@@ -381,7 +381,7 @@ void testSpeed(int nIter, int N, int M, int K)
 			//k88_pm8_mgk(LB, NULL, dA, dB, dC, N, M, K, M);
 			//k88_p_mgk(LB, NULL, dA, dB, dC, N, M, K, M);
 
-			//u88_mgk(LB, NULL, dA, dB, dC, N, M, K, M);
+			u88_mgk(LB, NULL, dA, dB, dC, N, M, K, M);
 			//u84_mgk(LB, NULL, dA, dB, dC, N, M, K, M);
 			//u48_mgk(LB, NULL, dA, dB, dC, N, M, K, M);
 			//u44_mgk(LB, NULL, dA, dB, dC, N, M, K, M);
@@ -565,13 +565,14 @@ main()
 	//int N = 2048, M = 2048, K = 4096;
 	//int N = 512, M = 2048, K = 8192 ;
 	//int N = 128, M = 128, K = 132;
+	int N = 1024, M = 1024, K = 1024;
 
-	int N = 68, M = 124, K = 520;
+	//int N = 68, M = 124, K = 520;
 
-	testCorrect<4>(N, M, K); return 0;
+	//testCorrect<4>(N, M, K); return 0;
 	//testCorrect<4>(N/2, M/2, K/2);
 	//testSpeed<4>(1, N, M, K);
-	//testSpeed<4>(1000, N * 2, M * 2, K * 2);
+	testSpeed<4>(1000, N * 2, M * 2, K * 2);
 	//testSpeed<4>(1000, N, M, K);
 
 	//=====[normal area]==============================================

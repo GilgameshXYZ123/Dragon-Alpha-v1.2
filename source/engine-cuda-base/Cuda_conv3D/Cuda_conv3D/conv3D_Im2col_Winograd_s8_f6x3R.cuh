@@ -78,7 +78,7 @@ __global__ void conv3dWinograd_f6x3_kernel_64x192R_tex(
 	const int boc0 = (blockIdx.x << 6);
 	const int Gk = (ty & 7), Gi = ((tx << 1) + (ty > 7)) << 1;//[8, 64]
 	const int toc0 = boc0 + Gi;
-	CW += Gk *OC + toc0;//CW[0, 0, Gk, toc0]
+	CW += Gk * OC + toc0;//CW[0, 0, Gk, toc0]
 
 	//prepare for X[N, IH, IW, IC]
 	const int bj0 = (blockIdx.y * 192);//32 * 6 = 192
@@ -184,7 +184,7 @@ __global__ void conv3dWinograd_f6x3_kernel_64x192R_tex(
 			float2 w1 = *(float2*)(CW + W1);
 			float2 w2 = *(float2*)(CW + W2);
 
-			//load 2 group from X[N, IH, IW, IC]
+			//load 1 group from X[N, IH, IW, IC]
 			int tX0 = X0 + fh * IW * IC + oic;
 			int tX1 = tX0 + IC, tX2 = tX0 + (IC << 1);
 			int tX3 = tX0 + IC * 3, tX4 = tX0 + (IC << 2);

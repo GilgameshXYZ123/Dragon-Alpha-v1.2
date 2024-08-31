@@ -17,15 +17,13 @@ import z.util.math.vector.Vector;
  * dim: 0, 1, 2, 3.
  * @author Gilgamesh
  */
-public class EngineCore implements MemStatus
-{
+public class EngineCore implements MemStatus {
     public static final long MEM_1GB = (1L) << 30;
     public static final long MEM_1MB = (1L) << 20;
     public static final long NULL = 0L;
     
     public static final long L_sizeof_int32 = 2;
     public static final long L_sizeof_int8 = 0;
-    
     public static final long sizeof_int32 = 4;
     public static final long sizeof_int8 = 1;
     
@@ -813,7 +811,7 @@ public class EngineCore implements MemStatus
     //</editor-fold>
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Convlution 3D">
+    //<editor-fold defaultstate="collapsed" desc="Convlution 3D (NHWC)">
     //<editor-fold defaultstate="collapsed" desc="param check">
     protected void conv3D_param_check(
             int OH, int OW, int IH, int IW, int FH, int FW, 
@@ -862,7 +860,8 @@ public class EngineCore implements MemStatus
             if(W_address == NULL) throw new NullPointerException("Tensor W is null");//W[OC, FH, FW, IC]
             conv3D_param_check(OH, OW, IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
         }
-        return base.conv3D(Y_address, OH, OW, 
+        return base.conv3D(
+                Y_address, OH, OW, 
                 X_address, IH, IW,
                 W_address, FH, FW, 
                 ((N  + 3) >> 2) << 2,
@@ -888,7 +887,8 @@ public class EngineCore implements MemStatus
             if(Bias_address == NULL) throw new NullPointerException("Tensor Bias is null");//Bias[OC]
             func_param_check_row(lengthv, OC_4x, OC, OC_4x);
         }
-        return base.conv3D_biased(Y_address, OH, OW,
+        return base.conv3D_biased(
+                Y_address, OH, OW,
                 X_address, IH, IW,
                 W_address, FH, FW,
                 ((N  + 3) >> 2) << 2, 
@@ -931,7 +931,7 @@ public class EngineCore implements MemStatus
     //<editor-fold defaultstate="collapsed" desc="backward propagation">
     public Syncer conv3D_deltaW(
             long deltaW_address, int FH, int FW, 
-            long X_address, int IH, int IW,
+            long X_address,      int IH, int IW,
             long deltaY_address, int OH, int OW,
             int N, int IC, int OC,
             int sh, int sw, int ph, int pw)
@@ -944,7 +944,7 @@ public class EngineCore implements MemStatus
         }
         return base.conv3D_deltaW(
                 deltaW_address, FH, FW, 
-                X_address, IH, IW, 
+                X_address,      IH, IW, 
                 deltaY_address, OH, OW, 
                 ((N  + 3) >> 2) << 2, 
                 ((IC + 3) >> 2) << 2,
@@ -955,7 +955,7 @@ public class EngineCore implements MemStatus
     public Syncer conv3D_deltaX(
             long deltaX_address, int IH, int IW,
             long deltaY_address, int OH, int OW,
-            long W_address, int FH, int FW,
+            long W_address,      int FH, int FW,
             int N, int IC, int OC,
             int sh, int sw, int ph ,int pw)
     {
@@ -968,7 +968,7 @@ public class EngineCore implements MemStatus
         return base.conv3D_deltaX(
                 deltaX_address, IH, IW, 
                 deltaY_address, OH, OW, 
-                W_address, FH, FW, 
+                W_address,      FH, FW, 
                 ((N  + 3) >> 2) << 2, 
                 ((IC + 3) >> 2) << 2,
                 ((OC + 3) >> 2) << 2, 
@@ -976,8 +976,162 @@ public class EngineCore implements MemStatus
     }
     //</editor-fold>
     //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Convlution 2D (NWC)">
+    //<editor-fold defaultstate="collapsed" desc="param check">
+    protected void conv2D_param_check(
+            int OW, int IW, int FW, 
+            int N, int IC, int OC, 
+            int sw, int pw)
+    {
+        if(OW <= 0) throw new IllegalArgumentException(String.format("OW { got %d } must > 0", OW));
+        if(N  <= 0) throw new IllegalArgumentException(String.format("N  { got %d } must > 0", N));
+        if(IC <= 0) throw new IllegalArgumentException(String.format("IC { got %d } must > 0", IC));
+        if(OC <= 0) throw new IllegalArgumentException(String.format("OC { got %d } must > 0", OC));
+        if(sw <= 0) throw new IllegalArgumentException(String.format("sw { got %d } must > 0", sw));
+        if(pw < 0) throw new IllegalArgumentException(String.format("pw { got %d } must >= 0", pw));
+        
+        if(FW <= pw) throw new IllegalArgumentException(String.format("FW { got %d } <= pw { got %d }", FW, pw));
+        if(FW < sw) throw new IllegalArgumentException(String.format("FW { got %d } < sw { got %d }", FW, sw));
+        
+        if(FW > IW + (pw << 1)) throw new IllegalArgumentException(String.format(
+                "FW { got %d } > IW { got %d } + 2 * pw { %d }", FW, IW, pw));
+        if(IW - FW + (pw << 1) < (OW - 1)*sw) throw new IllegalArgumentException(String.format(
+                "IW { got %d } - FW { got %d } + 2 * pw { got %d } >= OW { got %d } - 1) * sw { got %d }", 
+                IW, FW, pw, OW, sw));
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="forward propagation">
+    public Syncer conv2D(
+            long Y_address, int OW, 
+            long X_address, int IW,
+            long W_address, int FW,
+            int N, int IC, int OC, 
+            int sw, int pw)
+    {
+        if(check) {
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");//X[N, IW, IC]
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");//Y[N, OW, OC]
+            if(W_address == NULL) throw new NullPointerException("Tensor W is null");//W[OC, FW, IC]
+            conv2D_param_check(OW, IW, FW, N, IC, OC, sw, pw);
+        }
+        return base.conv3D(
+                Y_address, 1, OW, 
+                X_address, 1, IW,
+                W_address, 1, FW, 
+                ((N  + 3) >> 2) << 2,
+                ((IC + 3) >> 2) << 2,
+                ((OC + 3) >> 2) << 2, 
+                1, sw, 0, pw);
+    }
+   
+    public Syncer conv2D_biased(
+            long Y_address, int OW, 
+            long X_address, int IW, 
+            long W_address, int FW,         
+            int N, int IC, int OC,//row_lengthv = OC_4x, [width, stride] = OC, OC_4x
+            int sw, int pw,
+            long Bias_address, int lengthv)//lengthv = Y.lengthv = N * OH * OW * OC_4x
+    {
+        int OC_4x = ((OC + 3) >> 2) << 2;
+        if(check) {
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");//X[N, IW, IC]
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");//Y[N, OW, OC]
+            if(W_address == NULL) throw new NullPointerException("Tensor W is null");//W[OC, FW, IC]
+            conv2D_param_check(OW, IW, FW, N, IC, OC, sw, pw);
+            if(Bias_address == NULL) throw new NullPointerException("Tensor Bias is null");//Bias[OC]
+            func_param_check_row(lengthv, OC_4x, OC, OC_4x);
+        }
+        return base.conv3D_biased(
+                Y_address, 1, OW,
+                X_address, 1, IW,
+                W_address, 1, FW,
+                ((N  + 3) >> 2) << 2, 
+                ((IC + 3) >> 2) << 2,
+                OC_4x,//((OC + 3) >> 2) << 2
+                1, sw, 0, pw, 
+                Bias_address,
+                lengthv, OC);
+    }
     
-    //<editor-fold defaultstate="collapsed" desc="DepthWiseConvlution 3D">
+    public Syncer deconv2D_biased(
+            long Y_address, int OW,
+            long X_address, int IW,
+            long W_address, int FW,
+            int N, int IC, int OC,//row_lengthv = OC_4x, [width, stride] = OC, OC_4x
+            int sw, int pw, 
+            long Bias_address, int lengthv)//lengthv = Y.lengthv = N * OH * OW * OC_4x
+    {
+        int OC_4x = ((OC + 3) >> 2) << 2;
+        if(check) {
+            if(Y_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(W_address == NULL) throw new NullPointerException("Tensor W is null");
+            conv2D_param_check(IW, OW, FW, N, IC, OC, sw, pw);
+            if(Bias_address == NULL) throw new NullPointerException("Tensor Bias is null");//Bias[OC]
+            func_param_check_row(lengthv, OC_4x, OC, OC_4x);
+        }
+        return base.deconv3D_biased(
+                Y_address, 1, OW, 
+                X_address, 1, IW, 
+                W_address, 1, FW, 
+                ((N  + 3) >> 2) << 2,  
+                ((IC + 3) >> 2) << 2,
+                OC_4x,//((OC + 3) >> 2) << 2
+                1, sw, 0, pw, 
+                Bias_address, 
+                lengthv, OC);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward propagation">
+    public Syncer conv2D_deltaW(
+            long deltaW_address, int FW, 
+            long X_address,      int IW,
+            long deltaY_address, int OW,
+            int N, int IC, int OC,
+            int sw, int pw)
+    {
+        if(check) {
+            if(deltaW_address == NULL) throw new NullPointerException("Tensor deltaW is null");
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            conv2D_param_check(OW, IW, FW, N, IC, OC, sw, pw);
+        }
+        return base.conv3D_deltaW(
+                deltaW_address, 1, FW, 
+                X_address,      1, IW, 
+                deltaY_address, 1, OW, 
+                ((N  + 3) >> 2) << 2, 
+                ((IC + 3) >> 2) << 2,
+                ((OC + 3) >> 2) << 2, 
+                1, sw, 0, pw);
+    }
+    
+    public Syncer conv2D_deltaX(
+            long deltaX_address, int IW,
+            long deltaY_address, int OW,
+            long W_address,      int FW,
+            int N, int IC, int OC,
+            int sw, int pw)
+    {
+        if(check) {
+            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(W_address == NULL) throw new NullPointerException("Tensor W is null");
+            conv2D_param_check(OW, IW, FW, N, IC, OC, sw, pw);
+        }
+        return base.conv3D_deltaX(
+                deltaX_address, 1, IW, 
+                deltaY_address, 1, OW, 
+                W_address,      1, FW, 
+                ((N  + 3) >> 2) << 2, 
+                ((IC + 3) >> 2) << 2,
+                ((OC + 3) >> 2) << 2, 
+                1, sw, 0, pw);
+    }
+    //</editor-fold>
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="DepthWiseConvlution 3D (NHWC)">
     //<editor-fold defaultstate="collapsed" desc="forward propagation">
     public Syncer depthwise_conv3D(
             long Y_address, int OH, int OW, 
@@ -1083,7 +1237,7 @@ public class EngineCore implements MemStatus
     //</editor-fold>
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Pooling 2D"> 
+    //<editor-fold defaultstate="collapsed" desc="Pooling 2D (NHWC)"> 
     //<editor-fold defaultstate="collapsed" desc="param check">
     protected void pool2D_param_check(
             int OH, int OW, int IH, int IW, int FH, int FW, 
@@ -1135,7 +1289,8 @@ public class EngineCore implements MemStatus
             if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
             pool2D_param_check(OH, OW, IH, IW, FH, FW, 1, IC, sh, sw, ph, pw);
         }
-        return base.pool2D_max(Y_address, OH, OW, 
+        return base.pool2D_max(
+                Y_address, OH, OW, 
                 X_address, 
                 ((IH + 3) >> 2) << 2, 
                 IW, FH, FW, 1,//N = 1
@@ -1155,7 +1310,8 @@ public class EngineCore implements MemStatus
             if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
             pool2D_param_check(OH, OW, IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
         }
-        return base.pool2D_max(Y_address, OH, OW, 
+        return base.pool2D_max(
+                Y_address, OH, OW, 
                 X_address, IH, IW, FH, FW, 
                 ((N  + 3) >> 2) << 2, 
                 ((IC + 3) >> 2) << 2,
@@ -1176,7 +1332,8 @@ public class EngineCore implements MemStatus
             if(Y_address == NULL) throw new NullPointerException("Tensor Index is null");
             pool2D_param_check(OH, OW, IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
         }
-        return base.pool2D_max_indexed(Y_address, Index_address, OH, OW, 
+        return base.pool2D_max_indexed(
+                Y_address, Index_address, OH, OW, 
                 X_address, IH, IW, FH, FW,
                 ((N  + 3) >> 2) << 2, 
                 ((IC + 3) >> 2) << 2,
@@ -1184,7 +1341,7 @@ public class EngineCore implements MemStatus
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="pool2D_avg">
-    public Syncer pool2D_avg(//ndim = 3
+    public Syncer pool2D_avg(boolean ignore_padding,//ndim = 3
             long Y_address, int OH, int OW,
             long X_address, int IH, int IW,
             int FH, int FW, int IC,
@@ -1195,7 +1352,8 @@ public class EngineCore implements MemStatus
             if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
             pool2D_param_check(OH, OW, IH, IW, FH, FW, 1, IC, sh, sw, ph, pw);
         }
-        return base.pool2D_avg(Y_address, OH, OW, 
+        return base.pool2D_avg(ignore_padding,
+                Y_address, OH, OW, 
                 X_address, 
                 ((IH + 3) >> 2) << 2, 
                 IW, FH, FW, 1,//N = 1
@@ -1203,7 +1361,7 @@ public class EngineCore implements MemStatus
                 sh, sw, ph, pw);
     }
     
-    public Syncer pool2D_avg(//ndim = 4
+    public Syncer pool2D_avg(boolean ignore_padding,//ndim = 4
             long Y_address, int OH, int OW,
             long X_address, int IH, int IW,
             int FH, int FW,
@@ -1215,45 +1373,8 @@ public class EngineCore implements MemStatus
             if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
             pool2D_param_check(OH, OW, IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
         }
-        return base.pool2D_avg(Y_address, OH, OW, 
-                X_address, IH, IW, FH, FW, 
-                ((N  + 3) >> 2) << 2, 
-                ((IC + 3) >> 2) << 2,
-                sh, sw, ph, pw);
-    }
-    
-    public Syncer pool2D_avg_ignore_padding(//ndim = 3
-            long Y_address, int OH, int OW,
-            long X_address, int IH, int IW,
-            int FH, int FW, int IC,
-            int sh, int sw, int ph, int pw)
-    {
-        if(check) {
-            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
-            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
-            pool2D_param_check(OH, OW, IH, IW, FH, FW, 1, IC, sh, sw, ph, pw);
-        }
-        return base.pool2D_avg_ignore_padding(Y_address, OH, OW, 
-                X_address,
-                ((IH + 3) >> 2) << 2, 
-                IW, FH, FW, 1,//N = 1
-                ((IC + 3) >> 2) << 2,
-                sh, sw, ph, pw);
-    }
-    
-    public Syncer pool2D_avg_ignore_padding(//ndim = 4
-            long Y_address, int OH, int OW,
-            long X_address, int IH, int IW,
-            int FH, int FW,
-            int N, int IC,
-            int sh, int sw, int ph, int pw)
-    {
-        if(check) {
-            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
-            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
-            pool2D_param_check(OH, OW, IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
-        }
-        return base.pool2D_avg_ignore_padding(Y_address, OH, OW, 
+        return base.pool2D_avg(ignore_padding,
+                Y_address, OH, OW, 
                 X_address, IH, IW, FH, FW, 
                 ((N  + 3) >> 2) << 2, 
                 ((IC + 3) >> 2) << 2,
@@ -1276,11 +1397,9 @@ public class EngineCore implements MemStatus
             if(X_address == NULL) throw new NullPointerException("Tensor X is null");
             pool2D_param_check(OH, OW, IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
         }
-        
         return base.unpool2D_max(
                 deltaX_address, X_address, IH, IW, 
-                deltaY_address, Y_address, OH, OW,
-                FH, FW, 
+                deltaY_address, Y_address, OH, OW, FH, FW, 
                 ((N  + 3) >> 2) << 2, 
                 ((IC + 3) >> 2) << 2,
                 sh, sw, ph, pw);
@@ -1299,17 +1418,15 @@ public class EngineCore implements MemStatus
             if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
             pool2D_param_check(OH, OW, IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
         }
-        
         return base.unpool2D_max_Indexed(
                 deltaX_address, IH, IW, 
-                deltaY_address, Index_address, OH, OW, 
-                FH, FW, 
+                deltaY_address, Index_address, OH, OW, FH, FW, 
                 ((N  + 3) >> 2) << 2, 
                 ((IC + 3) >> 2) << 2,
                 sh, sw, ph, pw);
     }
     
-    public Syncer unpool2D_avg(
+    public Syncer unpool2D_avg(boolean ignore_padding,
             long deltaX_address, int IH, int IW,
             long deltaY_address, int OH, int OW, 
             int FH, int FW,
@@ -1321,34 +1438,164 @@ public class EngineCore implements MemStatus
             if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
             pool2D_param_check(OH, OW, IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
         }
-        
-        return base.unpool2D_avg(
+        return base.unpool2D_avg(ignore_padding,
                 deltaX_address, IH, IW, 
                 deltaY_address, OH, OW, FH, FW, 
                 ((N  + 3) >> 2) << 2, 
                 ((IC + 3) >> 2) << 2,
                 sh, sw, ph, pw);
     }
+    //</editor-fold>
+    //</editor-fold>
     
-    public Syncer unpool2D_avg_ignore_padding(
-            long deltaX_address, int IH, int IW,
-            long deltaY_address, int OH, int OW, 
-            int FH, int FW,
-            int N, int IC,
-            int sh, int sw, int ph, int pw)
+    //<editor-fold defaultstate="collapsed" desc="Pooling 1D (NWC)"> 
+    //<editor-fold defaultstate="collapsed" desc="param check">
+    protected void pool1D_param_check(
+            int OW, int IW, int FW, 
+            int N, int IC, int sw, int pw)
+    {
+        if(OW <= 0) throw new IllegalArgumentException(String.format("OW { got %d } must > 0", OW));
+        if(N <= 0) throw new IllegalArgumentException(String.format("N (batch_size) must > 0", N));
+        if(IC <= 0) throw new IllegalArgumentException(String.format("IC (input_channel) { got %d } must > 0", IC));
+        if(sw <= 0) throw new IllegalArgumentException(String.format("sw (srtide_width) { got %d } must > 0", sw));
+        if(pw < 0) throw new IllegalArgumentException(String.format("pw (padding_width) { got %d }  must > 0", pw));
+        
+        if(FW < 2) throw new IllegalArgumentException(String.format("FW { got %d } < 2", FW));
+        if(FW <= pw) throw new IllegalArgumentException(String.format("FW { got %d } <= pw { got %d }", FW, pw));
+        if(FW < sw) throw new IllegalArgumentException(String.format("FW { got %d } < sw { got %d }", FW, sw));
+        
+        if(FW > IW + (pw << 1)) throw new IllegalArgumentException(String.format(
+                "FW { got %d } > IW { got %d } + 2 * pw { %d }", FW, IW , pw));
+        if(IW - FW + (pw << 1) < (OW - 1)*sw) throw new IllegalArgumentException(String.format(
+                "IW { got %d } - FW { got %d } + 2 * pw { got %d } >= (OW { got %d } - 1) * sw { got %d }", 
+                IW, FW, pw, OW, sw));
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="forward propagation">
+    //<editor-fold defaultstate="collapsed" desc="pool1D_max">
+    public Syncer pool1D_max(//ndim = 3
+            long Y_address, int OW,
+            long X_address, int IW,
+            int FW, int N, int IC,
+            int sw, int pw)
+    {
+        if(check) {
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            pool1D_param_check(OW, IW, FW, N, IC, sw, pw);
+        }
+        return base.pool2D_max(
+                Y_address, 1, OW, 
+                X_address, 1, IW, 1, FW, 
+                ((N  + 3) >> 2) << 2, 
+                ((IC + 3) >> 2) << 2,
+                1, sw, 0, pw);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="pool1D_max_indexed">
+    public Syncer pool1D_max_indexed(
+            long Y_address, long Index_address, int OW,
+            long X_address, int IW,
+            int FW, int N, int IC,
+            int sw, int pw)
+    {
+        if(check) {
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Index is null");
+            pool1D_param_check(OW, IW, FW, N, IC, sw,pw);
+        }
+        return base.pool2D_max_indexed(
+                Y_address, Index_address, 1, OW, 
+                X_address, 1, IW, 1, FW,
+                ((N  + 3) >> 2) << 2, 
+                ((IC + 3) >> 2) << 2,
+                1, sw, 0, pw);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="pool1D_avg">
+    public Syncer pool1D_avg(boolean ignore_padding,//ndim = 4
+            long Y_address, int OW,
+            long X_address, int IW,
+            int FW, int N, int IC,
+            int sw, int pw)
+    {
+        if(check) {
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            pool1D_param_check(OW, IW, FW, N, IC, sw, pw);
+        }
+        return base.pool2D_avg(ignore_padding,
+                Y_address, 1, OW, 
+                X_address, 1, IW, 1, FW, 
+                ((N  + 3) >> 2) << 2, 
+                ((IC + 3) >> 2) << 2,
+                1, sw, 0, pw);
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward propagation">
+    public Syncer unpool1D_max(
+            long deltaY_address, long Y_address, int OW, 
+            long deltaX_address, long X_address, int IW,
+            int FW, int N, int IC,
+            int sw, int pw)
+    {
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            pool1D_param_check(OW, IW, FW, N, IC, sw, pw);
+        }
+        
+        return base.unpool2D_max(
+                deltaX_address, X_address, 1, IW, 
+                deltaY_address, Y_address, 1, OW, 1, FW, 
+                ((N  + 3) >> 2) << 2, 
+                ((IC + 3) >> 2) << 2,
+                1, sw, 0, pw);
+    }
+    
+    public Syncer unpool1D_max_Indexed(
+            long deltaX_address, int IW,
+            long deltaY_address, long Index_address, int OW, 
+            int FW, int N, int IC,
+            int sw, int pw)
+    {
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(Index_address == NULL) throw new NullPointerException("Tensor<int32> Index is null");
+            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            pool1D_param_check(OW, IW, FW, N, IC, sw, pw);
+        }
+        
+        return base.unpool2D_max_Indexed(
+                deltaX_address, 1, IW, 
+                deltaY_address, Index_address, 1, OW, 1, FW, 
+                ((N  + 3) >> 2) << 2, 
+                ((IC + 3) >> 2) << 2,
+                1, sw, 0, pw);
+    }
+    
+    public Syncer unpool1D_avg(boolean ignore_padding,
+            long deltaX_address, int IW,
+            long deltaY_address, int OW, 
+            int FW, int N, int IC,
+            int sw, int pw)
     {
         if(check) {
             if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
             if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
-            pool2D_param_check(OH, OW, IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
+            pool1D_param_check(OW, IW, FW, N, IC, sw, pw);
         }
         
-        return base.upool2D_avg_ignore_padding(
-                deltaX_address, IH, IW, 
-                deltaY_address, OH, OW, FH, FW, 
+        return base.unpool2D_avg(ignore_padding,
+                deltaX_address, 1, IW, 
+                deltaY_address, 1, OW, 1, FW, 
                 ((N  + 3) >> 2) << 2, 
                 ((IC + 3) >> 2) << 2,
-                sh, sw, ph, pw);
+                1, sw, 0, pw);
     }
     //</editor-fold>
     //</editor-fold>
@@ -2446,6 +2693,7 @@ public class EngineCore implements MemStatus
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="semi-linear unit functions">
+    //<editor-fold defaultstate="collapsed" desc="exp">
     public Syncer exp2D(long Y_address,
             float alpha, long X_address, float beta, 
             int lengthv, int width) 
@@ -2460,7 +2708,7 @@ public class EngineCore implements MemStatus
                 alpha, X_address, beta, 
                 lengthv, width, stride);
     }
-    
+    //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="BP: log">
     public Syncer log2D(long Y_address, 
             float alpha, long X_address, float beta, 
@@ -2609,8 +2857,8 @@ public class EngineCore implements MemStatus
         if(check) {
             if(X_address == NULL) throw new NullPointerException("Tensor X is NULL");
             if(Y_address == NULL) throw new NullPointerException("Tensor Y is NULL");
-            if(alpha < 0) throw new IllegalArgumentException("Elu: alpha must >=0");
-            if(k < 0) throw new IllegalArgumentException("Elu: negative_slope(k) must >= 0");
+            if(alpha < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if(k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope(got %f) must >= 0", k));
             func_param_check(lengthv, width, stride);
         }
         return base.elu2D(Y_address, 
@@ -2628,8 +2876,8 @@ public class EngineCore implements MemStatus
             if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is NULL");
             if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is NULL");
             if(Y_address == NULL) throw new NullPointerException("Tensor Y is NULL");
-            if(alpha < 0) throw new IllegalArgumentException("Elu: alpha must >=0");
-            if(k < 0) throw new IllegalArgumentException("Elu: negative_slope(k) must >= 0");
+            if(alpha < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if(k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope(got %f) must >= 0", k));
             func_param_check(lengthv, width, stride);
         }
         return base.elu2D_deltaX_v1(deltaX_address, 
@@ -2648,8 +2896,8 @@ public class EngineCore implements MemStatus
             if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is NULL");
             if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is NULL");
             if(X_address == NULL) throw new NullPointerException("Tensor X is NULL");
-            if(alpha < 0) throw new IllegalArgumentException("Elu: alpha must >=0");
-            if(k < 0) throw new IllegalArgumentException("Elu: negative_slope(k) must >= 0");
+            if(alpha < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if(k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope(got %f) must >= 0", k));
             func_param_check(lengthv, width, stride);
         }
         return base.elu2D_deltaX_v2(deltaX_address,
@@ -2828,60 +3076,191 @@ public class EngineCore implements MemStatus
                 lengthv, width, stride);
     }
     //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_elu2D">
+    public Syncer linear2_elu2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma, 
+            float theta, float k,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if (Y_address  == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            if (X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
+            if (theta < 0) throw new IllegalArgumentException("Elu: alpha must >= 0");
+            if (k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope { got %f } must be non-negative", k));
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_elu2D(Y_address, 
+                X1_address, X2_address, 
+                alpha, beta, gamma, 
+                theta, k, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer linear2_elu2D_deltaX_v1(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            float alpha, float beta, 
+            float theta, float k,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if (deltaX1_address == NULL) throw new NullPointerException("Tensor deltaX1 is null");
+            if (deltaX2_address == NULL) throw new NullPointerException("Tensor deltaX2 is null");
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (theta < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if (k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope { got %f } must be non-negative", k));
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_elu2D_deltaX_v1(
+                deltaX1_address, deltaX2_address, 
+                deltaY_address, 
+                Y_address, 
+                alpha, beta, 
+                theta, k, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer linear2_elu2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma, 
+            float theta, float k,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if (deltaX1_address == NULL) throw new NullPointerException("Tensor deltaX1 is null");
+            if (deltaX2_address == NULL) throw new NullPointerException("Tensor deltaX2 is null");
+            if (X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            if (X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
+            if (theta < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if (k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope { got %f } must be non-negative", k));
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_elu2D_deltaX_v2(
+                deltaX1_address, deltaX2_address, 
+                deltaY_address,
+                X1_address, X2_address, 
+                alpha, beta, gamma,
+                theta, k, 
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_softplus2D">
+    public Syncer linear2_softplus2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(Y_address  == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            if(X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_softplus2D(Y_address, 
+                X1_address, X2_address, 
+                alpha, beta, gamma, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer linear2_softplus2D_deltaX_v1(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            float alpha, float beta,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(deltaX1_address == NULL) throw new NullPointerException("Tensor deltaX1 is null");
+            if(deltaX2_address == NULL) throw new NullPointerException("Tensor deltaX2 is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_softplus2D_deltaX_v1(
+                deltaX1_address, deltaX2_address, 
+                deltaY_address, 
+                Y_address, 
+                alpha, beta,
+                lengthv, width, stride);
+    }
+     
+    public Syncer linear2_softplus2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(deltaX1_address == NULL) throw new NullPointerException("Tensor deltaX1 is null");
+            if(deltaX2_address == NULL) throw new NullPointerException("Tensor deltaX2 is null");
+            if(X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            if(X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_softplus2D_deltaX_v2(
+                deltaX1_address, deltaX2_address, 
+                deltaY_address,
+                X1_address, X2_address, 
+                alpha, beta, gamma,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_gelu2D">
+    public Syncer linear2_gelu2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(Y_address  == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            if(X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_gelu2D(Y_address, 
+                X1_address, X2_address, 
+                alpha, beta, gamma, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer linear2_gelu2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(deltaX1_address == NULL) throw new NullPointerException("Tensor deltaX1 is null");
+            if(deltaX2_address == NULL) throw new NullPointerException("Tensor deltaX2 is null");
+            if(X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            if(X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_gelu2D_deltaX_v2(
+                deltaX1_address, deltaX2_address, 
+                deltaY_address,
+                X1_address, X2_address, 
+                alpha, beta, gamma,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="hypherbolic functions">
-    //<editor-fold defaultstate="collapsed" desc="BP: tanh">
-    public Syncer tanh2D(long Y_address,
-            long X_address,
-            int lengthv, int width)
-    {
-        int stride = ((width + 3) >> 2) << 2;
-        if(check) {
-            if(X_address == NULL) throw new NullPointerException("Tensor X is NULL");
-            if(Y_address == NULL) throw new NullPointerException("Tensor Y is NULL");
-            func_param_check(lengthv, width, stride);
-        }
-        return base.tanh2D(Y_address, X_address,
-                lengthv, width, stride);
-    }
-    
-    public Syncer tanh2D_deltaX_v1(long deltaX_address,
-            long deltaY_address,
-            long Y_address,//V1: holdY(), Y is not changed
-            int lengthv, int width)
-    {
-        int stride = ((width + 3) >> 2) << 2;
-        if(check) {
-            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is NULL");
-            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is NULL");
-            if(Y_address == NULL) throw new NullPointerException("Tensor Y is NULL");
-            func_param_check(lengthv, width, stride);
-        }
-        return base.tanh2D_deltaX_v1(deltaX_address, 
-                deltaY_address,
-                Y_address, 
-                lengthv, width, stride);
-    }
-    
-    public Syncer tanh2D_deltaX_v2(long deltaX_address,
-            long deltaY_address,
-            long X_address,//V2: holdX(), X is not changed
-            int lengthv, int width)
-    {
-        int stride = ((width + 3) >> 2) << 2;
-        if(check) {
-            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is NULL");
-            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is NULL");
-            if(X_address == NULL) throw new NullPointerException("Tensor X is NULL");
-            func_param_check(lengthv, width, stride);
-        }
-        return base.tanh2D_deltaX_v2(deltaX_address,
-                deltaY_address,
-                X_address, 
-                lengthv, width, stride);
-    }
-    //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="BP: sigmoid">
     public Syncer sigmoid2D(long Y_address,
             long X_address,
@@ -2934,6 +3313,58 @@ public class EngineCore implements MemStatus
                 lengthv, width, stride);
     }
     //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: tanh">
+    public Syncer tanh2D(long Y_address,
+            long X_address,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(X_address == NULL) throw new NullPointerException("Tensor X is NULL");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is NULL");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.tanh2D(Y_address, X_address,
+                lengthv, width, stride);
+    }
+    
+    public Syncer tanh2D_deltaX_v1(long deltaX_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is NULL");
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is NULL");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is NULL");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.tanh2D_deltaX_v1(deltaX_address, 
+                deltaY_address,
+                Y_address, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer tanh2D_deltaX_v2(long deltaX_address,
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is NULL");
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is NULL");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is NULL");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.tanh2D_deltaX_v2(deltaX_address,
+                deltaY_address,
+                X_address, 
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="BP: softmax">
     public Syncer softmax2D(long Y_address, 
             long X_address, int row_length,//lengthv = field_length * row_lengthv
@@ -3011,6 +3442,135 @@ public class EngineCore implements MemStatus
                 deltaY_address,
                 Y_address,
                 field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_sigmoid2D">
+    public Syncer linear2_sigmoid2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(Y_address  == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            if(X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_sigmoid2D(Y_address, 
+                X1_address, X2_address, 
+                alpha, beta, gamma, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer linear2_sigmoid2D_deltaX_v1(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            float alpha, float beta,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(deltaX1_address == NULL) throw new NullPointerException("Tensor deltaX1 is null");
+            if(deltaX2_address == NULL) throw new NullPointerException("Tensor deltaX2 is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_sigmoid2D_deltaX_v1(
+                deltaX1_address, deltaX2_address, 
+                deltaY_address, 
+                Y_address, 
+                alpha, beta,
+                lengthv, width, stride);
+    }
+     
+    public Syncer linear2_sigmoid2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(deltaX1_address == NULL) throw new NullPointerException("Tensor deltaX1 is null");
+            if(deltaX2_address == NULL) throw new NullPointerException("Tensor deltaX2 is null");
+            if(X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            if(X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_sigmoid2D_deltaX_v2(
+                deltaX1_address, deltaX2_address, 
+                deltaY_address,
+                X1_address, X2_address, 
+                alpha, beta, gamma,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_tanh2D">
+    public Syncer linear2_tanh2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(Y_address  == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            if(X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_tanh2D(Y_address, 
+                X1_address, X2_address, 
+                alpha, beta, gamma, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer linear2_tanh2D_deltaX_v1(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            float alpha, float beta,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(deltaX1_address == NULL) throw new NullPointerException("Tensor deltaX1 is null");
+            if(deltaX2_address == NULL) throw new NullPointerException("Tensor deltaX2 is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_tanh2D_deltaX_v1(
+                deltaX1_address, deltaX2_address, 
+                deltaY_address, 
+                Y_address, 
+                alpha, beta,
+                lengthv, width, stride);
+    }
+     
+    public Syncer linear2_tanh2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(deltaX1_address == NULL) throw new NullPointerException("Tensor deltaX1 is null");
+            if(deltaX2_address == NULL) throw new NullPointerException("Tensor deltaX2 is null");
+            if(X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            if(X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
+            func_param_check(lengthv, width, stride);
+        }
+        return base.linear2_tanh2D_deltaX_v2(
+                deltaX1_address, deltaX2_address, 
+                deltaY_address,
+                X1_address, X2_address, 
+                alpha, beta, gamma,
                 lengthv, width, stride);
     }
     //</editor-fold>
@@ -3722,6 +4282,598 @@ public class EngineCore implements MemStatus
                 deltaA_address,//result0
                 deltaB_address,//result1
                 deltaY_address, k,
+                X_address, 
+                A_address, B_address, 
+                field_length, row_lengthv,
+                width, stride);
+     }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_elu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public Syncer affine_elu2D(long Y_address,
+            long X_address,
+            long A_address, long B_address, int row_lengthv,
+            float alpha, float k,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            if (alpha < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if (k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope(got %f) must >= 0", k));
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_elu2D(Y_address,
+                X_address, 
+                A_address, B_address, row_lengthv,
+                alpha, k,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    public Syncer affine_elu2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address, float alpha, float k,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (alpha < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if (k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope(got %f) must >= 0", k));
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_elu2D_deltaX_v1(deltaX_address,
+                deltaY_address, alpha, k,
+                Y_address,
+                A_address, row_lengthv, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer affine_elu2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address, float alpha, float k,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            if (alpha < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if (k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope(got %f) must >= 0", k));
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_elu2D_deltaX_v2(deltaX_address,
+                deltaY_address, alpha, k,
+                X_address,
+                A_address,
+                B_address, row_lengthv, 
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: {deltaA, deltaB}">
+    public Syncer affine_elu2D_deltaAB_v1(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address, float alpha, float k,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        int field_length = lengthv / row_lengthv;//lengthv = X.lengthv
+        if(check) {
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            if (alpha < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if (k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope(got %f) must >= 0", k));
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.affine_elu2D_deltaAB_v1(
+                deltaA_address,//result0
+                deltaB_address,//result1
+                deltaY_address, alpha, k,
+                Y_address,
+                A_address, B_address,
+                field_length, row_lengthv, 
+                width, stride);
+    }
+    
+    public Syncer affine_elu2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address, float alpha, float k,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        int field_length = lengthv / row_lengthv;//lengthv = X.lengthv
+        if(check) {
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            if (alpha < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if (k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope(got %f) must >= 0", k));
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.affine_elu2D_deltaAB_v2(
+                deltaA_address,//result0
+                deltaB_address,//result1
+                deltaY_address, alpha, k,
+                X_address, 
+                A_address, B_address, 
+                field_length, row_lengthv,
+                width, stride);
+     }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_softplus">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public Syncer affine_softplus2D(long Y_address,
+            long X_address,
+            long A_address, long B_address, 
+            int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if(B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_softplus2D(Y_address,
+                X_address, 
+                A_address, B_address, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    public Syncer affine_softplus2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_softplus2D_deltaX_v1(deltaX_address,
+                deltaY_address,
+                Y_address,
+                A_address, row_lengthv, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer affine_softplus2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if(B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_softplus2D_deltaX_v2(deltaX_address,
+                deltaY_address, 
+                X_address,
+                A_address,
+                B_address, row_lengthv, 
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: {deltaA, deltaB}">
+    public Syncer affine_softplus2D_deltaAB_v1(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        int field_length = lengthv / row_lengthv;//lengthv = X.lengthv
+        if(check) {
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.affine_softplus2D_deltaAB_v1(
+                deltaA_address,//result0
+                deltaB_address,//result1
+                deltaY_address,
+                Y_address,
+                A_address, B_address,
+                field_length, row_lengthv, 
+                width, stride);
+    }
+    
+    public Syncer affine_softplus2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        int field_length = lengthv / row_lengthv;//lengthv = X.lengthv
+        if(check) {
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.affine_softplus2D_deltaAB_v2(
+                deltaA_address,//result0
+                deltaB_address,//result1
+                deltaY_address,
+                X_address, 
+                A_address, B_address, 
+                field_length, row_lengthv,
+                width, stride);
+     }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_gelu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public Syncer affine_gelu2D(long Y_address,
+            long X_address,
+            long A_address, long B_address, 
+            int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if(B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_gelu2D(Y_address,
+                X_address, 
+                A_address, B_address, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    public Syncer affine_gelu2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if(B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_gelu2D_deltaX_v2(deltaX_address,
+                deltaY_address, 
+                X_address,
+                A_address,
+                B_address, row_lengthv, 
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: {deltaA, deltaB}">
+    public Syncer affine_gelu2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        int field_length = lengthv / row_lengthv;//lengthv = X.lengthv
+        if(check) {
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.affine_gelu2D_deltaAB_v2(
+                deltaA_address,//result0
+                deltaB_address,//result1
+                deltaY_address,
+                X_address, 
+                A_address, B_address, 
+                field_length, row_lengthv,
+                width, stride);
+     }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_sigmoid">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public Syncer affine_sigmoid2D(long Y_address,
+            long X_address,
+            long A_address, long B_address, 
+            int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if(B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_sigmoid2D(Y_address,
+                X_address, 
+                A_address, B_address, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    public Syncer affine_sigmoid2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_sigmoid2D_deltaX_v1(deltaX_address,
+                deltaY_address,
+                Y_address,
+                A_address, row_lengthv, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer affine_sigmoid2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if(B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_sigmoid2D_deltaX_v2(deltaX_address,
+                deltaY_address, 
+                X_address,
+                A_address,
+                B_address, row_lengthv, 
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: {deltaA, deltaB}">
+    public Syncer affine_sigmoid2D_deltaAB_v1(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        int field_length = lengthv / row_lengthv;//lengthv = X.lengthv
+        if(check) {
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.affine_sigmoid2D_deltaAB_v1(
+                deltaA_address,//result0
+                deltaB_address,//result1
+                deltaY_address,
+                Y_address,
+                A_address, B_address,
+                field_length, row_lengthv, 
+                width, stride);
+    }
+    
+    public Syncer affine_sigmoid2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        int field_length = lengthv / row_lengthv;//lengthv = X.lengthv
+        if(check) {
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.affine_sigmoid2D_deltaAB_v2(
+                deltaA_address,//result0
+                deltaB_address,//result1
+                deltaY_address,
+                X_address, 
+                A_address, B_address, 
+                field_length, row_lengthv,
+                width, stride);
+     }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_tanh">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public Syncer affine_tanh2D(long Y_address,
+            long X_address,
+            long A_address, long B_address, 
+            int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if(B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_tanh2D(Y_address,
+                X_address, 
+                A_address, B_address, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaX">
+    public Syncer affine_tanh2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_tanh2D_deltaX_v1(deltaX_address,
+                deltaY_address,
+                Y_address,
+                A_address, row_lengthv, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer affine_tanh2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if(B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.affine_tanh2D_deltaX_v2(deltaX_address,
+                deltaY_address, 
+                X_address,
+                A_address,
+                B_address, row_lengthv, 
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: {deltaA, deltaB}">
+    public Syncer affine_tanh2D_deltaAB_v1(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        int field_length = lengthv / row_lengthv;//lengthv = X.lengthv
+        if(check) {
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.affine_tanh2D_deltaAB_v1(
+                deltaA_address,//result0
+                deltaB_address,//result1
+                deltaY_address,
+                Y_address,
+                A_address, B_address,
+                field_length, row_lengthv, 
+                width, stride);
+    }
+    
+    public Syncer affine_tanh2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        int field_length = lengthv / row_lengthv;//lengthv = X.lengthv
+        if(check) {
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.affine_tanh2D_deltaAB_v2(
+                deltaA_address,//result0
+                deltaB_address,//result1
+                deltaY_address,
                 X_address, 
                 A_address, B_address, 
                 field_length, row_lengthv,
@@ -4461,17 +5613,17 @@ public class EngineCore implements MemStatus
     {
         int stride = ((width + 3) >> 2) << 2;  
         int field_length = lengthv / row_lengthv;
-        if(check) {
-            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
-            if(deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
-            if(deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
-            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
-            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
-            if(X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
-            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
-            if(B_address == NULL) throw new NullPointerException("Tensor B is null");
-            if(eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
-            if(k <= 0) throw new IllegalArgumentException(String.format("k { got %f } must > 0", k));
+        if (check) {
+            if (deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            if (eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
+            if (k <= 0) throw new IllegalArgumentException(String.format("k { got %f } must > 0", k));
             func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
         }
         return base.batchNorm_leakyRelu2D_gradients_v1(
@@ -4516,6 +5668,810 @@ public class EngineCore implements MemStatus
                 deltaA_address,//result1
                 deltaB_address,//result2
                 deltaY_address, k, 
+                X_address,
+                X_mean_address, X_var_address, eps, 
+                A_address, B_address,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_elu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public Syncer batchNorm_elu2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps, 
+            int row_lengthv, float alpha, float k,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
+            if (alpha < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if (k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope(got %f) must >= 0", k));
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.batchNorm_elu2D(Y_address,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                row_lengthv, alpha, k, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer batchNorm_elu2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv, float alpha, float k,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            if (eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
+            if (alpha < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if (k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope(got %f) must >= 0", k));
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.batchNorm_elu2D(Y_address, 
+                X_address,
+                X_mean_address, X_var_address, eps, 
+                A_address, B_address,
+                row_lengthv, alpha, k,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    public Syncer batchNorm_elu2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address, float alpha, float k,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps, 
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if(X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if(k <= 0) throw new IllegalArgumentException(String.format("k { got %f } must > 0", k));
+            if(eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_elu2D_deltaX_v1(deltaX_address,
+                deltaY_address, alpha, k, 
+                Y_address, 
+                X_var_address, eps,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    
+    public Syncer batchNorm_elu2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address, float alpha, float k,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if(X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if(X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if(k < 0) throw new IllegalArgumentException(String.format("k { got %f } must be non-negative", k));
+            if(eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_elu2D_deltaX_v2(deltaX_address,
+                deltaY_address, alpha, k, 
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    public Syncer batchNorm_elu2D_gradients_v1(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address, float alpha, float k,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if (deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            if (alpha < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if (k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope(got %f) must >= 0", k));
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_elu2D_gradients_v1(
+                deltaX_address,//result0
+                deltaA_address,//result1
+                deltaB_address,//result2
+                deltaY_address, alpha, k,
+                Y_address, 
+                X_var_address, eps,
+                A_address, B_address, 
+                field_length, row_lengthv, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer batchNorm_elu2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address, float alpha, float k,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if (deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (alpha < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if (k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope(got %f) must >= 0", k));
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_elu2D_gradients_v2(
+                deltaX_address,//result0 
+                deltaA_address,//result1
+                deltaB_address,//result2
+                deltaY_address, alpha, k, 
+                X_address,
+                X_mean_address, X_var_address, eps, 
+                A_address, B_address,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_softplus">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public Syncer batchNorm_softplus2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps, 
+            int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.batchNorm_softplus2D(Y_address,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                row_lengthv,
+                lengthv, width, stride);
+    }
+    
+    public Syncer batchNorm_softplus2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if(X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if(B_address == NULL) throw new NullPointerException("Tensor B is null");
+            if(eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.batchNorm_softplus2D(Y_address, 
+                X_address,
+                X_mean_address, X_var_address, eps, 
+                A_address, B_address,
+                row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    public Syncer batchNorm_softplus2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps, 
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if(X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_softplus2D_deltaX_v1(deltaX_address,
+                deltaY_address,
+                Y_address, 
+                X_var_address, eps,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    
+    public Syncer batchNorm_softplus2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if(X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if(X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_softplus2D_deltaX_v2(deltaX_address,
+                deltaY_address,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    public Syncer batchNorm_softplus2D_gradients_v1(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if (deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_softplus2D_gradients_v1(
+                deltaX_address,//result0
+                deltaA_address,//result1
+                deltaB_address,//result2
+                deltaY_address,
+                Y_address, 
+                X_var_address, eps,
+                A_address, B_address, 
+                field_length, row_lengthv, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer batchNorm_softplus2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if (deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_softplus2D_gradients_v2(
+                deltaX_address,//result0 
+                deltaA_address,//result1
+                deltaB_address,//result2
+                deltaY_address,
+                X_address,
+                X_mean_address, X_var_address, eps, 
+                A_address, B_address,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_gelu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public Syncer batchNorm_gelu2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps, 
+            int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.batchNorm_gelu2D(Y_address,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                row_lengthv,
+                lengthv, width, stride);
+    }
+    
+    public Syncer batchNorm_gelu2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if(X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if(B_address == NULL) throw new NullPointerException("Tensor B is null");
+            if(eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.batchNorm_gelu2D(Y_address, 
+                X_address,
+                X_mean_address, X_var_address, eps, 
+                A_address, B_address,
+                row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    public Syncer batchNorm_gelu2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if (X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_gelu2D_deltaX_v2(deltaX_address,
+                deltaY_address,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    public Syncer batchNorm_gelu2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if (deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_gelu2D_gradients_v2(
+                deltaX_address,//result0 
+                deltaA_address,//result1
+                deltaB_address,//result2
+                deltaY_address,
+                X_address,
+                X_mean_address, X_var_address, eps, 
+                A_address, B_address,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_sigmoid">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public Syncer batchNorm_sigmoid2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps, 
+            int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.batchNorm_sigmoid2D(Y_address,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                row_lengthv,
+                lengthv, width, stride);
+    }
+    
+    public Syncer batchNorm_sigmoid2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if(X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if(B_address == NULL) throw new NullPointerException("Tensor B is null");
+            if(eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.batchNorm_sigmoid2D(Y_address, 
+                X_address,
+                X_mean_address, X_var_address, eps, 
+                A_address, B_address,
+                row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    public Syncer batchNorm_sigmoid2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps, 
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if(X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_sigmoid2D_deltaX_v1(deltaX_address,
+                deltaY_address,
+                Y_address, 
+                X_var_address, eps,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    
+    public Syncer batchNorm_sigmoid2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if(X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if(X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_sigmoid2D_deltaX_v2(deltaX_address,
+                deltaY_address,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    public Syncer batchNorm_sigmoid2D_gradients_v1(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if (deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_sigmoid2D_gradients_v1(
+                deltaX_address,//result0
+                deltaA_address,//result1
+                deltaB_address,//result2
+                deltaY_address,
+                Y_address, 
+                X_var_address, eps,
+                A_address, B_address, 
+                field_length, row_lengthv, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer batchNorm_sigmoid2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if (deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_sigmoid2D_gradients_v2(
+                deltaX_address,//result0 
+                deltaA_address,//result1
+                deltaB_address,//result2
+                deltaY_address,
+                X_address,
+                X_mean_address, X_var_address, eps, 
+                A_address, B_address,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_tanh">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public Syncer batchNorm_tanh2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps, 
+            int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.batchNorm_tanh2D(Y_address,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                row_lengthv,
+                lengthv, width, stride);
+    }
+    
+    public Syncer batchNorm_tanh2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if(X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if(A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if(B_address == NULL) throw new NullPointerException("Tensor B is null");
+            if(eps < 0) throw new IllegalArgumentException(String.format("eps { got %f } must be non-negative", eps));
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.batchNorm_tanh2D(Y_address, 
+                X_address,
+                X_mean_address, X_var_address, eps, 
+                A_address, B_address,
+                row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    public Syncer batchNorm_tanh2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps, 
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if(X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_tanh2D_deltaX_v1(deltaX_address,
+                deltaY_address,
+                Y_address, 
+                X_var_address, eps,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    
+    public Syncer batchNorm_tanh2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if (check) {
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if (X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_tanh2D_deltaX_v2(deltaX_address,
+                deltaY_address,
+                X_address, 
+                X_mean_address, X_var_address, eps,
+                field_length, row_lengthv,
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    public Syncer batchNorm_tanh2D_gradients_v1(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if (check) {
+            if (deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            if (B_address == NULL) throw new NullPointerException("Tensor B is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_tanh2D_gradients_v1(
+                deltaX_address,//result0
+                deltaA_address,//result1
+                deltaB_address,//result2
+                deltaY_address,
+                Y_address, 
+                X_var_address, eps,
+                A_address, B_address, 
+                field_length, row_lengthv, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer batchNorm_tanh2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int row_lengthv, int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;  
+        int field_length = lengthv / row_lengthv;
+        if(check) {
+            if (deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
+            if (deltaA_address == NULL) throw new NullPointerException("Tensor deltaA is null");
+            if (deltaB_address == NULL) throw new NullPointerException("Tensor deltaB is null");
+            if (deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (X_mean_address == NULL) throw new NullPointerException("Tensor X_means is null");
+            if (X_var_address == NULL) throw new NullPointerException("Tensor X_var is null");
+            if (A_address == NULL) throw new NullPointerException("Tensor A is null");
+            func_param_check_field(lengthv, field_length, row_lengthv, width, stride);
+        }
+        return base.batchNorm_tanh2D_gradients_v2(
+                deltaX_address,//result0 
+                deltaA_address,//result1
+                deltaB_address,//result2
+                deltaY_address,
                 X_address,
                 X_mean_address, X_var_address, eps, 
                 A_address, B_address,
@@ -6157,6 +8113,46 @@ public class EngineCore implements MemStatus
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="center reduce function">
+    public Syncer center_linear(long Y_address, 
+            long X_address,
+            float alpha, float beta,
+            int dim0, int dim1, int dim2,
+            int width)
+    {
+        if(check) {
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            center_reduce_param_check(dim0, dim1, dim2, width);
+        }
+        int stride = ((width + 3) >> 2) << 2;
+        dim2 = (dim2 / width) * stride;
+        return base.center_linear(Y_address, 
+                X_address, 
+                alpha, beta, 
+                dim0, dim1, dim2,
+                width, stride);
+    }
+    
+    public Syncer center_quadratic(long Y_address, 
+            long X_address,
+            float alpha, float beta, float gamma,
+            int dim0, int dim1, int dim2,
+            int width)
+    {
+        if(check) {
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            center_reduce_param_check(dim0, dim1, dim2, width);
+        }
+        int stride = ((width + 3) >> 2) << 2;
+        dim2 = (dim2 / width) * stride;
+        return base.center_quadratic(Y_address,
+                X_address, 
+                alpha, beta, gamma, 
+                dim0, dim1, dim2, 
+                width, stride);
+    }
+    
     //<editor-fold defaultstate="collapsed" desc="center_quadratic2">
     public Syncer center_quadratic2(long Y_address, 
             long X1_address, long X2_address,
@@ -6468,7 +8464,8 @@ public class EngineCore implements MemStatus
     
     //<editor-fold defaultstate="collapsed" desc="image: dualLinear2_div2D">
     public Syncer img_dualLinear2_div2D(long Y_address, 
-            long X_address, long X1_address, long X2_address,
+            long X_address, 
+            long X1_address, long X2_address,
             float alpha1, float beta1, float gamma1,
             float alpha2, float beta2, float gamma2, float C,
             int lengthv, int width)
@@ -6482,10 +8479,61 @@ public class EngineCore implements MemStatus
             func_param_check(lengthv, width, stride);
         }
         return base.img_dualLinear2_div2D(Y_address, 
-                X_address, X1_address, X2_address, 
+                X_address,
+                X1_address, X2_address, 
                 alpha1, beta1, gamma1,
                 alpha2, beta2, gamma2, C, 
                 lengthv, width, stride);
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="image: dualLinear2_normalize2D: row, center">
+    public Syncer img_dualLinear2_normalize2D_row(long Y_address, 
+            long X_address,
+            long X1_address, long X2_address, int row_lengthv, 
+            float alpha1, float beta1, float gamma1,
+            float alpha2, float beta2, float gamma2, float C,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            if(X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.img_dualLinear2_normalize2D_row(Y_address, 
+                X_address,
+                X1_address, X2_address, row_lengthv, 
+                alpha1, beta1, gamma1, 
+                alpha2, beta2, gamma2, C,
+                lengthv, width, stride);
+    }
+    
+    public Syncer img_dualLinear2_normalize2D_center(long Y_address, 
+            long X_address,
+            long X1_address, long X2_address,
+            float alpha1, float beta1, float gamma1,
+            float alpha2, float beta2, float gamma2, float C,
+            int dim0, int dim1, int dim2,
+            int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if(X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            if(X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
+            func_param_check_center(dim0, dim1, dim2, width);
+        }
+        return base.img_dualLinear2_normalize2D_center(Y_address, 
+                X_address, 
+                X1_address, X2_address, 
+                alpha1, beta1, gamma1,
+                alpha2, beta2, gamma2, C,
+                dim0, dim1, dim2,
+                width, stride);
     }
     //</editor-fold>
     

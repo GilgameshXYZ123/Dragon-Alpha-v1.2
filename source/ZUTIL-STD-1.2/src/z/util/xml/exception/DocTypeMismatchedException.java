@@ -13,12 +13,11 @@ public class DocTypeMismatchedException extends RuntimeException
 {
     public static final String MESSAGE="DocTypeMismatchedException: ";
     
-    public DocTypeMismatchedException()
-    {
+    public DocTypeMismatchedException() {
         super();
     }
-    public DocTypeMismatchedException(String message)
-    {
+    
+    public DocTypeMismatchedException(String message) {
         super(MESSAGE+message);
     }
 }

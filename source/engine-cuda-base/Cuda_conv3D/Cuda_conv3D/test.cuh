@@ -3,7 +3,7 @@
 #ifndef TEST_H
 #define TEST_H
 
-#ifndef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifndef COMPILE//<<<<complie-area--------------------------------------------------
 
 #ifndef UTIL
 #define UTIL
@@ -414,7 +414,7 @@ void testCorrect(
 
 	//img2col_Winograd==========================================
 	{
-		//__kernel_remode(NULL, dW, dCW, FH, FW, OC, IC);//[FH, FW, IC, OC]
+		__kernel_remode(NULL, dW, dCW, FH, FW, OC, IC);//[FH, FW, IC, OC]
 		//__kernel_remodeV3(NULL, dW, dCW, FH, FW, OC, IC);//[FH, IC, FW, OC]
 		
 		//------[FH = FW = 2]------------------------------------
@@ -437,6 +437,8 @@ void testCorrect(
 		
 		//------[FH = FW = 3]-------------------------------------
 		{
+			conv3dWinogradV2_f6x3_k64x192R_p1_tex(NULL,texX, IH, IW, dCW, 3, dY, OH, OW, N, IC, OC, ph, pw);
+
 			//===================================================
 			//conv3dGemm_u88R4W3S1_ruse(NULL, LB, 0, 0, dX, IH, IW, dCW, dY, OH, OW, IC, OC, ph, pw, GN, GM);
 			//__conv3dWinograd_f2x3_k48R_tex<LB>(NULL, 0, 0, texX, IH, IW, dCW, dY, OH, OW, IC, OC, ph, pw, GN, GM);
@@ -572,7 +574,7 @@ void testCorrect(
 
 	//GemmR=====================================================
 	{{
-		__kernel_remode(NULL, dW, dCW, FH, FW, OC, IC);
+		//__kernel_remode(NULL, dW, dCW, FH, FW, OC, IC);
 
 		//GemmR V2 uernel
 		{
@@ -610,9 +612,6 @@ void testCorrect(
 
 		//GemmR uernel
 		{
-			//u3v3o3_k1(NULL, LB, 0, 0, dX, IH, IW, dCW, dY, OH, OW, LOG2(IC), OC, sh, sw, ph, pw, GN, GM);
-			u3v3o3_k2(NULL, LB, 0, 0, dX, IH, IW, dCW, dY, OH, OW, LOG2(IC), OC, sh, sw, ph, pw, GN, GM);
-
 			//----------------------------------------------------------
 			//conv3dGemm_u88R(NULL, LB, 0, 0, dX, IH, IW, dCW, FH, FW, dY, OH, OW, IC, OC, sh, sw, ph, pw, GN, GM);
 			//conv3dGemm_u88R_ic2pow(NULL, LB, 0, 0, dX, IH, IW, dCW, FH, FW, dY, OH, OW, LOG2(IC), OC, sh, sw, ph, pw, GN, GM);
@@ -1040,7 +1039,7 @@ void testSpeed(
 
 		//Img2col Winograd=======================================
 		{
-			//__kernel_remode(NULL, dW, dCW, FH, FW, OC, IC);//[FH, FW, IC, OC]
+			__kernel_remode(NULL, dW, dCW, FH, FW, OC, IC);//[FH, FW, IC, OC]
 			//__kernel_remodeV3(NULL, dW, dCW, FH, FW, OC, IC);//[FH, IC, FW, OC]
 
 			//------[FH = FW = 2]-------------------------------------
@@ -1062,6 +1061,9 @@ void testSpeed(
 			
 			//------[FH = FW = 3]-------------------------------------
 			{
+				//conv3dWinogradV2_f6x3_k64x192R_p1_tex(NULL, texX, IH, IW, dCW, 3, dY, OH, OW, N, IC, OC, ph, pw);
+			
+				//===================================================================================
 				//__conv3dWinograd_f2x3_k48R_tex<LB>(NULL, 0, 0, texX, IH, IW, dCW, dY, OH, OW, IC, OC, ph, pw, GN, GM);
 				//__conv3dWinograd_f2x3_k48R_p1<LB>(stream, 0, 0, dX, IH, IW, dCW, dY, OH, OW, IC, OC, GN, GM);
 				//conv3dGemm_u88R4W3S1(NULL, LB, 0, 0, dX, IH, IW, dCW, dY, OH, OW, IC, OC, ph, pw, GN, GM);
@@ -1078,8 +1080,8 @@ void testSpeed(
 
 				//conv3dGemm_u88RC(NULL, 4, 0, 0, 0, dX, IH, IW, dCW, FH, FW, dY, OH, OW, IC, OC, sh, sw, ph, pw, GN, GM);
 
-				int index = 0, GMr, GNr;
-				conv3D_Winograd_s8_W3_64x32R_tex<3>(streams, index, length, dX, texX, IH, IW, dCW, dY, OH, OW, N, IC, OC, ph, pw, GN, GM, GMr, GNr);
+				//int index = 0, GMr, GNr;
+				//conv3D_Winograd_s8_W3_64x32R_tex<3>(streams, index, length, dX, texX, IH, IW, dCW, dY, OH, OW, N, IC, OC, ph, pw, GN, GM, GMr, GNr);
 
 				//------[FW % 3 == 0]-------------------------------------------
 				//conv3dWinograd_SFW_f2x3_k64x128RC_tex(NULL, 0, texX, IH, IW, dCW, FH, 6, dY, OH, OW, N, IC, OC, ph, pw, OW);
@@ -1189,7 +1191,7 @@ void testSpeed(
 				//conv3D_Winograd_s16_W9_32x32R_p4_tex<9>(streams, index, length, dX, texX, IH, IW, dCW, dY, OH, OW, N, IC, OC, ph, pw, GN, GM, GMr, GNr);
 
 				//====================================================
-				//conv3dWinograd_f8x9_k64x256R_p4_tex(NULL, texX, IH, IW, dCW, 9, dY, OH, OW, N, IC, OC, ph, pw);
+				conv3dWinograd_f8x9_k64x256R_p4_tex(NULL, texX, IH, IW, dCW, 9, dY, OH, OW, N, IC, OC, ph, pw);
 
 				//int index = 0, GMr, GNr;
 				//conv3D_Winograd_s16_W9_64x32R_p4_tex<9>(streams, index, length, dX, texX, IH, IW, dCW, dY, OH, OW, N, IC, OC, ph, pw, GN, GM, GMr, GNr);
@@ -1585,13 +1587,13 @@ STRIDE1:
 	{
 		//int FH = 1, FW = 1, ph = 0, pw = 0, sh = 1, sw = 1;
 		//int FH = 2, FW = 2, ph = 1, pw = 1, sh = 1, sw = 1;
-		int FH = 3, FW = 3, ph = 1, pw = 1, sh = 1, sw = 1;
+		//int FH = 3, FW = 3, ph = 1, pw = 1, sh = 1, sw = 1;
 		//int FH = 4, FW = 4, ph = 2, pw = 2, sh = 1, sw = 1; 
 		//int FH = 5, FW = 5, ph = 2, pw = 2, sh = 1, sw = 1;
 		//int FH = 6, FW = 6, ph = 3, pw = 3, sh = 1, sw = 1;
 		//int FH = 7, FW = 7, ph = 3, pw = 3, sh = 1, sw = 1;
 		//int FH = 8, FW = 8, ph = 4, pw = 4, sh = 1, sw = 1;
-		//int FH = 9, FW = 9, ph = 4, pw = 4, sh = 1, sw = 1;
+		int FH = 9, FW = 9, ph = 4, pw = 4, sh = 1, sw = 1;
 	
 		//int IH = 128, IW = 128, OH = 128, OW = 128, N = 32, IC = 64, OC = 64;
 		//int IH = 64, IW = 64, OH = 64, OW = 64, N = 64, IC = 128, OC = 128;
@@ -1630,9 +1632,10 @@ STRIDE1:
 
 		//======[3 * 3]========================================================
 		//int IH = 96, IW = 96, OH = 96, OW = 96, N = 128, IC = 64, OC = 64;
-		int IH = 48, IW = 48, OH = 48, OW = 48, N = 128, IC = 128, OC = 128;
+		//int IH = 48, IW = 48, OH = 48, OW = 48, N = 128, IC = 128, OC = 128;
 		//int IH = 24, IW = 24, OH = 24, OW = 24, N = 128, IC = 256, OC = 256;
 		//int IH = 12, IW = 12, OH = 12, OW = 12, N = 128, IC = 512, OC = 512;
+		//int IH = 6, IW = 6, OH = 6, OW = 6, N = 128, IC = 1024, OC = 1024;
 
 		//======[4 * 4]=======================================================
 		//int IH = 80, IW = 80, OH = 80, OW = 80, N = 128, IC = 64, OC = 64;
@@ -1705,7 +1708,7 @@ STRIDE1:
 
 		//int IH = 128, IW = 128, OH = 128, OW = 128, N = 32, IC = 64, OC = 64;
 		//int IH = 64, IW = 64, OH = 64, OW = 64, N = 128, IC = 64, OC = 64;
-		//int IH = 32, IW = 32, OH = 32, OW = 32, N = 128, IC = 128, OC = 128;
+		int IH = 32, IW = 32, OH = 32, OW = 32, N = 128, IC = 128, OC = 128;
 		//int IH = 16, IW = 16, OH = 16, OW = 16, N = 128, IC = 256, OC = 256;
 		//int IH = 8, IW = 8, OH = 8, OW = 8, N = 128, IC = 512, OC = 512;
 

@@ -6,7 +6,7 @@
 #include "batchMatMulT1_kernel.cuh"
 #include "batchMatMulT1_kernel_padding.cuh"
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 //A[Batch,  K, AN] logically-> A^T[Batch, AN, K]
 //B[Batch,  K,  M]

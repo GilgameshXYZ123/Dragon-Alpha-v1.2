@@ -3,6 +3,7 @@
 #ifndef CENTER_QUADRATIC_DUAL_H
 #define CENTER_QUADRATIC_DUAL_H
 
+//reduction: along dim1 axis
 //center_reduce: A[dim0, dim1, dim2] 
 //	-> field_reduce: A'[dim1, dim0*dim2] 
 //	= V[HV, dim0 * dim2]

@@ -9,6 +9,8 @@
 #include "img_linear2_div2D_row.cuh"
 #include "img_linear2_div2D_field.cuh"
 #include "img_dualLinear2_divide2D.cuh"
+#include "img_dualLinear2_normalize2D_row.cuh"
+#include "img_dualLinear2_normalize2D_center.cuh"
 
 //pixel functions=====================================
 #include "img_linear2D.cuh"
@@ -17,5 +19,6 @@
 #include "img_exp2D.cuh"
 #include "img_linear_dual2D_field.cuh"
 #include "img_linear_dual2D_row.cuh"
+#include "img_threshold.cuh"
 
 #endif

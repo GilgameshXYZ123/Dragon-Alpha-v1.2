@@ -25,7 +25,7 @@ import z.util.lang.SimpleTimer;
  */
 public class train 
 {
-    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.1"); }
+    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2"); }
     static Mempool memp = alpha.engine.memp1(alpha.MEM_1GB * 8);
     static Engine eg = alpha.engine.cuda_float32(0, memp, alpha.MEM_1MB * 1024);
     static {
@@ -35,7 +35,7 @@ public class train
     }
     
     static int batch_size = 512;//512;
-    static float lr = 0.001f;//learning_rate
+    static float lr = 0.0005f;//learning_rate
     
     public static void training(int epoch) {
         ResNet18 net = new ResNet18().init(eg).println(); //net.load();
@@ -86,7 +86,7 @@ public class train
             //25 epochs for Adam
             //50 epochs for SGD
             //30 epcohs for SGDMN
-            training(25);
+            training(5);//26.136 -> 25.279
         }
         catch(Exception e) {
             e.printStackTrace();

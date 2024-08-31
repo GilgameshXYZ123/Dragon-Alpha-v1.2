@@ -319,7 +319,6 @@
     <ClInclude Include="Xeno1_X3.cuh">
       <Filter>xeno1</Filter>
     </ClInclude>
-    <ClInclude Include="X.cuh" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="micro">

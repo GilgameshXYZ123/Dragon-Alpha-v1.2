@@ -212,17 +212,17 @@
 #include "extra_layernorm_affined2D_row_deltaX_v1.cuh"
 #include "extra_layernorm_affined2D_row_deltaX_v2.cuh"
 
-//-----fusion---------------------------------------------
-#include "type1_linear_dual2D_with_leakyRelu.cuh"
-#include "type1_linear_dual2D_with_relu.cuh"
 
+//=====fusion=============================================
+//-----fusion: linear_dual + leakyRelu--------------------
+#include "type1_linear_dual2D_with_relu.cuh"
+#include "type1_linear_dual2D_with_leakyRelu.cuh"
 #include "type1_linear_dual2D_with_leakyRelu_deltaX_v2.cuh"
 #include "type1_linear_dual2D_with_leakyRelu_deltaX_v1.cuh"
 
 //-----fusion: affine + leakyRelu-------------------------
 #include "fusion_affine2D_row_with_relu.cuh"
 #include "fusion_affine2D_row_with_leakyRelu.cuh"
-
 #include "fusion_affine2D_row_with_leakyRelu_deltaX_v1.cuh"
 #include "fusion_affine2D_row_with_leakyRelu_deltaX_v2.cuh"
 
@@ -236,5 +236,24 @@
 #include "fusion_batchNorm_affined2D_row_with_leakyRelu.cuh"
 #include "fusion_batchNorm_affined2D_row_with_leakyRelu_deltaX_v1.cuh"
 #include "fusion_batchNorm_affined2D_row_with_leakyRelu_deltaX_v2.cuh"
+
+//-----fusion: batchNorm + function-----------------------
+#include "type1_linear_dual2D_with_function.cuh"
+#include "type1_linear_dual2D_with_function_deltaX_v1.cuh"
+#include "type1_linear_dual2D_with_function_deltaX_v2.cuh"
+
+//-----fusion: affine + function--------------------------
+#include "fusion_affine2D_row_with_function.cuh"
+#include "fusion_affine2D_row_with_function_deltaX_v1.cuh"
+#include "fusion_affine2D_row_with_function_deltaX_v2.cuh"
+
+//-----fusion: batchNorm + function-----------------------
+#include "fusion_batchNorm2D_row_with_function.cuh"
+#include "fusion_batchNorm2D_row_with_function_deltaX_v1.cuh"
+#include "fusion_batchNorm2D_row_with_function_deltaX_v2.cuh"
+
+#include "fusion_batchNorm_affined2D_row_with_function.cuh"
+#include "fusion_batchNorm_affined2D_row_with_function_deltaX_v1.cuh"
+#include "fusion_batchNorm_affined2D_row_with_function_deltaX_v2.cuh"
 
 #endif

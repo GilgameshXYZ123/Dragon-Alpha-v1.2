@@ -32,7 +32,7 @@ public class Net
             
             conv2 = nn.conv3D(false, out_channel, out_channel, 3, 1, 1);
             bn2 = nn.batchNorm(out_channel);
-           
+            
             if(stride != 1 || out_channel != in_channel)
                 downsample = nn.sequence(
                         nn.conv3D(false, in_channel, out_channel, 3, stride, 1),

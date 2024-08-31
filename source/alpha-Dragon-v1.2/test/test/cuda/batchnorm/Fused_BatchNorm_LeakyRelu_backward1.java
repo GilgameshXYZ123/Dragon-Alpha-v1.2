@@ -17,16 +17,16 @@ import z.util.math.vector.Vector;
  */
 public class Fused_BatchNorm_LeakyRelu_backward1 
 {
-    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.1");}
+    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2");}
     static Engine eg = alpha.engine.cuda_float32(0, alpha.engine.memp1());
     static final ExRandom exr = new ExRandom();
     
     //affine = false
-    public static void testCorrect(int height, int width)
-    {
+    public static void testCorrect(int height, int width) {
         System.out.format("\ntestCorrect: (height, width) = (%d, %d)\n", height, width);
         
         float eps = exr.nextFloat();
+        float alpha = exr.nextFloat();
         float k = exr.nextFloat();
         System.out.format("(eps, k) = (%f, %f)\n", eps, k);
         
@@ -41,13 +41,31 @@ public class Fused_BatchNorm_LeakyRelu_backward1
        
         //path1-----------------------------------------------------------------
         Tensor tY1 = eg.batchNorm(false, X, X_mean, X_var, eps, A, B);
-        Tensor tY2 = eg.leakyRelu(false, tY1, k);
+        
+//        Tensor tY2 = eg.leakyRelu(false, tY1, k);
+//        Tensor tY2 = eg.elu(false, tY1, alpha, k);
+//        Tensor tY2 = eg.softplus(false, tY1);
+//        Tensor tY2 = eg.sigmoid(false, tY1);
+        Tensor tY2 = eg.tanh(false, tY1);
+        
 //        Vector.println("X : ", X.value(), 0, 10);
 //        Vector.println("Y1: ", tY1.value(), 0, 10);
 //        Vector.println("Y2: ", tY2.value(), 0, 10);
         
+//        Tensor[] grads1 = eg.batchNorm_gradients_v1(false,
+//                eg.leakyRelu_deltaX_v1(false, deltaY, tY2, k), 
+//                tY1, X_var, eps, A, B);
+//        Tensor[] grads1 = eg.batchNorm_gradients_v1(false,
+//                eg.elu_deltaX_v1(false, deltaY, tY2, alpha, k), 
+//                tY1, X_var, eps, A, B);
+//        Tensor[] grads1 = eg.batchNorm_gradients_v1(false,
+//                eg.softplus_deltaX_v1(false, deltaY, tY2), 
+//                tY1, X_var, eps, A, B);
+//        Tensor[] grads1 = eg.batchNorm_gradients_v1(false,
+//                eg.sigmoid_deltaX_v1(false, deltaY, tY2), 
+//                tY1, X_var, eps, A, B);
         Tensor[] grads1 = eg.batchNorm_gradients_v1(false,
-                eg.leakyRelu_deltaX_v1(false, deltaY, tY2, k), 
+                eg.tanh_deltaX_v1(false, deltaY, tY2), 
                 tY1, X_var, eps, A, B);
         
         Tensor tdeltaX1 = grads1[0];
@@ -55,9 +73,17 @@ public class Fused_BatchNorm_LeakyRelu_backward1
         Tensor tdeltaB1 = grads1[2];
         
         //path2-----------------------------------------------------------------
-        Tensor tY3 = eg.batchNorm_leakyRelu(true, X, X_mean, X_var, eps, A, B, k);
-        Tensor[] grads2 = eg.batchNorm_leakyRelu_gradients_v1(false, 
-                deltaY, k, tY3, X_var, eps, A, B);
+//        Tensor tY3 = eg.batchNorm_leakyRelu(true, X, X_mean, X_var, eps, A, B, k);
+//        Tensor tY3 = eg.batchNorm_elu(true, X, X_mean, X_var, eps, A, B, alpha, k);
+//        Tensor tY3 = eg.batchNorm_softplus(true, X, X_mean, X_var, eps, A, B);
+//        Tensor tY3 = eg.batchNorm_sigmoid(true, X, X_mean, X_var, eps, A, B);
+        Tensor tY3 = eg.batchNorm_tanh(true, X, X_mean, X_var, eps, A, B);
+        
+//        Tensor[] grads2 = eg.batchNorm_leakyRelu_gradients_v1(false, deltaY, k, tY3, X_var, eps, A, B);
+//        Tensor[] grads2 = eg.batchNorm_elu_gradients_v1(false, deltaY, alpha, k, tY3, X_var, eps, A, B);
+//        Tensor[] grads2 = eg.batchNorm_softplus_gradients_v1(false, deltaY, tY3, X_var, eps, A, B);
+//        Tensor[] grads2 = eg.batchNorm_sigmoid_gradients_v1(false, deltaY, tY3, X_var, eps, A, B);
+        Tensor[] grads2 = eg.batchNorm_tanh_gradients_v1(false, deltaY, tY3, X_var, eps, A, B);
         
         Tensor tdeltaX2 = grads2[0];
         Tensor tdeltaA2 = grads2[1];
@@ -98,12 +124,11 @@ public class Fused_BatchNorm_LeakyRelu_backward1
     }
     
     
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         Vector.PRINT_DIFFERENT = true;
         
-        for(int h=2; h<=32; h++)
-            for(int w=1; w<=256; w++) testCorrect(h, w);
+//        for(int h=2; h<=32; h++)
+//            for(int w=1; w<=256; w++) testCorrect(h, w);
             
         for(int h=100; h<=105; h++)
             for(int w= 128; w<=256; w++) testCorrect(h, w);

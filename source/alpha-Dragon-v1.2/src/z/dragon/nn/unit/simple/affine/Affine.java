@@ -34,8 +34,7 @@ import z.util.math.vector.Vector;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Affine extends SimpleInplaceUnit
-{
+public class Affine extends SimpleInplaceUnit {
     private static final long serialVersionUID = 1L;
     
     protected int features;

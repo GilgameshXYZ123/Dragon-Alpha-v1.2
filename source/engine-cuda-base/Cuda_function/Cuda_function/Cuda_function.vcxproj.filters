@@ -167,22 +167,22 @@
       <Filter>type3_clip</Filter>
     </ClInclude>
     <ClInclude Include="type4_elu2D.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type4_gelu2D.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type4_gelu2D_deltaX.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type4_leakyRelu2D.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type4_relu2D.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type4_softplus2D.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type5_exp2D.cuh">
       <Filter>type5_exp</Filter>
@@ -239,28 +239,28 @@
       <Filter>type6_sin</Filter>
     </ClInclude>
     <ClInclude Include="type4_relu2D_deltaX_v2.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type4_relu2D_deltaX_v1.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type4_leakyRelu2D_deltaX_v1.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type4_leakyRelu2D_deltaX_v2.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type4_elu2D_deltaX_v1.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type4_elu2D_deltaX_v2.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type4_softplus2D_deltaX_v1.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type4_softplus2D_deltaX_v2.cuh">
-      <Filter>type4_relu</Filter>
+      <Filter>type5_exp\type4_relu</Filter>
     </ClInclude>
     <ClInclude Include="type5_sigmoid2D_deltaX_v1.cuh">
       <Filter>type5_exp</Filter>
@@ -422,25 +422,25 @@
       <Filter>fusion_batchNorm_leakyRelu</Filter>
     </ClInclude>
     <ClInclude Include="fusion_affine2D_row_with_leakyRelu.cuh">
-      <Filter>fusion\fusion_affine_leakyRelu</Filter>
+      <Filter>fusion_affine_leakyRelu</Filter>
     </ClInclude>
     <ClInclude Include="fusion_affine2D_row_with_leakyRelu_deltaX_v1.cuh">
-      <Filter>fusion\fusion_affine_leakyRelu</Filter>
+      <Filter>fusion_affine_leakyRelu</Filter>
     </ClInclude>
     <ClInclude Include="fusion_affine2D_row_with_leakyRelu_deltaX_v2.cuh">
-      <Filter>fusion\fusion_affine_leakyRelu</Filter>
+      <Filter>fusion_affine_leakyRelu</Filter>
     </ClInclude>
     <ClInclude Include="type1_linear_dual2D_with_leakyRelu.cuh">
-      <Filter>fusion</Filter>
+      <Filter>fusion_linear_leakyRelu</Filter>
     </ClInclude>
     <ClInclude Include="type1_linear_dual2D_with_leakyRelu_deltaX_v2.cuh">
-      <Filter>fusion</Filter>
+      <Filter>fusion_linear_leakyRelu</Filter>
     </ClInclude>
     <ClInclude Include="type1_linear_dual2D_with_leakyRelu_deltaX_v1.cuh">
-      <Filter>fusion</Filter>
+      <Filter>fusion_linear_leakyRelu</Filter>
     </ClInclude>
     <ClInclude Include="fusion_affine2D_row_with_relu.cuh">
-      <Filter>fusion\fusion_affine_leakyRelu</Filter>
+      <Filter>fusion_affine_leakyRelu</Filter>
     </ClInclude>
     <ClInclude Include="fusion_batchNorm_affined2D_row_with_relu.cuh">
       <Filter>fusion_batchNorm_leakyRelu</Filter>
@@ -449,7 +449,7 @@
       <Filter>fusion_batchNorm_leakyRelu</Filter>
     </ClInclude>
     <ClInclude Include="type1_linear_dual2D_with_relu.cuh">
-      <Filter>fusion</Filter>
+      <Filter>fusion_linear_leakyRelu</Filter>
     </ClInclude>
     <ClInclude Include="type1_quadratic_dual_clip2D.cuh">
       <Filter>type1_quadratic</Filter>
@@ -487,6 +487,43 @@
     <ClInclude Include="type1_linear_bound_switch_mul2D.cuh">
       <Filter>type1_linear</Filter>
     </ClInclude>
+    <ClInclude Include="FP32_function.cuh" />
+    <ClInclude Include="fusion_batchNorm_affined2D_row_with_function.cuh">
+      <Filter>fusion_batchNorm_function</Filter>
+    </ClInclude>
+    <ClInclude Include="fusion_batchNorm2D_row_with_function.cuh">
+      <Filter>fusion_batchNorm_function</Filter>
+    </ClInclude>
+    <ClInclude Include="fusion_batchNorm_affined2D_row_with_function_deltaX_v1.cuh">
+      <Filter>fusion_batchNorm_function</Filter>
+    </ClInclude>
+    <ClInclude Include="fusion_batchNorm_affined2D_row_with_function_deltaX_v2.cuh">
+      <Filter>fusion_batchNorm_function</Filter>
+    </ClInclude>
+    <ClInclude Include="type1_linear_dual2D_with_function.cuh">
+      <Filter>fusion_linear_function</Filter>
+    </ClInclude>
+    <ClInclude Include="type1_linear_dual2D_with_function_deltaX_v1.cuh">
+      <Filter>fusion_linear_function</Filter>
+    </ClInclude>
+    <ClInclude Include="type1_linear_dual2D_with_function_deltaX_v2.cuh">
+      <Filter>fusion_linear_function</Filter>
+    </ClInclude>
+    <ClInclude Include="fusion_batchNorm2D_row_with_function_deltaX_v1.cuh">
+      <Filter>fusion_batchNorm_function</Filter>
+    </ClInclude>
+    <ClInclude Include="fusion_batchNorm2D_row_with_function_deltaX_v2.cuh">
+      <Filter>fusion_batchNorm_function</Filter>
+    </ClInclude>
+    <ClInclude Include="fusion_affine2D_row_with_function.cuh">
+      <Filter>fusion_affine_function</Filter>
+    </ClInclude>
+    <ClInclude Include="fusion_affine2D_row_with_function_deltaX_v1.cuh">
+      <Filter>fusion_affine_function</Filter>
+    </ClInclude>
+    <ClInclude Include="fusion_affine2D_row_with_function_deltaX_v2.cuh">
+      <Filter>fusion_affine_function</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="distance">
@@ -503,9 +540,6 @@
     </Filter>
     <Filter Include="type3_clip">
       <UniqueIdentifier>{b60424dd-6ef9-44d2-be5e-30ec01cc6f14}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="type4_relu">
-      <UniqueIdentifier>{411551f7-3e05-4695-bf94-c4a41b2a0e5b}</UniqueIdentifier>
     </Filter>
     <Filter Include="type6_sin">
       <UniqueIdentifier>{465f7007-f2bd-4c3f-9f53-4561a35d7076}</UniqueIdentifier>
@@ -534,11 +568,23 @@
     <Filter Include="fusion_batchNorm_leakyRelu">
       <UniqueIdentifier>{72c411e6-fed3-426d-b416-abcdc930edd7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="fusion">
+    <Filter Include="fusion_affine_leakyRelu">
+      <UniqueIdentifier>{78c04c4a-6758-471a-ac5c-302dc37402b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fusion_batchNorm_function">
+      <UniqueIdentifier>{defdcfa0-c80d-42bf-9a2e-4b33f3000293}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fusion_linear_leakyRelu">
       <UniqueIdentifier>{0973fe32-a568-4856-9403-45e9559b2ef8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="fusion\fusion_affine_leakyRelu">
-      <UniqueIdentifier>{78c04c4a-6758-471a-ac5c-302dc37402b0}</UniqueIdentifier>
+    <Filter Include="fusion_linear_function">
+      <UniqueIdentifier>{8c8c0367-3bab-43fa-8281-b044215c93df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="type5_exp\type4_relu">
+      <UniqueIdentifier>{411551f7-3e05-4695-bf94-c4a41b2a0e5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fusion_affine_function">
+      <UniqueIdentifier>{23e40b65-b892-4fd8-8e69-e58b608b5e66}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

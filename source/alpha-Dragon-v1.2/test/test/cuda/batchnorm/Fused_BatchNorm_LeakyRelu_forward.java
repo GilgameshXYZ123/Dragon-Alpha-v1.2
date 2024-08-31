@@ -22,8 +22,7 @@ public class Fused_BatchNorm_LeakyRelu_forward
     static final ExRandom exr = new ExRandom();
     
     //affine = false
-    public static void testCorrect(int height, int width)
-    {
+    public static void testCorrect(int height, int width) {
         System.out.format("testCorrect: (height, width) = (%d, %d)\n", height, width);
         
         float eps = exr.nextFloat();

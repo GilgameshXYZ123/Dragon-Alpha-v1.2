@@ -588,6 +588,8 @@ __device__ __forceinline__ void warp_min_indexed_16(
 	sd[index] = fminf(a1, a2);
 }
 
-#endif 
+#endif
+
+#include "FP32_function.cuh"
 
 #endif

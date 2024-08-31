@@ -121,6 +121,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_Cuda_1expk2_gappedMemcpy2D
 	float* dX = (float*)(intptr_t)dX_address;
 	float* dY = (float*)(intptr_t)dY_address;
 	__gappedMemcpy(stream, dX, Xstart, strideX, dY, Ystart, strideY, width, length);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif

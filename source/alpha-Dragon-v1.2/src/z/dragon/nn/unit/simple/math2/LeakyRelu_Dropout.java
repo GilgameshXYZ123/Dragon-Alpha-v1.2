@@ -18,9 +18,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class LeakyRelu_Dropout extends SimpleInplaceFunction
-        implements Train2Eval
-{
+public class LeakyRelu_Dropout extends SimpleInplaceFunction implements Train2Eval {
     private static final long serialVersionUID = 562781240350001L;
     
     protected float k;

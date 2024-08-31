@@ -14,6 +14,6 @@
 #include <math.h>
 #include <time.h>
 
-#define COMPLIE 1
+#define COMPILE 1
 
 #endif

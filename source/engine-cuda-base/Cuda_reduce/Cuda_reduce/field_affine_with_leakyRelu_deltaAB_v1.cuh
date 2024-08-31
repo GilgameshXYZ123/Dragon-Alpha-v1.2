@@ -11,8 +11,7 @@
 //(6) [y, x] -> [row_num, field_stride]
 //(7) [N, M] = [row_num, field_stride], A.lengthv = N*M
 //(8) V1: holdY(), Y is not changed
-//(9) affine = true:
-//Can be used for layerNorm, batchNrom, sqBatchNorm
+//(9) Can be used for layerNorm, batchNrom, sqBatchNorm (affine = true)
 #ifndef FIELD_AFFINE_WITH_LEAKY_RELU_DELTA_AB_V1_CALL
 #define FIELD_AFFINE_WITH_LEAKY_RELU_DELTA_AB_V1_CALL
 
@@ -47,8 +46,7 @@
 //[Forward Propagation]
 //<1> affine: 
 //	(1) Y1 = A*X + B
-//  (2) Y2 = leaky_relu(Y1) = Y, so: 
-//
+//  (2) Y2 = leaky_relu(Y1) = Y
 //<2> Norm: 
 //	(1) Y1 = A*X_norm + B
 //  (2) Y2 = leaky_relu(Y1) = Y. obviously: sign(Y1) = sign(Y2)
@@ -68,10 +66,9 @@ __global__ void field_affine_with_leakyRelu_deltaAB_v1_kernel_4(
 	const float* __restrict__ deltaY,
 	const float* __restrict__ Y, float k,
 	const float* __restrict__ A,
-	const float* __restrict__ B,
-	int N, int M,
-	float* __restrict__ deltaA,//deltaA = deltaXp2
-	float* __restrict__ deltaB,//deltaB = deltaXp1
+	const float* __restrict__ B, int N, int M,
+	      float* __restrict__ deltaA,//deltaA = deltaXp2
+	      float* __restrict__ deltaB,//deltaB = deltaXp1
 	int width, int stride)
 {
 	const int by = blockIdx.y, bx = blockIdx.x;
@@ -211,11 +208,11 @@ __global__ void field_affine_with_leakyRelu_deltaAB_v1_kernel_4(
 //M % 4 == 0, M >= 4
 void __field_affine_with_leakyRelu_deltaAB_v1_stage(cudaStream_t stream,
 	const float* deltaY,
-	const float* Y, float k,//V1: holdY(), Y is nnot changed
-	const float* A, const float* B,
-	int N, int M,
-	float* deltaA,//deltaA = deltaXp2
-	float* deltaB,//deltaB = deltaXp1
+	const float* Y, float k,//V1: holdY(), Y is not changed
+	const float* A, 
+	const float* B, int N, int M,
+	      float* deltaA,//deltaA = deltaXp2
+	      float* deltaB,//deltaB = deltaXp1
 	int width, int stride)
 {
 	if (M > 15) {
@@ -241,10 +238,10 @@ int __field_affine_with_leakyRelu_deltaAB_v1(JNIEnv *env,
 	cudaStream_t stream1, cudaStream_t stream2,
 	const float* deltaY,
 	const float* Y, float k,//V1: holdY(), Y is not changed
-	const float* A, const float* B,
-	int N, int M,
-	float* deltaA_buf, float* deltaA,//deltaA = deltaXp2
-	float* deltaB_buf, float* deltaB,//deltaB = deltaXp1
+	const float* A, 
+	const float* B, int N, int M,
+	      float* deltaA_buf, float* deltaA,//deltaA = deltaXp2
+	      float* deltaB_buf, float* deltaB,//deltaB = deltaXp1
 	int width, int stride,
 	int partNum)
 {

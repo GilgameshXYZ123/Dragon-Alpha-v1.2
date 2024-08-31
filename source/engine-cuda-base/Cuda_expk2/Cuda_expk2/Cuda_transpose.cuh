@@ -21,7 +21,10 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_Cuda_1expk2_transpose2D(JN
 	cudaStream_t stream = (cudaStream_t)stream_address;
 	float *dX = (float*)dX_address;
 	float *dY = (float*)dY_address;
-	__transpose2d(stream, dX, dY, Xdim1, Ydim1, strideX, strideY, length);
+	__transpose2d(stream, dX, dY, 
+		Xdim1, Ydim1, 
+		strideX, strideY, length);
+	cudaError error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    transpose3D
@@ -42,8 +45,8 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_Cuda_1expk2_transpose3D(JN
 		Xdim1, Xdim2, 
 		Ydim1, Ydim2,
 		dimIndex1, dimIndex2, 
-		strideX, strideY, 
-		length);
+		strideX, strideY, length);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    transposed4D
@@ -64,8 +67,8 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_Cuda_1expk2_transpose4D(JN
 		Xdim1, Xdim2, Xdim3,
 		Ydim1, Ydim2, Ydim3,
 		dimIndex1, dimIndex2,
-		strideX, strideY,
-		length);
+		strideX, strideY, length);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif

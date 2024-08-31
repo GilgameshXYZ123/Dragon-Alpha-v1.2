@@ -45,7 +45,7 @@ public class GSter
         lr.setNegativeSlope(0.02f);//setter
         k = lr.getNegativeSlope();//getter
         System.out.println(k);
-        k = lr.negative_slop(0.02f).negative_slop();//alpha.format
+        k = lr.negative_slop(0.02f).negative_slope();//alpha.format
         System.out.println(k);
         
         

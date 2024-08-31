@@ -14,7 +14,6 @@ import z.dragon.nn.unit.dual.DualUnit;
  * Linear2 + LeakyRelu.
  *  Y = leakyRelu(alpha*X1 + beta*X2 + gamma, k)
  * @author Gilgamesh
- * @author Gilgamesh
  * @param <T>
  */
 public class CoreLinear2_LeakyRelu<T extends DualUnit> extends DualCore<T> 
@@ -51,8 +50,7 @@ public class CoreLinear2_LeakyRelu<T extends DualUnit> extends DualCore<T>
     @Override
     protected Tensor[] __backward__(Engine eg, Tensor deltaY, 
             boolean grad_inplace, boolean backward_grads,
-            boolean backward_grads1, boolean backward_grads2) 
-    {
+            boolean backward_grads1, boolean backward_grads2) {
         if(!backward_grads) return null;
         
         Tensor[] grads = (is_holdY()? //V1: holdY / V2: hold{X1, X2}

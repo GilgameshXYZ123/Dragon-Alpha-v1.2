@@ -79,6 +79,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_Cuda_1expk2_rot180(JNIEnv 
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
 	__rot180(stream, dX, dY, IH, IW, IC, length);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif 

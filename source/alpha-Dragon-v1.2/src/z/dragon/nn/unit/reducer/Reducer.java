@@ -12,8 +12,7 @@ import z.dragon.nn.unit.Unit;
  *
  * @author Gilgamesh
  */
-public abstract class Reducer extends Unit
-{ 
+public abstract class Reducer extends Unit { 
     private static final long serialVersionUID = 1L;
     
     @Override public boolean is_complex() { return false; }

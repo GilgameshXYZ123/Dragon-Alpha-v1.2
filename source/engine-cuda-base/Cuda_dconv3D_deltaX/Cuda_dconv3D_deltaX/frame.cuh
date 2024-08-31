@@ -17,7 +17,7 @@
 //#include "cooperative_groups.h"
 //#include "cooperative_groups/memcpy_async.h"
 
-#define COMPLIE 1
+#define COMPILE 1
 
 #define ENABLE_DECONV3D_ZERO_PADDING_S1_32X32C 1
 

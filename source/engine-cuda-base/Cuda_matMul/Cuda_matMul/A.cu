@@ -10,7 +10,7 @@
 using namespace std;
 #include "test.cuh"
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 //split K to improve parallelism
 #ifndef JNI_SKBUF_SUMMARY
@@ -26,6 +26,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1matMul_SKbuf_1s
 	float* dCbuf = (float*)(intptr_t)dCbuf_address;
 	float* dC = (float*)(intptr_t)dC_address;
 	SKbuf_summary(stream, dCbuf, dC, part, sizeC);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -51,6 +52,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1matMul_matMul(J
 	float *dC = (float*)(intptr_t)dC_address;
 	int index = 0;
 	matMul4x(streams, index, length, dA, dB, dC, N, M, K, M);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    matMulSK
@@ -73,6 +75,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1matMul_matMulSK
 	matMul_4x_SK(streams, index, length, GridZ, 
 		dA, dB, dC, dCbuf, 
 		N, M, K, M, K_slice, (N*M));
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -98,6 +101,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1matMul_matMulT1
 	float *dC = (float*)(intptr_t)dC_address;
 	int index = 0;
 	matMul4x_T1(streams, index, length, dA, dB, dC, N, M, K, N, M);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    matMulT1SK
@@ -120,6 +124,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1matMul_matMulT1
 	matMul4x_T1_SK(streams, index, length, GridZ,
 		dA, dB, dC, dCbuf,
 		N, M, K, K_slice, N, M);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -145,6 +150,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1matMul_matMulT2
 	float *dC = (float*)(intptr_t)dC_address;
 	int index = 0;
 	matMul4x_T2(streams, index, length, dA, dB, dC, N, M, K, M);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    matMulT2SK
@@ -167,6 +173,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1matMul_matMulT2
 	matMul4x_T2_SK(streams, index, length, GridZ,
 		dA, dB, dC, dCbuf, N, M, K, M,
 		K_slice, (N*M));
+	cudaError_t error = cudaGetLastError(); handleError(error);
 
 }
 

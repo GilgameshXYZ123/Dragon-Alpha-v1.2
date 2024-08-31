@@ -147,6 +147,7 @@ public final class Cuda_function
             float alpha, float beta, float gamma,
             long dY_address,
             int lengthv, int width, int stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="linear_greater_switch2D">
     /**
@@ -157,6 +158,7 @@ public final class Cuda_function
      * (3) stride = (width + 3)/4 * 4
      * (4) linear(beta) != 0
      * </pre>
+     *
      * @param stream_address
      * @param alpha
      * @param dX_address
@@ -174,7 +176,7 @@ public final class Cuda_function
             float v1, float v2,
             long dY_address,
             int lengthv, int width, int stride);
-    
+
     /**
      * <pre>
      *  Y = ((alpha*X1 + beta) > 0 ? v1 : v2) * X2.
@@ -183,6 +185,7 @@ public final class Cuda_function
      * (3) stride = (width + 3)/4 * 4
      * (4) linear(beta) != 0
      * </pre>
+     *
      * @param stream_address
      * @param alpha
      * @param dX1_address
@@ -201,11 +204,12 @@ public final class Cuda_function
             long dX2_address, float v1, float v2,
             long dY_address,
             int lengthv, int width, int stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="linear_bound_switch_mul2D">
-     /**
+    /**
      * <pre>
-     * {@code 
+     * {@code
      *   (1) Y = X2 * v1, (alpha * X1) >= vmax,       [vmax, +inf)
      *   (2) Y = X2 * v2, vmin < (alpha * X1) < vmax, (vmin, vmax)
      *   (3) Y = X2 * v3, (alpha * X1) <= vmin,       (-inf, vmin]
@@ -215,6 +219,7 @@ public final class Cuda_function
      * (3) stride = (width + 3)/4 * 4
      * (4) linear(beta) != 0
      * </pre>
+     *
      * @param stream_address
      * @param alpha
      * @param dX1_address
@@ -264,10 +269,10 @@ public final class Cuda_function
             float alpha, long dX_address, float beta,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-   
+
     /**
      * <pre>
-     * Linear Transformation: 
+     * Linear Transformation:
      * [1] Y1 = alpha1 * X + beta1
      * [2] Y2 = alpha2s * X + beta2.
      * (1) height * stride = lengthv
@@ -294,11 +299,12 @@ public final class Cuda_function
      */
     @Passed
     public static native void linear_dual_out2D(long cudaStream_address,
-            long dX_address, 
+            long dX_address,
             float alpha1, float beta1,
             float alpha2, float beta2,
             long dY1_address, long dY2_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="linear2D: char2float">
     /**
@@ -447,6 +453,7 @@ public final class Cuda_function
             float alpha, float beta, float gamma,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="linear_dual2D_row">
     /**
@@ -486,9 +493,10 @@ public final class Cuda_function
             float alpha, float beta, float gamma,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="linear_dual2D_center">
-     /**
+    /**
      * <pre>
      * Linear Transformation: Y = alpha*X1 + beta*X2 + gamma.
      * (1) height * stride = lengthv
@@ -521,6 +529,7 @@ public final class Cuda_function
             long dY_address,
             int dim0, int dim1, int dim2,
             int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="linear_dual2D_field">
     /**
@@ -560,6 +569,7 @@ public final class Cuda_function
             float alpha, float beta, float gamma,
             long dY_address,
             int lengthv, int width, int stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="mul_linear2D">
     /**
@@ -595,9 +605,10 @@ public final class Cuda_function
             float alpha, float beta, float gamma,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="BP: linear_dual2D_with_leakyRelu (relu)">
-     /**
+    //<editor-fold defaultstate="collapsed" desc="BP: linear_dual2D + leakyRelu (relu)">
+    /**
      * <pre>
      * Linear Transformation: Y = relu(alpha*X1 + beta*X2 + gamma).
      * (1) height * stride = lengthv
@@ -626,7 +637,7 @@ public final class Cuda_function
             float alpha, float beta, float gamma,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * Linear Transformation: Y = leakyRelu(alpha*X1 + beta*X2 + gamma).
@@ -657,7 +668,7 @@ public final class Cuda_function
             float alpha, float beta, float gamma, float k,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * Linear Transformation: Y = leakyRelu(alpha*X1 + beta*X2 + gamma).
@@ -667,25 +678,26 @@ public final class Cuda_function
      * (4) linear(beta) != 0
      * (5) V1: holdY(), Y is not changed
      * </pre>
+     *
      * @param stream_address
      * @param d_deltaX1_address
      * @param d_deltaX2_address
      * @param d_deltaY_address
-     * @param dY_address 
-     * @param alpha 
-     * @param beta 
-     * @param k 
-     * @param lengthv 
-     * @param mem_width 
-     * @param mem_stride 
+     * @param dY_address
+     * @param alpha
+     * @param beta
+     * @param k
+     * @param lengthv
+     * @param mem_width
+     * @param mem_stride
      */
     public static native void linear_dual2D_with_leakyRelu_deltaX_v1(long stream_address,
             long d_deltaX1_address, long d_deltaX2_address,
             long d_deltaY_address,
-            long dY_address, 
+            long dY_address,
             float alpha, float beta, float k,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * Linear Transformation: Y = leakyRelu(alpha*X1 + beta*X2 + gamma).
@@ -695,25 +707,127 @@ public final class Cuda_function
      * (4) linear(beta) != 0
      * (5) V1: holdY(), Y is not changed
      * </pre>
+     *
      * @param stream_address
      * @param d_deltaX1_address
      * @param d_deltaX2_address
      * @param d_deltaY_address
      * @param dX1_address
      * @param dX2_address
-     * @param alpha 
-     * @param beta 
-     * @param k 
-     * @param lengthv 
-     * @param gamma 
-     * @param mem_width 
-     * @param mem_stride 
+     * @param alpha
+     * @param beta
+     * @param k
+     * @param lengthv
+     * @param gamma
+     * @param mem_width
+     * @param mem_stride
      */
     public static native void linear_dual2D_with_leakyRelu_deltaX_v2(long stream_address,
             long d_deltaX1_address, long d_deltaX2_address,
             long d_deltaY_address,
             long dX1_address, long dX2_address,
             float alpha, float beta, float gamma, float k,
+            int lengthv, int mem_width, int mem_stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear_dual2D + function">
+    /**
+     * <pre>
+     * Linear Transformation: Y = function(alpha*X1 + beta*X2 + gamma).
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * (4) linear(beta) != 0
+     *
+     * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
+     * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
+     * [height, width] = [1024, 1024]: Time = 0.108000, Speed = 72.337959 GB/s
+     * </pre>
+     *
+     * @param stream_address
+     * @param dX1_address
+     * @param dX2_address
+     * @param alpha
+     * @param beta
+     * @param gamma
+     * @param func_type
+     * @param func_params
+     * @param func_params_length
+     * @param dY_address
+     * @param lengthv
+     * @param mem_width
+     * @param mem_stride
+     */
+    public static native void linear_dual2D_with_function(long stream_address,
+            long dX1_address, long dX2_address,
+            float alpha, float beta, float gamma,
+            int func_type, float[] func_params, int func_params_length,
+            long dY_address,
+            int lengthv, int mem_width, int mem_stride);
+
+    /**
+     * <pre>
+     * Linear Transformation: Y = function(alpha*X1 + beta*X2 + gamma).
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * (4) linear(beta) != 0
+     * (5) V1: holdY(), Y is not changed
+     * </pre>
+     *
+     * @param stream_address
+     * @param d_deltaX1_address
+     * @param d_deltaX2_address
+     * @param d_deltaY_address
+     * @param dY_address
+     * @param alpha
+     * @param beta
+     * @param func_type
+     * @param func_params
+     * @param func_params_length
+     * @param lengthv
+     * @param mem_width
+     * @param mem_stride
+     */
+    public static native void linear_dual2D_with_function_deltaX_v1(long stream_address,
+            long d_deltaX1_address, long d_deltaX2_address,
+            long d_deltaY_address,
+            long dY_address,
+            float alpha, float beta, 
+            int func_type, float[] func_params, int func_params_length,
+            int lengthv, int mem_width, int mem_stride);
+
+    /**
+     * <pre>
+     * Linear Transformation: Y = function(alpha*X1 + beta*X2 + gamma).
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * (4) linear(beta) != 0
+     * (5) V1: holdY(), Y is not changed
+     * </pre>
+     *
+     * @param stream_address
+     * @param d_deltaX1_address
+     * @param d_deltaX2_address
+     * @param d_deltaY_address
+     * @param dX1_address
+     * @param dX2_address
+     * @param alpha
+     * @param beta
+     * @param lengthv
+     * @param func_type
+     * @param func_params
+     * @param func_params_length
+     * @param gamma
+     * @param mem_width
+     * @param mem_stride
+     */
+    public static native void linear_dual2D_with_function_deltaX_v2(long stream_address,
+            long d_deltaX1_address, long d_deltaX2_address,
+            long d_deltaY_address,
+            long dX1_address, long dX2_address,
+            float alpha, float beta, float gamma,
+            int func_type, float[] func_params, int func_params_length,
             int lengthv, int mem_width, int mem_stride);
     //</editor-fold>
 
@@ -779,6 +893,7 @@ public final class Cuda_function
             long d_deltaY_address,
             long dX_address, float alpha, float beta,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="BP: quadratic_dual2D">
     /**
@@ -815,7 +930,7 @@ public final class Cuda_function
             float C,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * Y = k11*X1^2 + X1*X2  + k22*X2^2 + k1*X1 + k2*X2 + C.
@@ -892,6 +1007,7 @@ public final class Cuda_function
             float k11, float k12, float k22,
             float k1, float k2,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="quadratic_dual2D_row">
     /**
@@ -937,6 +1053,7 @@ public final class Cuda_function
             float C,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="quadratic_dual2D_center">
     /**
@@ -976,6 +1093,7 @@ public final class Cuda_function
             long dY_address,
             int dim0, int dim1, int dim2,
             int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="quadratic_dual2D_field">
     /**
@@ -1021,6 +1139,7 @@ public final class Cuda_function
             float C,
             long dY_address,
             int lengthv, int width, int stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="variance2D_f64">
     /**
@@ -1051,7 +1170,7 @@ public final class Cuda_function
             long dX_var_address,
             int lengthv, int mem_width, int mem_stride);
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="BP: rpl2D">
     /**
      * <pre>
@@ -1275,6 +1394,7 @@ public final class Cuda_function
             float gamma, int row_lengthv,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="add_div2D: row, field">
     /**
@@ -1352,6 +1472,7 @@ public final class Cuda_function
             float alpha, float beta, float gamma, float delta,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="mul_squareDiv2D">
     /**
@@ -1366,8 +1487,9 @@ public final class Cuda_function
      *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
      * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
-     * [height, width] = [1024, 1024]: 
+     * [height, width] = [1024, 1024]:
      * </pre>
+     *
      * @param cudaStream_address
      * @param alpha1
      * @param dX1_address
@@ -1382,7 +1504,7 @@ public final class Cuda_function
      * @param dY_address
      * @param lengthv
      * @param mem_width
-     * @param mem_stride 
+     * @param mem_stride
      */
     @Passed
     public static native void mul_squareDiv2D(long cudaStream_address,
@@ -1480,8 +1602,8 @@ public final class Cuda_function
             float alpha, long dX_address, float beta,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-    
-      /**
+
+    /**
      * <pre>
      * Y = X * !isNan(X).
      * (1) height * stride = lengthv
@@ -1631,8 +1753,8 @@ public final class Cuda_function
             float C,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-    
-     /**
+
+    /**
      * <pre>
      * Y = k11*X1^2 + X1*X2  + k22*X2^2 + k1*X1 + k2*X2 + C
      * Y = sqrt(max(Y, 0)).
@@ -2008,6 +2130,7 @@ public final class Cuda_function
             long d_deltaY_address,
             long dX_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="BP: leakyRelu">
     /**
@@ -2048,7 +2171,7 @@ public final class Cuda_function
      * (3) stride = (width + 3)/4 * 4
      * (4) k belongs to [0, 1)
      * (5) V1: holdY(), Y is not changed
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
      * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
      * [height, width] = [1024, 1024]: Time = 0.140000, Speed = 83.705353 GB/s
@@ -2069,7 +2192,7 @@ public final class Cuda_function
             long d_deltaY_address,
             long dY_address, float k,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * Y' =  (Y > 0) + (0 >= Y) * k = 1 + (0 >= Y)*(k - 1)
@@ -2079,7 +2202,7 @@ public final class Cuda_function
      * (3) stride = (width + 3)/4 * 4
      * (4) k belongs to [0, 1)
      * (5) V2: holdX(), X is not changed
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
      * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
      * [height, width] = [1024, 1024]: Time = 0.140000, Speed = 83.705353 GB/s
@@ -2100,6 +2223,7 @@ public final class Cuda_function
             long d_deltaY_address,
             long dX_address, float k,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="BP: elu">
     /**
@@ -2170,7 +2294,7 @@ public final class Cuda_function
             long d_deltaY_address,
             long dY_address, float alpha, float k,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * Y >  0: Y = alpha * X          , Y' = alpha
@@ -2208,6 +2332,7 @@ public final class Cuda_function
             long d_deltaY_address,
             long dX_address, float alpha, float k,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="BP: softplus">
     /**
@@ -2245,7 +2370,7 @@ public final class Cuda_function
      * (2) height * width = length
      * (3) stride = (width + 3)/4 * 4
      * (4) holdY(): Y is not changed
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
      * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
      * [height, width] = [1024, 1024]: Time = 0.150000, Speed = 78.125000 GB/s
@@ -2265,8 +2390,8 @@ public final class Cuda_function
             long d_deltaY_address,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-    
-     /**
+
+    /**
      * <pre>
      * Y = log(1 + e^X) = log1p(e^X)
      * Y' = 1 - 1/(1 + e^X)
@@ -2276,7 +2401,7 @@ public final class Cuda_function
      * (2) height * width = length
      * (3) stride = (width + 3)/4 * 4
      * (4) holdX(): X is not changed
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
      * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
      * [height, width] = [1024, 1024]: Time = 0.150000, Speed = 78.125000 GB/s
@@ -2296,14 +2421,15 @@ public final class Cuda_function
             long d_deltaY_address,
             long dX_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="BP: gelu">
-     /**
+    /**
      * <pre>
      * Y = Gaussian_RELU(X):
      *  (1) u = -1.5957692 * x * (1 + 0.044715 * x^2)
      *  (2) x / (1 + e^u).
-     * 
+     *
      * (1) height * stride = lengthv
      * (2) height * width = length
      * (3) stride = (width + 3)/4 * 4
@@ -2415,8 +2541,8 @@ public final class Cuda_function
             long d_deltaY_address,
             long dY_address,
             int lengthv, int width, int stride);
-    
-     /**
+
+    /**
      * <pre>
      * Y = 1 - 2/(e^(2*X) + 1)
      * Y'= 1 - Y^2
@@ -2445,6 +2571,7 @@ public final class Cuda_function
             long d_deltaY_address,
             long dX_address,
             int lengthv, int width, int stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="BP: sigmoid">
     /**
@@ -2503,8 +2630,8 @@ public final class Cuda_function
             long d_deltaY_address,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-    
-      /**
+
+    /**
      * <pre>
      * Y = 1/(1 + e^(-X))
      * Y' = Y - Y^2 = Y(1 - Y)
@@ -2513,7 +2640,7 @@ public final class Cuda_function
      * (2) height * width = length
      * (3) stride = (width + 3)/4 * 4
      * (4) V2: holdX(), X is not changed
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
      * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
      * [height, width] = [1024, 1024]: Time = 0.153000, Speed = 76.593140 GB/s
@@ -2533,6 +2660,7 @@ public final class Cuda_function
             long d_deltaY_address,
             long dX_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="BP: softmax">
     /**
@@ -2930,6 +3058,7 @@ public final class Cuda_function
             long d_deltaY_address,
             long dY_address, float alpha,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold> 
     //<editor-fold defaultstate="collapsed" desc="BP: halfSin">
     /**
@@ -3542,7 +3671,6 @@ public final class Cuda_function
             int lengthv, int mem_width, int mem_stride);
 
     //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="SGDMN">
     /**
      * <pre>
@@ -3575,7 +3703,7 @@ public final class Cuda_function
             long dV_address, float momentum, float dampen, float nesterov,
             long d_deltaW_address, float lr,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * SGD with momentum and nestrov
@@ -3612,7 +3740,7 @@ public final class Cuda_function
             float L1coef, float L2coef,
             int lengthv, int mem_width, int mem_stride);
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="RMSprop">
     /**
      * <pre>
@@ -3701,7 +3829,7 @@ public final class Cuda_function
 
     //<editor-fold defaultstate="collapsed" desc="Adam">
     //<editor-fold defaultstate="collapsed" desc="adam_type2">
-      /**
+    /**
      * <pre>
      * Adam(W):
      * Init: Uv = alpha, Us = beta
@@ -3749,7 +3877,7 @@ public final class Cuda_function
             long d_deltaW_address, float lr,
             int lengthv, int mem_width, int mem_stride);
     //</editor-fold>
- 
+
     /**
      * <pre>
      * Adam:
@@ -3846,9 +3974,10 @@ public final class Cuda_function
             long d_deltaW_address, float lr_t,
             float L1coef, float L2coef,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Adam(AMSgrad)">
-     /**
+    /**
      * <pre>
      * Adam:
      * Init: Uv = alpha, Us = beta
@@ -3910,7 +4039,7 @@ public final class Cuda_function
      *      (3) eps_t = eps * sqrt(1 - Us)
      *      (4) V = a1*V + a2*deltaW          # update the velocity depending on the acceleration
      *      (5) S = b1*S + b2*deltaW^2        # update the standard derivation depending on the acceleration
-     *      (6) Smax = max(Smax, S) 
+     *      (6) Smax = max(Smax, S)
      *      (7) W = W - lr_t * V / (sqrt(Smax) + eps_t)  # gradient descent
      *      Uv *= alpha; Us *= beta.
      * (1) height * stride = lengthv
@@ -3951,7 +4080,7 @@ public final class Cuda_function
             float L1coef, float L2coef,
             int lengthv, int mem_width, int mem_stride);
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="Adamax">
     /**
      * <pre>
@@ -4046,7 +4175,7 @@ public final class Cuda_function
             float L1coef, float L2coef,
             int lengthv, int mem_width, int mem_stride);
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="AdamW">
     /**
      * <pre>
@@ -4097,6 +4226,7 @@ public final class Cuda_function
             long d_deltaW_address, float lr_t, float lr,
             float L1coef, float L2coef,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="AdamW(AMSgrad)">
     /**
@@ -4152,7 +4282,7 @@ public final class Cuda_function
             float L1coef, float L2coef,
             int lengthv, int mem_width, int mem_stride);
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="Adamod">
     /**
      * <pre>
@@ -4295,6 +4425,7 @@ public final class Cuda_function
             long dA_address, long dB_address, int row_lengthv,
             long dY_address,
             int lengthv, int width, int stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="BP: affine + leaky_relu / relu">
     /**
@@ -4309,6 +4440,7 @@ public final class Cuda_function
      * (2) height * width = length
      * (3) stride = (width + 3)/4 * 4
      * </pre>
+     *
      * @param stream_address
      * @param dX_address
      * @param dA_address
@@ -4324,7 +4456,7 @@ public final class Cuda_function
             long dA_address, long dB_address, int row_lengthv,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * (1) [A, B] -> Tensor[row_lengthv]
@@ -4354,7 +4486,7 @@ public final class Cuda_function
             long dA_address, long dB_address, int row_lengthv,
             long dY_address, float k,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * Affine Transformation with Leaky_relu.
@@ -4363,7 +4495,7 @@ public final class Cuda_function
      * (3) stride = (width + 3)/4 * 4
      * (4) k belongs to [0, 1)
      * (5) V1: holdY(), Y is not changed
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
      * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
      * [height, width] = [1024, 1024]: Time = 0.140000, Speed = 83.705353 GB/s
@@ -4387,7 +4519,7 @@ public final class Cuda_function
             long dY_address, float k,
             long dA_address, int row_lengthv,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * Affine Transformation with Leaky_relu.
@@ -4396,11 +4528,12 @@ public final class Cuda_function
      * (3) stride = (width + 3)/4 * 4
      * (4) k belongs to [0, 1)
      * (5) V1: holdY(), Y is not changed
-     * 
+     *
      * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
      * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
      * [height, width] = [1024, 1024]: Time = 0.140000, Speed = 83.705353 GB/s
      * </pre>
+     *
      * @param cudaStream_address
      * @param d_deltaX_address
      * @param d_deltaY_address
@@ -4411,13 +4544,121 @@ public final class Cuda_function
      * @param row_lengthv
      * @param lengthv
      * @param mem_width
-     * @param mem_stride 
+     * @param mem_stride
      */
     @Passed
     public static native void affine2D_row_with_leakyRelu_deltaX_v2(long cudaStream_address,
             long d_deltaX_address,
             long d_deltaY_address, float k,
-            long dX_address, 
+            long dX_address,
+            long dA_address,
+            long dB_address, int row_lengthv,
+            int lengthv, int mem_width, int mem_stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine + function">
+    /**
+     * <pre>
+     * (1) [A, B] -> Tensor[row_lengthv]
+     * (2) [X, Y] -> Tensor[height, row_lengthv]
+     * (3) lengthv / row_lengthv = height
+     * (4) lengthv % row_lengthv == 0
+     * (5) A.width = B.width = Y.width = X.width
+     * (6) for each field: Y = function(A*X + B).
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * </pre>
+     *
+     * @param stream_address
+     * @param dX_address
+     * @param dA_address
+     * @param dB_address
+     * @param row_lengthv
+     * @param dY_address
+     * @param func_type
+     * @param func_params
+     * @param func_params_length
+     * @param lengthv
+     * @param mem_width
+     * @param mem_stride
+     */
+    public static native void affine2D_row_with_function(long stream_address,
+            long dX_address,
+            long dA_address, long dB_address, int row_lengthv,
+            long dY_address,
+            int func_type, float[] func_params, int func_params_length,
+            int lengthv, int mem_width, int mem_stride);
+
+    /**
+     * <pre>
+     * Affine Transformation with function.
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * (4) k belongs to [0, 1)
+     * (5) V1: holdY(), Y is not changed
+     *
+     * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
+     * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
+     * [height, width] = [1024, 1024]: Time = 0.140000, Speed = 83.705353 GB/s
+     * </pre>
+     *
+     * @param cudaStream_address
+     * @param d_deltaX_address
+     * @param d_deltaY_address
+     * @param dY_address
+     * @param func_type
+     * @param func_params
+     * @param dA_address
+     * @param func_params_length
+     * @param row_lengthv
+     * @param lengthv
+     * @param mem_width
+     * @param mem_stride
+     */
+    @Passed
+    public static native void affine2D_row_with_function_deltaX_v1(long cudaStream_address,
+            long d_deltaX_address,
+            long d_deltaY_address,
+            long dY_address,
+            int func_type, float[] func_params, int func_params_length,
+            long dA_address, int row_lengthv,
+            int lengthv, int mem_width, int mem_stride);
+
+    /**
+     * <pre>
+     * Affine Transformation with function.
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * (4) k belongs to [0, 1)
+     * (5) V1: holdY(), Y is not changed
+     *
+     * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
+     * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
+     * [height, width] = [1024, 1024]: Time = 0.140000, Speed = 83.705353 GB/s
+     * </pre>
+     *
+     * @param cudaStream_address
+     * @param d_deltaX_address
+     * @param d_deltaY_address
+     * @param func_type
+     * @param func_params
+     * @param func_params_length
+     * @param dX_address
+     * @param dA_address
+     * @param dB_address
+     * @param row_lengthv
+     * @param lengthv
+     * @param mem_width
+     * @param mem_stride
+     */
+    @Passed
+    public static native void affine2D_row_with_function_deltaX_v2(long cudaStream_address,
+            long d_deltaX_address,
+            long d_deltaY_address,
+            int func_type, float[] func_params, int func_params_length,
+            long dX_address,
             long dA_address,
             long dB_address, int row_lengthv,
             int lengthv, int mem_width, int mem_stride);
@@ -4440,6 +4681,7 @@ public final class Cuda_function
      * (3) stride = (width + 3)/4 * 4
      * (4) affine = false
      * </pre>
+     *
      * @param stream_address
      * @param dX_address
      * @param dX_mean_address
@@ -4454,11 +4696,11 @@ public final class Cuda_function
     @Passed
     public static native void sqBatchNorm2D_row(long stream_address,
             long dX_address,
-            long dX_mean_address, 
+            long dX_mean_address,
             long dX_sqmean_address, float eps, int row_lengthv,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * Square Batch Normalization:
@@ -4474,6 +4716,7 @@ public final class Cuda_function
      * (3) stride = (width + 3)/4 * 4
      * (4) affine = true
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_address
      * @param dX_mean_address
@@ -4490,11 +4733,12 @@ public final class Cuda_function
     @Passed
     public static native void sqBatchNorm_affined2D_row(long cudaStream_address,
             long dX_address,
-            long dX_mean_address, 
+            long dX_mean_address,
             long dX_sqmean_address, float eps,
             long dA_address, long dB_address, int row_lengthv,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="backward propagation">
     /**
@@ -4506,6 +4750,7 @@ public final class Cuda_function
      * (4) V1: holdY(), Y is not changed
      * (5) affined = false.
      * </pre>
+     *
      * @param stream_address
      * @param d_deltaY_address
      * @param dY_address
@@ -4524,9 +4769,9 @@ public final class Cuda_function
     public static native void sqBatchNorm2D_row_deltaX_v1(long stream_address,
             long d_deltaY_address,
             long dY_address,
-            long dX_mean_address, 
+            long dX_mean_address,
             long dX_sqmean_address, float eps,
-            long d_deltaXp1, 
+            long d_deltaXp1,
             long d_deltaXp2, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
@@ -4540,6 +4785,7 @@ public final class Cuda_function
      * (4) V2: HoldX(), X is not changed
      * (5) affined = false.
      * </pre>
+     *
      * @param stream_address
      * @param d_deltaY_address
      * @param dX_address
@@ -4559,10 +4805,11 @@ public final class Cuda_function
             long d_deltaY_address,
             long dX_address,
             long dX_mean_address, long dX_sqmean_address, float eps,
-            long d_deltaXp1, 
+            long d_deltaXp1,
             long d_deltaXp2, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="backward propagation(affined)">
     /**
@@ -4574,6 +4821,7 @@ public final class Cuda_function
      * (4) V1: holdY(), Y is not changed
      * (5) affine = true
      * </pre>
+     *
      * @param cudaStream_address
      * @param d_deltaY_address
      * @param dY_address
@@ -4600,7 +4848,7 @@ public final class Cuda_function
             long d_deltaXp2_address, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * find the gradient of X in Square Batch Normalization.
@@ -4610,6 +4858,7 @@ public final class Cuda_function
      * (4) V2: holdX(), X is not changed
      * (5) affine = true
      * </pre>
+     *
      * @param cudaStream_address
      * @param d_deltaY_address
      * @param dX_address
@@ -4623,20 +4872,20 @@ public final class Cuda_function
      * @param d_deltaX_address
      * @param lengthv
      * @param mem_width
-     * @param mem_stride 
+     * @param mem_stride
      */
     public static native void sqBatchNorm_affined2D_row_deltaX_v2(long cudaStream_address,
-            long d_deltaY_address, 
+            long d_deltaY_address,
             long dX_address,
             long dX_mean_address, long dX_sqmean_address, float eps,
-            long dA_address, 
-            long d_deltaXp1_address, 
+            long dA_address,
+            long d_deltaXp1_address,
             long d_deltaXp2_address, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
     //</editor-fold>
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="BP: batchNorm2D_row">
     //<editor-fold defaultstate="collapsed" desc="forward propagation">
     /**
@@ -4647,6 +4896,7 @@ public final class Cuda_function
      * (3) stride = (width + 3)/4 * 4
      * (4) affine = false
      * </pre>
+     *
      * @param stream_address
      * @param dX_address
      * @param dX_mean_address
@@ -4661,20 +4911,21 @@ public final class Cuda_function
     @Passed
     public static native void batchNorm2D_row(long stream_address,
             long dX_address,
-            long dX_mean_address, 
+            long dX_mean_address,
             long dX_var_address, float eps, int row_lengthv,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
-     * Batch Normalization: 
+     * Batch Normalization:
      *  Y = a* (X - X_mean) / sqrt(X_var + eps) + b.
      * (1) height * stride = lengthv
      * (2) height * width = length
      * (3) stride = (width + 3)/4 * 4
      * (4) affine = true
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_address
      * @param dX_mean_address
@@ -4691,11 +4942,12 @@ public final class Cuda_function
     @Passed
     public static native void batchNorm_affined2D_row(long cudaStream_address,
             long dX_address,
-            long dX_mean_address, 
+            long dX_mean_address,
             long dX_var_address, float eps,
             long dA_address, long dB_address, int row_lengthv,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="backward propagation">
     /**
@@ -4707,6 +4959,7 @@ public final class Cuda_function
      * (4) V1: holdY(), Y is not changed
      * (5) affined = false.
      * </pre>
+     *
      * @param stream_address
      * @param d_deltaY_address
      * @param dY_address
@@ -4725,7 +4978,7 @@ public final class Cuda_function
             long d_deltaY_address,
             long dY_address,
             long dX_var_address, float eps,
-            long d_deltaXp1, 
+            long d_deltaXp1,
             long d_deltaXp2, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
@@ -4739,6 +4992,7 @@ public final class Cuda_function
      * (4) V2: HoldX(), X is not changed
      * (5) affined = false.
      * </pre>
+     *
      * @param stream_address
      * @param d_deltaY_address
      * @param dX_address
@@ -4758,10 +5012,11 @@ public final class Cuda_function
             long d_deltaY_address,
             long dX_address,
             long dX_mean_address, long dX_var_address, float eps,
-            long d_deltaXp1, 
+            long d_deltaXp1,
             long d_deltaXp2, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="backward propagation(affined)">
     /**
@@ -4773,6 +5028,7 @@ public final class Cuda_function
      * (4) V1: holdY(), Y is not changed
      * (5) affine = true
      * </pre>
+     *
      * @param cudaStream_address
      * @param d_deltaY_address
      * @param dY_address
@@ -4798,7 +5054,7 @@ public final class Cuda_function
             long d_deltaXp2_address, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * find the gradient of X in Batch Normalization.
@@ -4808,6 +5064,7 @@ public final class Cuda_function
      * (4) V2: holdX(), X is not changed
      * (5) affine = true
      * </pre>
+     *
      * @param cudaStream_address
      * @param d_deltaY_address
      * @param dX_address
@@ -4821,30 +5078,32 @@ public final class Cuda_function
      * @param d_deltaX_address
      * @param lengthv
      * @param mem_width
-     * @param mem_stride 
+     * @param mem_stride
      */
     public static native void batchNorm_affined2D_row_deltaX_v2(long cudaStream_address,
             long d_deltaY_address,
             long dX_address,
             long dX_mean_address, long dX_var_address, float eps,
-            long dA_address, 
-            long d_deltaXp1_address, 
+            long dA_address,
+            long d_deltaXp1_address,
             long d_deltaXp2_address, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="BP: batchNorm2D_row + leakyRelu / relu">
     //<editor-fold defaultstate="collapsed" desc="foward_propagation (relu)">
     /**
      * <pre>
-     * Batch Normalization: 
+     * Batch Normalization:
      *  Y = relu((X - X_mean) / sqrt(X_var + eps)).
      * (1) height * stride = lengthv
      * (2) height * width = length
      * (3) stride = (width + 3)/4 * 4
      * (4) affine = true
      * </pre>
+     *
      * @param stream_address
      * @param dX_address
      * @param dX_mean_address
@@ -4859,20 +5118,21 @@ public final class Cuda_function
     @Passed
     public static native void batchNorm2D_row_with_relu(long stream_address,
             long dX_address,
-            long dX_mean_address, 
+            long dX_mean_address,
             long dX_var_address, float eps, int row_lengthv,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
-     * Batch Normalization: 
+     * Batch Normalization:
      *  Y = relu(A * (X - X_mean) / sqrt(X_var + eps) + B).
      * (1) height * stride = lengthv
      * (2) height * width = length
      * (3) stride = (width + 3)/4 * 4
      * (4) affine = true
      * </pre>
+     *
      * @param stream_address
      * @param dX_address
      * @param dX_mean_address
@@ -4889,22 +5149,24 @@ public final class Cuda_function
     @Passed
     public static native void batchNorm_affined2D_row_with_relu(long stream_address,
             long dX_address,
-            long dX_mean_address, 
+            long dX_mean_address,
             long dX_var_address, float eps,
             long dA_address, long dB_address, int row_lengthv,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="foward_propagation (leakyRelu)">
     /**
      * <pre>
-     * Batch Normalization: 
+     * Batch Normalization:
      *  Y = leakyRelu((X - X_mean) / sqrt(X_var + eps)).
      * (1) height * stride = lengthv
      * (2) height * width = length
      * (3) stride = (width + 3)/4 * 4
      * (4) affine = true
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_address
      * @param dX_mean_address
@@ -4920,20 +5182,21 @@ public final class Cuda_function
     @Passed
     public static native void batchNorm2D_row_with_leakyRelu(long cudaStream_address,
             long dX_address,
-            long dX_mean_address, 
+            long dX_mean_address,
             long dX_var_address, float eps, int row_lengthv,
             long dY_address, float k,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
-     * Batch Normalization: 
+     * Batch Normalization:
      *  Y = leakyRelu(A * (X - X_mean) / sqrt(X_var + eps) + B).
      * (1) height * stride = lengthv
      * (2) height * width = length
      * (3) stride = (width + 3)/4 * 4
      * (4) affine = true
      * </pre>
+     *
      * @param cudaStream_address
      * @param dX_address
      * @param dX_mean_address
@@ -4951,11 +5214,12 @@ public final class Cuda_function
     @Passed
     public static native void batchNorm_affined2D_row_with_leakyRelu(long cudaStream_address,
             long dX_address,
-            long dX_mean_address, 
+            long dX_mean_address,
             long dX_var_address, float eps,
             long dA_address, long dB_address, int row_lengthv,
             long dY_address, float k,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="backward propagation">
     /**
@@ -4967,14 +5231,15 @@ public final class Cuda_function
      * (4) V1: holdY(), Y is not changed
      * (5) affined = false.
      * </pre>
+     *
      * @param stream_address
      * @param d_deltaY_address
      * @param dY_address
      * @param k
      * @param dX_var_address
      * @param eps
-     * @param d_deltaXp1
-     * @param d_deltaXp2
+     * @param d_deltaXp1_address
+     * @param d_deltaXp2_address
      * @param row_lengthv
      * @param d_deltaX_address
      * @param lengthv
@@ -4986,8 +5251,8 @@ public final class Cuda_function
             long d_deltaY_address,
             long dY_address, float k,
             long dX_var_address, float eps,
-            long d_deltaXp1, 
-            long d_deltaXp2, int row_lengthv,
+            long d_deltaXp1_address,
+            long d_deltaXp2_address, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
 
@@ -5000,6 +5265,7 @@ public final class Cuda_function
      * (4) V2: HoldX(), X is not changed
      * (5) affined = false.
      * </pre>
+     *
      * @param stream_address
      * @param d_deltaY_address
      * @param k
@@ -5020,12 +5286,13 @@ public final class Cuda_function
             long d_deltaY_address, float k,
             long dX_address,
             long dX_mean_address, long dX_var_address, float eps,
-            long d_deltaXp1, 
+            long d_deltaXp1,
             long d_deltaXp2, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="backward propagation(affined)">
+    //<editor-fold defaultstate="collapsed" desc="backward propagation (affined)">
     /**
      * <pre>
      * find the gradient of X in Batch Normalization with leakyRelu.
@@ -5035,6 +5302,7 @@ public final class Cuda_function
      * (4) V1: holdY(), Y is not changed
      * (5) affine = true
      * </pre>
+     *
      * @param cudaStream_address
      * @param d_deltaY_address
      * @param dY_address
@@ -5061,16 +5329,17 @@ public final class Cuda_function
             long d_deltaXp2_address, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
-     * find the gradient of X in Batch Normalization.
+     * find the gradient of X in Batch Normalization with leakyRelu.
      * (1) height * stride = lengthv
      * (2) height * width = length
      * (3) stride = (width + 3)/4 * 4
      * (4) V2: holdX(), X is not changed
      * (5) affine = true
      * </pre>
+     *
      * @param cudaStream_address
      * @param d_deltaY_address
      * @param k
@@ -5086,14 +5355,244 @@ public final class Cuda_function
      * @param d_deltaX_address
      * @param lengthv
      * @param mem_width
-     * @param mem_stride 
+     * @param mem_stride
      */
     public static native void batchNorm_affined2D_row_with_leakyRelu_deltaX_v2(long cudaStream_address,
             long d_deltaY_address, float k,
             long dX_address,
             long dX_mean_address, long dX_var_address, float eps,
             long dA_address, long dB_address,
-            long d_deltaXp1_address, 
+            long d_deltaXp1_address,
+            long d_deltaXp2_address, int row_lengthv,
+            long d_deltaX_address,
+            int lengthv, int mem_width, int mem_stride);
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm2D_row + function">
+    //<editor-fold defaultstate="collapsed" desc="foward propagation">
+    /**
+     * <pre>
+     * Batch Normalization:
+     *  Y = function((X - X_mean) / sqrt(X_var + eps)).
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * (4) affine = true
+     * </pre>
+     *
+     * @param cudaStream_address
+     * @param dX_address
+     * @param dX_mean_address
+     * @param dX_var_address
+     * @param eps
+     * @param row_lengthv
+     * @param dY_address
+     * @param func_type
+     * @param func_params
+     * @param lengthv
+     * @param func_params_length
+     * @param mem_width
+     * @param mem_stride
+     */
+    @Passed
+    public static native void batchNorm2D_row_with_function(long cudaStream_address,
+            long dX_address,
+            long dX_mean_address,
+            long dX_var_address, float eps, int row_lengthv,
+            long dY_address,
+            int func_type, float[] func_params, int func_params_length,
+            int lengthv, int mem_width, int mem_stride);
+
+    /**
+     * <pre>
+     * Batch Normalization:
+     *  Y = function(A * (X - X_mean) / sqrt(X_var + eps) + B).
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * (4) affine = true
+     * </pre>
+     *
+     * @param cudaStream_address
+     * @param dX_address
+     * @param dX_mean_address
+     * @param dX_var_address
+     * @param eps
+     * @param dA_address
+     * @param dB_address
+     * @param row_lengthv
+     * @param dY_address
+     * @param func_type
+     * @param func_params
+     * @param lengthv
+     * @param mem_width
+     * @param func_params_length
+     * @param mem_stride
+     */
+    @Passed
+    public static native void batchNorm_affined2D_row_with_function(long cudaStream_address,
+            long dX_address,
+            long dX_mean_address,
+            long dX_var_address, float eps,
+            long dA_address, long dB_address, int row_lengthv,
+            long dY_address,
+            int func_type, float[] func_params, int func_params_length,
+            int lengthv, int mem_width, int mem_stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward propagation">
+    /**
+     * <pre>
+     * find the gradient of X in Batch Normalization.
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * (4) V1: holdY(), Y is not changed
+     * (5) affined = false.
+     * </pre>
+     *
+     * @param stream_address
+     * @param d_deltaY_address
+     * @param dY_address
+     * @param func_type
+     * @param func_params
+     * @param func_params_length
+     * @param dX_var_address
+     * @param eps
+     * @param d_deltaXp1_address
+     * @param d_deltaXp2_address
+     * @param row_lengthv
+     * @param d_deltaX_address
+     * @param lengthv
+     * @param mem_width
+     * @param mem_stride
+     */
+    @Passed
+    public static native void batchNorm2D_row_with_function_deltaX_v1(long stream_address,
+            long d_deltaY_address,
+            long dY_address,
+            int func_type, float[] func_params, int func_params_length,
+            long dX_var_address, float eps,
+            long d_deltaXp1_address,
+            long d_deltaXp2_address, int row_lengthv,
+            long d_deltaX_address,
+            int lengthv, int mem_width, int mem_stride);
+
+    /**
+     * <pre>
+     * find the gradient of X in Batch Normalization.
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * (4) V2: HoldX(), X is not changed
+     * (5) affined = false.
+     * </pre>
+     *
+     * @param stream_address
+     * @param d_deltaY_address
+     * @param func_type
+     * @param func_params
+     * @param func_params_length
+     * @param dX_address
+     * @param dX_mean_address
+     * @param dX_var_address
+     * @param eps
+     * @param d_deltaXp1_address
+     * @param d_deltaXp2_address
+     * @param row_lengthv
+     * @param d_deltaX_address
+     * @param lengthv
+     * @param mem_width
+     * @param mem_stride
+     */
+    @Passed
+    public static native void batchNorm2D_row_with_function_deltaX_v2(long stream_address,
+            long d_deltaY_address,
+            int func_type, float[] func_params, int func_params_length,
+            long dX_address,
+            long dX_mean_address, long dX_var_address, float eps,
+            long d_deltaXp1_address,
+            long d_deltaXp2_address, int row_lengthv,
+            long d_deltaX_address,
+            int lengthv, int mem_width, int mem_stride);
+
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward propagation (affined)">
+    /**
+     * <pre>
+     * find the gradient of X in Batch Normalization with function
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * (4) V1: holdY(), Y is not changed
+     * (5) affine = true
+     * </pre>
+     *
+     * @param cudaStream_address
+     * @param d_deltaY_address
+     * @param dY_address
+     * @param func_type
+     * @param func_params
+     * @param func_params_length
+     * @param dX_var_address
+     * @param eps
+     * @param dA_address
+     * @param dB_address
+     * @param d_deltaXp1_address
+     * @param d_deltaXp2_address
+     * @param row_lengthv
+     * @param d_deltaX_address
+     * @param lengthv
+     * @param mem_width
+     * @param mem_stride
+     */
+    @Passed
+    public static native void batchNorm_affined2D_row_with_function_deltaX_v1(long cudaStream_address,
+            long d_deltaY_address,
+            long dY_address,
+            int func_type, float[] func_params, int func_params_length,
+            long dX_var_address, float eps,
+            long dA_address, long dB_address,
+            long d_deltaXp1_address,
+            long d_deltaXp2_address, int row_lengthv,
+            long d_deltaX_address,
+            int lengthv, int mem_width, int mem_stride);
+
+    /**
+     * <pre>
+     * find the gradient of X in Batch Normalization with function.
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * (4) V2: holdX(), X is not changed
+     * (5) affine = true
+     * </pre>
+     *
+     * @param cudaStream_address
+     * @param d_deltaY_address
+     * @param func_type
+     * @param func_params
+     * @param func_params_length
+     * @param dX_address
+     * @param dX_mean_address
+     * @param dX_var_address
+     * @param eps
+     * @param dA_address
+     * @param dB_address
+     * @param d_deltaXp1_address
+     * @param d_deltaXp2_address
+     * @param row_lengthv
+     * @param d_deltaX_address
+     * @param lengthv
+     * @param mem_width
+     * @param mem_stride
+     */
+    public static native void batchNorm_affined2D_row_with_function_deltaX_v2(long cudaStream_address,
+            long d_deltaY_address,
+            int func_type, float[] func_params, int func_params_length,
+            long dX_address,
+            long dX_mean_address, long dX_var_address, float eps,
+            long dA_address, long dB_address,
+            long d_deltaXp1_address,
             long d_deltaXp2_address, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
@@ -5182,7 +5681,7 @@ public final class Cuda_function
             long d_deltaXp1_address, long d_deltaXp2_address, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * find the gradient of deltaX in Batch Normalization:
@@ -5226,6 +5725,7 @@ public final class Cuda_function
             long d_deltaXp1_address, long d_deltaXp2_address, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="BP: layernorm2D_row (affined)">
     /**
@@ -5289,6 +5789,7 @@ public final class Cuda_function
      * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
      * [height, width] = [1024, 1024]:
      * </pre>
+     *
      * @param stream_address
      * @param d_deltaY_address
      * @param dY_address
@@ -5313,7 +5814,7 @@ public final class Cuda_function
             long d_deltaXp1_address, long d_deltaXp2_address, int row_lengthv,
             long d_deltaX_address,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
      * find the gradient of deltaX in Batch Normalization:
@@ -5335,6 +5836,7 @@ public final class Cuda_function
      * for [height, width] from [1, 1] to(+1, +1) [10, 256]: correct
      * [height, width] = [1024, 1024]:
      * </pre>
+     *
      * @param stream_address
      * @param d_deltaY_address
      * @param dX_address
@@ -5449,10 +5951,10 @@ public final class Cuda_function
             long dX_address,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-    
+
     /**
      * <pre>
-     * Y = clip(X, 0, 1) * 255.0f. 
+     * Y = clip(X, 0, 1) * 255.0f.
      * (1) height * stride = lengthv
      * (2) height * width = length
      * (3) stride = (width + 3)/4 * 4

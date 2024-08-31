@@ -16,9 +16,8 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Quadratic2 extends DualFunction
-{
-    private static long serialVersionUID = 1L;
+public class Quadratic2 extends DualFunction {
+    private static final long serialVersionUID = 1L;
     
     protected boolean likeX1;
     protected float k11, k12, k22, k1, k2, C;

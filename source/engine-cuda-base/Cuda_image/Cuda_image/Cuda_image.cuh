@@ -33,6 +33,22 @@ extern "C" {
 
 	/*
 	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_image
+	 * Method:    img_dualLinear2_noramlize2D_row
+	 * Signature: (JJJJIFFFFFFFJIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1image_img_1dualLinear2_1noramlize2D_1row
+	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jint, jfloat, jfloat, jfloat, jfloat, jfloat, jfloat, jfloat, jlong, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_image
+	 * Method:    img_dualLinear2_noramlize2D_center
+	 * Signature: (JJJJFFFFFFFJIIIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1image_img_1dualLinear2_1noramlize2D_1center
+	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jfloat, jfloat, jfloat, jfloat, jfloat, jfloat, jfloat, jlong, jint, jint, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_image
 	 * Method:    img_linear2_div2D_field
 	 * Signature: (JJJJIFFFFFFJIII)V
 	 */
@@ -70,6 +86,14 @@ extern "C" {
 	 */
 	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1image_img_1linear_1dual2D_1field
 	(JNIEnv *, jclass, jlong, jlong, jlong, jint, jfloat, jfloat, jfloat, jlong, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_image
+	 * Method:    img_threshold2D
+	 * Signature: (JJFFBBJIII)V
+	 */
+	JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1image_img_1threshold2D
+	(JNIEnv *, jclass, jlong, jlong, jfloat, jfloat, jbyte, jbyte, jlong, jint, jint, jint);
 
 	/*
 	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_image

@@ -52,7 +52,7 @@ public class HSI_present1
         white = eg.img.resize(true, white, raw.dim(0), raw.dim(1));
         dark = eg.img.resize(true, dark, raw.dim(0), raw.dim(1));
         
-        Tensor raw2 = eg.img.reflection_normalization(true, raw, white, dark)
+        Tensor raw2 = eg.img.reflection_normalize(true, raw, white, dark)
                 .img().linear_dtype_to_pixel(true, 255, 0);
         
         cv.imshow(eg.img.BGR(raw2), "raw2(BGR type)");

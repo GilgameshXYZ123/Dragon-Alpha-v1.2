@@ -15,8 +15,7 @@ import z.dragon.nn.unit.dual.DualFunction;
  *
  * @author Gilgamesh
  */
-public class Quadratic2Row extends DualFunction 
-{
+public class Quadratic2Row extends DualFunction {
     private static final long serialVersionUID = 1L;
     
     protected float k11, k12, k22, k1, k2, C;   

@@ -277,7 +277,7 @@ __global__ void img_dualLinear2_divide2D_kernel_4(
 #endif
 
 
-void __img_dualLinear2_div(cudaStream_t stream,
+void __img_dualLinear2_div2D(cudaStream_t stream,
 	const char* X, 
 	const char* X1, 
 	const char* X2,

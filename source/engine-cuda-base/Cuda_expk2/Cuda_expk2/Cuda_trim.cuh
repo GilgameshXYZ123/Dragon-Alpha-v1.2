@@ -21,6 +21,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_Cuda_1expk2_trim2D(JNIEnv 
 		dX, IN, IC,
 		dY, ON, OC,
 		pn0, pc0);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    trim3D
@@ -37,6 +38,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_Cuda_1expk2_trim3D(JNIEnv 
 		dX, IN, IW, IC,
 		dY, ON, OW, OC,
 		pn0, pw0, pc0);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    trim4D
@@ -53,7 +55,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_Cuda_1expk2_trim4D(JNIEnv 
 		dX, IN, IH, IW, IC,
 		dY, ON, OH, OW, OC,
 		pn0, ph0, pw0, pc0);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
-
 
 #endif

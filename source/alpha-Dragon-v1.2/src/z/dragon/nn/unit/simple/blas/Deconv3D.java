@@ -22,29 +22,28 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Deconv3D extends SimpleUnit
-{
+public class Deconv3D extends SimpleUnit {
     private static final long serialVersionUID = 562781240120001L;
     
     protected int IC, OC;
     protected int FH, FW;
     protected int sh, sw;
     protected int ph, pw;
-    protected int OH, OW;//reversed conv3D: (OH, OW) -> (IH, IW)
+    protected int OH, OW;
     protected boolean biased;
     
     transient protected Parameter W;
     transient protected Parameter B;
     
     public Deconv3D(boolean biasd,
-            int in_channels, int out_channels, 
-            int kernel_height, int kernel_width, 
-            int stride_height, int stride_width,
+            int in_channel,     int out_channel, 
+            int kernel_height,  int kernel_width, 
+            int stride_height,  int stride_width,
             int padding_height, int padding_width,
-            int output_height, int output_width) 
+            int output_height,  int output_width) 
     {
         this.biased = biasd;
-        this.IC = in_channels;    this.OC = out_channels;//transposed: swap(OC, IC)
+        this.IC = in_channel;     this.OC = out_channel;
         this.FH = kernel_height;  this.FW = kernel_width;
         this.sh = stride_height;  this.sw = stride_width;
         this.ph = padding_height; this.pw = padding_width;
@@ -53,8 +52,8 @@ public class Deconv3D extends SimpleUnit
 
     //<editor-fold defaultstate="collapsed" desc="Basic-Functions">
     public boolean biased() { return biased; }
-    public int out_channels() { return OC; }
-    public int in_channels() { return IC; }
+    public int out_channel() { return OC; }
+    public int in_channel()  { return IC; }
     
     public int[] kernel()  { return new int[]{ FH, FW }; }
     public int[] stride()  { return new int[]{ sh, sw }; }
@@ -110,13 +109,13 @@ public class Deconv3D extends SimpleUnit
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="running-area: init">
-    transient private boolean baseW = true;
-    transient private boolean baseB = true;
+    //<editor-fold defaultstate="collapsed" desc="running-area: others">
+    transient private boolean baseW = true;//is the first gradient of W
+    transient private boolean baseB = true;//is the first gradient of B
     
     protected final synchronized void reset_backward() { baseW = baseB = true;  }
-    protected final synchronized boolean baseW() {  boolean old = baseW; baseW = false; return old; }
-    protected final synchronized boolean baseB() { boolean  old = baseB; baseB = false; return old; }
+    protected final synchronized boolean baseW() { boolean old = baseW; baseW = false; return old; }
+    protected final synchronized boolean baseB() { boolean old = baseB; baseB = false; return old; }
     
     @Override
     protected InlineDeconv3D create_unit_core() {
@@ -171,8 +170,7 @@ public class Deconv3D extends SimpleUnit
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: InlineDeconv3D">
-    public static class InlineDeconv3D extends SimpleCore<Deconv3D>
-    {
+    public static class InlineDeconv3D extends SimpleCore<Deconv3D> {
         public InlineDeconv3D(Deconv3D unit) { super(unit); }
         
         transient private int IH, IW;
@@ -180,13 +178,13 @@ public class Deconv3D extends SimpleUnit
         
         //<editor-fold defaultstate="collapsed" desc="Basic-Functions">
         public boolean biased() { return ut.biased; }
-        public int out_channels() { return ut.OC; }
-        public int in_channels() { return ut.IC; }
+        public int out_channel() { return ut.OC; }
+        public int in_channel()  { return ut.IC; }
     
-        public int[] kernel()  { return new int[]{ ut.FH, ut.FW }; }
-        public int[] stride()  { return new int[]{ ut.sh, ut.sw }; }
-        public int[] padding() { return new int[]{ ut.ph, ut.pw }; }
-        public int[] out_size() { return new int[] { ut.OH, ut.OW }; }
+        public int[] kernel()   { return new int[]{ ut.FH, ut.FW }; }
+        public int[] stride()   { return new int[]{ ut.sh, ut.sw }; }
+        public int[] padding()  { return new int[]{ ut.ph, ut.pw }; }
+        public int[] out_size() { return new int[]{ ut.OH, ut.OW }; }
      
         public boolean pre_alloc_forward() { return ut.pre_alloc_forward; }
         //</editor-fold>

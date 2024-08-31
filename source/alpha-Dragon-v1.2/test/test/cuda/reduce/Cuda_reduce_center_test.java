@@ -18,7 +18,7 @@ import z.util.math.vector.Vector;
  */
 public class Cuda_reduce_center_test 
 {
-    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.1");}
+    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2");}
     static Engine eg = alpha.engine.cuda_float32(0, alpha.engine.memp1());
     static final ExRandom exr = new ExRandom();
     
@@ -39,22 +39,26 @@ public class Cuda_reduce_center_test
         Tensor tX1 = eg.tensor(X1, dim0, dim1, dim2);
         Tensor tX2 = eg.tensor(X2, dim0, dim1, dim2);
         
+        
         //CPU-------------------------------------------------------------------
         float[][][] cX1 = Vector.to3D(X1, dim0, dim1, dim2);
         float[][][] cX2 = Vector.to3D(X2, dim0, dim1, dim2);
         
-        float[][] mY = Matrix.center_quadratic2(cX1, cX2, alpha, alpha2, beta, beta2, gamma, gamma2);
+        float[][] mY = Matrix.center_linear(cX1, alpha, beta);
+//        float[][] mY = Matrix.center_quadratic(cX1, alpha, beta, gamma);
+//        float[][] mY = Matrix.center_quadratic2(cX1, cX2, alpha, alpha2, beta, beta2, gamma, gamma2);
         float[] Y1 = Vector.flatten(mY);
         
         //GPU-------------------------------------------------------------------
-        Tensor tY = eg.center_quadratic2(tX1, tX2, alpha, alpha2, beta, beta2, gamma, gamma2);
+        Tensor tY = eg.center_linear(tX1, alpha, beta).c();
+//        Tensor tY = eg.center_quadratic(tX1, alpha, beta, gamma).c();
+//        Tensor tY = eg.center_quadratic2(tX1, tX2, alpha, alpha2, beta, beta2, gamma, gamma2).c();
                 
         //compare---------------------------------------------------------------
         float[] Y2 = tY.value();
         
         Vector.println("CPU1: ", Y1, 0, 10);
         Vector.println("GPU1:" , Y2, 0, 10);
-        
         
         float sp = Vector.samePercent_relative(Y1, Y2);
         System.out.println("sp = " + sp);

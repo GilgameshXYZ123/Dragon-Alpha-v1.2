@@ -16,8 +16,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class HalfSin extends SimpleInplaceFunction
-{
+public class HalfSin extends SimpleInplaceFunction {
     private static final long serialVersionUID = 562781240380001L;
     
     protected float amp;

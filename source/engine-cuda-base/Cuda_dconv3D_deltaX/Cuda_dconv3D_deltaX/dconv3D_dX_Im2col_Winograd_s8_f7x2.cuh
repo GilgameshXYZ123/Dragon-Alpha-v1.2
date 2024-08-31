@@ -370,7 +370,7 @@ __global__ void winograd_f7x2_kernel_64x224_p0_tex(
 
 	//======[compute area1: local]======================================================
 	const int Di = (Yi + (Yk << 2)) & 31;//avoid bank conflict (1/8)
-	float g0[8], g1[8], y[8], d[8]; char ly[8];
+	float g0[8], g1[8], y[8], d[8];
 	for (int fh = 0; fh < FH; fh++) {
 		//load 2 group from W[OC, FH, FW, IC]
 		const int W0 = - (fh << 1) * IC, W1 = W0 + IC;//rotate180

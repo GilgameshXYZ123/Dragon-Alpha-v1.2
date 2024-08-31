@@ -44,7 +44,7 @@ public class AT6
         Tensor X = eg.img.pixels(img);
         Tensor white = eg.img.constants_like(255, X);
         Tensor black = eg.img.constants_like(94, X);
-        Tensor Y = eg.img.reflection_normalization(false, X, white, black)
+        Tensor Y = eg.img.reflection_normalize(false, X, white, black)
                 .tensor_to_pixel(true);
         
         BufferedImage img2 = cv.BGR(Y); cv.imshow(img2, "x2");

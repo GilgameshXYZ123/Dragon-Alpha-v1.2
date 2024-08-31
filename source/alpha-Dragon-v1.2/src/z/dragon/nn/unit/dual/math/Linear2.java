@@ -16,8 +16,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Linear2 extends DualFunction
-{
+public class Linear2 extends DualFunction {
     private static final long serialVersionUID = 1L;
     
     protected boolean likeX1;

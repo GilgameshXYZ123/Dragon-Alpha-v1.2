@@ -11,7 +11,7 @@
 #include "matMulSK_uernel.cuh"
 #include "matMulSK_kernel_padding.cuh"
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 //Common
 #ifndef MAT_MUL4X

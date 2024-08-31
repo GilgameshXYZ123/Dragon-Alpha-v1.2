@@ -7,7 +7,7 @@ using namespace std;
 #include "test.cuh"
 
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 //=======[type: linear, linear_dual, rpl, div, quadratic, quadratic_dual]=========
 #ifndef JNI_TYPE1
@@ -28,8 +28,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_equal_
 	float *dX1 = (float*)(intptr_t)dX1_address;
 	float *dX2 = (float*)(intptr_t)dX2_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__equal_abs2D(stream, dX1, dX2, min, max, dY,
+	__equal_abs2D(stream, dX1, dX2, min, max, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    equal_abs2D_char
@@ -46,6 +47,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_equal_
 	float *dY = (float*)(intptr_t)dY_address;
 	__equal_abs2D_char(stream, dX1, dX2, min, max, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    equal_abs2D_int
@@ -62,6 +64,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_equal_
 	float *dY = (float*)(intptr_t)dY_address;
 	__equal_abs2D_int(stream, dX1, dX2, min, max, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -82,6 +85,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float* dY = (float*)(intptr_t)dY_address;
 	__linear_greater2D(stream, alpha, dX, beta, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    linear_greater_dual2D
@@ -98,6 +102,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float* dY = (float*)(intptr_t)dY_address;
 	__linear_greater_dual2D(stream, dX1, dX2, alpha, beta, gamma, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    linear_greater_switch2D
@@ -113,6 +118,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float* dY = (float*)(intptr_t)dY_address;
 	__linear_greater_switch2D(stream, alpha, dX, beta, v1, v2, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    linear_greater_switch_mul2D
@@ -129,6 +135,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float* dY = (float*)(intptr_t)dY_address;
 	__linear_greater_switch_mul2D(stream, alpha, dX1, beta, dX2, v1, v2, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -151,6 +158,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float* dY = (float*)(intptr_t)dY_address;
 	__linear_bound_switch_mul2D(stream, alpha, dX1, vmin, vmax, dX2, v1, v2, v3, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -171,8 +179,8 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float *dY = (float*)(intptr_t)dY_address;
 	__linear2D(stream, alpha, dX, beta, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
-
 
 //Method:    linear_dual_out2D
 JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear_1dual_1out2D(JNIEnv *env, jclass cls, 
@@ -189,8 +197,8 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float *dY2 = (float*)(intptr_t)dY2_address;
 	__linear_dual_out2D(stream, dX, alpha1, beta1, alpha2, beta2, dY1, dY2, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
-
 
 //Method:    linear2D_char2float
 JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear2D_1char2float(JNIEnv *env, jclass cls,
@@ -204,6 +212,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float *dY = (float*)(intptr_t)dY_address;
 	__linear2D_char2float(stream, alpha, dX, beta, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    linear2D_float2char
@@ -218,6 +227,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	char  *dY =  (char*)(intptr_t)dY_address;
 	__linear2D_float2char(stream, alpha, dX, beta, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    linear2D_int2float
@@ -232,6 +242,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float *dY = (float*)(intptr_t)dY_address;
 	__linear2D_int2float(stream, alpha, dX, beta, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    linear2D_float2int
@@ -246,6 +257,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	int   *dY =   (int*)(intptr_t)dY_address;
 	__linear2D_float2int(stream, alpha, dX, beta, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -267,9 +279,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float *dX1 = (float*)(intptr_t)dX1_address;
 	float *dX2 = (float*)(intptr_t)dX2_address;
 	float *dY = (float*)(intptr_t)dY_address;
-
 	__linear_dual2D(stream, dX1, dX2, alpha, beta, gamma, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    linear_dual2D_row
@@ -285,9 +297,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float *dX1 = (float*)(intptr_t)dX1_address;
 	float *dX2 = (float*)(intptr_t)dX2_address;
 	float *dY = (float*)(intptr_t)dY_address;
-
 	__linear_dual2D_row(stream, dX1, dX2, row_lengthv, alpha, beta, gamma, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    linear_dual2D_center
@@ -303,11 +315,10 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float *dX1 = (float*)(intptr_t)dX1_address;
 	float *dX2 = (float*)(intptr_t)dX2_address;
 	float *dY = (float*)(intptr_t)dY_address;
-
 	__linear_dual2D_center(stream, dX1, dX2, alpha, beta, gamma, dY,
 		dim0, dim1, dim2, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
-
 
 //Method:    linear_dual2D_field
 JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear_1dual2D_1field(JNIEnv *env, jclass cls,
@@ -322,9 +333,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float *dX1 = (float*)(intptr_t)dX1_address;
 	float *dX2 = (float*)(intptr_t)dX2_address;
 	float *dY = (float*)(intptr_t)dY_address;
-
 	__linear_dual2D_field(stream, dX1, dX2, row_lengthv, alpha, beta, gamma, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    mul_linear_dual2D
@@ -342,9 +353,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_mul_1l
 	float *dX1 = (float*)(intptr_t)dX1_address;
 	float *dX2 = (float*)(intptr_t)dX2_address;
 	float *dY = (float*)(intptr_t)dY_address;
-
 	__mul_linear_dual2D(stream, dX, dX1, dX2, alpha, beta, gamma, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -364,7 +375,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_quadra
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__quadratic2D(stream, dX, alpha, beta, gamma, dY, lengthv, width, stride);
+	__quadratic2D(stream, dX, alpha, beta, gamma, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    quadratic2D_deltaX
@@ -379,7 +392,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_quadra
 	float *d_deltaX = (float*)(intptr_t)d_deltaX_address;
 	float *d_deltaY = (float*)(intptr_t)d_deltaY_address;
 	float *dX = (float*)(intptr_t)dX_address;
-	__quadratic2D_deltaX(stream, d_deltaX, d_deltaY, dX, alpha, beta, lengthv, width, stride);
+	__quadratic2D_deltaX(stream, d_deltaX, d_deltaY, dX, alpha, beta, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 #endif
 
@@ -403,6 +418,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_quadra
 	float *dY = (float*)(intptr_t)dY_address;
 	__quadratic_dual2D(stream, dX1, dX2, k11, k12, k22, k1, k2, C, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    quadratic_dual_clip2D
@@ -422,8 +438,8 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_quadra
 	float *dY = (float*)(intptr_t)dY_address;
 	__quadratic_dual_clip2D(stream, dX1, dX2, k11, k12, k22, k1, k2, C, min, max, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
-
 
 //Method:    quadratic_dual2D_deltaX
 JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_quadratic_1dual2D_1deltaX(JNIEnv *env, jclass cls,
@@ -444,6 +460,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_quadra
 	__quadratic_dual2D_deltaX(stream, d_deltaX1, d_deltaX2, d_deltaY,
 		dX1, dX2, k11, k12, k22, k1, k2,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 
@@ -464,6 +481,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_quadra
 	float *dY = (float*)(intptr_t)dY_address;
 	__quadratic_dual2D_row(stream, dX1, dX2, X2_lengthv, k11, k12, k22, k1, k2, C, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    quadratic_dual2D_center
@@ -483,6 +501,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_quadra
 	float *dY = (float*)(intptr_t)dY_address;
 	__quadratic_dual2D_center(stream, dX1, dX2, k11, k12, k22, k1, k2, C, dY,
 		dim0, dim1, dim2, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    quadratic_dual2D_field
@@ -503,6 +522,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_quadra
 	__quadratic_dual2D_field(stream, dX1, dX2, row_lengthv, 
 		k11, k12, k22, k1, k2, C, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    variance2D_f64
@@ -519,6 +539,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_varian
 	float* dX_var = (float*)(intptr_t)dX_var_address;
 	__variance2D_f64(stream, dX_mean, dX_sqmean, dX_var,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -537,7 +558,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_rpl2D(
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__rpl2D(stream, alpha, dX, beta, gamma, dY, lengthv, width, stride);
+	__rpl2D(stream, alpha, dX, beta, gamma, dY,
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    rpl2D_deltaX
@@ -552,7 +575,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_rpl2D_
 	float *dY = (float*)(intptr_t)dY_address;
 	float *d_deltaX = (float*)(intptr_t)d_deltaX_address;
 	float *d_deltaY = (float*)(intptr_t)d_deltaY_address;
-	__rpl2D_deltaX(stream, d_deltaX, d_deltaY, dY, alpha, gamma, lengthv, width, stride);
+	__rpl2D_deltaX(stream, d_deltaX, d_deltaY, dY, alpha, gamma, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -576,6 +601,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_div2D(
 	float *dY = (float*)(intptr_t)dY_address;
 	__div2D(stream, alpha1, dX1, beta1, alpha2, dX2, beta2, gamma, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    div2D_deltaX
@@ -597,6 +623,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_div2D_
 		dX1, alpha1, beta1, 
 		dX2, alpha2, beta2, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -620,6 +647,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_div2D_
 	float *dY = (float*)(intptr_t)dY_address;
 	__div2D_row(stream, alpha1, dX1, beta1, alpha2, dX2, beta2, gamma, row_lengthv, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    div2D_field
@@ -637,6 +665,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_div2D_
 	float *dY = (float*)(intptr_t)dY_address;
 	__div2D_field(stream, alpha1, dX1, beta1, alpha2, dX2, beta2, gamma, row_lengthv, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -663,6 +692,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_add_1d
 	__add_div2D_row(stream, dX1, dX2, dX3, row_lengthv,
 		alpha, beta, gamma, delta, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    add_div2D_field
@@ -683,6 +713,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_add_1d
 	__add_div2D_field(stream, dX1, dX2, dX3, row_lengthv,
 		alpha, beta, gamma, delta, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -713,6 +744,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_mul_1s
 		alpha3, dX3, beta3,
 		gamma, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -735,7 +767,24 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_sign2D
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__sign2D(stream, alpha, dX, beta, dY, lengthv, width, stride);
+	__sign2D(stream, alpha, dX, beta, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
+}
+
+//Method:    zero_nan2D
+JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_zero_1nan2D(JNIEnv *env, jclass cls,
+	jlong stream_address,
+	jlong dX_address,
+	jlong dY_address,
+	jint lengthv, jint width, jint stride)
+{
+	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
+	float *dX = (float*)(intptr_t)dX_address;
+	float *dY = (float*)(intptr_t)dY_address;
+	__zero_nan2D(stream, dX, dY,
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    ceil2D
@@ -748,7 +797,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_ceil2D
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__ceil2D(stream, alpha, dX, beta, dY, lengthv, width, stride);
+	__ceil2D(stream, alpha, dX, beta, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    floor2D
@@ -761,8 +812,11 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_floor2
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__floor2D(stream, alpha, dX, beta, dY, lengthv, width, stride);
+	__floor2D(stream, alpha, dX, beta, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
+
 
 #ifndef JNI_ABS
 #define JNI_ABS
@@ -777,7 +831,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_abs2D(
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__abs2D(stream, alpha, dX, beta, dY, lengthv, width, stride);
+	__abs2D(stream, alpha, dX, beta, dY,
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    abs2D_deltaX
@@ -794,22 +850,10 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_abs2D_
 	float *d_deltaY = (float*)(intptr_t)d_deltaY_address;
 	__abs2D_deltaX(stream, d_deltaX, d_deltaY, dX, alpha, beta,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
-
-//Method:    zero_nan2D
-JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_zero_1nan2D(JNIEnv *env, jclass cls,
-	jlong stream_address,
-	jlong dX_address,
-	jlong dY_address,
-	jint lengthv, jint width, jint stride)
-{
-	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
-	float *dX = (float*)(intptr_t)dX_address;
-	float *dY = (float*)(intptr_t)dY_address;
-	__zero_nan2D(stream, dX, dY, lengthv, width, stride);
-}
 
 
 #ifndef JNI_SQRT
@@ -825,7 +869,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_sqrt2D
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__sqrt2D(stream, alpha, dX, beta, dY, lengthv, width, stride);
+	__sqrt2D(stream, alpha, dX, beta, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    sqrt_quadratic_dual2D
@@ -845,6 +891,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_sqrt_1
 	__sqrt_quadratic_dual2D(stream, dX1, dX2,
 		k11, k12, k22, k1, k2, C, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    sqrt_positive_quadratic_dual2D
@@ -864,6 +911,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_sqrt_1
 	__sqrt_postive_quadratic_dual2D(stream, dX1, dX2,
 		k11, k12, k22, k1, k2, C, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -876,8 +924,8 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_sqrt_1
 #ifndef JNI_TYPE3
 #define JNI_TYPE3
 
-#ifndef JNI_MIN_MIN_DUAL
-#define JNI_MIN_MIN_DUAL
+#ifndef JNI_MIN
+#define JNI_MIN
 
 //Method:    min2D
 JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_min2D(JNIEnv *env, jclass cls,
@@ -890,7 +938,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_min2D(
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__min2D(stream, alpha, dX, beta, vmin, dY, lengthv, width, stride);
+	__min2D(stream, alpha, dX, beta, vmin, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    min_dual2D
@@ -907,13 +957,14 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_min_1d
 	float *dY = (float*)(intptr_t)dY_address;
 	__min_dual2D(stream, alpha1, dX1, beta1, alpha2, dX2, beta2, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
 
 
-#ifndef JNI_MAX_MAX_DUAL
-#define JNI_MAX_MAX_DUAL
+#ifndef JNI_MAX
+#define JNI_MAX
 
 //Method:    max2D
 JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_max2D(JNIEnv *env, jclass cls,
@@ -958,7 +1009,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_clip2D
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__clip2D(stream, alpha, dX, beta, vmin, vmax, dY, lengthv, width, stride);
+	__clip2D(stream, alpha, dX, beta, vmin, vmax, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -969,8 +1022,8 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_clip2D
 #ifndef JNI_TYPE4_SEMI_LINEAR
 #define JNI_TYPE4_SEMI_LINEAR
 
-#ifndef JNI_LOG_EXP
-#define JNI_LOG_EXP
+#ifndef JNI_EXP
+#define JNI_EXP
 
 //Method:    exp2D
 JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_exp2D(JNIEnv *env, jclass cls,
@@ -982,7 +1035,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_exp2D(
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__expf2D(stream, alpha, dX, beta, dY, lengthv, width, stride);
+	__expf2D(stream, alpha, dX, beta, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1003,6 +1058,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_log2D(
 	float *dY = (float*)(intptr_t)dY_address;
 	__log2D(stream, alpha, dX, beta, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    log2D_deltaX
@@ -1019,6 +1075,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_log2D_
 	float *dY = (float*)(intptr_t)dY_address;
 	__log2D_deltaX(stream, d_deltaX, d_deltaY, dY, alpha, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1037,7 +1094,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_relu2D
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__relu2D(stream, dX, dY, lengthv, width, stride);
+	__relu2D(stream, dX, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    relu2D_deltaX_v1
@@ -1052,9 +1111,10 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_relu2D
 	float *d_deltaX = (float*)(intptr_t)d_deltaX_address;
 	float *d_deltaY = (float*)(intptr_t)d_deltaY_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__relu2D_deltaX_v1(stream, d_deltaX, d_deltaY, dY, lengthv, width, stride);
+	__relu2D_deltaX_v1(stream, d_deltaX, d_deltaY, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
-
 
 //Method:    relu2D_deltaX_v2
 JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_relu2D_1deltaX_1v2(JNIEnv *env, jclass cls,
@@ -1068,7 +1128,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_relu2D
 	float *d_deltaX = (float*)(intptr_t)d_deltaX_address;
 	float *d_deltaY = (float*)(intptr_t)d_deltaY_address;
 	float *dX = (float*)dX_address;
-	__relu2D_deltaX_v2(stream, d_deltaX, d_deltaY, dX, lengthv, width, stride);
+	__relu2D_deltaX_v2(stream, d_deltaX, d_deltaY, dX, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1087,7 +1149,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_leakyR
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__leakyRelu2D(stream, dX, k, dY, lengthv, width, stride);
+	__leakyRelu2D(stream, dX, k, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    leakyRelu2D_deltaX_v1
@@ -1104,6 +1168,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_leakyR
 	float *dY = (float*)(intptr_t)dY_address;
 	__leakyRelu2D_deltaX_v1(stream, d_deltaX, d_deltaY, dY, k,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    leakyRelu2D_deltaX_v2
@@ -1120,6 +1185,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_leakyR
 	float *dX = (float*)(intptr_t)dX_address;
 	__leakyRelu2D_deltaX_v2(stream, d_deltaX, d_deltaY, dX, k, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1140,6 +1206,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_elu2D(
 	float *dY = (float*)(intptr_t)dY_address;
 	__elu2D(stream, dX, alpha, k, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    elu2D_deltaX_v1
@@ -1156,6 +1223,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_elu2D_
 	float *dY = (float*)(intptr_t)dY_address;
 	__elu2D_deltaX_v1(stream, d_deltaX, d_deltaY, dY, alpha, k, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    elu2D_deltaX_v2
@@ -1172,6 +1240,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_elu2D_
 	float *dX = (float*)(intptr_t)dX_address;
 	__elu2D_deltaX_v2(stream, d_deltaX, d_deltaY, dX, alpha, k, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1192,6 +1261,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_softPl
 	float *dY = (float*)(intptr_t)dY_address;
 	__softplus2D(stream, dX, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    softPlus2D_deltaX_v1
@@ -1208,6 +1278,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_softPl
 	float *dY = (float*)(intptr_t)dY_address;
 	__softplus2D_deltaX_v1(stream, d_deltaX, d_deltaY, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    softPlus2D_deltaX_v2
@@ -1224,6 +1295,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_softPl
 	float *dX = (float*)(intptr_t)dX_address;
 	__softplus2D_deltaX_v2(stream, d_deltaX, d_deltaY, dX, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1242,7 +1314,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_gelu2D
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float* dX = (float*)(intptr_t)dX_address;
 	float* dY = (float*)(intptr_t)dY_address;
-	__gelu2D(stream, dX, dY, lengthv, width, stride);
+	__gelu2D(stream, dX, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    gelu2D_deltaX
@@ -1259,6 +1333,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_gelu2D
 	float* dX = (float*)(intptr_t)dX_address;
 	__gelu2D_deltaX(stream, d_deltaX, d_deltaY, dX, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1286,6 +1361,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_tanh2D
 	float *dY = (float*)(intptr_t)dY_address;
 	__tanh2D(stream, dX, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    tanh2D_deltaX_v1
@@ -1302,6 +1378,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_tanh2D
 	float *dY = (float*)(intptr_t)dY_address;
 	__tanh2D_deltaX_v1(stream, d_deltaX, d_deltaY, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    tanh2D_deltaX_v2
@@ -1318,6 +1395,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_tanh2D
 	float *dX = (float*)(intptr_t)dX_address;
 	__tanh2D_deltaX_v2(stream, d_deltaX, d_deltaY, dX,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1374,6 +1452,10 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_sigmoi
 
 #endif
 
+
+#ifndef JNI_SOFTMAX
+#define JNI_SOFTMAX
+
 //Method:    softmax2D_deltaX
 JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_softmax2D_1deltaX(JNIEnv *env, jclass cls,
 	jlong stream_address,
@@ -1391,10 +1473,8 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_softma
 	__softmax2D_deltaX(stream, d_deltaX, d_deltaY, dY,
 		d_deltaY_Y_rowSum, row_lengthv,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
-
-#ifndef JNI_LOG_SOFTMAX
-#define JNI_LOG_SOFTMAX
 
 //Method:    logsoftmax2D
 JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_logsoftmax2D(JNIEnv *env, jclass cls,
@@ -1412,6 +1492,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_logsof
 	float *d_expXm_max_rowSum = (float*)(intptr_t)d_expXm_max_rowSum_address;
 	__logsoftmax2D(stream, dX, d_maxX, d_expXm_max_rowSum, row_lengthv, 
 		dY, lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    logsoftmax2D_deltaX
@@ -1431,6 +1512,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_logsof
 	__logsoftmax2D_deltaX(stream, d_deltaX, d_deltaY, dY, 
 		d_deltaY_rowSum, row_lengthv, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1456,7 +1538,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_sin2D(
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__sin2D(stream, alpha, dX, beta, dY, lengthv, width, stride);
+	__sin2D(stream, alpha, dX, beta, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    sin2D_deltaX
@@ -1471,7 +1555,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_sin2D_
 	float *d_deltaX = (float*)(intptr_t)d_deltaX_address;
 	float *d_deltaY = (float*)(intptr_t)d_deltaY_address;
 	float *dX = (float*)(intptr_t)dX_address;
-	__sin2D_deltaX(stream, d_deltaX, d_deltaY, dX, alpha, beta, lengthv, width, stride);
+	__sin2D_deltaX(stream, d_deltaX, d_deltaY, dX, alpha, beta, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1492,6 +1578,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_tan2D(
 	float *dY = (float*)(intptr_t)dY_address;
 	__tan2D(stream, alpha, dX, beta, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    tan2D_deltaX
@@ -1508,6 +1595,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_tan2D_
 	float *dY = (float*)(intptr_t)dY_address;
 	__tan2D_deltaX(stream, d_deltaX, d_deltaY, dY, alpha, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1528,6 +1616,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_csc2D(
 	float *dY = (float*)(intptr_t)dY_address;
 	__csc2D(stream, alpha, dX, beta, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    csc2D_deltaX
@@ -1544,6 +1633,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_csc2D_
 	float *dX = (float*)(intptr_t)dX_address;
 	__csc2D_deltaX(stream, d_deltaX, d_deltaY, dX, alpha, beta,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1564,6 +1654,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_arcsin
 	float *dY = (float*)(intptr_t)dY_address;
 	__arcsin2D(stream, alpha, dX, beta, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    arcsin2D_deltaX
@@ -1580,6 +1671,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_arcsin
 	float *dY = (float*)(intptr_t)dY_address;
 	return __arcsin2D_deltaX(stream, d_deltaX, d_deltaY, dY, alpha,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1600,6 +1692,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_arctan
 	float *dY = (float*)(intptr_t)dY_address;
 	__arctan2D(stream, alpha, dX, beta, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    arctan2D_deltaX
@@ -1616,6 +1709,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_arctan
 	float *dY = (float*)(intptr_t)dY_address;
 	return __arctan2D_deltaX(stream, d_deltaX, d_deltaY, dY, alpha, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1634,7 +1728,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_halfSi
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__halfsin2D(stream, Amp, alpha, dX, beta, dY, lengthv, width, stride);
+	__halfsin2D(stream, Amp, alpha, dX, beta, dY, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    halfSin2D_deltaX
@@ -1649,7 +1745,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_halfSi
 	float *d_deltaX = (float*)(intptr_t)d_deltaX_address;
 	float *d_deltaY = (float*)(intptr_t)d_deltaY_address;
 	float *dY = (float*)(intptr_t)dY_address;
-	__halfsin2D_deltaX(stream, d_deltaX, d_deltaY, dY, Amp, alpha, lengthv, width, stride);
+	__halfsin2D_deltaX(stream, d_deltaX, d_deltaY, dY, Amp, alpha, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1678,6 +1776,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_L1_12D
 	float *dL = (float*)(intptr_t)dL_address;
 	__L1_2D(stream, dY, dYh, dL, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    L1_2D_deltaYh
@@ -1693,6 +1792,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_L1_12D
 	float *d_deltaYh = (float*)(intptr_t)d_deltaYh_address;
 	__L1_2D_deltaYh(stream, dY, dYh, d_deltaYh, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1714,6 +1814,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_L2_12D
 	float *dL = (float*)(intptr_t)dL_address;
 	__L2_2D(stream, dY, dYh, dL, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    L2_2D_deltaYh
@@ -1729,6 +1830,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_L2_12D
 	float *d_deltaYh = (float*)(intptr_t)d_deltaYh_address;
 	__L2_2D_deltaYh(stream, dY, dYh, d_deltaYh, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1750,6 +1852,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_smooth
 	float *dL = (float*)(intptr_t)dL_address;
 	__smoothL1_2D(stream, dY, dYh, dL, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    smoothL1_2D_deltaYh
@@ -1765,6 +1868,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_smooth
 	float *d_deltaYh = (float*)(intptr_t)d_deltaYh_address;
 	__smoothL1_2D_deltaYh(stream, dY, dYh, d_deltaYh,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1787,6 +1891,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_binary
 	float *dL = (float*)(intptr_t)dL_address;
 	__binaryCrossEntropy_2D(stream, dY, dYh, alpha, beta, dL, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    binaryCrossEntropy2D_deltaYh
@@ -1803,6 +1908,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_binary
 	float *d_deltaYh = (float*)(intptr_t)d_deltaYh_address;
 	__binaryCrossEntropy_2D_deltaYh(stream, dY, dYh, alpha, beta, d_deltaYh,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1825,6 +1931,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_sigmoi
 	float *dL = (float*)(intptr_t)dL_address;
 	__sigmoid_binaryCrossEntropy_2D(stream, dY, dX, alpha, beta, dL,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    sigmoid_binaryCrossEntropy2D_deltaX
@@ -1841,6 +1948,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_sigmoi
 	float *d_deltaX = (float*)(intptr_t)d_deltaX_address;
 	__sigmoid_crossEntropy_2D_deltaX(stream, dY, dX, alpha, beta, d_deltaX,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1862,6 +1970,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_crossE
 	float *dL = (float*)(intptr_t)dL_address;
 	__crossEntropy_2D(stream, dY, dYh, dL,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    crossEntropy2D_deltaYh
@@ -1877,6 +1986,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_crossE
 	float *d_deltaYh = (float*)(intptr_t)d_deltaYh_address;
 	__crossEntropy_2D_deltaYh(stream, dY, dYh, d_deltaYh, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1903,6 +2013,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_softma
 	__softmax_crossEntropy_2D(stream, dY, dX, 
 		d_maxX, d_expXm_max_rowSum, row_lengthv, dL, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    softmax_crossEntropy2D_deltaX
@@ -1925,6 +2036,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_softma
 	__softmax_crossEntropy_2D_deltaX(stream, dY, dX,
 		d_maxX, d_expXm_max_rowSum, dY_rowSum, row_lengthv, d_deltaX,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -1956,6 +2068,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_moment
 		dV, a1, a2,
 		d_deltaW, lr_t, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    momentum2D_decay
@@ -1976,6 +2089,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_moment
 		d_deltaW, lr_t, 
 		L1coef, L2coef, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -2000,6 +2114,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_sgdmn2
 		dV, momentum, dampen, nesterov,
 		d_deltaW, lr,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    sgdmn2D_decay
@@ -2020,6 +2135,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_sgdmn2
 		d_deltaW, lr,
 		L1coef, L2coef,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -2044,6 +2160,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_rmspro
 		dS, a1, a2, eps_t,
 		d_deltaW, lr_t, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    rmsprop2D_decay
@@ -2064,6 +2181,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_rmspro
 		d_deltaW, lr_t,
 		L1coef, L2coef, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -2091,6 +2209,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_adam2D
 		dS, b1, b2, eps, 
 		d_deltaW, lr_t, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    adam2D_decay
@@ -2114,8 +2233,8 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_adam2D
 		d_deltaW, lr_t, 
 		L1coef, L2coef, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
-
 
 //Method:    adam2D_type2
 JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_adam2D_1type2(JNIEnv *env, jclass cls,
@@ -2136,6 +2255,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_adam2D
 		dS, b1, b2, eps, Us,
 		d_deltaW, lr,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -2166,6 +2286,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_adam_1
 		dSmax,
 		d_deltaW, lr_t,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    adam_amsgrad2D_decay
@@ -2192,6 +2313,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_adam_1
 		d_deltaW, lr_t,
 		L1coef, L2coef,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -2219,6 +2341,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_adamax
 		dS, b1, eps,
 		d_deltaW, lr_t,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    adamax2D_decay
@@ -2242,6 +2365,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_adamax
 		d_deltaW, lr_t, 
 		L1coef, L2coef, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -2271,6 +2395,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_adamW2
 		d_deltaW, lr_t, lr,
 		L1coef, L2coef,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -2303,6 +2428,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_adamW_
 		d_deltaW, lr_t, lr,
 		L1coef, L2coef,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -2333,6 +2459,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_adamod
 		dG, c1, c2,
 		d_deltaW, lr_t,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    adamod2D_decay
@@ -2358,11 +2485,13 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_adamod
 		d_deltaW, lr_t,
 		L1coef, L2coef,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
 
 #endif
+
 
 
 //=======[affine, batchnorm, layernorm]===========================================
@@ -2949,6 +3078,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_onehot
 	float *dY = (float*)(intptr_t)(dY_address);
 	__onehot2D_row_int(stream, dX, alpha, beta, row_lengthv, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    onehot2D_row_char
@@ -2964,6 +3094,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_onehot
 	float *dY = (float*)(intptr_t)(dY_address);
 	__onehot2D_row_char(stream, dX, alpha, beta, row_lengthv, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -3022,6 +3153,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float* dY = (float*)(intptr_t)dY_address;
 	__linear_dual2D_with_relu(stream, dX1, dX2, alpha, beta, gamma, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 
@@ -3039,6 +3171,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	float* dY = (float*)(intptr_t)dY_address;
 	__linear_dual2D_with_leakyRelu(stream, dX1, dX2, alpha, beta, gamma, k, dY, 
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    linear_dual2D_with_leakyRelu_deltaX_v1
@@ -3046,7 +3179,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	jlong stream_address, 
 	jlong d_deltaX1_address, jlong d_deltaX2_address,
 	jlong d_deltaY_address,
-	jlong dY_address,//V2: holdY(), Y is not changed
+	jlong dY_address,//V1: holdY(), Y is not changed
 	jfloat alpha, jfloat beta, jfloat k, 
 	jint lengthv, jint width, jint stride)
 {
@@ -3058,6 +3191,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	__linear_dual2D_with_leakyRelu_deltaX_v1(stream, d_deltaX1, d_deltaX2,
 		d_deltaY, dY, alpha, beta, k,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    linear_dual2D_with_leakyRelu_deltaX_v2
@@ -3065,7 +3199,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	jlong stream_address,
 	jlong d_deltaX1_address, jlong d_deltaX2_address,
 	jlong d_deltaY_address,
-	jlong dX1_address, jlong dX2_address, 
+	jlong dX1_address, jlong dX2_address,//V2: holdX(), X is not changed
 	jfloat alpha, jfloat beta, jfloat gamma, jfloat k,
 	jint lengthv, jint width, jint stride)
 {
@@ -3078,6 +3212,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear
 	__linear_dual2D_with_leakyRelu_deltaX_v2(stream, d_deltaX1, d_deltaX2,
 		d_deltaY, dX1, dX2, alpha, beta, gamma, k,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -3103,6 +3238,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_affine
 	float* dY = (float*)(intptr_t)dY_address;
 	__affine2D_row_with_relu(stream, dX, dA, dB, row_lengthv, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    affine2D_row_with_leakyRelu
@@ -3121,6 +3257,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_affine
 	float* dY = (float*)(intptr_t)dY_address;
 	__affine2D_row_with_leakyRelu(stream, dX, dA, dB, row_lengthv, k, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    affine2D_row_with_leakyRelu_deltaX_v1
@@ -3140,6 +3277,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_affine
 	__affine2D_row_with_leakyRelu_deltaX_v1(stream, d_deltaX, d_deltaY,
 		dY, k, dA, row_lengthv,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    affine2D_row_with_leakyRelu_deltaX_v2
@@ -3161,6 +3299,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_affine
 	__affine2D_row_with_leakyRelu_deltaX_v2(stream, d_deltaX, d_deltaY, k,
 		dX, dA, dB, row_lengthv,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -3192,6 +3331,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchN
 	__batchNorm2D_row_with_relu(stream, dX,
 		dX_mean, dX_var, eps, row_lengthv, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    batchNorm_affined2D_row_with_relu
@@ -3211,13 +3351,14 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchN
 	float *dA = (float*)(intptr_t)(dA_address);
 	float *dB = (float*)(intptr_t)(dB_address);
 	float *dY = (float*)(intptr_t)(dY_address);
-
 	__batchNorm_affined2D_row_with_relu(stream, dX,
 		dX_mean, dX_var, eps, dA, dB, row_lengthv, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
+
 
 //forward_prop: batchNorm + leakyRelu
 #ifndef JNI_BATCH_NORM_WITH_LEAKY_RELU_FORWARD
@@ -3240,6 +3381,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchN
 	__batchNorm2D_row_with_leakyRelu(stream, dX,
 		dX_mean, dX_var, eps, row_lengthv, dY, k,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    batchNorm_affined2D_row_with_leakyRelu
@@ -3259,10 +3401,10 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchN
 	float *dA = (float*)(intptr_t)(dA_address);
 	float *dB = (float*)(intptr_t)(dB_address);
 	float *dY = (float*)(intptr_t)(dY_address);
-
 	__batchNorm_affined2D_row_with_leakyRelu(stream, dX,
 		dX_mean, dX_var, eps, dA, dB, row_lengthv, dY, k,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -3295,6 +3437,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchN
 	__batchNorm2D_row_with_leakyRelu_deltaX_v1(stream, d_deltaY, dY, k,
 		dX_var, eps, d_deltaXp1, d_deltaXp2, row_lengthv, d_deltaX,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    batchNorm2D_row_with_leakyRelu_deltaX_v2
@@ -3322,6 +3465,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchN
 	__batchNorm2D_row_with_leakyRelu_deltaX_v2(stream, d_deltaY, k,
 		dX, dX_mean, dX_var, eps, d_deltaXp1, d_deltaXp2, row_lengthv, d_deltaX,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -3339,7 +3483,8 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchN
 	jlong dX_var_address, jfloat eps,
 	jlong dA_address, jlong dB_address,
 	jlong d_deltaXp1_address,
-	jlong d_deltaXp2_address, jint row_lengthv, jlong d_deltaX_address,
+	jlong d_deltaXp2_address, jint row_lengthv, 
+	jlong d_deltaX_address,
 	jint lengthv, jint width, jint stride)
 {
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
@@ -3356,6 +3501,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchN
 	__batchNorm_affined2D_row_with_leakyRelu_deltaX_v1(stream, d_deltaY, dY, k,
 		dX_var, eps, dA, dB, d_deltaXp1, d_deltaXp2, row_lengthv, d_deltaX,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //batchNorm_affined2D_row_with_leakyRelu_deltaX_v2
@@ -3365,8 +3511,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchN
 	jlong dX_address,//V2: holdX(), X is not changed
 	jlong dX_mean_address,
 	jlong dX_var_address, jfloat eps, 
-	jlong dA_address, 
-	jlong dB_address,
+	jlong dA_address, jlong dB_address,
 	jlong d_deltaXp1_address,
 	jlong d_deltaXp2_address, jint row_lengthv,
 	jlong d_deltaX_address,
@@ -3387,6 +3532,414 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchN
 	__batchNorm_affined2D_row_with_leakyRelu_deltaX_v2(stream, d_deltaY, k, dX,
 		dX_mean, dX_var, eps, dA, dB, d_deltaXp1, d_deltaXp2, row_lengthv,
 		d_deltaX, lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
+}
+
+#endif
+
+#endif
+
+
+
+//======[fusion: linear2 + function]==============================================
+#ifndef JNI_LINEAR_DUAL_WITH_FUNCTION
+#define JNI_LINEAR_DUAL_WITH_FUNCTION
+
+//Method:    linear_dual2D_with_function
+JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear_1dual2D_1with_1function(JNIEnv *env, jclass cls,
+	jlong stream_address, 
+	jlong dX1_address, jlong dX2_address,
+	jfloat alpha, jfloat beta, jfloat gamma, 
+	jint func_type, jfloatArray func_params, jint func_params_length,
+	jlong dY_address,
+	jint lengthv, jint width, jint stride)
+{
+	float params[MAX_FP32_Func_Param_length]; env->GetFloatArrayRegion(func_params, 0, func_params_length, params);
+	float param0 = 0.0f; if (func_params_length > 0) param0 = params[0];
+	float param1 = 0.0f; if (func_params_length > 1) param1 = params[1];
+	float param2 = 0.0f; if (func_params_length > 2) param2 = params[2];
+	
+	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
+	float* dX1 = (float*)(intptr_t)dX1_address;
+	float* dX2 = (float*)(intptr_t)dX2_address;
+	float* dY = (float*)(intptr_t)dY_address;
+
+	__linear_dual2D_with_function(env, stream, dX1, dX2, alpha, beta, gamma, dY,
+		lengthv, width, stride,
+		func_type, param0, param1, param2);
+	cudaError_t error = cudaGetLastError(); handleError(error);
+}
+
+//Method:    linear_dual2D_with_function_deltaX_v1
+JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear_1dual2D_1with_1function_1deltaX_1v1(JNIEnv *env, jclass cls,
+	jlong stream_address,
+	jlong d_deltaX1_address, jlong d_deltaX2_address, 
+	jlong d_deltaY_address,
+	jlong dY_address,//V1: holdY(), Y is not changed
+	jfloat alpha, jfloat beta, 
+	jint func_type, jfloatArray func_params, jint func_params_length,
+	jint lengthv, jint width, jint stride)
+{
+	float params[MAX_FP32_Func_Param_length]; env->GetFloatArrayRegion(func_params, 0, func_params_length, params);
+	float param0 = 0.0f; if (func_params_length > 0) param0 = params[0];
+	float param1 = 0.0f; if (func_params_length > 1) param1 = params[1];
+	float param2 = 0.0f; if (func_params_length > 2) param2 = params[2];
+
+	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
+	float* d_deltaX1 = (float*)(intptr_t)d_deltaX1_address;
+	float* d_deltaX2 = (float*)(intptr_t)d_deltaX2_address;
+	float* d_deltaY = (float*)(intptr_t)d_deltaY_address;
+	float* dY = (float*)(intptr_t)dY_address;
+
+	__linear_dual2D_with_function_deltaX_v1(env, stream, d_deltaX1, d_deltaX2,
+		d_deltaY, dY, alpha, beta,
+		lengthv, width, stride,
+		func_type, param0, param1, param2);
+	cudaError_t error = cudaGetLastError(); handleError(error);
+}
+
+//Method:    linear_dual2D_with_function_deltaX_v2
+JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_linear_1dual2D_1with_1function_1deltaX_1v2(JNIEnv *env, jclass cls,
+	jlong stream_address, 
+	jlong d_deltaX1_address, jlong d_deltaX2_address,
+	jlong d_deltaY_address,
+	jlong dX1_address, jlong dX2_address,
+	jfloat alpha, jfloat beta, jfloat gamma, 
+	jint func_type, jfloatArray func_params, jint func_params_length,
+	jint lengthv, jint width, jint stride)
+{
+	float params[MAX_FP32_Func_Param_length]; env->GetFloatArrayRegion(func_params, 0, func_params_length, params);
+	float param0 = 0.0f; if (func_params_length > 0) param0 = params[0];
+	float param1 = 0.0f; if (func_params_length > 1) param1 = params[1];
+	float param2 = 0.0f; if (func_params_length > 2) param2 = params[2];
+
+	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
+	float* d_deltaX1 = (float*)(intptr_t)d_deltaX1_address;
+	float* d_deltaX2 = (float*)(intptr_t)d_deltaX2_address;
+	float* d_deltaY = (float*)(intptr_t)d_deltaY_address;
+	float* dX1 = (float*)(intptr_t)dX1_address;
+	float* dX2 = (float*)(intptr_t)dX2_address;
+
+	__linear_dual2D_with_function_deltaX_v2(env, stream, d_deltaX1, d_deltaX2,
+		d_deltaY, dX1, dX2, alpha, beta, gamma, 
+		lengthv, width, stride,
+		func_type, param0, param1, param2);
+	cudaError_t error = cudaGetLastError(); handleError(error);
+}
+
+#endif
+
+
+
+//======[fusion: affine + leakyRelu (relu)]=======================================
+#ifndef JNI_AFFINE_WITH_FUNCTION
+#define JNI_AFFINE_WITH_FUNCTION
+
+//Method:    affine2D_row_with_function
+JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_affine2D_1row_1with_1function(JNIEnv *env, jclass cls,
+	jlong stream_address, 
+	jlong dX_address, 
+	jlong dA_address, 
+	jlong dB_address, jint row_lengthv, 
+	jlong dY_address,
+	jint func_type, jfloatArray func_params, jint func_params_length, 
+	jint lengthv, jint width, jint stride) 
+{
+	float params[MAX_FP32_Func_Param_length]; env->GetFloatArrayRegion(func_params, 0, func_params_length, params);
+	float param0 = 0.0f; if (func_params_length > 0) param0 = params[0];
+	float param1 = 0.0f; if (func_params_length > 1) param1 = params[1];
+	float param2 = 0.0f; if (func_params_length > 2) param2 = params[2];
+
+	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
+	float* dX = (float*)(intptr_t)dX_address;
+	float* dA = (float*)(intptr_t)dA_address;
+	float* dB = (float*)(intptr_t)dB_address;
+	float* dY = (float*)(intptr_t)dY_address;
+
+	__affine2D_row_with_function(env, stream, dX, dA, dB, row_lengthv, dY,
+		lengthv, width, stride,
+		func_type, param0, param1, param2);
+	cudaError_t error = cudaGetLastError(); handleError(error);
+}
+
+//Method:    affine2D_row_with_function_deltaX_v1
+JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_affine2D_1row_1with_1function_1deltaX_1v1(JNIEnv *env, jclass cls,
+	jlong stream_address, 
+	jlong d_deltaX_address,
+	jlong d_deltaY_address,
+	jlong dY_address,
+	jint func_type, jfloatArray func_params, jint func_params_length,
+	jlong dA_address, jint row_lengthv, 
+	jint lengthv, jint width, jint stride)
+{
+	float params[MAX_FP32_Func_Param_length]; env->GetFloatArrayRegion(func_params, 0, func_params_length, params);
+	float param0 = 0.0f; if (func_params_length > 0) param0 = params[0];
+	float param1 = 0.0f; if (func_params_length > 1) param1 = params[1];
+	float param2 = 0.0f; if (func_params_length > 2) param2 = params[2];
+
+	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
+	float* d_deltaX = (float*)(intptr_t)d_deltaX_address;
+	float* d_deltaY = (float*)(intptr_t)d_deltaY_address;
+	float* dY = (float*)(intptr_t)dY_address;
+	float* dA = (float*)(intptr_t)dA_address;
+
+	__affine2D_row_with_function_deltaX_v1(env, stream, d_deltaX, d_deltaY,
+		dY, dA, row_lengthv,
+		lengthv, width, stride,
+		func_type, param0, param1, param2);
+	cudaError_t error = cudaGetLastError(); handleError(error);
+}
+
+//Method:    affine2D_row_with_function_deltaX_v2
+JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_affine2D_1row_1with_1function_1deltaX_1v2(JNIEnv *env, jclass cls,
+	jlong stream_address,
+	jlong d_deltaX_address,
+	jlong d_deltaY_address, 
+	jint func_type, jfloatArray func_params, jint func_params_length,
+	jlong dX_address,
+	jlong dA_address,
+	jlong dB_address, jint row_lengthv,
+	jint lengthv, jint width, jint stride)
+{
+	float params[MAX_FP32_Func_Param_length]; env->GetFloatArrayRegion(func_params, 0, func_params_length, params);
+	float param0 = 0.0f; if (func_params_length > 0) param0 = params[0];
+	float param1 = 0.0f; if (func_params_length > 1) param1 = params[1];
+	float param2 = 0.0f; if (func_params_length > 2) param2 = params[2];
+
+	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
+	float* d_deltaX = (float*)(intptr_t)d_deltaX_address;
+	float* d_deltaY = (float*)(intptr_t)d_deltaY_address;
+	float* dX = (float*)(intptr_t)dX_address;
+	float* dA = (float*)(intptr_t)dA_address;
+	float* dB = (float*)(intptr_t)dB_address;
+
+	__affine2D_row_with_function_deltaX_v2(env, stream, d_deltaX, d_deltaY,
+		dX, dA, dB, row_lengthv,
+		lengthv, width, stride,
+		func_type, param0, param1, param2);
+	cudaError_t error = cudaGetLastError(); handleError(error);
+}
+
+#endif
+
+
+
+//======[fusion: batchNorm + function]============================================
+#ifndef JNI_BATCH_NORM_WITH_FUNCTION
+#define JNI_BATCH_NORM_WITH_FUNCTION
+
+//forward_prop: batchNorm + function
+#ifndef JNI_BATCH_NORM_WITH_FUNCTION_FORWARD
+#define JNI_BATCH_NORM_WITH_FUNCTION_FORWARD
+
+//Method:    batchNorm2D_row_with_function
+JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchNorm2D_1row_1with_1function(JNIEnv *env, jclass cls,
+	jlong stream_address,
+	jlong dX_address, 
+	jlong dX_mean_address,
+	jlong dX_var_address, jfloat eps, jint row_lengthv,
+	jlong dY_address,
+	jint func_type, jfloatArray func_params, jint func_params_length, 
+	jint lengthv, jint width, jint stride)
+{
+	float params[MAX_FP32_Func_Param_length]; env->GetFloatArrayRegion(func_params, 0, func_params_length, params);
+	float param0 = 0.0f; if (func_params_length > 0) param0 = params[0];
+	float param1 = 0.0f; if (func_params_length > 1) param1 = params[1];
+	float param2 = 0.0f; if (func_params_length > 2) param2 = params[2];
+
+	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
+	float *dX = (float*)(intptr_t)(dX_address);
+	float *dX_mean = (float*)(intptr_t)(dX_mean_address);
+	float *dX_var = (float*)(intptr_t)(dX_var_address);
+	float *dY = (float*)(intptr_t)(dY_address);
+
+	__batchNorm2D_row_with_function(env, stream, dX,
+		dX_mean, dX_var, eps, row_lengthv, dY,
+		lengthv, width, stride,
+		func_type, param0, param1, param2);
+	cudaError_t error = cudaGetLastError(); handleError(error);
+}
+
+//Method:    batchNorm_affined2D_row_with_function
+JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchNorm_1affined2D_1row_1with_1function(JNIEnv *env, jclass cls,
+	jlong stream_address, 
+	jlong dX_address,
+	jlong dX_mean_address,
+	jlong dX_var_address, jfloat eps,
+	jlong dA_address, jlong dB_address, jint row_lengthv, 
+	jlong dY_address,
+	jint func_type, jfloatArray func_params, jint func_params_length,
+	jint lengthv, jint width, jint stride)
+{
+	float params[MAX_FP32_Func_Param_length]; env->GetFloatArrayRegion(func_params, 0, func_params_length, params);
+	float param0 = 0.0f; if (func_params_length > 0) param0 = params[0];
+	float param1 = 0.0f; if (func_params_length > 1) param1 = params[1];
+	float param2 = 0.0f; if (func_params_length > 2) param2 = params[2];
+
+	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
+	float *dX = (float*)(intptr_t)(dX_address);
+	float *dX_mean = (float*)(intptr_t)(dX_mean_address);
+	float *dX_var = (float*)(intptr_t)(dX_var_address);
+	float *dA = (float*)(intptr_t)(dA_address);
+	float *dB = (float*)(intptr_t)(dB_address);
+	float *dY = (float*)(intptr_t)(dY_address);
+
+	__batchNorm_affined2D_row_with_function(env, stream, dX,
+		dX_mean, dX_var, eps, dA, dB, row_lengthv, dY, 
+		lengthv, width, stride,
+		func_type, param0, param1, param2);
+	cudaError_t error = cudaGetLastError(); handleError(error);
+}
+
+#endif
+
+
+//backward_prop: batchNorm + function
+#ifndef JNI_BATCH_NORM_WITH_FUNCTION_BACKWARD
+#define JNI_BATCH_NORM_WITH_FUNCTION_BACKWARD
+
+//Method:    batchNorm2D_row_with_function_deltaX_v1
+JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchNorm2D_1row_1with_1function_1deltaX_1v1(JNIEnv *env, jclass cls,
+	jlong stream_address,
+	jlong d_deltaY_address, 
+	jlong dY_address, 
+	jint func_type, jfloatArray func_params, jint func_params_length, 
+	jlong dX_var_address, jfloat eps,
+	jlong d_deltaXp1_address, 
+	jlong d_deltaXp2_address, jint row_lengthv,
+	jlong d_deltaX_address, 
+	jint lengthv, jint width, jint stride)
+{
+	float params[MAX_FP32_Func_Param_length]; env->GetFloatArrayRegion(func_params, 0, func_params_length, params);
+	float param0 = 0.0f; if (func_params_length > 0) param0 = params[0];
+	float param1 = 0.0f; if (func_params_length > 1) param1 = params[1];
+	float param2 = 0.0f; if (func_params_length > 2) param2 = params[2];
+
+	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
+	float* d_deltaY = (float*)(intptr_t)d_deltaY_address;
+	float* dY = (float*)dY_address;
+	float* dX_var = (float*)(intptr_t)dX_var_address;
+	float* d_deltaXp1 = (float*)(intptr_t)d_deltaXp1_address;
+	float* d_deltaXp2 = (float*)(intptr_t)d_deltaXp2_address;
+	float* d_deltaX = (float*)(intptr_t)d_deltaX_address;
+
+	__batchNorm2D_row_with_function_deltaX_v1(env, stream, d_deltaY, dY,
+		dX_var, eps, d_deltaXp1, d_deltaXp2, row_lengthv, d_deltaX,
+		lengthv, width, stride,
+		func_type, param0, param1, param2);
+	cudaError_t error = cudaGetLastError(); handleError(error);
+}
+
+//Method:    batchNorm2D_row_with_function_deltaX_v2
+JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchNorm2D_1row_1with_1function_1deltaX_1v2(JNIEnv *env, jclass cls,
+	jlong stream_address, 
+	jlong d_deltaY_address, 
+	jint func_type, jfloatArray func_params, jint func_params_length,
+	jlong dX_address,
+	jlong dX_mean_address, jlong dX_var_address, jfloat eps,
+	jlong d_deltaXp1_address,
+	jlong d_deltaXp2_address, jint row_lengthv,
+	jlong d_deltaX_address,
+	jint lengthv, jint width, jint stride)
+{
+	float params[MAX_FP32_Func_Param_length]; env->GetFloatArrayRegion(func_params, 0, func_params_length, params);
+	float param0 = 0.0f; if (func_params_length > 0) param0 = params[0];
+	float param1 = 0.0f; if (func_params_length > 1) param1 = params[1];
+	float param2 = 0.0f; if (func_params_length > 2) param2 = params[2];
+
+	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
+	float* d_deltaY = (float*)(intptr_t)d_deltaY_address;
+	float* dX = (float*)(intptr_t)dX_address;
+	float* dX_mean = (float*)(intptr_t)dX_mean_address;
+	float* dX_var = (float*)(intptr_t)dX_var_address;
+	float* d_deltaXp1 = (float*)(intptr_t)d_deltaXp1_address;
+	float* d_deltaXp2 = (float*)(intptr_t)d_deltaXp2_address;
+	float* d_deltaX = (float*)(intptr_t)d_deltaX_address;
+
+	__batchNorm2D_row_with_function_deltaX_v2(env, stream, d_deltaY,
+		dX, dX_mean, dX_var, eps, d_deltaXp1, d_deltaXp2, row_lengthv, d_deltaX,
+		lengthv, width, stride,
+		func_type, param0, param1, param2);
+	cudaError_t error = cudaGetLastError(); handleError(error);
+}
+
+#endif
+
+
+//backward_prop: batchNorm(affined) + function
+#ifndef JNI_BATCH_NORM_WITH_FUNCTION_BACKWARD_AFFINED
+#define JNI_BATCH_NORM_WITH_FUNCTION_BACKWARD_AFFINED
+
+//Method:    batchNorm_affined2D_row_with_function_deltaX_v1
+JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchNorm_1affined2D_1row_1with_1function_1deltaX_1v1(JNIEnv *env, jclass cls,
+	jlong stream_address,
+	jlong d_deltaY_address,
+	jlong dY_address,//V1: holdY(), Y is not changed
+	jint func_type, jfloatArray func_params, jint func_params_length,
+	jlong dX_var_address, jfloat eps,
+	jlong dA_address, jlong dB_address,
+	jlong d_deltaXp1_address, 
+	jlong d_deltaXp2_address, jint row_lengthv,
+	jlong d_deltaX_address, 
+	jint lengthv, jint width, jint stride)
+{
+	float params[MAX_FP32_Func_Param_length]; env->GetFloatArrayRegion(func_params, 0, func_params_length, params);
+	float param0 = 0.0f; if (func_params_length > 0) param0 = params[0];
+	float param1 = 0.0f; if (func_params_length > 1) param1 = params[1];
+	float param2 = 0.0f; if (func_params_length > 2) param2 = params[2];
+
+	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
+	float* d_deltaY = (float*)(intptr_t)d_deltaY_address;
+	float* dY = (float*)dY_address;
+	float* dX_var = (float*)(intptr_t)dX_var_address;
+	float* dA = (float*)(intptr_t)dA_address;
+	float* dB = (float*)(intptr_t)dB_address;
+	float* d_deltaXp1 = (float*)(intptr_t)d_deltaXp1_address;
+	float* d_deltaXp2 = (float*)(intptr_t)d_deltaXp2_address;
+	float* d_deltaX = (float*)(intptr_t)d_deltaX_address;
+
+	__batchNorm_affined2D_row_with_function_deltaX_v1(env, stream, d_deltaY, dY,
+		dX_var, eps, dA, dB, d_deltaXp1, d_deltaXp2, row_lengthv,
+		d_deltaX, lengthv, width, stride,
+		func_type, param0, param1, param2);
+	cudaError_t error = cudaGetLastError(); handleError(error);
+}
+
+//Method:    batchNorm_affined2D_row_with_function_deltaX_v2
+JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1function_batchNorm_1affined2D_1row_1with_1function_1deltaX_1v2(JNIEnv *env, jclass cls,
+	jlong stream_address,
+	jlong d_deltaY_address,
+	jint func_type, jfloatArray func_params, jint func_params_length,
+	jlong dX_address,//V2: holdX(), X is not changed
+	jlong dX_mean_address, 
+	jlong dX_var_address, jfloat eps,
+	jlong dA_address, jlong dB_address,
+	jlong d_deltaXp1_address,
+	jlong d_deltaXp2_address, jint row_lengthv, 
+	jlong d_deltaX_address,
+	jint lengthv, jint width, jint stride)
+{
+	float params[MAX_FP32_Func_Param_length]; env->GetFloatArrayRegion(func_params, 0, func_params_length, params);
+	float param0 = 0.0f; if (func_params_length > 0) param0 = params[0];
+	float param1 = 0.0f; if (func_params_length > 1) param1 = params[1];
+	float param2 = 0.0f; if (func_params_length > 2) param2 = params[2];
+
+	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
+	float* d_deltaY = (float*)(intptr_t)d_deltaY_address;
+	float* dX = (float*)(intptr_t)dX_address;
+	float* dX_mean = (float*)(intptr_t)dX_mean_address;
+	float* dX_var = (float*)(intptr_t)dX_var_address;
+	float* dA = (float*)(intptr_t)dA_address;
+	float* dB = (float*)(intptr_t)dB_address;
+	float* d_deltaXp1 = (float*)(intptr_t)d_deltaXp1_address;
+	float* d_deltaXp2 = (float*)(intptr_t)d_deltaXp2_address;
+	float* d_deltaX = (float*)(intptr_t)d_deltaX_address;
+
+	__batchNorm_affined2D_row_with_function_deltaX_v2(env, stream, d_deltaY,
+		dX, dX_mean, dX_var, eps, dA, dB, d_deltaXp1, d_deltaXp2, row_lengthv, d_deltaX,
+		lengthv, width, stride,
+		func_type, param0, param1, param2);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif

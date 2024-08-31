@@ -14,8 +14,9 @@ import z.dragon.nn.unit.dual.DualFunction;
  *
  * @author Gilgamesh
  */
-public class Linear2_LeakyRelu extends DualFunction 
-{
+public class Linear2_LeakyRelu extends DualFunction  {
+    private static final long serialVersionUID = 1L;
+    
     protected boolean likeX1;
     protected float alpha, beta, gamma;
     protected float k;

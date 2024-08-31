@@ -17,7 +17,7 @@ import z.util.math.vector.Vector;
  */
 public class Cuda_pool2D_indexed_test 
 {
-    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.1");}
+    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2");}
     static Engine eg = alpha.engine.cuda_float32(0, alpha.engine.memp1(alpha.MEM_1GB * 4));
      
     public static void testCorrect(

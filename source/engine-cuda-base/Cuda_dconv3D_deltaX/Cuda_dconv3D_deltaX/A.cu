@@ -8,7 +8,7 @@ using namespace std;
 #include "test.cuh"
 
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 //zero_padding: Y[N, OH, OW, OC] -> Y[N, OHp, OWp, OC]
 #ifndef JNI_DECONV_3D_DELTAX_ZERO_PADDING
@@ -38,6 +38,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 		d_deltaX, IH, IW,
 		N, IC, OC,
 		ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    dconv3D_deltaX_s1_SGM
@@ -83,6 +84,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 			GN, GMr, GK,
 			0, j_index);
 	}
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -114,6 +116,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 		N, IC, OC,
 		ph, pw);
 	cudaError_t error = cudaDestroyTextureObject(texDy); handleError(error);
+	error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    dconv3D_deltaX_s1_texture_SGM
@@ -161,6 +164,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 			0, j_index);
 	}
 	cudaError_t error = cudaDestroyTextureObject(texDy); handleError(error);
+	error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -188,6 +192,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 		dW, 
 		d_deltaX, IH, IW, 
 		N, IC, OC);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    dconv3D_deltaX_W1_SGM
@@ -225,6 +230,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 			GN, GMr,
 			0, j_index);
 	}
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -254,6 +260,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 		d_deltaX, IH, IW,
 		N, IC, OC,
 		ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -280,6 +287,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 	float* dW = (float*)(intptr_t)dW_address;
 	float* dCW = (float*)(intptr_t)dCW_address;
 	__ks_remode(stream, dW, FH, FW, dCW, CFH, CFW, OC, IC, sh, sw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    ks_remodev2
@@ -293,6 +301,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 	float* dW = (float*)(intptr_t)dW_address;
 	float* dCW = (float*)(intptr_t)dCW_address;
 	__ks_remodev2(stream, dW, FH, FW, dCW, CFH, CFW, OC, IC, sh, sw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -323,6 +332,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 		d_deltaX, IH, IW, 
 		N, IC, OC,
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    dconv3D_deltaX_kernelSplit_SGM
@@ -366,6 +376,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 			GN, GMr,
 			0, j_index);
 	}
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -396,6 +407,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 		d_deltaX, IH_slice, IW_slice,
 		IC, OC,
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    dconv3D_deltaX_ksImsR_SGM
@@ -439,6 +451,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 			GN, GMr,
 			0, j_index);
 	}
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -471,6 +484,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 		IC, OC, 
 		sh, sw, ph, pw);
 	cudaError_t error = cudaDestroyTextureObject(texDy); handleError(error);
+	error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    dconv3D_deltaX_ksImsR_texture_SGM
@@ -516,6 +530,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 			0, j_index);
 	}
 	cudaError_t error = cudaDestroyTextureObject(texDy); handleError(error);
+	error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -546,6 +561,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 		d_deltaX, IH_slice, IW_slice,
 		N, IC, OC,
 		ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    dconv3D_deltaX_ksIms2R_SGM
@@ -589,6 +605,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 			GN, GMr,
 			0, j_index);
 	}
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -621,6 +638,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 		IC, OC,
 		ph, pw);
 	cudaError_t error = cudaDestroyTextureObject(texDy); handleError(error);
+	error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    dconv3D_deltaX_ksIms2R_texture_SGM
@@ -666,6 +684,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 			0, j_index);
 	}
 	cudaError_t error = cudaDestroyTextureObject(texDy); handleError(error);
+	error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -695,6 +714,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 		dCW, FH, FW, CWstride,
 		d_deltaX, IH_slice, IW_slice,
 		IC, OC, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -740,8 +760,8 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 		d_deltaX, IH, IW, 
 		N, IC, OC, 
 		sh, sw, ph, pw);
+	error = cudaGetLastError(); handleError(error);
 }
-
 
 //Method:    dconv3D_deltaX_crossAdd_SGM
 JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX_dconv3D_1deltaX_1crossAdd_1SGM(JNIEnv *env, jclass cls, 
@@ -799,6 +819,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX
 			GN, GMr, GK,
 			0, j_index);
 	}
+	error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -836,6 +857,7 @@ JNIEXPORT jboolean JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1de
 		N, IC, OC,
 		ph, pw);
 	cudaError_t error = cudaDestroyTextureObject(texDy); handleError(error);
+	error = cudaGetLastError(); handleError(error);
 	return flag;
 }
 
@@ -908,7 +930,7 @@ JNIEXPORT jboolean JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1de
 				ph, pw);
 		}
 	}
-
+	cudaError_t error = cudaGetLastError(); handleError(error);
 	return true;
 }
 
@@ -917,7 +939,6 @@ JNIEXPORT jboolean JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1de
 
 #ifndef JNI_DECONV_3D_DELTAX_IM2COL_WINOGRAD_S16
 #define JNI_DECONV_3D_DELTAX_IM2COL_WINOGRAD_S16
-
 
 //Method:    Im2col_Winograd_s16_texture
 JNIEXPORT jboolean JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1deltaX_Im2col_1Winograd_1s16_1texture(JNIEnv *env, jclass cls,
@@ -943,6 +964,7 @@ JNIEXPORT jboolean JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1de
 		N, IC, OC,
 		ph, pw);
 	cudaError_t error = cudaDestroyTextureObject(texDy); handleError(error);
+	error = cudaGetLastError(); handleError(error);
 	return flag;
 }
 
@@ -1015,7 +1037,7 @@ JNIEXPORT jboolean JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1dconv3D_1de
 				ph, pw);
 		}
 	}
-
+	cudaError_t error = cudaGetLastError(); handleError(error);
 	return true;
 }
 

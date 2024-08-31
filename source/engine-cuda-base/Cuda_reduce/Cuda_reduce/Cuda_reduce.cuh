@@ -177,6 +177,22 @@ extern "C" {
 
 	/*
 	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_reduce
+	 * Method:    field_affine_with_function_deltaAB_v1
+	 * Signature: (JJJJJJIIJJJJIIII[FI)I
+	 */
+	JNIEXPORT jint JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1reduce_field_1affine_1with_1function_1deltaAB_1v1
+	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jlong, jlong, jint, jint, jlong, jlong, jlong, jlong, jint, jint, jint, jint, jfloatArray, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_reduce
+	 * Method:    field_affine_with_function_deltaAB_v2
+	 * Signature: (JJJJJJIIJJJJIIII[FI)I
+	 */
+	JNIEXPORT jint JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1reduce_field_1affine_1with_1function_1deltaAB_1v2
+	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jlong, jlong, jint, jint, jlong, jlong, jlong, jlong, jint, jint, jint, jint, jfloatArray, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_reduce
 	 * Method:    field_sqBatchNorm_deltaA_v2
 	 * Signature: (JJJJJFIIJJIII)I
 	 */
@@ -233,6 +249,30 @@ extern "C" {
 
 	/*
 	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_reduce
+	 * Method:    field_batchNorm_with_function_deltaXp_v1
+	 * Signature: (JJJJIIJJJJIIII[FI)I
+	 */
+	JNIEXPORT jint JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1reduce_field_1batchNorm_1with_1function_1deltaXp_1v1
+	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jint, jint, jlong, jlong, jlong, jlong, jint, jint, jint, jint, jfloatArray, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_reduce
+	 * Method:    field_batchNorm_with_function_deltaXp_v2
+	 * Signature: (JJJJJJFIIJJJJIIII[FI)I
+	 */
+	JNIEXPORT jint JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1reduce_field_1batchNorm_1with_1function_1deltaXp_1v2
+	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jlong, jlong, jfloat, jint, jint, jlong, jlong, jlong, jlong, jint, jint, jint, jint, jfloatArray, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_reduce
+	 * Method:    field_batchNorm_with_function_deltaAB_v2
+	 * Signature: (JJJJJJFJJIIJJJJIIII[FI)I
+	 */
+	JNIEXPORT jint JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1reduce_field_1batchNorm_1with_1function_1deltaAB_1v2
+	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jlong, jlong, jfloat, jlong, jlong, jint, jint, jlong, jlong, jlong, jlong, jint, jint, jint, jint, jfloatArray, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_reduce
 	 * Method:    field_layerNorm_deltaA_v2
 	 * Signature: (JJJJJFIIJJIII)I
 	 */
@@ -246,6 +286,22 @@ extern "C" {
 	 */
 	JNIEXPORT jint JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1reduce_field_1layerNorm_1deltaAB_1v2
 	(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jlong, jlong, jfloat, jint, jint, jlong, jlong, jlong, jlong, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_reduce
+	 * Method:    center_linear
+	 * Signature: (JJFFIIIJJIII)I
+	 */
+	JNIEXPORT jint JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1reduce_center_1linear
+	(JNIEnv *, jclass, jlong, jlong, jfloat, jfloat, jint, jint, jint, jlong, jlong, jint, jint, jint);
+
+	/*
+	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_reduce
+	 * Method:    center_quadratic
+	 * Signature: (JJFFFIIIJJIII)I
+	 */
+	JNIEXPORT jint JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1reduce_center_1quadratic
+	(JNIEnv *, jclass, jlong, jlong, jfloat, jfloat, jfloat, jint, jint, jint, jlong, jlong, jint, jint, jint);
 
 	/*
 	 * Class:     z_dragon_engine_cuda_impl_math_Cuda_reduce

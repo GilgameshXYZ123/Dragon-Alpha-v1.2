@@ -41,4 +41,12 @@
 #include "field_batchNorm_with_leakyRelu_deltaXp_v2.cuh"
 #include "field_batchNorm_with_leakyRelu_deltaXP_v1.cuh"
 
+
+//------[affine, batchNorm + function]--------------
+#include "field_affine_with_function_deltaAB_v1.cuh"
+#include "field_affine_with_function_deltaAB_v2.cuh"
+#include "field_batchNorm_with_function_deltaAB_v2.cuh"
+#include "field_batchNorm_with_function_deltaXp_v2.cuh"
+#include "field_batchNorm_with_function_deltaXP_v1.cuh"
+
 #endif

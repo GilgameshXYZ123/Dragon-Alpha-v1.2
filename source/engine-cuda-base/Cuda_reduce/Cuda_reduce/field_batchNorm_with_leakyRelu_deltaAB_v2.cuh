@@ -11,7 +11,6 @@
 //(6) [y, x] -> [row_num, field_stride]
 //(7) [N, M] = [row_num, field_stride], A.lengthv = N*M
 //(8) V2: holdX(), X is not changed
-//(9) affine = true || false
 //<1> (deltaXp1 = deltaB) = field_sum: deltaY1
 //<2> (deltaXp2 = deltaA) = field_sum: deltaY1 * X_norm
 #ifndef FIELD_BATCH_NORM_WITH_LEAKY_RELU_DELTA_AB_V2_CALL
@@ -67,10 +66,9 @@ __global__ void field_batchNorm_with_leakyRelu_deltaAB_v2_kernel_4(
 	const float* __restrict__ X_mean,
 	const float* __restrict__ X_var, float eps,
 	const float* __restrict__ A,
-	const float* __restrict__ B,
-	int N, int M,
-	float* __restrict__ deltaA,//deltaA = deltaXp2
-	float* __restrict__ deltaB,//deltaB = deltaXp1
+	const float* __restrict__ B, int N, int M,
+	      float* __restrict__ deltaA,//deltaA = deltaXp2
+	      float* __restrict__ deltaB,//deltaB = deltaXp1
 	int width, int stride)
 {
 	const int by = blockIdx.y, bx = blockIdx.x;
@@ -223,10 +221,9 @@ void __field_batchNorm_with_leakyRelu_deltaAB_v2_stage(cudaStream_t stream,
 	const float* X_mean,
 	const float* X_var, float eps,
 	const float *A,
-	const float *B,
-	int N, int M,
-	float* deltaA,//deltaA = deltaXp2
-	float* deltaB,//deltaB = deltaXp1
+	const float *B, int N, int M,
+	      float* deltaA,//deltaA = deltaXp2
+	      float* deltaB,//deltaB = deltaXp1
 	int width, int stride)
 {
 	if (M > 15) {
@@ -245,8 +242,8 @@ void __field_batchNorm_with_leakyRelu_deltaAB_v2_stage(cudaStream_t stream,
 #endif 
 
 
-#ifndef FIELD_BATCH_WITH_LEAKY_RELU_NORM_DELTA_AB_V2
-#define FIELD_BATCH_WITH_LEAKY_RELU_NORM_DELTA_AB_V2
+#ifndef FIELD_BATCH_NORM_WITH_LEAKY_RELU_DELTA_AB_V2
+#define FIELD_BATCH_NORM_WITH_LEAKY_RELU_DELTA_AB_V2
 
 int __field_batchNorm_with_leakyRelu_deltaAB_v2(JNIEnv *env,
 	cudaStream_t stream1, cudaStream_t stream2,
@@ -255,10 +252,9 @@ int __field_batchNorm_with_leakyRelu_deltaAB_v2(JNIEnv *env,
 	const float* X_mean,
 	const float* X_var, float eps,
 	const float* A,
-	const float* B,
-	int N, int M,
-	float* deltaA_buf, float* deltaA,//deltaA = deltaXp2
-	float* deltaB_buf, float* deltaB,//deltaB = deltaXp1
+	const float* B, int N, int M,
+	      float* deltaA_buf, float* deltaA,//deltaA = deltaXp2
+	      float* deltaB_buf, float* deltaB,//deltaB = deltaXp1
 	int width, int stride,
 	int partNum)
 {

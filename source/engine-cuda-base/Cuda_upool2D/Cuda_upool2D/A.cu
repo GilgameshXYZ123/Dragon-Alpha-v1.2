@@ -34,6 +34,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1upool2D_upool2D
 		d_deltaX, dX, IH, IW, 
 		N, IC, 
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    upool2D_max_Indexed
@@ -57,6 +58,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1upool2D_upool2D
 		d_deltaX, IH, IW, 
 		N, IC,
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -86,6 +88,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1upool2D_upool2D
 		d_deltaX, IH, IW,
 		N, IC, 
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    upool2D_avg_tiled
@@ -108,8 +111,8 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1upool2D_upool2D
 		d_deltaX, IH, IW,
 		N, IC,
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
-
 
 //Method:    upool2D_avg_ignore_padding
 JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1upool2D_upool2D_1avg_1ignore_1padding(JNIEnv *env, jclass cls,
@@ -131,6 +134,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1upool2D_upool2D
 		d_deltaX, IH, IW,
 		N, IC,
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    upool2D_avg_ignore_padding_tiled
@@ -153,6 +157,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1upool2D_upool2D
 		d_deltaX, IH, IW,
 		N, IC,
 		sh, sw, ph, pw);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif

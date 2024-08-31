@@ -12,8 +12,7 @@ import z.dragon.nn.unit.Unit;
  * One input, Multiple output.
  * @author Gilgamesh
  */
-public abstract class Furcation extends Unit
-{
+public abstract class Furcation extends Unit {
     private static final long serialVersionUID = 1L;
     
     @Override public boolean is_complex() { return false; }

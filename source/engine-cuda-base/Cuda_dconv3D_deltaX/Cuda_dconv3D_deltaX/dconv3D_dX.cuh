@@ -11,7 +11,7 @@
 #include "conv3D_Winograd2D.cuh"
 
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 //zero_padding: Y[N, OH, OW, OC] -> Y[N, OHp, OWp, OC]
 #ifndef ZERO_PADDING_AREA
@@ -1899,9 +1899,13 @@ bool dconv3d_dX_im2col_Winograd_s8_texture(JNIEnv *env, jlong* streams, int &ind
 		if (FH == 3) { deconv3D_dX_winograd_s8_W3_64x32R_tex<3>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }//3*3
 		if (FH == 5) { deconv3D_dX_winograd_s8_W3_64x32R_tex<5>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 7) { deconv3D_dX_winograd_s8_W3_64x32R_tex<7>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 9) { deconv3D_dX_winograd_s8_W3_64x32R_tex<9>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 1) { deconv3D_dX_winograd_s8_W3_64x32R_tex<1>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }//2D convolution
+
 		if (FH == 2) { deconv3D_dX_winograd_s8_W3_64x32R_tex<2>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 4) { deconv3D_dX_winograd_s8_W3_64x32R_tex<4>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 6) { deconv3D_dX_winograd_s8_W3_64x32R_tex<6>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 8) { deconv3D_dX_winograd_s8_W3_64x32R_tex<8>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		goto END_FALSE;
 	}
 
@@ -1909,9 +1913,13 @@ bool dconv3d_dX_im2col_Winograd_s8_texture(JNIEnv *env, jlong* streams, int &ind
 		if (FH == 5) { deconv3D_dX_winograd_s8_W5_64x32R_tex<5>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }//5*5
 		if (FH == 3) { deconv3D_dX_winograd_s8_W5_64x32R_tex<3>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 7) { deconv3D_dX_winograd_s8_W5_64x32R_tex<7>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 9) { deconv3D_dX_winograd_s8_W5_64x32R_tex<9>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 1) { deconv3D_dX_winograd_s8_W5_64x32R_tex<1>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }//2D convolution
+
 		if (FH == 2) { deconv3D_dX_winograd_s8_W5_64x32R_tex<2>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 4) { deconv3D_dX_winograd_s8_W5_64x32R_tex<4>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 6) { deconv3D_dX_winograd_s8_W5_64x32R_tex<6>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 8) { deconv3D_dX_winograd_s8_W5_64x32R_tex<8>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		goto END_FALSE;
 	}
 
@@ -1919,9 +1927,13 @@ bool dconv3d_dX_im2col_Winograd_s8_texture(JNIEnv *env, jlong* streams, int &ind
 		if (FH == 7) { deconv3D_dX_winograd_s8_W7_64x32R_tex<7>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }//7*7
 		if (FH == 3) { deconv3D_dX_winograd_s8_W7_64x32R_tex<3>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 5) { deconv3D_dX_winograd_s8_W7_64x32R_tex<5>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 9) { deconv3D_dX_winograd_s8_W7_64x32R_tex<9>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 1) { deconv3D_dX_winograd_s8_W7_64x32R_tex<1>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }//2D convolution
+
 		if (FH == 2) { deconv3D_dX_winograd_s8_W7_64x32R_tex<2>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 4) { deconv3D_dX_winograd_s8_W7_64x32R_tex<4>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 6) { deconv3D_dX_winograd_s8_W7_64x32R_tex<6>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 8) { deconv3D_dX_winograd_s8_W7_64x32R_tex<8>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		goto END_FALSE;
 	}
 	
@@ -1930,9 +1942,13 @@ bool dconv3d_dX_im2col_Winograd_s8_texture(JNIEnv *env, jlong* streams, int &ind
 		if (FH == 2) { deconv3D_dX_winograd_s8_W2_64x32R_tex<2>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }//2*2
 		if (FH == 4) { deconv3D_dX_winograd_s8_W2_64x32R_tex<4>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 6) { deconv3D_dX_winograd_s8_W2_64x32R_tex<6>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 8) { deconv3D_dX_winograd_s8_W2_64x32R_tex<8>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+
 		if (FH == 3) { deconv3D_dX_winograd_s8_W2_64x32R_tex<3>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 5) { deconv3D_dX_winograd_s8_W2_64x32R_tex<5>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 7) { deconv3D_dX_winograd_s8_W2_64x32R_tex<7>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 9) { deconv3D_dX_winograd_s8_W7_64x32R_tex<9>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 1) { deconv3D_dX_winograd_s8_W7_64x32R_tex<1>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }//2D convolution
 		goto END_FALSE;
 	}
 
@@ -1940,9 +1956,13 @@ bool dconv3d_dX_im2col_Winograd_s8_texture(JNIEnv *env, jlong* streams, int &ind
 		if (FH == 4) { deconv3D_dX_winograd_s8_W4_64x32R_tex<4>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }//4*4
 		if (FH == 2) { deconv3D_dX_winograd_s8_W4_64x32R_tex<2>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 6) { deconv3D_dX_winograd_s8_W4_64x32R_tex<6>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 8) { deconv3D_dX_winograd_s8_W4_64x32R_tex<8>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+
 		if (FH == 3) { deconv3D_dX_winograd_s8_W4_64x32R_tex<3>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 5) { deconv3D_dX_winograd_s8_W4_64x32R_tex<5>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 7) { deconv3D_dX_winograd_s8_W4_64x32R_tex<7>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 9) { deconv3D_dX_winograd_s8_W4_64x32R_tex<9>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 1) { deconv3D_dX_winograd_s8_W4_64x32R_tex<1>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }//2D convolution
 		goto END_FALSE;
 	}
 
@@ -1950,9 +1970,13 @@ bool dconv3d_dX_im2col_Winograd_s8_texture(JNIEnv *env, jlong* streams, int &ind
 		if (FH == 6) { deconv3D_dX_winograd_s8_W6_64x32R_tex<6>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }//6*6
 		if (FH == 2) { deconv3D_dX_winograd_s8_W6_64x32R_tex<2>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 4) { deconv3D_dX_winograd_s8_W6_64x32R_tex<4>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 8) { deconv3D_dX_winograd_s8_W6_64x32R_tex<8>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+
 		if (FH == 3) { deconv3D_dX_winograd_s8_W6_64x32R_tex<3>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 5) { deconv3D_dX_winograd_s8_W6_64x32R_tex<5>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
 		if (FH == 7) { deconv3D_dX_winograd_s8_W6_64x32R_tex<7>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 9) { deconv3D_dX_winograd_s8_W6_64x32R_tex<9>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }
+		if (FH == 1) { deconv3D_dX_winograd_s8_W6_64x32R_tex<1>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GMr, GNr); goto END_TRUE; }//2D convolution
 		goto END_FALSE;
 	}
 
@@ -2005,6 +2029,9 @@ bool dconv3d_dX_im2col_Winograd_s16_texture(JNIEnv *env, jlong* streams, int &in
 				       else            deconv3D_dX_Winograd_s16_W7_32x32_p3_tex<5>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
 		if (FH == 9) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W7_64x32_p3_tex<9>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
 				       else            deconv3D_dX_Winograd_s16_W7_32x32_p3_tex<9>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
+		if (FH == 1) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W7_64x32_p3_tex<1>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
+				       else            deconv3D_dX_Winograd_s16_W7_32x32_p3_tex<1>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }//2D convolution
+
 		if (FH == 2) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W7_64x32_p3_tex<2>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
 				       else            deconv3D_dX_Winograd_s16_W7_32x32_p3_tex<2>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
 		if (FH == 4) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W7_64x32_p3_tex<4>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
@@ -2025,6 +2052,9 @@ bool dconv3d_dX_im2col_Winograd_s16_texture(JNIEnv *env, jlong* streams, int &in
 			           else            deconv3D_dX_Winograd_s16_W9_32x32_p4_tex<7>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
 		if (FH == 3) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W9_64x32_p4_tex<3>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
 		               else            deconv3D_dX_Winograd_s16_W9_32x32_p4_tex<3>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
+		if (FH == 1) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W9_64x32_p4_tex<1>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
+		               else            deconv3D_dX_Winograd_s16_W9_32x32_p4_tex<1>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }//2D convolution
+
 		if (FH == 2) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W9_64x32_p4_tex<2>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
 			           else            deconv3D_dX_Winograd_s16_W9_32x32_p4_tex<2>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
 		if (FH == 4) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W9_64x32_p4_tex<4>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
@@ -2046,14 +2076,17 @@ bool dconv3d_dX_im2col_Winograd_s16_texture(JNIEnv *env, jlong* streams, int &in
 			           else            deconv3D_dX_Winograd_s16_W8_32x32_p3_tex<4>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
 		if (FH == 6) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W8_64x32_p3_tex<6>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
 			           else            deconv3D_dX_Winograd_s16_W8_32x32_p3_tex<6>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
-		if (FH == 9) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W8_64x32_p3_tex<9>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
-			           else            deconv3D_dX_Winograd_s16_W8_32x32_p3_tex<9>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
+
+		if (FH == 3) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W8_64x32_p3_tex<3>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
+			           else            deconv3D_dX_Winograd_s16_W8_32x32_p3_tex<3>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
 		if (FH == 5) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W8_64x32_p3_tex<5>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
 			           else            deconv3D_dX_Winograd_s16_W8_32x32_p3_tex<5>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
 		if (FH == 7) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W8_64x32_p3_tex<7>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
 			           else            deconv3D_dX_Winograd_s16_W8_32x32_p3_tex<7>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
-		if (FH == 3) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W8_64x32_p3_tex<3>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
-			           else            deconv3D_dX_Winograd_s16_W8_32x32_p3_tex<3>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
+		if (FH == 9) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W8_64x32_p3_tex<9>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
+			           else            deconv3D_dX_Winograd_s16_W8_32x32_p3_tex<9>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }
+		if (FH == 1) { if (!(IC & 63)) deconv3D_dX_Winograd_s16_W8_64x32_p3_tex<1>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr);
+			           else            deconv3D_dX_Winograd_s16_W8_32x32_p3_tex<1>(streams, index, length, deltaY, texDy, OH, OW, W, deltaX, IH, IW, N, IC, OC, ph, pw, GN, GM, GNr, GMr); goto END_TRUE; }//2D convolution
 		goto END_FALSE;
 	}
 

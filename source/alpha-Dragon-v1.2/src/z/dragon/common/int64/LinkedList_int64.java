@@ -12,8 +12,9 @@ import java.util.Arrays;
  *
  * @author Gilgamesh
  */
-public class LinkedList_int64 implements Serializable
-{
+public class LinkedList_int64 implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     //<editor-fold defaultstate="collapsed" desc="class: Lnode">
     protected static final class Node 
     {

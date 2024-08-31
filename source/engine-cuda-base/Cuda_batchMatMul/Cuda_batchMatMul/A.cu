@@ -11,7 +11,7 @@
 using namespace std;
 #include "test.cuh"
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 #ifndef JNI_BATCH_MATMUL 
 #define JNI_BATCH_MATMUL
@@ -34,6 +34,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1batchMatMul_bat
 	__batch_matMul(1, 1, streams, index, length,
 		dA, dB, dC, 
 		Batch, N, M, BK, AK);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 
 }
 
@@ -57,6 +58,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1batchMatMul_bat
 		dA, texA, dB, dC, Batch,
 		N, M, BK, AK);
 	cudaError_t error = cudaDestroyTextureObject(texA); handleError(error);
+	error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -83,6 +85,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1batchMatMul_bat
 	__batch_matMulT1(1, 1, streams, index, length, 
 		dA, dB, dC, 
 		Batch, CN, AN, M, K);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -109,6 +112,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1batchMatMul_bat
 	__batch_matMulT2(1, 1, streams, index, length, 
 		dA, dB, dC, 
 		Batch, N, CM, BM, K);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    batchMatMulT2_texture
@@ -135,6 +139,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1batchMatMul_bat
 	cudaError_t error;
 	error = cudaDestroyTextureObject(texA); handleError(error);
 	error = cudaDestroyTextureObject(texB); handleError(error);
+	error = cudaGetLastError(); handleError(error);
 }
 
 #endif

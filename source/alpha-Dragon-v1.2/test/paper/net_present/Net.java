@@ -13,7 +13,7 @@ import z.dragon.engine.Tensor;
 import z.dragon.engine.memp.Mempool;
 import z.dragon.nn.unit.Unit;
 import z.dragon.nn.unit.complex.Module;
-import z.dragon.nn.unit.simple.affine.BatchNorm;
+import z.dragon.nn.unit.simple.batchnorm.BatchNorm;
 
 /**
  *

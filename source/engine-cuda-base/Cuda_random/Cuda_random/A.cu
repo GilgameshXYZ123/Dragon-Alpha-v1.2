@@ -16,7 +16,7 @@ using namespace std;
 #include "test.cuh"
 
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 #ifndef JNI_BERNOULI
 #define JNI_BERNOULI
@@ -31,7 +31,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1random_bernouli
 {
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
-	__bernouli2D(stream, dX, seed, p, v1, v2, lengthv, width, stride);
+	__bernouli2D(stream, dX, seed, p, v1, v2, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    bernouli_mul2D
@@ -50,6 +52,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1random_bernouli
 	__bernouli_mul2D(stream, dX, dR, dY,
 		seed, p, v1, v2,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    leakyRelu_bernouli_mul2D
@@ -68,6 +71,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1random_leakyRel
 	__leakyRelu_bernouli_mul2D(stream, dX, dR, dY, k,
 		seed, p, v1, v2,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -87,7 +91,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1random_uniform2
 {
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
-	__uniform2D(stream, dX, seed, vmin, vmax, lengthv, width, stride);
+	__uniform2D(stream, dX, seed, vmin, vmax, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    sparse_uniform2D
@@ -100,7 +106,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1random_sparse_1
 {
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
-	__sparse_uniform2D(stream, dX, seed1, seed2, p, vmin, vmax, lengthv, width, stride);
+	__sparse_uniform2D(stream, dX, seed1, seed2, p, vmin, vmax, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
@@ -120,7 +128,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1random_gaussian
 {
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
-	__gaussian2D(stream, dX, seed1, seed2, mu, sigma, lengthv, width, stride);
+	__gaussian2D(stream, dX, seed1, seed2, mu, sigma, 
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    sparse_gaussian2D
@@ -133,7 +143,9 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_math_Cuda_1random_sparse_1
 {
 	cudaStream_t stream = (cudaStream_t)(intptr_t)stream_address;
 	float *dX = (float*)(intptr_t)dX_address;
-	__sparse_gaussian2D(stream, dX, seed1, seed2, seed3, p, mu, sigma, lengthv, width, stride);
+	__sparse_gaussian2D(stream, dX, seed1, seed2, seed3, p, mu, sigma,
+		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif

@@ -11,8 +11,6 @@ import java.util.HashMap;
 import z.dragon.common.DragonCV.Canvas;
 import static z.dragon.common.DragonCV.cv;
 import static z.ui.JUI.FontHandler.font;
-import z.util.lang.Lang;
-import z.util.math.ExRandom;
 import z.util.math.vector.Vector;
 import z.util.math.vector.Vector.MaxMin;
 import static z.ui.JUI.ColorHandler.clr;

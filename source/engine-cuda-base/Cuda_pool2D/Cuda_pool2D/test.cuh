@@ -3,7 +3,7 @@
 #ifndef TEST_H
 #define TEST_H
 
-#ifndef COMPLIE//<<<<complie-area-------------------------------------------------
+#ifndef COMPILE//<<<<complie-area-------------------------------------------------
 
 #ifndef UTIL
 #define UTIL

@@ -16,8 +16,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Rpl extends SimpleInplaceFunction
-{
+public class Rpl extends SimpleInplaceFunction {
     private static final long serialVersionUID = 1L;
     
     protected float alpha;

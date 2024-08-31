@@ -5,7 +5,6 @@
  */
 package z.dragon.nn.unit.dual.math;
 
-import z.dragon.engine.Counter.CountGc;
 import z.dragon.engine.Engine;
 import z.dragon.engine.Tensor;
 import z.dragon.nn.core.dual.DualCore;
@@ -15,8 +14,7 @@ import z.dragon.nn.unit.dual.DualFunction;
  *
  * @author Gilgamesh
  */
-public class Quadratic2Center extends DualFunction 
-{
+public class Quadratic2Center extends DualFunction {
     private static final long serialVersionUID = 1L;
     
     protected int dim2;

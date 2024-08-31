@@ -69,18 +69,17 @@ public class TCP
         }
     }
     //</editor-fold>
-    public static ServerSocket newServer(String host, int port) throws IOException
-    {
+    public static ServerSocket newServer(String host, int port) throws IOException{
         return new ServerSocket(port, 50, InetAddress.getByName(host));
     }
-    public static ServerSocket newServer(String host, int port, int backlog) throws IOException
-    {
+    
+    public static ServerSocket newServer(String host, int port, int backlog) throws IOException {
         return new ServerSocket(port, backlog, InetAddress.getByName(host));
     }
-    public static Socket newSocket(String address, int port) throws IOException
-    {
+    public static Socket newSocket(String address, int port) throws IOException {
         return new Socket(InetAddress.getByName(address), port);
     }
+    
     //<editor-fold defaultstate="collapsed" desc="HelloWorld-TCP">
     /**
      * create a hellow-world-single-thread TCP server

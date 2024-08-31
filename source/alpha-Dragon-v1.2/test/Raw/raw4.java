@@ -51,7 +51,7 @@ public class raw4
         BufferedImage img2 = cv.RGB(rgb2); cv.imshow(img2, "img2");
         BufferedImage img3 = cv.RGB(rgb3); cv.imshow(img3, "img3");
         
-        Tensor X2 = eg.img.reflection_normalization(true, X, white, dark)
+        Tensor X2 = eg.img.reflection_normalize(true, X, white, dark)
                 .img().linear_dtype_to_pixel(true, 255, 0);
         
         float brightness = 0.1f, saturation = 0.2f, contrast = 0.3f;

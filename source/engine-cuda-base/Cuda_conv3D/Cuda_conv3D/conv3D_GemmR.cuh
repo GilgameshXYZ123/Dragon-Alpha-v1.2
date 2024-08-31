@@ -64,7 +64,7 @@ inline bool conv3D_Gemm_uernel_8x8R(cudaStream_t stream, int oc_index, int j_ind
 #endif
 
 
-#ifndef COMPLIE
+#ifndef COMPILE
 #define CONV_3D_GEMM_UERNEL_S1_RUSE_8X8R
 #endif
 #ifndef CONV_3D_GEMM_UERNEL_S1_RUSE_8X8R

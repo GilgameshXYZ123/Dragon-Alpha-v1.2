@@ -33,7 +33,6 @@
             dim3(1<<LBX, 1<<LBY), 0, stream >>>\
 			(deltaY, Y, k, N, M, deltaXp1, deltaXp2, width, stride)
 
-
 #endif
 
 
@@ -63,10 +62,9 @@
 template<int LBY, int LBX>
 __global__ void field_batchNorm_with_leakyRelu_deltaXp_v1_kernel_4(
 	const float* __restrict__ deltaY,
-	const float* __restrict__ Y, float k,
-	int N, int M,
-	float* __restrict__ deltaXp1,
-	float* __restrict__ deltaXp2,
+	const float* __restrict__ Y, float k, int N, int M,
+	      float* __restrict__ deltaXp1,
+	      float* __restrict__ deltaXp2,
 	int width, int stride)
 {
 	const int by = blockIdx.y, bx = blockIdx.x;
@@ -104,14 +102,14 @@ __global__ void field_batchNorm_with_leakyRelu_deltaXp_v1_kernel_4(
 			dy1.z = dy2.z * ((y2v.z > 0.0f) + (y2v.z <= 0.0f)*k);
 			dy1.w = dy2.w * ((y2v.w > 0.0f) + (y2v.w <= 0.0f)*k);
 
-			float4 dv1;//(deltaXp2 = deltaA) = field_sum: deltaY1 * X_norm
+			float4 dv1;//deltaXp2 = deltaY1 * X_norm
 			dv1.x = dy1.x * y1v.x;
 			dv1.y = dy1.y * y1v.y;
 			dv1.z = dy1.z * y1v.z;
 			dv1.w = dy1.w * y1v.w;
 
-			Kahan_simdAdd4(v0, dy1, c0);//(deltaXp1 = deltaB) = field_sum: deltaY1
-			Kahan_simdAdd4(v1, dv1, c1);//field sum for: (deltaXp2 = deltaA)
+			Kahan_simdAdd4(v0, dy1, c0);//deltaXp1 = field_sum: deltaY1
+			Kahan_simdAdd4(v1, dv1, c1);//deltaXp2 = field_sum: deltaY1 * X_norm
 		}
 		As[tx][(ty << 1)] = float4{ v0.x, v0.y, v1.x, v1.y };//[deltaXp1, deltaB]
 		As[tx][(ty << 1) + 1] = float4{ v0.z, v0.w, v1.z, v1.w };//[deltaXp2, deltaA]
@@ -170,17 +168,16 @@ __global__ void field_batchNorm_with_leakyRelu_deltaXp_v1_kernel_4(
 			float4 sv1 = As[tx][yIdx], sv2 = As[tx][yIdx + 2], sc = scs[(yIdx & 1)];
 			Kahan_simdAdd4(sv1, sv2, sc);//v1 += v2
 
-			float2 dB = float2{ sv1.x, sv1.y };//deltaXp1 = deltaB
-			float2 dA = float2{ sv1.z, sv1.w };//deltaXp2 = deltaA
+			float2 dXp1 = float2{ sv1.x, sv1.y };//deltaXp1
+			float2 dXp2 = float2{ sv1.z, sv1.w };//deltaXp2
 
-			//(deltaXp2 = deltaA) = field_sum: deltaY1 * Y1
 			const int xindex2 = x4 + (ty << 1);
-			within_width_zero_nan2(dB, xindex2, table, stride, width);
-			within_width_zero_nan2(dA, xindex2, table, stride, width);
+			within_width_zero_nan2(dXp1, xindex2, table, stride, width);
+			within_width_zero_nan2(dXp2, xindex2, table, stride, width);
 
 			const int dst_index = by * M + xindex2;
-			*(float2*)(deltaXp1 + dst_index) = dB;//deltaXp1[by, xindex2]
-			*(float2*)(deltaXp2 + dst_index) = dA;//deltaXp2[by, xindex2]
+			*(float2*)(deltaXp1 + dst_index) = dXp1;//deltaXp1[by, xindex2]
+			*(float2*)(deltaXp2 + dst_index) = dXp2;//deltaXp2[by, xindex2]
 		}
 		__syncthreads();
 	}
@@ -196,10 +193,9 @@ __global__ void field_batchNorm_with_leakyRelu_deltaXp_v1_kernel_4(
 //M % 4 == 0, M >= 4
 void __field_batchNorm_with_leakyRelu_deltaXp_v1_stage(cudaStream_t stream,
 	const float* deltaY,
-	const float* Y, float k,//V1: holdY(), Y is nnot changed
-	int N, int M,
-	float* deltaXp1,
-	float* deltaXp2,
+	const float* Y, float k, int N, int M,//V1: holdY(), Y is not changed
+	      float* deltaXp1,
+	      float* deltaXp2,
 	int width, int stride)
 {
 	if (M > 15) {
@@ -224,10 +220,9 @@ void __field_batchNorm_with_leakyRelu_deltaXp_v1_stage(cudaStream_t stream,
 int __field_batchNorm_with_leakyRelu_deltaXp_v1(JNIEnv *env,
 	cudaStream_t stream1, cudaStream_t stream2,
 	const float* deltaY,
-	const float* Y, float k,//V1: holdY(), Y is not changed
-	int N, int M,
-	float* deltaXp1_buf, float* deltaXp1,
-	float* deltaXp2_buf, float* deltaXp2,
+	const float* Y, float k, int N, int M,//V1: holdY(), Y is not changed
+	      float* deltaXp1_buf, float* deltaXp1,
+	      float* deltaXp2_buf, float* deltaXp2,
 	int width, int stride,
 	int partNum)
 {

@@ -136,7 +136,8 @@ __global__ void batchNorm_affined2D_row_with_leakyRelu_deltaX_v1_kernel_4(
 
 
 void __batchNorm_affined2D_row_with_leakyRelu_deltaX_v1(cudaStream_t stream,
-	const float* deltaY, const float* Y, float k,
+	const float* deltaY, 
+	const float* Y, float k,
 	const float* X_var, float eps,
 	const float* A,
 	const float* B,

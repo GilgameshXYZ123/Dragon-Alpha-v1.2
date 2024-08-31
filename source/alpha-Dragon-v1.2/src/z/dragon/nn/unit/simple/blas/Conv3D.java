@@ -22,8 +22,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Conv3D extends SimpleUnit
-{
+public class Conv3D extends SimpleUnit {
     private static final long serialVersionUID = 562781240110001L;
    
     protected int OC, IC;
@@ -37,14 +36,14 @@ public class Conv3D extends SimpleUnit
     transient protected Parameter B;
     
     public Conv3D(boolean biased,
-            int in_channels, int out_channels, 
-            int kernel_height, int kernel_width, 
-            int stride_height, int stride_width,
+            int in_channel,     int out_channel, 
+            int kernel_height,  int kernel_width, 
+            int stride_height,  int stride_width,
             int padding_height, int padding_width,
-            int output_height, int output_width) 
+            int output_height,  int output_width) 
     { 
         this.biased = biased;
-        this.IC = in_channels;    this.OC = out_channels;
+        this.IC = in_channel;     this.OC = out_channel;
         this.FH = kernel_height;  this.FW = kernel_width;
         this.sh = stride_height;  this.sw = stride_width;
         this.ph = padding_height; this.pw = padding_width;
@@ -53,8 +52,8 @@ public class Conv3D extends SimpleUnit
 
     //<editor-fold defaultstate="collapsed" desc="Basic-Functions">
     public boolean biased() { return biased; }
-    public int out_channels() { return OC; }
-    public int in_channels() { return IC; }
+    public int out_channel() { return OC; }
+    public int in_channel()  { return IC; }
     
     public int[] kernel()  { return new int[]{ FH, FW }; }
     public int[] stride()  { return new int[]{ sh, sw }; }
@@ -73,9 +72,9 @@ public class Conv3D extends SimpleUnit
     public Tensor weight() { return W.ts(); }
     public Conv3D weight(Tensor weight) {
         if(Tensor.isNull(weight)) throw new NullPointerException("weight is null");
-        if(!weight.dimEquals(IC, FH, FW, OC)) throw new IllegalArgumentException(String.format(
-                "%s : weight.dim { got %s } != [IC, FH, FW, OC] = [%d, %d, %d, %d]", 
-                name, Arrays.toString(weight.dim()), IC, FH, FW, OC));
+        if(!weight.dimEquals(OC, FH, FW, IC)) throw new IllegalArgumentException(String.format(
+                "%s : weight.dim { got %s } != [OC, FH, FW, IC] = [%d, %d, %d, %d]", 
+                name, Arrays.toString(weight.dim()), OC, FH, FW, IC));
         if(W != null) W.delete();
         W.tensor(weight);
         return this;
@@ -85,9 +84,9 @@ public class Conv3D extends SimpleUnit
     public Tensor bias() { return B.ts(); }
     public Conv3D bias(Tensor bias) {
         if(Tensor.isNull(bias)) throw new NullPointerException("bias is null");
-        if(!bias.dimEquals(IC)) throw new IllegalArgumentException(String.format(
-                "%s : bias.dim { got %s } != [IC] = [%d]",
-                name, Arrays.toString(bias.dim()), IC));
+        if(!bias.dimEquals(OC)) throw new IllegalArgumentException(String.format(
+                "%s : bias.dim { got %s } != [OC] = [%d]",
+                name, Arrays.toString(bias.dim()), OC));
         if(B != null) B.delete(); 
         B.tensor(bias);
         return this;
@@ -111,8 +110,8 @@ public class Conv3D extends SimpleUnit
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="running-area: others">
-    transient private boolean baseW = true;
-    transient private boolean baseB = true;
+    transient private boolean baseW = true;//is the first gradient of W
+    transient private boolean baseB = true;//is the first gradient of B
     protected final synchronized void reset_backward() { baseW = baseB = true;  }
     protected final synchronized boolean baseW() { boolean old = baseW; baseW = false; return old; }
     protected final synchronized boolean baseB() { boolean old = baseB; baseB = false; return old; }
@@ -170,8 +169,7 @@ public class Conv3D extends SimpleUnit
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: InlineConv3D"> 
-    public static class InlineConv3D extends SimpleCore<Conv3D>
-    {
+    public static class InlineConv3D extends SimpleCore<Conv3D> {
         transient private int IH, IW;
         transient private Tensor y;
 
@@ -179,8 +177,8 @@ public class Conv3D extends SimpleUnit
         
         //<editor-fold defaultstate="collapsed" desc="Basic-Functions">
         public boolean biased() { return ut.biased; }
-        public int out_channels() { return ut.OC; }
-        public int in_channels() { return ut.IC; }
+        public int out_channel() { return ut.OC; }
+        public int in_channel() { return ut.IC; }
     
         public int[] kernel()  { return new int[]{ ut.FH, ut.FW }; }
         public int[] stride()  { return new int[]{ ut.sh, ut.sw }; }

@@ -10,7 +10,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import z.util.lang.SimpleTimer;
-import static z.util.math.vector.MatMul_naive.matMul1;
 
 /**
  *

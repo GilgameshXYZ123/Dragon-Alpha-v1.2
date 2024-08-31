@@ -16,8 +16,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Sigmoid extends SimpleInplaceFunction
-{
+public class Sigmoid extends SimpleInplaceFunction {
     private static final long serialVersionUID = 1L;
     
     public Sigmoid(boolean inplace) {super(inplace); }

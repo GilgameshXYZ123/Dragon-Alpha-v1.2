@@ -6,12 +6,12 @@
 //process remainder of OW
 #include "conv3D_GemmR_uernel_C.cuh"
 
-//4 stat
+//4 states
 #include "conv3D_ori_Winograd_f2x3R.cuh"//FW = 3
 #include "conv3D_Im2col_Winograd_s4_f3x2R.cuh"//FW = 2
 #include "conv3D_Im2col_Winograd_s4_f2x3R.cuh"//FW = 3
 
-//8 stat
+//8 states
 #include "conv3D_Im2col_Winograd_s8_f7x2R.cuh"//FW = 2
 #include "conv3D_Im2col_Winograd_s8_f6x3R.cuh"//FW = 3
 #include "conv3D_Im2col_Winograd_s8_f5x4R.cuh"//FW = 4
@@ -19,7 +19,7 @@
 #include "conv3D_Im2col_Winograd_s8_f3x6R.cuh"//FW = 6
 #include "conv3D_Im2col_Winograd_s8_f2x7R.cuh"//FW = 7
 
-//16 stat
+//16 states
 #include "conv3D_Im2col_Winograd_sg_fAx7R.cuh"//FW = 7
 #include "conv3D_Im2col_Winograd_sg_f9x8R.cuh"//FW = 8
 #include "conv3D_Im2col_Winograd_sg_f8x9R.cuh"//FW = 9
@@ -237,6 +237,8 @@ inline void conv3D_Winograd_s8_W2_64x32R_tex(jlong* streams, int &index, int len
 //[7] for: Feature = (12, 12), [N, IC, OC] = [128, 512, 512]
 //LB = 4: Size = 40.5, Time = 4.95093 msec, Performace = 17567 GFlop/s
 //WB = 4: Size = 40.5, Time = 4.45236 msec, Performace = 19534.1 GFlop/s
+//V2LB = 4: Size = 40.5, Time = 4.88319 msec, Performace = 17810.7 GFlop/s
+//V2WB = 4: Size = 40.5, Time = 4.56674 msec, Performace = 19044.9 GFlop/ss
 //cuDNN-Winograd-Fused: Size = 40.5, Time = 8.433 msec, Performance = 10313.4 GFlop/s
 //cuDNN-NCHW-GEMM-implicit-prec: Size = 40.5, Time = 5.598 msec, Performance = 15536.5 GFlop/s
 //cuDNN-NHWC-GEMM-implicit-prec: Size = 40.5, Time = 5.283 msec, Performance = 16462.8 GFlop/s
@@ -253,6 +255,8 @@ inline void conv3D_Winograd_s8_W2_64x32R_tex(jlong* streams, int &index, int len
 //[9] for: Feature = (6, 6), [N, IC, OC] = [128, 1024, 1024]
 //LB = 4: Size = 40.5, Time = 4.99974 msec, Performace = 17395.5 GFlop/s
 //WB = 4: Size = 40.5, Time = 4.53758 msec, Performace = 19167.3 GFlop/s
+//V2LB = 4: Size = 40.5, Time = 4.66051 msec, Performace = 18661.7 GFlop/s
+//V2WB = 4: Size = 40.5, Time = 4.16379 msec, Performace = 20888 GFlop/s
 //cuDNN-Winograd-Fused: Size = 40.5, Time = 17.993 msec, Performance = 4833.7 GFlop/s
 //cuDNN-NCHW-GEMM-implicit-prec: Size = 40.5, Time = 5.422 msec, Performance = 16040.8 GFlop/s
 //cuDNN-NHWC-GEMM-implicit-prec: Size = 40.5, Time = 5.536 msec, Performance = 15710.5 GFlop/s

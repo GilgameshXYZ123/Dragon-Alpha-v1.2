@@ -6,9 +6,7 @@
 #ifndef TEXTURE_FUNCTION
 #define TEXTURE_FUNCTION
 
-cudaTextureObject_t createFloat4Texture(float *X, long sizeX)
-{
-
+cudaTextureObject_t createFloat4Texture(float *X, long sizeX) {
 	cudaResourceDesc rdesc;
 	memset(&rdesc, 0, sizeof(rdesc));
 	rdesc.resType = cudaResourceTypeLinear;
@@ -111,5 +109,7 @@ cudaTextureObject_t createFloat4Texture(float *X, long sizeX)
 #define float_to_pixel(x) ( (x>0.0f && x<1.0f)*255.0f*x + (x>=1.0f)*255.0f )
 
 #endif
+
+#include "FP32_function.cuh"
 
 #endif

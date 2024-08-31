@@ -6,7 +6,7 @@
 #include "matMulT1_kernel.cuh"
 #include "matMulT1SK_kernel.cuh"
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 //Common
 #ifndef MAT_MUL4X_T1

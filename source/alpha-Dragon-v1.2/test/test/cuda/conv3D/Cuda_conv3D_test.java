@@ -154,12 +154,10 @@ public class Cuda_conv3D_test
     
     public static void main(String[] args)
     {
-        testCorrect(128, 128, 7, 7, 256, 4, 64, 1, 1, 3, 3);
-        return;
-        
 //        int FH = 9, FW = 9, sh = 1, sw = 1, ph = 4, pw = 4;
 //        int FH = 8, FW = 8, sh = 1, sw = 1, ph = 4, pw = 4;
-        int FH = 7, FW = 7, sh = 1, sw = 1, ph = 3, pw = 3;
+//        int FH = 7, FW = 7, sh = 1, sw = 1, ph = 3, pw = 3;
+        int FH = 1, FW = 7, sh = 1, sw = 1, ph = 0, pw = 3;
 //        int FH = 5, FW = 5, sh = 1, sw = 1, ph = 2, pw = 2;
 //        int FH = 3, FW = 3, sh = 1, sw = 1, ph = 1, pw = 1;
 //        int IH = 128, IW = 128, IC =   3, OC =  64, N = 128;//false
@@ -174,7 +172,7 @@ public class Cuda_conv3D_test
         
 //        testCorrect(IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
         testSpeed(IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
-        return;
+        System.exit(0);
         
 //        int FH = 7, FW = 7, ph = 3, pw = 3, sh = 1, sw = 1;
 //        int FH = 6, FW = 6, ph = 3, pw = 3, sh = 1, sw = 1;
@@ -213,25 +211,25 @@ public class Cuda_conv3D_test
         //Vector.PRINT_DIFFERENT = true;
         
         //test W11==============================================================
-        {
-            int IH = 32, IW = 32;
-            int FH = 1, FW = 1;
-            int N = 4;
-            int IC = 128, OC = 16;
-            int sh = 1, sw = 1, ph = 0, pw = 0;
-            for(int oc = 1; oc <= 128; oc++) 
-                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
-        }
-       
-        {
-            int IH = 64, IW = 64;
-            int FH = 1, FW = 1;
-            int N = 4;
-            int IC = 128, OC = 255;
-            int sh = 1, sw = 1, ph = 0, pw = 0;
-            testCorrect(IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
-            testSpeed(IH, IW, FH, FW, N*2, IC, OC, sh, sw, ph, pw);
-        }
+//        {
+//            int IH = 32, IW = 32;
+//            int FH = 1, FW = 1;
+//            int N = 4;
+//            int IC = 128, OC = 16;
+//            int sh = 1, sw = 1, ph = 0, pw = 0;
+//            for(int oc = 1; oc <= 128; oc++) 
+//                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
+//        }
+//       
+//        {
+//            int IH = 64, IW = 64;
+//            int FH = 1, FW = 1;
+//            int N = 4;
+//            int IC = 128, OC = 255;
+//            int sh = 1, sw = 1, ph = 0, pw = 0;
+//            testCorrect(IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
+//            testSpeed(IH, IW, FH, FW, N*2, IC, OC, sh, sw, ph, pw);
+//        }
         
         //test np===============================================================
 //        int IH = 33, IW = 33;//(33 - 4 + 2)/1 + 1
@@ -251,109 +249,109 @@ public class Cuda_conv3D_test
 //        testSpeed(IH, IW, FH, FW, N*2, IC, OC, sh, sw, ph, pw);
         
         //test common===========================================================
-        {
-            int IH = 16, IW = 16;//(33 - 4 + 2)/1 + 1
-            int FH = 3, FW = 3;
-            int sh = 2, sw = 2, ph = 1, pw = 1;
-            int N = 4;
-            int IC = 16, OC = 128;//9*4=36 
-            for(int oc = 1; oc <= 128; oc++) {
-                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
-            }
-        }
-        
-        {
-            int IH = 16, IW = 16;//(33 - 4 + 2)/1 + 1
-            int FH = 4, FW = 4;
-            int sh = 2, sw = 2, ph = 1, pw = 1;
-            int N = 4;
-            int IC = 16, OC = 128;//9*4=36 
-            for(int oc = 1; oc <= 128; oc++) {
-                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
-            }
-        }
-        
-        {
-            int IH = 16, IW = 16;//(33 - 4 + 2)/1 + 1
-            int FH = 5, FW = 5;
-            int sh = 2, sw = 2, ph = 2, pw = 2;
-            int N = 4;
-            int IC = 16, OC = 128;//9*4=36 
-            for(int oc = 1; oc <= 128; oc++) {
-                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
-            }
-        }
-        
-        {
-            int IH = 8, IW = 8;//(33 - 4 + 2)/1 + 1
-            int FH = 5, FW = 5;
-            int sh = 2, sw = 2, ph = 2, pw = 2;
-            int N = 64;
-            int IC = 16, OC = 128;//9*4=36 
-            for(int oc = 1; oc <= 128; oc++) {
-                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
-            }
-            
-            sh = 1; sw = 1;
-            for(int oc = 1; oc <= 128; oc++) {
-                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
-            }
-        }
-        
-        {
-            int IH = 8, IW = 8;//(33 - 4 + 2)/1 + 1
-            int FH = 6, FW = 6;
-            int sh = 2, sw = 2, ph = 2, pw = 2;
-            int N = 64;
-            int IC = 16, OC = 128;//9*4=36 
-            for(int oc = 1; oc <= 128; oc++) {
-                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
-            }
-            
-            sh = 1; sw = 1;
-            for(int oc = 1; oc <= 128; oc++) {
-                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
-            }
-        }
-        
-        {
-            int IH = 8, IW = 8;//(33 - 4 + 2)/1 + 1
-            int FH = 5, FW = 5;
-            int sh = 2, sw = 2, ph = 1, pw = 1;
-            int N = 64;
-            int IC = 16, OC = 128;//9*4=36 
-            
-            testCorrect(IH, IW, FH, FW, N, IC, 61, sh, sw, ph, pw);
-                
-            for(int oc = 1; oc <= 128; oc++) {
-                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
-            }
-            
-            sh = 1; sw = 1;
-            for(int oc = 1; oc <= 128; oc++) {
-                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
-            }
-        }
-        
-        {
-            int IH = 8, IW = 8;//(33 - 4 + 2)/1 + 1
-            int FH = 7, FW = 7;
-            int sh = 2, sw = 2, ph = 3, pw = 3;
-            
-            int N = 64;
-            int IC = 16, OC = 128;//9*4=36 
-            
-            testCorrect(IH, IW, FH, FW, N, IC, 61, sh, sw, ph, pw);
-                
-            for(int oc = 1; oc <= 128; oc++) {
-                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
-            }
-            
-            sh = 1; sw = 1;
-            for(int oc = 1; oc <= 128; oc++) {
-                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
-            }
-        }
+//        {
+//            int IH = 16, IW = 16;//(33 - 4 + 2)/1 + 1
+//            int FH = 3, FW = 3;
+//            int sh = 2, sw = 2, ph = 1, pw = 1;
+//            int N = 4;
+//            int IC = 16, OC = 128;//9*4=36 
+//            for(int oc = 1; oc <= 128; oc++) {
+//                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
+//            }
+//        }
+//        
+//        {
+//            int IH = 16, IW = 16;//(33 - 4 + 2)/1 + 1
+//            int FH = 4, FW = 4;
+//            int sh = 2, sw = 2, ph = 1, pw = 1;
+//            int N = 4;
+//            int IC = 16, OC = 128;//9*4=36 
+//            for(int oc = 1; oc <= 128; oc++) {
+//                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
+//            }
+//        }
+//        
+//        {
+//            int IH = 16, IW = 16;//(33 - 4 + 2)/1 + 1
+//            int FH = 5, FW = 5;
+//            int sh = 2, sw = 2, ph = 2, pw = 2;
+//            int N = 4;
+//            int IC = 16, OC = 128;//9*4=36 
+//            for(int oc = 1; oc <= 128; oc++) {
+//                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
+//            }
+//        }
+//        
+//        {
+//            int IH = 8, IW = 8;//(33 - 4 + 2)/1 + 1
+//            int FH = 5, FW = 5;
+//            int sh = 2, sw = 2, ph = 2, pw = 2;
+//            int N = 64;
+//            int IC = 16, OC = 128;//9*4=36 
+//            for(int oc = 1; oc <= 128; oc++) {
+//                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
+//            }
+//            
+//            sh = 1; sw = 1;
+//            for(int oc = 1; oc <= 128; oc++) {
+//                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
+//            }
+//        }
+//        
+//        {
+//            int IH = 8, IW = 8;//(33 - 4 + 2)/1 + 1
+//            int FH = 6, FW = 6;
+//            int sh = 2, sw = 2, ph = 2, pw = 2;
+//            int N = 64;
+//            int IC = 16, OC = 128;//9*4=36 
+//            for(int oc = 1; oc <= 128; oc++) {
+//                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
+//            }
+//            
+//            sh = 1; sw = 1;
+//            for(int oc = 1; oc <= 128; oc++) {
+//                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
+//            }
+//        }
+//        
+//        {
+//            int IH = 8, IW = 8;//(33 - 4 + 2)/1 + 1
+//            int FH = 5, FW = 5;
+//            int sh = 2, sw = 2, ph = 1, pw = 1;
+//            int N = 64;
+//            int IC = 16, OC = 128;//9*4=36 
+//            
+//            testCorrect(IH, IW, FH, FW, N, IC, 61, sh, sw, ph, pw);
+//                
+//            for(int oc = 1; oc <= 128; oc++) {
+//                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
+//            }
+//            
+//            sh = 1; sw = 1;
+//            for(int oc = 1; oc <= 128; oc++) {
+//                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
+//            }
+//        }
+//        
+//        {
+//            int IH = 8, IW = 8;//(33 - 4 + 2)/1 + 1
+//            int FH = 7, FW = 7;
+//            int sh = 2, sw = 2, ph = 3, pw = 3;
+//            
+//            int N = 64;
+//            int IC = 16, OC = 128;//9*4=36 
+//            
+//            testCorrect(IH, IW, FH, FW, N, IC, 61, sh, sw, ph, pw);
+//                
+//            for(int oc = 1; oc <= 128; oc++) {
+//                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
+//            }
+//            
+//            sh = 1; sw = 1;
+//            for(int oc = 1; oc <= 128; oc++) {
+//                testCorrect(IH, IW, FH, FW, N, IC, oc, sh, sw, ph, pw);
+//            }
+//        }
 //        
 //        int IH = 32, IW = 32;//(33 - 4 + 2)/1 + 1
 //	int FH = 4, FW = 4;//FH = 4, FW = 4

@@ -16,8 +16,7 @@ import z.dragon.engine.Result.IndexedResult;
  * stride: (width + 3)/4*4, memory alignment, == Tensor.memStride
  * @author Gilgamesh
  */
-public abstract class EngineBase
-{
+public abstract class EngineBase {
     protected final long L_sizeof_datatype;//sizeof_datatype = 1<<L_sizeof_datatype
     protected final String datatype;
     protected final String datatype_int32;//sizeof(int32) = 4
@@ -25,7 +24,8 @@ public abstract class EngineBase
     
     protected EngineCore core;
     
-    public EngineBase(String dataType, long LsizeofDatatype, 
+    public EngineBase(
+            String dataType, long LsizeofDatatype, 
             String dataType_int32,
             String dataType_int8) 
     {
@@ -269,14 +269,7 @@ public abstract class EngineBase
             int N, int IC,
             int sh, int sw, int ph, int pw);
     
-    public abstract Syncer pool2D_avg(
-            long Y_address, int OH, int OW,
-            long X_address, int IH, int IW,
-            int FH, int FW,
-            int N, int IC,
-            int sh, int sw, int ph, int pw);
-    
-    public abstract Syncer pool2D_avg_ignore_padding(
+    public abstract Syncer pool2D_avg(boolean ignore_padding,
             long Y_address, int OH, int OW,
             long X_address, int IH, int IW,
             int FH, int FW,
@@ -298,14 +291,7 @@ public abstract class EngineBase
             int N, int IC,
             int sh, int sw, int ph, int pw);
     
-    public abstract Syncer unpool2D_avg(
-            long deltaX_address, int IH, int IW,
-            long deltaY_address, int OH, int OW, 
-            int FH, int FW,
-            int N, int IC,
-            int sh, int sw, int ph, int pw);
-    
-    public abstract Syncer upool2D_avg_ignore_padding(
+    public abstract Syncer unpool2D_avg(boolean ignore_padding,
             long deltaX_address, int IH, int IW,
             long deltaY_address, int OH, int OW, 
             int FH, int FW,
@@ -384,7 +370,7 @@ public abstract class EngineBase
             float alpha, long X_address, float beta,
             int lengthv, int width, int stride);
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="linear_dual2D">
+    //<editor-fold defaultstate="collapsed" desc="linear2_2D">
     public abstract Syncer linear2_2D(long Y_address,
             long X1_address, long X2_address,
             float alpha, float beta, float gamma,
@@ -435,7 +421,7 @@ public abstract class EngineBase
             long X_address, float alpha, float beta,
             int lengthv, int width, int stride);
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="quadratic_dual2D">
+    //<editor-fold defaultstate="collapsed" desc="quadratic2_2D">
     public abstract Syncer quadratic2_2D(long Y_address,
             long X1_address,
             long X2_address,
@@ -726,6 +712,62 @@ public abstract class EngineBase
             float alpha, float beta, float gamma, float k,
             int lengthv, int width, int stride);
     //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_elu2D">
+    public abstract Syncer linear2_elu2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma, 
+            float elu_alpha, float k,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer linear2_elu2D_deltaX_v1(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            float alpha, float beta, 
+            float elu_alpha, float k,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer linear2_elu2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma, 
+            float elu_alpha, float k,
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_softplus">
+    public abstract Syncer linear2_softplus2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer linear2_softplus2D_deltaX_v1(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            float alpha, float beta, 
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer linear2_softplus2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_gelu">
+    public abstract Syncer linear2_gelu2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer linear2_gelu2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="hypherbolic functions">
@@ -778,6 +820,47 @@ public abstract class EngineBase
             long Y_address,
             int field_length, int row_lengthv,
             int lengthv, int width, int stride);
+    
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_sigmoid">
+    public abstract Syncer linear2_sigmoid2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer linear2_sigmoid2D_deltaX_v1(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            float alpha, float beta, 
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer linear2_sigmoid2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_tanh">
+    public abstract Syncer linear2_tanh2D(long Y_address,
+            long X1_address, long X2_address,
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer linear2_tanh2D_deltaX_v1(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            float alpha, float beta, 
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer linear2_tanh2D_deltaX_v2(
+            long deltaX1_address, long deltaX2_address,
+            long deltaY_address,
+            long X1_address, long X2_address,//V2: holdX(), {X1, X2} are not changed
+            float alpha, float beta, float gamma, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
     //</editor-fold>
    
     //<editor-fold defaultstate="collapsed" desc="trigonometric functions">
@@ -970,6 +1053,177 @@ public abstract class EngineBase
             long deltaB_address,//result1
             long deltaY_address, float k,
             long X_address,//(V2: X for Affine || V1: Y for Norm)
+            long A_address, long B_address,
+            int field_length, int row_lengthv,
+            int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_elu">
+    public abstract Syncer affine_elu2D(long Y_address, 
+            long X_address, 
+            long A_address, long B_address, int row_lengthv,
+            float alpha, float k,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer affine_elu2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address, float alpha, float k,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, int row_lengthv,
+            int lengthv, int width, int stride);
+
+    public abstract Syncer affine_elu2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address, float alpha, float k,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer affine_elu2D_deltaAB_v1(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address, float alpha, float k,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int width, int stride);
+    
+    public abstract Syncer affine_elu2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1 
+            long deltaY_address, float alpha, float k,
+            long X_address,//V2 holdX(), X is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv,
+            int width, int stride);  
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_softplus">
+    public abstract Syncer affine_softplus2D(long Y_address, 
+            long X_address, 
+            long A_address, long B_address, int row_lengthv,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer affine_softplus2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, int row_lengthv,
+            int lengthv, int width, int stride);
+
+    public abstract Syncer affine_softplus2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer affine_softplus2D_deltaAB_v1(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int width, int stride);
+    
+    public abstract Syncer affine_softplus2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1 
+            long deltaY_address,
+            long X_address,//V2 holdX(), X is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv,
+            int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_gelu">
+    public abstract Syncer affine_gelu2D(long Y_address, 
+            long X_address, 
+            long A_address, long B_address, int row_lengthv,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer affine_gelu2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer affine_gelu2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1 
+            long deltaY_address,
+            long X_address,//V2 holdX(), X is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv,
+            int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_sigmoid">
+    public abstract Syncer affine_sigmoid2D(long Y_address, 
+            long X_address, 
+            long A_address, long B_address, int row_lengthv,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer affine_sigmoid2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, int row_lengthv,
+            int lengthv, int width, int stride);
+
+    public abstract Syncer affine_sigmoid2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer affine_sigmoid2D_deltaAB_v1(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int width, int stride);
+    
+    public abstract Syncer affine_sigmoid2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1 
+            long deltaY_address,
+            long X_address,//V2 holdX(), X is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv,
+            int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: affine_tanh">
+    public abstract Syncer affine_tanh2D(long Y_address, 
+            long X_address, 
+            long A_address, long B_address, int row_lengthv,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer affine_tanh2D_deltaX_v1(long deltaX_address, 
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, int row_lengthv,
+            int lengthv, int width, int stride);
+
+    public abstract Syncer affine_tanh2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long A_address, 
+            long B_address, int row_lengthv,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer affine_tanh2D_deltaAB_v1(
+            long deltaA_address,//result0
+            long deltaB_address,//result1
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int width, int stride);
+    
+    public abstract Syncer affine_tanh2D_deltaAB_v2(
+            long deltaA_address,//result0
+            long deltaB_address,//result1 
+            long deltaY_address,
+            long X_address,//V2 holdX(), X is not changed
             long A_address, long B_address,
             int field_length, int row_lengthv,
             int width, int stride);
@@ -1172,7 +1426,7 @@ public abstract class EngineBase
     public abstract Syncer batchNorm_leakyRelu2D(long Y_address,
             long X_address,
             long X_mean_address, long X_var_address, float eps,
-            long A_address, long B_address,
+            long A_address, long B_address, 
             int row_lengthv, float k,
             int lengthv, int width, int stride);
     //</editor-fold>
@@ -1212,6 +1466,258 @@ public abstract class EngineBase
             long X_mean_address, long X_var_address, float eps,
             long A_address, long B_address,
             int field_length, int row_lengthv,
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_elu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public abstract Syncer batchNorm_elu2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv, float alpha, float k, 
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer batchNorm_elu2D(long Y_address,
+            long X_address, 
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address, 
+            int row_lengthv, float alpha, float k, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    public abstract Syncer batchNorm_elu2D_deltaX_v1(long deltaX_address,
+            long deltaY_address, float alpha, float k,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer batchNorm_elu2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address, float alpha, float k,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    public abstract Syncer batchNorm_elu2D_gradients_v1(
+            long deltaX_address,//result0
+            long deltaA_address,//result1 
+            long deltaB_address,//result2
+            long deltaY_address, float alpha, float k,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps, 
+            long A_address, long B_address, 
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+     
+    public abstract Syncer batchNorm_elu2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address, float alpha, float k,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_softplus">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public abstract Syncer batchNorm_softplus2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer batchNorm_softplus2D(long Y_address,
+            long X_address, 
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address, 
+            int row_lengthv,
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    public abstract Syncer batchNorm_softplus2D_deltaX_v1(long deltaX_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer batchNorm_softplus2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    public abstract Syncer batchNorm_softplus2D_gradients_v1(
+            long deltaX_address,//result0
+            long deltaA_address,//result1 
+            long deltaB_address,//result2
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps, 
+            long A_address, long B_address, 
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+     
+    public abstract Syncer batchNorm_softplus2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_gelu">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public abstract Syncer batchNorm_gelu2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer batchNorm_gelu2D(long Y_address,
+            long X_address, 
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address, 
+            int row_lengthv,
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    public abstract Syncer batchNorm_gelu2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    public abstract Syncer batchNorm_gelu2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_sigmoid">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public abstract Syncer batchNorm_sigmoid2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer batchNorm_sigmoid2D(long Y_address,
+            long X_address, 
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address, 
+            int row_lengthv,
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    public abstract Syncer batchNorm_sigmoid2D_deltaX_v1(long deltaX_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer batchNorm_sigmoid2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    public abstract Syncer batchNorm_sigmoid2D_gradients_v1(
+            long deltaX_address,//result0
+            long deltaA_address,//result1 
+            long deltaB_address,//result2
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps, 
+            long A_address, long B_address, 
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+     
+    public abstract Syncer batchNorm_sigmoid2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="BP: batchNorm_tanh">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    public abstract Syncer batchNorm_tanh2D(long Y_address,
+            long X_address,
+            long X_mean_address, long X_var_address, float eps,
+            int row_lengthv,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer batchNorm_tanh2D(long Y_address,
+            long X_address, 
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address, 
+            int row_lengthv,
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-progataion: deltaX">
+    public abstract Syncer batchNorm_tanh2D_deltaX_v1(long deltaX_address,
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer batchNorm_tanh2D_deltaX_v2(long deltaX_address, 
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation (affined): {deltaA, deltaB, deltaX}">
+    public abstract Syncer batchNorm_tanh2D_gradients_v1(
+            long deltaX_address,//result0
+            long deltaA_address,//result1 
+            long deltaB_address,//result2
+            long deltaY_address,
+            long Y_address,//V1: holdY(), Y is not changed
+            long X_var_address, float eps, 
+            long A_address, long B_address, 
+            int field_length, int row_lengthv, 
+            int lengthv, int width, int stride);
+     
+    public abstract Syncer batchNorm_tanh2D_gradients_v2(
+            long deltaX_address,//result0
+            long deltaA_address,//result1
+            long deltaB_address,//result2
+            long deltaY_address,
+            long X_address,//V2: holdX(), X is not changed
+            long X_mean_address, long X_var_address, float eps,
+            long A_address, long B_address,
+            int field_length, int row_lengthv, 
             int lengthv, int width, int stride);
     //</editor-fold>
     //</editor-fold>
@@ -1671,6 +2177,18 @@ public abstract class EngineBase
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="center reduce function">
+    public abstract Syncer center_linear(long Y_address,
+            long X_address,
+            float alpha, float beta,
+            int dim0, int dim1, int dim2,
+            int width, int stride);
+    
+    public abstract Syncer center_quadratic(long Y_address,
+            long X_address,
+            float alpha, float beta, float gamma,
+            int dim0, int dim1, int dim2,
+            int width, int stride);
+    
     public abstract Syncer center_quadratic2(long Y_address,
             long X1_address, long X2_address,
             float k11, float k12, float k22,
@@ -1766,6 +2284,21 @@ public abstract class EngineBase
             float alpha1, float beta1, float gamma1,
             float alpha2, float beta2, float gamma2, float C,
             int lengthv, int width, int stride);
+    
+    public abstract Syncer img_dualLinear2_normalize2D_row(long Y_address, 
+            long X_address, 
+            long X1_address, long X2_address, int row_lengthv,
+            float alpha1, float beta1, float gamma1,
+            float alpha2, float beta2, float gamma2, float C,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer img_dualLinear2_normalize2D_center(long Y_address, 
+            long X_address, 
+            long X1_address, long X2_address,
+            float alpha1, float beta1, float gamma1,
+            float alpha2, float beta2, float gamma2, float C,
+            int dim0, int dim1, int dim2,
+            int width, int stride);
     
     public abstract Syncer img_linear2_div2D_row(long Y_address,
             long X_address,

@@ -16,8 +16,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class LeakyRelu extends SimpleInplaceFunction
-{
+public class LeakyRelu extends SimpleInplaceFunction {
     private static final long serialVersionUID = 562781240390001L;
     
     protected float k;
@@ -28,7 +27,7 @@ public class LeakyRelu extends SimpleInplaceFunction
     }
     
     //<editor-fold defaultstate="collapsed" desc="functions">
-    public float negative_slop() { return k; }
+    public float negative_slope() { return k; }
     public LeakyRelu negative_slop(float negative_slope) { k = negative_slope; return this; }
     
     @Override

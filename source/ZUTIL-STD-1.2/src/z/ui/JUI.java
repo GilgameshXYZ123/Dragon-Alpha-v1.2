@@ -184,9 +184,21 @@ public final class JUI
     public void set_width(Component c, int width) { c.setSize(width, c.getHeight()); }
     public void set_height(Component c, int height) { c.setSize(c.getWidth(), height); }
     
-    public Component left (Component ref, Component c, int gap) { c.setLocation(ref.getX() - c.getWidth() - 4, ref.getY()); return c; }
-    public Component right(Component ref, Component c, int gap) { c.setLocation(ref.getX() + ref.getWidth() + gap, ref.getY()); return c; }
-    public Component bellow(Component ref, Component c, int gap) { c.setLocation(ref.getX(), ref.getY() + ref.getHeight() + gap); return c; }
+    public Component left (Component ref, Component c, int gap) { 
+        int y = (ref == null ? 0 : ref.getY());
+        int x = (ref == null ? 0 : ref.getX() - c.getWidth() - gap);
+        c.setLocation(x, y); return c; 
+    }
+    public Component right(Component ref, Component c, int gap) { 
+        int y = (ref == null ? 0 : ref.getY());
+        int x = (ref == null ? 0 : ref.getX() + ref.getWidth() + gap);
+        c.setLocation(x, y); return c;
+    }
+    public Component bellow(Component ref, Component c, int gap) { 
+        int y = (ref == null ? 0 : ref.getY() + ref.getHeight() + gap);
+        int x = (ref == null ? 0 : ref.getX());
+        c.setLocation(x, y); return c;
+    }
     
     //<editor-fold defaultstate="collapsed" desc="layout">
     public FlowLayout layout_flow(int align, int ygap, int xgap) { return new FlowLayout(align, xgap, ygap); }

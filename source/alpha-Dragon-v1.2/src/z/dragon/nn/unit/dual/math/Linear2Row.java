@@ -15,12 +15,11 @@ import z.dragon.nn.unit.dual.DualFunction;
  *
  * @author Gilgamesh
  */
-public class Linear2Row extends DualFunction 
-{
+public class Linear2Row extends DualFunction {
     private static final long serialVersionUID = 1L;
     
     protected float alpha, beta, gamma;
-    
+
     public Linear2Row(float alpha, float beta, float gamma) {
         this.alpha = alpha;
         this.beta = beta;

@@ -90,8 +90,7 @@ __global__ void linear_dual2D_with_leakyRelu_deltaX_v1_kernel_4(
 
 
 void __linear_dual2D_with_leakyRelu_deltaX_v1(cudaStream_t stream,
-	      float* deltaX1, 
-	      float* deltaX2,
+	float* deltaX1, float* deltaX2,
 	const float* deltaY,
 	const float* Y,
 	float alpha, float beta, float k,

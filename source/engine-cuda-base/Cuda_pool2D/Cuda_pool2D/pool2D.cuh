@@ -8,7 +8,7 @@
 #include "pool2D_avg_kernel.cuh"
 #include "pool2D_avg_ip_kernel.cuh"
 
-#ifdef COMPLIE//<<<<complie-area--------------------------------------------------
+#ifdef COMPILE//<<<<complie-area--------------------------------------------------
 
 #ifndef POOL2D_MAX
 #define POOL2D_MAX

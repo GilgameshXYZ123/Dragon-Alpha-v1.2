@@ -18,7 +18,8 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_Cuda_1expk2_srcIndexedMemc
 	int* dIndex = (int*)(intptr_t)dIndex_address;
 	float* dY = (float*)(intptr_t)dY_address;
 	__srcIndexedMemcpy(stream, dX, dIndex, dY, 
-		lengthv, width, stride);
+		lengthv, width, stride); 
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 //Method:    dstIndexedMemcpy
@@ -35,6 +36,7 @@ JNIEXPORT void JNICALL Java_z_dragon_engine_cuda_impl_Cuda_1expk2_dstIndexedMemc
 	float* dY = (float*)(intptr_t)dY_address;
 	__dstIndexedMemcpy(stream, dX, dIndex, dY,
 		lengthv, width, stride);
+	cudaError_t error = cudaGetLastError(); handleError(error);
 }
 
 #endif
