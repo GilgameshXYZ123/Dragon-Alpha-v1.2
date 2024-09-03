@@ -14,8 +14,7 @@ import z.dragon.nn.unit.simple.SimpleUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public abstract class SimpleInplaceCore<T extends SimpleUnit> extends SimpleCore<T> 
-{
+public abstract class SimpleInplaceCore<T extends SimpleUnit> extends SimpleCore<T> {
     private final boolean inplace;
     
     protected SimpleInplaceCore(T unit, boolean inplace) {

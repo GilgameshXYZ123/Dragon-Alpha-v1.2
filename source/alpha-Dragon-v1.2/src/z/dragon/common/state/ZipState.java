@@ -29,8 +29,7 @@ import z.dragon.common.state.State.StateWriter;
  *
  * @author Gilgamesh
  */
-public class ZipState 
-{
+public class ZipState {
     private static final Charset UTF_8 = Charset.forName("UTF-8");
     
     //<editor-fold defaultstate="collapsed" desc="class: ZipValue">

@@ -2046,6 +2046,7 @@ public abstract class EngineBase {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Random Function">
+    //<editor-fold defaultstate="collapsed" desc="bernouli">
     public abstract Syncer bernouli2D(long X_address, 
             int seed,
             float p, float v1, float v2,
@@ -2063,7 +2064,37 @@ public abstract class EngineBase {
             float p, float v1, float v2,
             int lengthv, int width, int stride);
     
+    public abstract Syncer elu_bernouli_mul2D(long Y_address, long R_address, 
+            long X_address, 
+            float alpha, float k, int seed,
+            float p, float v1, float v2,
+            int lengthv, int width, int stride);
     
+    public abstract Syncer softplus_bernouli_mul2D(long Y_address, long R_address, 
+            long X_address, 
+            int seed,
+            float p, float v1, float v2,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer gelu_bernouli_mul2D(long Y_address, long R_address, 
+            long X_address, 
+            int seed,
+            float p, float v1, float v2,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer sigmoid_bernouli_mul2D(long Y_address, long R_address, 
+            long X_address, 
+            int seed,
+            float p, float v1, float v2,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer tanh_bernouli_mul2D(long Y_address, long R_address, 
+            long X_address, 
+            int seed,
+            float p, float v1, float v2,
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="uniform">
     public abstract Syncer uniform2D(long X_address, 
             int seed, 
             float vmin, float vmax,
@@ -2073,7 +2104,8 @@ public abstract class EngineBase {
             int seed1, int seed2, 
             float p, float vmin, float vmax,
             int lengthv, int width, int stride);
-    
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="gaussian">
     public abstract Syncer gaussian2D(long X_address,
             int seed1, int seed2, 
             float mu, float sigma, 
@@ -2084,7 +2116,8 @@ public abstract class EngineBase {
             float p, float mu, float sigma,
             int lengthv, int width, int stride);
     //</editor-fold>
-
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="Reduce Function">
     //<editor-fold defaultstate="collapsed" desc="straight reduce function">
     public abstract Result<Float> straight_linear(long X_address,

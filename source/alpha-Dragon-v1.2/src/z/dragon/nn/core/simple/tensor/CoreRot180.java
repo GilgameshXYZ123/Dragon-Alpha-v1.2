@@ -15,8 +15,7 @@ import z.dragon.nn.unit.simple.SimpleUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreRot180<T extends SimpleUnit> extends SimpleInplaceCore<T>
-{
+public class CoreRot180<T extends SimpleUnit> extends SimpleInplaceCore<T> {
     public CoreRot180(T unit, boolean inplace) {
         super(unit, inplace);
     }

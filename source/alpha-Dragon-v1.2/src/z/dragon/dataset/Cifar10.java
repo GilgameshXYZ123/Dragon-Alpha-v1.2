@@ -19,8 +19,7 @@ import z.dragon.data.container.ListContainer;
 /**
  * @author Gilgamesh
  */
-public final class Cifar10 
-{
+public final class Cifar10 {
     private Cifar10() {}
     
     public static final int num_class = 10;//use one hot coding

@@ -15,8 +15,7 @@ import java.util.concurrent.ThreadFactory;
  *
  * @author Gilgamesh
  */
-public interface Syncer 
-{
+public interface Syncer {
     public void sync();
     
     //<editor-fold defaultstate="collapsed" desc="class: NullSyncer">
@@ -45,8 +44,8 @@ public interface Syncer
         
         @Override
         public final void sync() {
-            if(sc1 != null) sc1.sync();
-            if(sc2 != null) sc2.sync();
+            if (sc1 != null) sc1.sync();
+            if (sc2 != null) sc2.sync();
         }
     }
     //</editor-fold>
@@ -140,8 +139,7 @@ public interface Syncer
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="class: FutureSyncer">
-    public static class FutureSyncer<T> implements Syncer
-    {
+    public static class FutureSyncer<T> implements Syncer {
         private final Future<T> ft;
         
         public FutureSyncer(Future<T> future) { this.ft = future; }

@@ -13,7 +13,6 @@ import z.dragon.engine.Tensor;
  * @author Gilgamesh
  * @param <T>
  */
-public interface Transform<T> 
-{
+public interface Transform<T> {
     public Tensor transform(Engine eg, T value);
 }

@@ -14,8 +14,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class MatMul extends DualFunction
-{
+public class MatMul extends DualFunction {
     private static final long serialVersionUID = 1L;
     
     @Override

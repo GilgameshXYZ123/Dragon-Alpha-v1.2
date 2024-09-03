@@ -11,8 +11,7 @@ import z.util.lang.annotation.Passed;
  *
  * @author Gilgamesh
  */
-public final class Cuda_function 
-{
+public final class Cuda_function {
     private Cuda_function() {}
 
     //<editor-fold defaultstate="collapsed" desc="greater, equal, linear, quadratic, rpl, div, add_div"> 

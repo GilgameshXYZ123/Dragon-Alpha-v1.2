@@ -12,8 +12,9 @@ import z.dragon.common.int64.ArrayList_int64;
  * Hashed Simple StreamPool with available set.
  * @author Gilgamesh
  */
-public class CudaStreamp2 extends CudaStreamPool
-{
+public class CudaStreamp2 extends CudaStreamPool {
+    private static final long serialVersionUID = 1L;
+    
     protected TreeSet<Long> available;
     protected ArrayList_int64 gc;//size = gc.size() //how much stream has been created
     protected int gc_index = 0;

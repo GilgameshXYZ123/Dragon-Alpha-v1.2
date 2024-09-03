@@ -11,8 +11,7 @@ import z.util.lang.annotation.Passed;
  * 
  * @author Gilgamesh
  */
-public final class Cuda_upool2D 
-{
+public final class Cuda_upool2D {
     private Cuda_upool2D () {}
     
     //<editor-fold defaultstate="collapsed" desc="streamSize">

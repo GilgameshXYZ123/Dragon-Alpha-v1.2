@@ -16,8 +16,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Cos extends SimpleFunction
-{
+public class Cos extends SimpleFunction {
     private static final long serialVersionUID =  562781240220001L;
     
     protected float alpha;

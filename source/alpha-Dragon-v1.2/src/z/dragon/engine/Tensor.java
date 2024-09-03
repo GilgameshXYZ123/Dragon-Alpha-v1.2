@@ -26,22 +26,23 @@ import z.dragon.nn.core.UnitCore;
  * {4, 3, 2, 1}, firstDim -> lastDim
  */
 @SuppressWarnings("unchecked")
-public class Tensor implements StateValue, Serializable
-{
+public class Tensor implements StateValue, Serializable {
+    private static final long serialVersionUID = 11231231234666L;
     //<editor-fold defaultstate="collapsed" desc="static class: TensorList">
-    public static class TensorList extends ArrayList<Tensor>  
-    {
+    public static class TensorList extends ArrayList<Tensor> {
         private static final long serialVersionUID = 615120712446L;
         
         public TensorList(int init_capacity) { super(init_capacity);}
         public TensorList() { super(); }
         
+        @Override public synchronized void clear() { super.clear(); }
+        
         @Override
-        public final boolean add(Tensor ts) {
+        public synchronized final boolean add(Tensor ts) {
             return ((ts == null || ts.is_null()) ? false : super.add(ts));
         }
 
-        public final boolean addAll(Tensor[] arr) {
+        public synchronized  final boolean addAll(Tensor[] arr) {
             boolean flag = false;
             for(Tensor ts : arr) {
                 if(ts == null || ts.is_null()) continue;
@@ -52,19 +53,20 @@ public class Tensor implements StateValue, Serializable
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="static class: TenorSet">
-    public static class TensorSet extends HashSet<Tensor> 
-    {
+    public static class TensorSet extends HashSet<Tensor>  {
         private static final long serialVersionUID = 1L;
         
         public TensorSet() { super(); }
         public TensorSet(int init_capacity) { super(init_capacity); }
 
+        @Override public synchronized void clear() { super.clear(); }
+        
         @Override
-        public final boolean add(Tensor ts) {
+        public synchronized final boolean add(Tensor ts) {
             return ((ts == null || ts.is_null()) ? false : super.add(ts));
         }
         
-        public final boolean add(Tensor...ts) {
+        public synchronized final boolean add(Tensor...ts) {
             if(ts == null || ts.length == 0) return false;
             boolean result = true;
             for(Tensor t : ts) {
@@ -76,15 +78,16 @@ public class Tensor implements StateValue, Serializable
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="static class: TensorMap">
-    public static class TensorMap<K> extends HashMap<K, Tensor>
-    {
+    public static class TensorMap<K> extends HashMap<K, Tensor> {
         private static final long serialVersionUID = 1L;
         
         public TensorMap() { super(); }
         public TensorMap(int initialCapacity) { super(initialCapacity); }
 
+        @Override public synchronized void clear() { super.clear(); }
+        
         @Override
-        public final Tensor put(K key, Tensor value) {
+        public synchronized final Tensor put(K key, Tensor value) {
             return ((value == null || value.is_null()) ? null :  super.put(key, value)); 
         }
     }
@@ -123,7 +126,7 @@ public class Tensor implements StateValue, Serializable
    
     transient protected String msg = null;
     public final String message() { return msg; }
-    public final Tensor message(String message) { this.msg = message; return this;}
+    public final Tensor message(String message) { this.msg = message; return this; }
     
     public static boolean isNull(Tensor ts) { return ts == null || ts.address == 0L; }
     public final boolean is_null() { return address == 0L; }
@@ -147,7 +150,7 @@ public class Tensor implements StateValue, Serializable
         this.append(sb);
         return sb.toString();
     }
-      
+    
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
@@ -164,8 +167,8 @@ public class Tensor implements StateValue, Serializable
         return dim[index];
     }
     
-    public final int firstDim() {return dim[0];}
-    public final int lastDim() {return dim[dim.length - 1];}
+    public final int firstDim() { return dim[0]; }
+    public final int lastDim() { return dim[dim.length - 1]; }
     
     public final int length() { return length; }
     public final int lengthv() { return lengthv; }
@@ -190,7 +193,7 @@ public class Tensor implements StateValue, Serializable
     }   
     
     protected void copy_memoryMetaData(Tensor X) {
-         synchronized(X) {
+        synchronized(X) {
             this.address = X.address;
             this.dim = X.dim;
             this.mem_size = X.mem_size;
@@ -353,14 +356,14 @@ public class Tensor implements StateValue, Serializable
     public <T> T raw_data() { return eg.raw_data(this); }
     public <T> T data() { return eg.data(this); }
     
-    public static final void sync(Tensor... list) { for(Tensor t : list) if(t != null) t.c(); }
-    public static final void sync(Collection<Tensor> arr) { for(Tensor t : arr) if(t != null) t.c(); }
+    public static final void sync(Tensor... list) { for (Tensor t : list) if(t != null) t.c(); }
+    public static final void sync(Collection<Tensor> arr) { for (Tensor t : arr) if(t != null) t.c(); }
 
     public static final void delete(Tensor... arr) {
-        for(Tensor t : arr) if(t != null && !t.is_null()) t.delete(); 
+        for (Tensor t : arr) if (t != null && !t.is_null()) t.delete(); 
     }
     public static final void delete(Collection<Tensor> list) {
-        for(Tensor t : list) if(t != null && !t.is_null()) t.delete();
+        for (Tensor t : list) if (t != null && !t.is_null()) t.delete();
     }
     
     public static Tensor[] zero_like(Tensor... arr) {
@@ -502,6 +505,7 @@ public class Tensor implements StateValue, Serializable
     
     public Tensor reshape(boolean inplace, int... dim) { return eg.reshape(inplace, this, dim); }
     public Tensor view(boolean inplace, int... dim) { return eg.view(inplace, this, dim); }
+    public Tensor view_copy() { return eg.view_copy(this); }
     public Tensor transpose(boolean inplace, int dimIdx1, int dimIdx2) { return eg.transpose(inplace, this, dimIdx1, dimIdx2); }
     
     public Tensor pad(boolean inplace, int... p) { return eg.pad(inplace, this, p); }
@@ -566,7 +570,7 @@ public class Tensor implements StateValue, Serializable
 
     //<editor-fold defaultstate="collapsed" desc="Neural: extended">
     //<editor-fold defaultstate="collapsed" desc="mod_count: if the data of Tensor is changed">
-    public static class Mod_Count implements  Serializable { private int value = 0; }
+    public static class Mod_Count implements Serializable { private int value = 0; }
     protected Mod_Count mod_counter = new Mod_Count();
     
     public int mod_count() { synchronized(mod_counter) { return mod_counter.value; } }
@@ -604,7 +608,7 @@ public class Tensor implements StateValue, Serializable
     public final synchronized Tensor grad(Tensor grad) { this.grad = grad; return this; }
     
     public final synchronized void clear_grad() {
-        if(grad == null) return;
+        if (grad == null) return;
         grad.delete(); grad = null;
     }
     //</editor-fold>
@@ -620,9 +624,8 @@ public class Tensor implements StateValue, Serializable
     public final synchronized TensorSet carrier() {return carrier;}
     
     public void carry(Tensor ts) {
-        if(ts == null || ts == this || !ts.need_carry) return;
-        if(carrier == null) carrier = new TensorSet(4);
-        
+        if (ts == null || ts == this || !ts.need_carry) return;
+        if (carrier == null) carrier = new TensorSet(4);
         synchronized(this) {
             carrier.add(ts);
             if(ts.carrier != null && !ts.carrier.isEmpty()) {//hitch = union(ts.hitch, ts)

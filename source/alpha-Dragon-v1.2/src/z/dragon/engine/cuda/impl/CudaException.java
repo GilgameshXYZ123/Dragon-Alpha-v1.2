@@ -10,8 +10,7 @@ package z.dragon.engine.cuda.impl;
  * @author Gilgamesh
  */
 
-public final class CudaException extends RuntimeException
-{
+public final class CudaException extends RuntimeException {
     private static final long serialVersionUID = 1L;
     
     private final int type;

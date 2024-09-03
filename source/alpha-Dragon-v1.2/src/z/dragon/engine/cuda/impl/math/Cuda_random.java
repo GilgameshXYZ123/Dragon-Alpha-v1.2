@@ -10,8 +10,7 @@ import z.util.lang.annotation.Passed;
 /**
  * @author Gilgamesh
  */
-public final class Cuda_random 
-{
+public final class Cuda_random {
     private Cuda_random() {}
     
     //<editor-fold defaultstate="collapsed" desc="Bernouli Distribution">
@@ -112,6 +111,44 @@ public final class Cuda_random
             long dR_address, long dY_address, float k,
             int seed,
             float p, float v1, float v2,
+            int lengthv, int width, int stride);
+    
+    /**
+     * <pre>
+     * Random Vector:
+     * [1] R = bernouli(p, v1, v2)
+     * [2] elemntwise_mul: Y = R * X.
+     * (1) height * stride = lengthv
+     * (2) height * width = length
+     * (3) stride = (width + 3)/4 * 4
+     * (4) p belongs to (0, 1): the probability of the first value(v1)
+     *
+     * ----Performace on CudaFloat32 Engine(GTX 1050)[synchronized]-------------
+     * for [length] from [1] to(+1) [2048]: correct
+     * for [length] = 1024*1024: 0.085000, Speed = 45.955879 GB/s
+     * </pre>
+     *
+     * @param cudaStream_address
+     * @param dX_address
+     * @param dR_address
+     * @param dY_address
+     * @param seed
+     * @param p
+     * @param v1
+     * @param func_type
+     * @param func_params
+     * @param func_params_length
+     * @param v2
+     * @param lengthv
+     * @param width
+     * @param stride
+     */
+    public static native void function_bernouli_mul2D(long cudaStream_address,
+            long dX_address,
+            long dR_address, long dY_address,
+            int seed,
+            float p, float v1, float v2,
+            int func_type, float[] func_params, int func_params_length,
             int lengthv, int width, int stride);
     //</editor-fold>
 

@@ -14,8 +14,7 @@ import z.dragon.nn.core.UnitCore;
 import z.dragon.nn.unit.complex.Module;
 
 @SuppressWarnings("unchecked")
-public class CoreGraphTail<T extends Module> extends UnitCore<T>
-{
+public class CoreGraphTail<T extends Module> extends UnitCore<T> {
     //<editor-fold defaultstate="collapsed" desc="member-parameters">
     transient private UnitCoreMap<Object>[] arcs;//Solve the topology,{ int or HashSet<Integer> }
     transient UnitCoreSet nexts = new UnitCoreSet();
@@ -40,8 +39,8 @@ public class CoreGraphTail<T extends Module> extends UnitCore<T>
     
     @Override 
     public void gc() { 
-        if(X != null) { Tensor.delete(X); X = null; }
-        if(deltaX != null) { Tensor.delete(deltaX); deltaX = null; } 
+        if (X != null) { Tensor.delete(X); X = null; }
+        if (deltaX != null) { Tensor.delete(deltaX); deltaX = null; } 
         nexts.clear(); 
     }
     //</editor-fold>
@@ -65,11 +64,11 @@ public class CoreGraphTail<T extends Module> extends UnitCore<T>
     protected synchronized void traceBack(UnitCore next, int out_index, int next_in_index) {
         nexts.add(next);//module.nexts = nexts
 
-        if(arcs[out_index] == null) arcs[out_index] = new UnitCoreMap<>(2);
+        if (arcs[out_index] == null) arcs[out_index] = new UnitCoreMap<>(2);
         UnitCoreMap<Object> graph = arcs[out_index];
         
         Object value = graph.get(next);
-        if(value == null) graph.put(next, next_in_index);
+        if (value == null) graph.put(next, next_in_index);
         else if (value instanceof Integer) {
             HashSet<Integer> indexes = new HashSet<>(4);
             indexes.add((Integer) value);
@@ -92,8 +91,8 @@ public class CoreGraphTail<T extends Module> extends UnitCore<T>
         deltaX = new Tensor[arcs.length];
         
         for (int i = 0; i < arcs.length; i++) {
-            if(arcs[i] == null) continue;
-            deltaX[i] = this.aggregateGradient(arcs[i]); arcs[i] = null;
+            if (arcs[i] == null) continue;
+            deltaX[i] = aggregateGradient(arcs[i]); arcs[i] = null;
             //if deltaX[i] != null: allNull = (allNull && false) = false
             allNull = allNull && (deltaX[i] == null);//at least one grad != null
         }
@@ -111,8 +110,8 @@ public class CoreGraphTail<T extends Module> extends UnitCore<T>
     
     @Override 
     public Tensor gradient(int index) {
-        if(index > deltaX.length || index < 0) throw new IllegalArgumentException("tensor index out of range");
-        return (deltaX == null? null : deltaX[index]);
+        if (index > deltaX.length || index < 0) throw new IllegalArgumentException("tensor index out of range");
+        return (deltaX == null ? null : deltaX[index]);
     }
     //</editor-fold>
 }

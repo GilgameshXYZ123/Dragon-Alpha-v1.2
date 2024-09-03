@@ -11,8 +11,7 @@ import java.util.Arrays;
  * @author Gilgamesh
  * @param <V>
  */
-public abstract class Result<V>
-{
+public abstract class Result<V> {
     private V value;
     private volatile boolean done = false;
     

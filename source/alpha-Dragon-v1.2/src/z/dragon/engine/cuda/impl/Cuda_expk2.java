@@ -12,8 +12,7 @@ import z.util.lang.annotation.Passed;
  *
  * @author Gilgamesh
  */
-public final class Cuda_expk2 
-{
+public final class Cuda_expk2 {
     private Cuda_expk2() {}
     
     //<editor-fold defaultstate="collapsed" desc="Tenosr Transpose(2D -> 4D)">

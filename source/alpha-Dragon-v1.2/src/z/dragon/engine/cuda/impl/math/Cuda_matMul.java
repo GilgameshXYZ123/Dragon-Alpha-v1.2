@@ -11,8 +11,7 @@ import z.util.lang.annotation.Passed;
  * C = A * B.
  * @author Gilgamesh
  */
-public final class Cuda_matMul 
-{
+public final class Cuda_matMul {
     private Cuda_matMul(){}
     
     //<editor-fold defaultstate="collapsed" desc="blockNum">

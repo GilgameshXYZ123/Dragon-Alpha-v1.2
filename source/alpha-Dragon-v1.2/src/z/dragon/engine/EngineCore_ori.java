@@ -17,8 +17,7 @@ import java.util.TreeMap;
  * dim: 0, 1, 2, 3.
  * @author Gilgamesh
  */
-public class EngineCore_ori extends EngineCore
-{
+public class EngineCore_ori extends EngineCore {
     public EngineCore_ori(long maxMemorySize, boolean check) {
         this.max_mem_size = maxMemorySize;
         this.check = check;

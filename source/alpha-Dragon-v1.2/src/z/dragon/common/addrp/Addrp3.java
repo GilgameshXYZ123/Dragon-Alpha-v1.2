@@ -13,8 +13,9 @@ import java.util.TreeMap;
  *
  * @author Gilgamesh
  */
-public class Addrp3 implements Addrpool
-{
+public class Addrp3 implements Addrpool {
+    private static final long serialVersionUID = 1L;
+    
     public static final long max_mem_size_int32 = (1L << 30) - 1;
     
     private int size = 0;

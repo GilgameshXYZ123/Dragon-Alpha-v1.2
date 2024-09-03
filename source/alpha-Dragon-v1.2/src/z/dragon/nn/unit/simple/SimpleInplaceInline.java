@@ -14,8 +14,7 @@ import z.dragon.engine.Tensor;
  * @author Gilgamesh
  * @param <T>
  */
-public abstract class SimpleInplaceInline<T extends SimpleInplaceUnit> extends SimpleCore<T> 
-{
+public abstract class SimpleInplaceInline<T extends SimpleInplaceUnit> extends SimpleCore<T> {
     public SimpleInplaceInline(T unit) { super(unit); }
 
    //<editor-fold defaultstate="collapsed" desc="functions">

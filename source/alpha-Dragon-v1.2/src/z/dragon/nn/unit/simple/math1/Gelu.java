@@ -12,8 +12,9 @@ import z.dragon.nn.unit.simple.SimpleFunction;
  *
  * @author Gilgamesh
  */
-public class Gelu extends SimpleFunction 
-{
+public class Gelu extends SimpleFunction {
+    private static final long serialVersionUID = 1L;
+    
     @Override
     protected CoreGelu<?> create_unit_core() {
         return new CoreGelu<>(this);

@@ -16,8 +16,7 @@ import java.util.function.BiConsumer;
  * @param <K>
  * @param <V>
  */
-public class EntryList<K, V> extends ArrayList<Entry<K, V>>
-{
+public class EntryList<K, V> extends ArrayList<Entry<K, V>> {
     private static final long serialVersionUID = 2023320L;
     
     public EntryList() { super(); }

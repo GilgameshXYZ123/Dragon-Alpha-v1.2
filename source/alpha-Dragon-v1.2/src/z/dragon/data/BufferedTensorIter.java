@@ -17,8 +17,7 @@ import z.dragon.engine.Engine;
  *
  * @author Gilgamesh
  */
-public class BufferedTensorIter 
-{
+public class BufferedTensorIter {
     private static final ThreadFactory daemonThreadFactory = (Runnable r) -> {
         Thread t = new Thread(r);
         t.setDaemon(true);

@@ -16,8 +16,7 @@ import z.dragon.nn.unit.dual.DualUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreLinear2Row<T extends DualUnit> extends DualCore<T> 
-{
+public class CoreLinear2Row<T extends DualUnit> extends DualCore<T> {
     transient protected int row_length;
     protected float alpha, beta, gamma;
 

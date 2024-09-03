@@ -16,8 +16,7 @@ import z.dragon.nn.unit.reducer.Reducer;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreConcat<T extends Reducer> extends ReducerCore<T>
-{
+public class CoreConcat<T extends Reducer> extends ReducerCore<T> {
     protected int dimIdx;
     
     transient protected int[] section;

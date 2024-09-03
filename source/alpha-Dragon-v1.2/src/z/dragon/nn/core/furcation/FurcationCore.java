@@ -19,8 +19,7 @@ import z.dragon.nn.unit.furcation.Furcation;
  * @author Gilgamesh
  * @param <T>
  */
-public abstract class FurcationCore <T extends Furcation> extends UnitCore<T> 
-{
+public abstract class FurcationCore <T extends Furcation> extends UnitCore<T> {
     //<editor-fold defaultstate="collapsed" desc="member-parameters">
     transient private UnitCoreMap<Object>[] arcs;//solve the topology
     transient private final UnitCoreSet nexts = new UnitCoreSet();

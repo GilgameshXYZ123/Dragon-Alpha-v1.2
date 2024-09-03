@@ -88,7 +88,7 @@ import z.dragon.nn.unit.simple.math2.Arctan;
 import z.dragon.nn.unit.simple.batchnorm.global.GlobalSqBatchNorm;
 import z.dragon.nn.unit.simple.math1.Cos;
 import z.dragon.nn.unit.simple.math2.Cot;
-import z.dragon.nn.unit.simple.math2.Dropout;
+import z.dragon.nn.unit.simple.math2.dropout.Dropout;
 import z.dragon.nn.unit.simple.math2.Elu;
 import z.dragon.nn.unit.simple.math2.Exp;
 import z.dragon.nn.unit.simple.tensor.Flatten;
@@ -124,7 +124,7 @@ import z.dragon.engine.memp.Memp1;
 import z.dragon.engine.memp.Memp2;
 import z.dragon.engine.memp.Memp3;
 import z.dragon.engine.memp.Mempool;
-import z.dragon.nn.unit.simple.math2.BernouliMul;
+import z.dragon.nn.unit.simple.math2.bernouli.BernouliMul;
 import z.util.math.vector.Vector;
 import z.dragon.common.state.State.Stateful;
 import z.dragon.common.state.State.StatefulTransformer;
@@ -264,13 +264,22 @@ import z.dragon.nn.unit.simple.batchnorm.global.GlobalBatchNorm_Tanh;
 import z.dragon.nn.unit.simple.math1.Gelu;
 import z.dragon.nn.unit.simple.math2.Clip;
 import z.dragon.nn.unit.simple.math2.HardSigmoid;
-import z.dragon.nn.unit.simple.math2.LeakyRelu_BernouliMul;
-import z.dragon.nn.unit.simple.math2.LeakyRelu_Dropout;
+import z.dragon.nn.unit.simple.math2.bernouli.LeakyRelu_BernouliMul;
+import z.dragon.nn.unit.simple.math2.dropout.LeakyRelu_Dropout;
 import z.dragon.nn.unit.simple.math2.Max;
 import z.dragon.nn.unit.simple.math2.Min;
 import z.dragon.nn.unit.simple.math2.ReluN;
-import z.dragon.nn.unit.simple.math2.Relu_BernouliMul;
-import z.dragon.nn.unit.simple.math2.Relu_Dropout;
+import z.dragon.nn.unit.simple.math2.bernouli.Elu_BernouliMul;
+import z.dragon.nn.unit.simple.math2.bernouli.Gelu_BernouliMul;
+import z.dragon.nn.unit.simple.math2.dropout.Elu_Dropout;
+import z.dragon.nn.unit.simple.math2.dropout.Gelu_Dropout;
+import z.dragon.nn.unit.simple.math2.bernouli.Relu_BernouliMul;
+import z.dragon.nn.unit.simple.math2.bernouli.Sigmoid_BernouliMul;
+import z.dragon.nn.unit.simple.math2.bernouli.Softplus_BernouliMul;
+import z.dragon.nn.unit.simple.math2.bernouli.Tanh_BernouliMul;
+import z.dragon.nn.unit.simple.math2.dropout.Relu_Dropout;
+import z.dragon.nn.unit.simple.math2.dropout.Sigmoid_Dropout;
+import z.dragon.nn.unit.simple.math2.dropout.Softplus_Dropout;
 import z.dragon.nn.unit.simple.pool.AvgPool1D;
 import z.dragon.nn.unit.simple.pool.MaxPool1D;
 import z.dragon.nn.unit.simple.pool.adaptive.AdaptiveAvgPool1D;
@@ -282,8 +291,7 @@ import z.dragon.nn.unit.simple.tensor.Expand;
  *
  * @author Gilgamesh
  */
-public final class Alpha 
-{
+public final class Alpha {
     public final long MEM_1GB = Engines.MEM_1GB;
     public final long MEM_1MB = Engines.MEM_1MB;
     
@@ -888,9 +896,18 @@ public final class Alpha
         
         public Relu_Dropout relu_dropout(Relu af, Dropout dp) { return new Relu_Dropout(af.inplace() && dp.inplace(), dp.nonzero_percent()); }
         public LeakyRelu_Dropout leakyRelu_dropout(LeakyRelu af, Dropout dp) { return new LeakyRelu_Dropout(af.inplace() && dp.inplace(), af.negative_slope(), dp.nonzero_percent()); }
-        
+        public Elu_Dropout elu_dropout(Elu af, Dropout dp) { return new Elu_Dropout(af.inplace() && dp.inplace(), af.alpha(), af.negative_slope(), dp.nonzero_percent()); }
+        public Softplus_Dropout softplus_dropout(Softplus af, Dropout dp) { return new Softplus_Dropout(af.inplace() && dp.inplace(), dp.nonzero_percent()); }
+        public Gelu_Dropout gelu_dropout(Gelu af, Dropout dp) { return new Gelu_Dropout(dp.inplace(), dp.nonzero_percent()); }
+        public Sigmoid_Dropout softplus_dropout(Sigmoid af, Dropout dp) { return new Sigmoid_Dropout(af.inplace() && dp.inplace(), dp.nonzero_percent()); }
+       
         public Relu_BernouliMul relu_bernouliMul(Relu af, BernouliMul bm) { return new Relu_BernouliMul(af.inplace() && bm.inplace(), bm.p(), bm.v1(), bm.v2()); }
         public LeakyRelu_BernouliMul leakyRelu_bernouliMul(LeakyRelu af, BernouliMul bm) { return new LeakyRelu_BernouliMul(af.inplace() && bm.inplace(), af.negative_slope(), bm.p(), bm.v1(), bm.v2()); }
+        public Elu_BernouliMul elu_bernouliMul(Elu af, BernouliMul bm) { return new Elu_BernouliMul(af.inplace() && bm.inplace(), af.alpha(), af.negative_slope(), bm.p(), bm.v1(), bm.v2()); }
+        public Softplus_BernouliMul softplus_bernouliMul(Softplus af, BernouliMul bm) { return new Softplus_BernouliMul(af.inplace() && bm.inplace(), bm.p(), bm.v1(), bm.v2()); }
+        public Gelu_BernouliMul gelu_bernouliMul(Gelu af, BernouliMul bm) { return new Gelu_BernouliMul(bm.inplace(), bm.p(), bm.v1(), bm.v2()); }
+        public Sigmoid_BernouliMul softplus_bernouliMul(Sigmoid af, BernouliMul bm) { return new Sigmoid_BernouliMul(af.inplace() && bm.inplace(), bm.p(), bm.v1(), bm.v2()); }
+        public Tanh_BernouliMul tanh_bernouliMul(Tanh af, BernouliMul bm) { return new Tanh_BernouliMul(af.inplace() && bm.inplace(), bm.p(), bm.v1(), bm.v2()); }
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="create: simple.math1">
@@ -2017,38 +2034,30 @@ public final class Alpha
         }
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="functional: simple.tensor">
-        public final Tensor[] flatten(Tensor... X) { 
-            return fsp(new CoreFlatten<>(sp_func, sp_tensor_inplace), X); 
-        }
+        public final Tensor[] flatten(Tensor... X) {  return fsp(new CoreFlatten<>(sp_func, sp_tensor_inplace), X); }
         public final Tensor[] flatten(boolean inplace, Tensor... X) {
             return csp(inplace, new CoreFlatten<>(sp_func, inplace), X);
         }
         
         public final Tensor[] view(Tensor[] X, int... out_dim) { 
-            return fsp(new CoreView<>(sp_func, sp_tensor_inplace, 
-                    out_dim), X); 
+            return fsp(new CoreView<>(sp_func, sp_tensor_inplace, out_dim), X); 
         }
         public final Tensor[] view(boolean inplace, Tensor[] X, int... out_dim) {
-            return csp(inplace, new CoreView<>(sp_func, inplace, 
-                    out_dim), X);
+            return csp(inplace, new CoreView<>(sp_func, inplace, out_dim), X);
         }
         
         public final Tensor[] view_flatten(Tensor... X) { 
-            return fsp(new CoreView<>(sp_func, sp_tensor_inplace, 
-                    X[0].dim(0), -1), X); 
+            return fsp(new CoreView<>(sp_func, sp_tensor_inplace, X[0].dim(0), -1), X); 
         }
         public final Tensor[] view_flatten(boolean inplace, Tensor... X) {
-            return csp(inplace, new CoreView<>(sp_func, inplace, 
-                    X[0].dim(0), -1), X);
+            return csp(inplace, new CoreView<>(sp_func, inplace, X[0].dim(0), -1), X);
         }
         
         public final Tensor[] reshape(Tensor[] X, int... out_dim) { 
-            return fsp(new CoreReshape<>(sp_func, sp_tensor_inplace, 
-                    out_dim), X); 
+            return fsp(new CoreReshape<>(sp_func, sp_tensor_inplace, out_dim), X); 
         }
         public final Tensor[] reshape(boolean inplace, Tensor[] X, int... out_dim) {
-            return csp(inplace, new CoreReshape<>(sp_func, inplace, 
-                    out_dim), X);
+            return csp(inplace, new CoreReshape<>(sp_func, inplace, out_dim), X);
         }
         
         public final Tensor[] transpose(int dimIdx1, int dimIdx2, Tensor... X) {

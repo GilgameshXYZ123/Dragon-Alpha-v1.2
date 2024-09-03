@@ -9,8 +9,7 @@ package z.dragon.common.int64;
  *
  * @author Gilgamesh
  */
-public interface Iter_int64  
-{
+public interface Iter_int64 {
     public boolean hasNext();
     
     public long next();

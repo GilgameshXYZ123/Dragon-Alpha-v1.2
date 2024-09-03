@@ -21,8 +21,7 @@ import z.dragon.engine.Tensor;
  * @param <K>
  * @param <V>
  */
-public class DataSet<K, V>
-{
+public class DataSet<K, V> {
     protected DataContainer<K, V> con;
     protected Transform<K[]> key_transform;
     protected Transform<V[]> value_transform;

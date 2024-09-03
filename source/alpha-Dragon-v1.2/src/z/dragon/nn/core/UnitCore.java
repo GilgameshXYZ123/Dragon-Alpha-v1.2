@@ -14,7 +14,6 @@ import java.util.function.BiConsumer;
 import z.dragon.engine.Tensor;
 import z.dragon.engine.Tensor.TensorList;
 import z.dragon.engine.Tensor.TensorSet;
-import z.dragon.nn.core.Hook;
 import z.dragon.nn.unit.Unit;
 
 /**
@@ -23,8 +22,7 @@ import z.dragon.nn.unit.Unit;
  * @param <T>
  */
 @SuppressWarnings("unchecked")
-public abstract class UnitCore<T extends Unit> implements BackwardHookable
-{
+public abstract class UnitCore<T extends Unit> implements BackwardHookable {
     //<editor-fold defaultstate="collapsed" desc="static class: UnitCoreMap">
     public static class UnitCoreMap<V> extends HashMap<UnitCore<?>, V> 
     {
@@ -69,7 +67,7 @@ public abstract class UnitCore<T extends Unit> implements BackwardHookable
     
     //<editor-fold defaultstate="collapsed" desc="running-area: others">
     public final T unit() { return ut; }
-    public final String name() { return ut.name() + "<Core" + ut.index_of_core(this) + ">"; }
+    public final String name() { return ut.name() + "<Core" + ut.index_of_core(this) + "," + this.getClass().getName() + ">"; }
     
     public final boolean is_complex() { return ut.is_complex(); }
     public final boolean need_grads() { return ut.need_grads(); }
@@ -91,20 +89,19 @@ public abstract class UnitCore<T extends Unit> implements BackwardHookable
     
     //<editor-fold defaultstate="collapsed" desc="running-area: gradient-aggregation">
     //<editor-fold defaultstate="collapsed" desc="class: GradientAggregator">
-    public static class GradientAggregator implements BiConsumer<UnitCore<?>, Object> 
-    {
+    public static class GradientAggregator implements BiConsumer<UnitCore<?>, Object> {
         private final TensorList grads = new TensorList(4);
         public final TensorList grads() { return grads; }
         
         @Override
         public void accept(UnitCore<?> next, Object value) {
-            if(value == null) return;
-            if(value instanceof Integer) {//used as 1 input: 1 -> 1
+            if (value == null) return;
+            if (value instanceof Integer) {//used as 1 input: 1 -> 1
                 grads.add(next.gradient((int) value));
             }
             else {//used as multiple input: 1 -> m
-                HashSet<Integer> indexes = (HashSet<Integer>) value;
-                for(int index : indexes) grads.add(next.gradient(index));
+                HashSet<Integer> indice = (HashSet<Integer>) value;
+                for (int index : indice) grads.add(next.gradient(index));
             }
         }
     }
@@ -112,22 +109,33 @@ public abstract class UnitCore<T extends Unit> implements BackwardHookable
     private final transient GradientAggregator aggr = new GradientAggregator();
     
     protected final Tensor aggregateGradient(Map<UnitCore<?>, Object> arc) {
+        //System.out.println("BP: " + ut.name() + ", " + this + ". " + this.hashCode());
+        
         arc.forEach(aggr); 
         TensorList grads = aggr.grads;
-
-        if(grads.isEmpty()) return null;
-
-        Tensor deltaY;
-        if(grads.size() == 1) { deltaY = grads.get(0); grads.clear(); }
-        else {//find the summary of gradients
-            for(Tensor grad : grads) grad.c();//wait all grads are cauculated
-            
+        if (grads.isEmpty()) return null;
+        
+        Tensor deltaY; int gsize = grads.size();
+        if (gsize == 1) { deltaY = grads.get(0); grads.clear(); }
+        else if (gsize == 2) {
+            Tensor.sync(grads);//wait all grads are cauculated
             deltaY = grads.get(0).engine().sum(true, grads);
-            for(Tensor grad : grads) deltaY.carry(grad);//gc for oneOff nodes, if grad.need_carry = true
-            
+            deltaY.carry(grads.get(1));
+            deltaY.dual(()-> { grads.get(1).delete(); grads.clear(); });
+        }
+        else if (gsize == 3) {
+            Tensor.sync(grads);//wait all grads are cauculated
+            deltaY = grads.get(0).engine().sum(true, grads).c();
+            deltaY.carry(grads.get(1)); deltaY.carry(grads.get(2));
+            deltaY.dual(()-> { grads.get(1).delete(); grads.get(2).delete(); grads.clear(); });
+        }
+        else {//find the summary of gradients
+            Tensor.sync(grads);//wait all grads are cauculated
+            deltaY = grads.get(0).engine().sum(true, grads);
+            for (Tensor grad : grads) deltaY.carry(grad);//gc for oneOff nodes, if grad.need_carry = true
             deltaY.dual(()-> {//when deltaY is cauculated, grad[1:n-1] are not in need
                 Iterator<Tensor> iter = grads.iterator();
-                for(iter.next(); iter.hasNext(); ) iter.next().delete();//exclude grad[0]
+                for (iter.next(); iter.hasNext(); ) iter.next().delete();//exclude grad[0]
                 grads.clear();
             });
         }

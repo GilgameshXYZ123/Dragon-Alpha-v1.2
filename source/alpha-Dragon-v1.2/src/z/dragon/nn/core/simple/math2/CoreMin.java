@@ -17,8 +17,7 @@ import z.util.lang.annotation.Passed;
  * @param <T>
  */
 @Passed("CudaFloat32Base")
-public class CoreMin<T extends SimpleUnit> extends SimpleInplaceCore<T>
-{
+public class CoreMin<T extends SimpleUnit> extends SimpleInplaceCore<T> {
     protected float alpha;
     protected float beta;
     protected float vmin;

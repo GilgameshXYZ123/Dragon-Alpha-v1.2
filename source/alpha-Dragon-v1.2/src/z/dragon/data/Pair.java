@@ -6,15 +6,13 @@
 package z.dragon.data;
 
 import java.util.Map.Entry;
-import java.util.Objects;
 
 /**
  * @author Gilgamesh
  * @param <K>
  * @param <V>
  */
-public class Pair<K, V> implements Entry<K, V>
-{
+public class Pair<K, V> implements Entry<K, V> {
     public K input;
     public V label;
 

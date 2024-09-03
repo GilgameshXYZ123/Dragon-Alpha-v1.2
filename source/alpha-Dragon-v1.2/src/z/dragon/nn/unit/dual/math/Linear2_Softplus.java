@@ -49,8 +49,7 @@ public class Linear2_Softplus extends DualFunction {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: InlineLinear2_Softplus">
-    public static class InlineLinear2_Softplus extends DualCore<Linear2_Softplus>
-    {
+    public static class InlineLinear2_Softplus extends DualCore<Linear2_Softplus> {
         public InlineLinear2_Softplus(Linear2_Softplus unit) { super(unit); }
 
         public final boolean likeX1() { return ut.likeX1; }

@@ -17,8 +17,7 @@ import z.dragon.data.container.ListContainer;
  *
  * @author Gilgamesh
  */
-public class FileFolder extends DataSet<File, Integer>
-{
+public class FileFolder extends DataSet<File, Integer> {
     public static Comparator<File> file_comparator = (a, b) -> a.getName().compareTo(b.getName());
     
     protected Map<String, Integer> labels;

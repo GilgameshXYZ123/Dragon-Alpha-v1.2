@@ -9,14 +9,15 @@ import z.dragon.engine.Engine;
 import z.dragon.engine.Tensor;
 import z.dragon.nn.core.simple.SimpleInplaceCore;
 import z.dragon.nn.unit.simple.SimpleUnit;
+import z.util.lang.annotation.Passed;
 
 /**
  *
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreLeakyRelu<T extends SimpleUnit> extends SimpleInplaceCore<T>
-{
+@Passed("CudaFloat32Base")
+public class CoreLeakyRelu<T extends SimpleUnit> extends SimpleInplaceCore<T> {
     protected float k;
     
     public CoreLeakyRelu(T unit, boolean inplace, float negative_slope) {

@@ -11,8 +11,7 @@ import z.util.lang.annotation.Passed;
  * Y[N, OH, OW, OC] = conv3D(X[N, IH, IW, IC], W[OC, FH, FW, IC], [ph, pw, sh, sw]).
  * @author Gilgamesh
  */
-public final class Cuda_conv3D 
-{
+public final class Cuda_conv3D {
     private Cuda_conv3D() {}
     
     //<editor-fold defaultstate="collapsed" desc="Common">

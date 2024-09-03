@@ -15,8 +15,7 @@ import z.dragon.nn.unit.simple.SimpleUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreArcsin<T extends SimpleUnit> extends SimpleInplaceCore<T>
-{
+public class CoreArcsin<T extends SimpleUnit> extends SimpleInplaceCore<T> {
     protected float alpha;
     protected float beta;
     

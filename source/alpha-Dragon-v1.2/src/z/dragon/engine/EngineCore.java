@@ -7644,14 +7644,16 @@ public class EngineCore implements MemStatus {
     protected int next_seed() { return exr.nextInt(); } 
     public EngineCore set_seed(long seed) { exr.setSeed(seed); return this; }
     
+    //<editor-fold defaultstate="collapsed" desc="bernouli">
     public Syncer bernouli2D(long X_address, 
             float p, float v1, float v2,
             int lengthv, int width)
     {
         int stride = ((width + 3) >> 2) << 2;
         if(check) {
-            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
-            if(p<0 || p>1) throw new IllegalArgumentException(String.format("p { got %f } must belong to [0,1]", p));
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (p<0 || p>1) throw new IllegalArgumentException(String.format(
+                    "p { got %f } must belong to [0,1]", p));
             func_param_check(lengthv, width, stride);
         }
         return base.bernouli2D(X_address,
@@ -7667,10 +7669,11 @@ public class EngineCore implements MemStatus {
     {
         int stride = ((width + 3) >> 2) << 2;
         if(check) {
-            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
-            if(R_address == NULL) throw new NullPointerException("Tensor R is null");
-            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
-            if(p<0 || p>1) throw new IllegalArgumentException(String.format("p { got %f } must belong to [0,1]", p));
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (R_address == NULL) throw new NullPointerException("Tensor R is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (p<0 || p>1) throw new IllegalArgumentException(String.format(
+                    "p { got %f } must belong to [0,1]", p));
             func_param_check(lengthv, width, stride);
         }
         return base.bernouli_mul2D(Y_address, R_address,
@@ -7687,11 +7690,11 @@ public class EngineCore implements MemStatus {
     {
         int stride = ((width + 3) >> 2) << 2;
         if(check) {
-            if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");
-            if(R_address == NULL) throw new NullPointerException("Tensor R is null");
-            if(X_address == NULL) throw new NullPointerException("Tensor X is null");
-            if(k < 0) throw new IllegalArgumentException(String.format("k { got %f } must >= 0", k));
-            if(p<0 || p>1) throw new IllegalArgumentException(String.format("p { got %f } must belong to [0,1]", p));
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (R_address == NULL) throw new NullPointerException("Tensor R is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (k < 0) throw new IllegalArgumentException(String.format("negative_slope { got %f } must >= 0", k));
+            if (p<0 || p>1) throw new IllegalArgumentException(String.format("p { got %f } must belong to [0,1]", p));
             func_param_check(lengthv, width, stride);
         }
         return base.leakyRelu_bernouli_mul2D(Y_address, R_address, 
@@ -7701,6 +7704,109 @@ public class EngineCore implements MemStatus {
                 lengthv, width, stride);
     }
     
+    public Syncer elu_bernouli2D_mul(long Y_address, long R_address,
+            long X_address, 
+            float alpha, float k, float p, float v1, float v2,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (R_address == NULL) throw new NullPointerException("Tensor R is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (alpha < 0) throw new IllegalArgumentException(String.format("Elu: alpha {got %f} must >=0", alpha));
+            if (k < 0) throw new IllegalArgumentException(String.format("Elu: negative_slope { got %f } must >= 0", k));
+            if (p<0 || p>1) throw new IllegalArgumentException(String.format("p { got %f } must belong to [0,1]", p));
+            func_param_check(lengthv, width, stride);
+        }
+        return base.elu_bernouli_mul2D(Y_address, R_address, 
+                X_address, 
+                alpha, k, next_seed(), 
+                p, v1, v2, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer softplus_bernouli2D_mul(long Y_address, long R_address,
+            long X_address, 
+            float p, float v1, float v2,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (R_address == NULL) throw new NullPointerException("Tensor R is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (p<0 || p>1) throw new IllegalArgumentException(String.format("p { got %f } must belong to [0,1]", p));
+            func_param_check(lengthv, width, stride);
+        }
+        return base.softplus_bernouli_mul2D(Y_address, R_address, 
+                X_address, 
+                next_seed(), 
+                p, v1, v2, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer gelu_bernouli2D_mul(long Y_address, long R_address,
+            long X_address, 
+            float p, float v1, float v2,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (R_address == NULL) throw new NullPointerException("Tensor R is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (p<0 || p>1) throw new IllegalArgumentException(String.format("p { got %f } must belong to [0,1]", p));
+            func_param_check(lengthv, width, stride);
+        }
+        return base.gelu_bernouli_mul2D(Y_address, R_address, 
+                X_address, 
+                next_seed(), 
+                p, v1, v2, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer sigmoid_bernouli2D_mul(long Y_address, long R_address,
+            long X_address, 
+            float p, float v1, float v2,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (R_address == NULL) throw new NullPointerException("Tensor R is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (p<0 || p>1) throw new IllegalArgumentException(String.format("p { got %f } must belong to [0,1]", p));
+            func_param_check(lengthv, width, stride);
+        }
+        return base.sigmoid_bernouli_mul2D(Y_address, R_address, 
+                X_address, 
+                next_seed(), 
+                p, v1, v2, 
+                lengthv, width, stride);
+    }
+    
+    public Syncer tanh_bernouli2D_mul(long Y_address, long R_address,
+            long X_address, 
+            float p, float v1, float v2,
+            int lengthv, int width)
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check) {
+            if (Y_address == NULL) throw new NullPointerException("Tensor Y is null");
+            if (R_address == NULL) throw new NullPointerException("Tensor R is null");
+            if (X_address == NULL) throw new NullPointerException("Tensor X is null");
+            if (p<0 || p>1) throw new IllegalArgumentException(String.format("p { got %f } must belong to [0,1]", p));
+            func_param_check(lengthv, width, stride);
+        }
+        return base.tanh_bernouli_mul2D(Y_address, R_address, 
+                X_address, 
+                next_seed(), 
+                p, v1, v2, 
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="uniform">
     public Syncer uniform2D(long X_address, 
             float vmin, float vmax,
             int lengthv, int width)
@@ -7733,7 +7839,8 @@ public class EngineCore implements MemStatus {
                 p, vmin, vmax, 
                 lengthv, width, stride);
     }
-    
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="gaussian">
     public Syncer gaussian2D(long X_address,
             float mu, float sigma,
             int lengthv, int width)
@@ -7768,6 +7875,7 @@ public class EngineCore implements MemStatus {
                 p, mu, sigma,
                 lengthv, width, stride);
     }
+    //</editor-fold>
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Reduce Function">

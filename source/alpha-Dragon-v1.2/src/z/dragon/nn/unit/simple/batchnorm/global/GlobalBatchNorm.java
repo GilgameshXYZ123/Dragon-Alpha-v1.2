@@ -169,8 +169,7 @@ public class GlobalBatchNorm extends Affine implements Train2Eval {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: InlineGlobalBatchNorm">
-    public static class InlineGlobalBatchNorm<T extends GlobalBatchNorm> extends InlineAffine<T>
-    {
+    public static class InlineGlobalBatchNorm<T extends GlobalBatchNorm> extends InlineAffine<T> {
         public InlineGlobalBatchNorm(T unit) { super(unit); }
         
         public boolean affine() { return ut.affine; }

@@ -20,8 +20,7 @@ import z.dragon.nn.unit.simple.SimpleUnit;
  * @param <T>
  */
 @SuppressWarnings("unchecked")
-public abstract class SimpleCore<T extends SimpleUnit> extends UnitCore<T>
-{
+public abstract class SimpleCore<T extends SimpleUnit> extends UnitCore<T> {
     //<editor-fold defaultstate="collapsed" desc="member-parameters">
     transient private final UnitCoreMap<Object> arc = new UnitCoreMap<>();//solve the topology
     
@@ -59,10 +58,10 @@ public abstract class SimpleCore<T extends SimpleUnit> extends UnitCore<T>
     
     @Override
     public void gc() {//the main part of gc will be down be unit (Module)
-        if(X != null) { X.delete(); X = null; }
-        if(Y != null) { Y.delete(); Y = null; }
-        if(deltaX != null) { deltaX.delete(); deltaX = null; }
-        if(deltaY != null) { deltaY.delete(); deltaY = null; }
+        if (X != null) { X.delete(); X = null; }
+        if (Y != null) { Y.delete(); Y = null; }
+        if (deltaX != null) { deltaX.delete(); deltaX = null; }
+        if (deltaY != null) { deltaY.delete(); deltaY = null; }
     }
     //</editor-fold>
 
@@ -84,7 +83,7 @@ public abstract class SimpleCore<T extends SimpleUnit> extends UnitCore<T>
         
         //send trace to the next: I will send my 0th output to you
         last_need_grads = X.need_grad();
-        if(trace != null) last_need_grads = (last_need_grads || trace.need_grads());
+        if (trace != null) last_need_grads = (last_need_grads || trace.need_grads());
         boolean need_grads = (last_need_grads || ut.need_grads());
         Y.setTrace(this, 0, need_grads);
      
@@ -94,8 +93,8 @@ public abstract class SimpleCore<T extends SimpleUnit> extends UnitCore<T>
     @Override
     protected synchronized void traceBack(UnitCore<?> next, int out_index, int next_in_index) {
         Object value = arc.get(next);
-        if(value == null) arc.put(next, next_in_index);//create new arc for next node
-        else if(value instanceof Integer) {//output[0] used twice for one specific next node
+        if (value == null) arc.put(next, next_in_index);//create new arc for next node
+        else if (value instanceof Integer) {//output[0] used twice for one specific next node
             HashSet<Integer> indexes = new HashSet<>(2);
             indexes.add((Integer) value);
             indexes.add(next_in_index);
@@ -113,7 +112,7 @@ public abstract class SimpleCore<T extends SimpleUnit> extends UnitCore<T>
     public Tensor[] collectGradientFromNext() {
         deltaY = aggregateGradient(arc); 
         arc.clear();
-        return (deltaY == null? null : new Tensor[]{ deltaY });
+        return (deltaY == null ? null : new Tensor[]{ deltaY });
     }
 
     protected abstract Tensor __backward__(Engine eg, Tensor deltaY,//compute deltaX

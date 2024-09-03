@@ -14,8 +14,7 @@ import z.dragon.engine.Parameter.ParamSet;
  *
  * @author Gilgamesh
  */
-public abstract class SimpleFunction extends SimpleUnit
-{
+public abstract class SimpleFunction extends SimpleUnit {
     private static final long serialVersionUID = 1L;
     
     @Override

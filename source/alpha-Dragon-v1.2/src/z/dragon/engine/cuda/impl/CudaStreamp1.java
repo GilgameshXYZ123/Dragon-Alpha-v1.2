@@ -11,8 +11,9 @@ import z.dragon.common.int64.ArrayList_int64;
  * Hashed Simple StreamPool.
  * @author Gilgamesh
  */
-public class CudaStreamp1 extends CudaStreamPool
-{
+public class CudaStreamp1 extends CudaStreamPool {
+    private static final long serialVersionUID = 1L;
+    
     protected ArrayList_int64 gc;//size = gc.size() //how much stream has been created
     protected int gc_index = 0;
     private boolean inited = false;

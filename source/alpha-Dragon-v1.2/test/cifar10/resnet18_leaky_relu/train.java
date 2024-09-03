@@ -92,7 +92,7 @@ public class train
             //25 epochs for Adam 
             //50 epochs for SGD
             //30 epcohs for SGDMN
-            training(5);
+            training(25);
         }
         catch(IOException e) {
             e.printStackTrace();

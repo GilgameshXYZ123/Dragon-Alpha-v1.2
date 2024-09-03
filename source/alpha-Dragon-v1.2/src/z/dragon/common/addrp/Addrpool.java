@@ -11,8 +11,7 @@ import java.io.Serializable;
  *
  * @author Gilgamesh
  */
-public interface Addrpool extends Serializable
-{
+public interface Addrpool extends Serializable {
     public int size();
     default boolean isEmpty() { return size() == 0; }
     

@@ -31,8 +31,8 @@ import z.util.lang.annotation.Passed;
  */
 @SuppressWarnings("unchecked")
 @Passed("CudaFloat32Base")
-public class Sequence extends Unit implements Train2Eval, AsyncStateUpdate
-{
+public class Sequence extends Unit implements Train2Eval, AsyncStateUpdate {
+    private static final long serialVersionUID = 1L;
     //<editor-fold defaultstate="collapsed" desc="static class: EmptySequence">
     protected static final class EmptySequence extends Sequence {
         protected EmptySequence() { }

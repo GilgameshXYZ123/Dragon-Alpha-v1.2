@@ -15,8 +15,7 @@ import z.dragon.nn.unit.furcation.Furcation;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreChunk<T extends Furcation> extends FurcationCore<T>  
-{
+public class CoreChunk<T extends Furcation> extends FurcationCore<T> {
     protected int dimIdx;
     protected int num;
     

@@ -21,8 +21,7 @@ import z.dragon.data.container.DataContainer;
  *
  * @author Gilgamesh
  */
-public class ImageFolder extends DataSet<byte[], Integer> 
-{
+public class ImageFolder extends DataSet<byte[], Integer> {
     protected FileFolder ff;
     protected Function<File, byte[]> pixel_transform;
     protected ExecutorService img_exec;

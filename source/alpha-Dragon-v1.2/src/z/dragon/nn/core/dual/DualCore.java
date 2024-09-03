@@ -20,8 +20,7 @@ import z.dragon.nn.unit.dual.DualUnit;
  * @param <T>
  */
 @SuppressWarnings("unchecked")
-public abstract class DualCore<T extends DualUnit> extends UnitCore<T> 
-{
+public abstract class DualCore<T extends DualUnit> extends UnitCore<T> {
     //<editor-fold defaultstate="collapsed" desc="member-parameters">
     transient private final UnitCoreMap<Object> arc = new UnitCoreMap<>();//solve the topology
     
@@ -105,8 +104,8 @@ public abstract class DualCore<T extends DualUnit> extends UnitCore<T>
     @Override
     protected void traceBack(UnitCore<?> next, int out_index, int next_in_index) {
         Object value = arc.get(next);
-        if(value == null) arc.put(next, next_in_index);
-        else if(value instanceof Integer) {
+        if (value == null) arc.put(next, next_in_index);
+        else if (value instanceof Integer) {
             HashSet<Integer> indexes = new HashSet<>(2);
             indexes.add((Integer) value);
             indexes.add(next_in_index);
@@ -127,7 +126,7 @@ public abstract class DualCore<T extends DualUnit> extends UnitCore<T>
         return (deltaY == null? null : new Tensor[]{ deltaY });
     }
 
-     protected abstract Tensor[] __backward__(Engine eg, Tensor deltaY,//compute deltaX1 and deltaX2
+    protected abstract Tensor[] __backward__(Engine eg, Tensor deltaY,//compute deltaX1 and deltaX2
             boolean grad_inplace, boolean backward_grads,
             boolean backward_grads1, boolean backward_grads2);//mapping: X1, X2
     

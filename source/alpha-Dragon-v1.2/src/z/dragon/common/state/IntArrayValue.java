@@ -8,8 +8,7 @@ package z.dragon.common.state;
 import java.util.ArrayList;
 import z.dragon.common.state.State.StateValue;
 
-public final class IntArrayValue implements StateValue 
-{
+public final class IntArrayValue implements StateValue {
     private final int[] value;
 
     public IntArrayValue(int... value) {

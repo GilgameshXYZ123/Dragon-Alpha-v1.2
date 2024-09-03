@@ -9,8 +9,7 @@ package z.dragon.engine;
  * 
  * @author Gilgamesh
  */
-public abstract class Counter 
-{
+public abstract class Counter {
     private int count;
     private boolean runned = false;
     

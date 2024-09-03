@@ -11,8 +11,7 @@ import z.util.lang.annotation.Passed;
  * deltaW[OC, FH, FW, IC] = dconv3D(X[N, IH, IW, IC], deltaY[N, OH, OW, OC], [sh, sw], [ph, pw]).
  * @author Gilgamesh
  */
-public final class Cuda_dconv3D_deltaW 
-{
+public final class Cuda_dconv3D_deltaW {
     private Cuda_dconv3D_deltaW() {}
     
     //<editor-fold defaultstate="collapsed" desc="Common">

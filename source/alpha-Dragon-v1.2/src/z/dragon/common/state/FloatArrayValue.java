@@ -8,8 +8,7 @@ package z.dragon.common.state;
 import java.util.ArrayList;
 import z.dragon.common.state.State.StateValue;
 
-public final class FloatArrayValue implements StateValue 
-{
+public final class FloatArrayValue implements StateValue {
     private final float[] value;
 
     public FloatArrayValue(float... value) {

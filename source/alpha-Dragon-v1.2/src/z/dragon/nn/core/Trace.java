@@ -9,8 +9,7 @@ package z.dragon.nn.core;
  * 
  * @author Gilgamesh
  */
-public final class Trace 
-{
+public final class Trace {
     private final UnitCore<?> last;
     private final int out_index;//Tensor = out.Y[pre_out_index]
     private final boolean need_grads;

@@ -324,8 +324,7 @@ public class CudaFloat32EngineBase extends EngineBase {
 
     //<editor-fold defaultstate="collapsed" desc="Syncer & Result">
     //<editor-fold defaultstate="collapsed" desc="class: StreamSyncer">
-    public static final class StreamSyncer implements Syncer  
-    {
+    public static final class StreamSyncer implements Syncer {
         private final CudaStreamPool streamPool;
         private final long stream;
         private final long event;
@@ -343,23 +342,27 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(called) return; 
-            Cuda.deleteEvent(event);
+            super.finalize();
+            synchronized(this) {
+                if (called) return; 
+                Cuda.deleteEvent(event);
+            }
             streamPool.returnStream(stream);
         }
         
         @Override 
-        public final synchronized void sync() {
-            if(called) return; 
-            Cuda.eventSync_Del(event);
+        public final void sync() {
+            synchronized(this) {
+                if (called) return;
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             streamPool.returnStream(stream);
-            called = true;
         }
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="class: Stream2Syncer_1">
-    public static final class Stream2Syncer_1 implements Syncer //only sync stream1
-    {
+    public static final class Stream2Syncer_1 implements Syncer { //only sync stream1
         private final CudaStreamPool streamPool;
         private final long stream1;
         private final long stream2;
@@ -380,25 +383,29 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(called) return; 
-            Cuda.deleteEvent(event);
+            super.finalize(); 
+            synchronized(this) {
+                if (called) return; 
+                Cuda.deleteEvent(event);
+            }
             streamPool.returnStream(stream1);
             streamPool.returnStream(stream2);
         }
         
         @Override 
-        public final synchronized void sync() {
-            if(called) return; 
-            Cuda.eventSync_Del(event);
+        public final void sync() {
+            synchronized(this) {
+                if (called) return; 
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             streamPool.returnStream(stream1);
             streamPool.returnStream(stream2);
-            called = true;
         }
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="class: StreamBlockSyncer">
-    public static final class StreamBlockSyncer implements Syncer 
-    {
+    public static final class StreamBlockSyncer implements Syncer {
         private final CudaStreamPool streamPool;
         private final long stream;
         private final long event;
@@ -425,25 +432,29 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(called) return; 
-            Cuda.deleteEvent(event);
+            super.finalize(); 
+            synchronized(this) {
+                if (called) return; 
+                Cuda.deleteEvent(event);
+            }
             streamPool.returnStream(stream);
             core.free(block[0], block[1]);
         }
         
         @Override
-        public final synchronized void sync() {
-            if(called) return;
-            Cuda.eventSync_Del(event);
+        public final void sync() {
+            synchronized(this) {
+                if (called) return;
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             streamPool.returnStream(stream);
             core.free(block[0], block[1]);
-            called = true;
         }
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="class: StreamBlock2Syncer">
-    public static final class StreamBlock2Syncer implements Syncer 
-    {
+    public static final class StreamBlock2Syncer implements Syncer {
         private final CudaStreamPool streamPool;
         private final long stream;
         private final long event;
@@ -473,27 +484,31 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(called) return; 
-            Cuda.deleteEvent(event);
+            super.finalize(); 
+            synchronized(this) {
+                if (called) return; 
+                Cuda.deleteEvent(event);
+            }
             streamPool.returnStream(stream);
             core.free(block1[0], block1[1]);
             core.free(block2[0], block2[1]);
         }
         
         @Override 
-        public final synchronized void sync() {
-            if(called) return;
-            Cuda.eventSync_Del(event);
+        public final void sync() {
+            synchronized(this) {
+                if (called) return;
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             streamPool.returnStream(stream);
             core.free(block1[0], block1[1]);
             core.free(block2[0], block2[1]);
-            called = true;
         }
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="class: Stream2Block2Syncer_1">
-    public static final class Stream2Block2Syncer_1 implements Syncer //only sync stream1
-    {
+    public static final class Stream2Block2Syncer_1 implements Syncer {//only sync stream1
         private final CudaStreamPool streamPool;
         private final long stream1;
         private final long stream2;
@@ -526,8 +541,11 @@ public class CudaFloat32EngineBase extends EngineBase {
 
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(called) return; 
-            Cuda.deleteEvent(event);
+            super.finalize();
+            synchronized(this) {
+                if (called) return; 
+                Cuda.deleteEvent(event);
+            }
             streamPool.returnStream(stream1);
             streamPool.returnStream(stream2);
             core.free(block1[0], block1[1]);
@@ -535,20 +553,21 @@ public class CudaFloat32EngineBase extends EngineBase {
         }
         
         @Override 
-        public final synchronized void sync() {
-            if(called) return;
-            Cuda.eventSync_Del(event);
+        public final void sync() {
+            synchronized(this) {
+                if (called) return;
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             streamPool.returnStream(stream1);
             streamPool.returnStream(stream2);
             core.free(block1[0], block1[1]);
             core.free(block2[0], block2[1]);
-            called = true;
         }
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="class: Stream2Block3Syncer_1">
-    public static final class Stream2Block3Syncer_1 implements Syncer //only sync stream1
-    {
+    public static final class Stream2Block3Syncer_1 implements Syncer {//only sync stream1
         private final CudaStreamPool streamPool;
         private final long stream1;
         private final long stream2;
@@ -584,8 +603,11 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(called) return; 
-            Cuda.deleteEvent(event);
+            super.finalize(); 
+            synchronized(this) {
+                if (called) return; 
+                Cuda.deleteEvent(event);
+            }
             streamPool.returnStream(stream1);
             streamPool.returnStream(stream2);
             core.free(block1[0], block1[1]);
@@ -594,15 +616,17 @@ public class CudaFloat32EngineBase extends EngineBase {
         }
         
         @Override 
-        public final synchronized void sync() {
-            if(called) return;
-            Cuda.eventSync_Del(event);
+        public final void sync() {
+            synchronized(this) {
+                if (called) return;
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             streamPool.returnStream(stream1);
             streamPool.returnStream(stream2);
             core.free(block1[0], block1[1]);
             core.free(block2[0], block2[1]);
             core.free(block3[0], block3[1]);
-            called = true;
         }
     }
     //</editor-fold>
@@ -615,8 +639,7 @@ public class CudaFloat32EngineBase extends EngineBase {
     }
     
     //<editor-fold defaultstate="collapsed" desc="class: StreamArraySyncer">
-    public static final class StreamArraySyncer implements Syncer 
-    {
+    public static final class StreamArraySyncer implements Syncer {
         private final CudaStreamPool streamPool;
         private final long[] streams;
         private final long event;
@@ -636,23 +659,27 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(called) return; 
-            Cuda.deleteEvent(event);
+            super.finalize();
+            synchronized(this) {
+                if (called) return; 
+                Cuda.deleteEvent(event);
+            }
             streamPool.returnStreamArray(streams);
         }
         
         @Override 
-        public final synchronized void sync() {
-            if(called) return;
-            Cuda.eventSync_Del(event);
+        public final void sync() {
+            synchronized(this) {
+                if (called) return;
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             streamPool.returnStreamArray(streams);
-            called = true;
         }
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="class: StreamArrayBlockSyncer">
-    public static final class StreamArrayBlockSyncer implements Syncer
-    {
+    public static final class StreamArrayBlockSyncer implements Syncer {
         private final CudaStreamPool streamPool;
         private final long[] streams;
         private final long event;
@@ -690,18 +717,19 @@ public class CudaFloat32EngineBase extends EngineBase {
         }
              
         @Override
-        public final synchronized void sync() {
-            if(called) return;
-            Cuda.eventSync_Del(event);
+        public final void sync() {
+            synchronized(this) {
+                if (called) return;
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             core.free(block[0], block[1]);//release block1.mem_address
             streamPool.returnStreamArray(streams);
-            called = true;
         }
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="class: StreamArrayBlock2Syncer">
-    public static final class StreamArrayBlock2Syncer implements Syncer
-    {
+    public static final class StreamArrayBlock2Syncer implements Syncer {
         private final CudaStreamPool streamPool;
         private final long[] streams;
         private final long event;
@@ -735,27 +763,31 @@ public class CudaFloat32EngineBase extends EngineBase {
              
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(called) return; 
-            Cuda.deleteEvent(event);
+            super.finalize(); 
+            synchronized(this) {
+                if(called) return; 
+                Cuda.deleteEvent(event);
+            }
             core.free(block1[0], block1[1]);//release block1.mem_address
             core.free(block2[0], block2[1]);//release block2.mem_address
             streamPool.returnStreamArray(streams);
         }
         
         @Override
-        public final synchronized void sync() {
-            if(called) return;
-            Cuda.eventSync_Del(event);
+        public final void sync() {
+            synchronized(this) {
+                if (called) return;
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             core.free(block1[0], block1[1]);//release block1.mem_address
             core.free(block2[0], block2[1]);//release block2.mem_address
             streamPool.returnStreamArray(streams);
-            called = true;
         }
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="class: StreamArrayBlock2Syncer_1">
-    public static final class StreamArrayBlock2Syncer_1 implements Syncer //only sync streams[0]
-    {
+    public static final class StreamArrayBlock2Syncer_1 implements Syncer {//only sync streams[0]
         private final CudaStreamPool streamPool;
         private final long[] streams;
         private final long event;
@@ -785,27 +817,31 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(called) return; 
-            Cuda.deleteEvent(event);
+            super.finalize(); 
+            synchronized(this) {
+                if (called) return; 
+                Cuda.deleteEvent(event);
+            }
             streamPool.returnStreamArray(streams);
             core.free(block1[0], block1[1]);
             core.free(block2[0], block2[1]);
         }
         
         @Override 
-        public final synchronized void sync() {
-            if(called) return;
-            Cuda.eventSync_Del(event);
+        public final void sync() {
+            synchronized(this) {
+                if (called) return;
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             streamPool.returnStreamArray(streams);
             core.free(block1[0], block1[1]);
             core.free(block2[0], block2[1]);
-            called = true;
         }
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="class: StreamArrayBlock4Syncer_1">
-    public static final class StreamArrayBlock4Syncer_1 implements Syncer //only sync streams[0]
-    {
+    public static final class StreamArrayBlock4Syncer_1 implements Syncer {//only sync streams[0]
         private final CudaStreamPool streamPool;
         private final long[] streams;
         private final long event;
@@ -841,8 +877,11 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(called) return; 
-            Cuda.deleteEvent(event);
+            super.finalize(); 
+            synchronized(this) {
+                if (called) return; 
+                Cuda.deleteEvent(event);
+            }
             streamPool.returnStreamArray(streams);
             core.free(block1[0], block1[1]);
             core.free(block2[0], block2[1]);
@@ -852,21 +891,22 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         @Override 
         public final synchronized void sync() {
-            if(called) return;
-            Cuda.eventSync_Del(event);
+            synchronized(this) {
+                if (called) return;
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             streamPool.returnStreamArray(streams);
             core.free(block1[0], block1[1]);
             core.free(block2[0], block2[1]);
             core.free(block3[0], block3[1]);
             core.free(block4[0], block4[1]);
-            called = true;
         }
     }
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="class: BiasedForwardSyncer">
-    public static final class BiasedForwardSyncer implements Syncer 
-    {
+    public static final class BiasedForwardSyncer implements Syncer {
         private final CudaStreamPool streamPool;
         private final long[] streams;
         private final long event;
@@ -891,16 +931,17 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         @Override 
         public final synchronized void sync() {
-            if(called) return;
-            Cuda.eventSync_Del(event);
+            synchronized(this) {
+                if (called) return;
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             streamPool.returnStreamArray(streams);
-            called = true;
         }
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="class: BiasedBlockForwardSyncer">
-    public static final class BiasedForwardBlockSyncer implements Syncer 
-    {
+    public static final class BiasedForwardBlockSyncer implements Syncer {
         private final CudaStreamPool streamPool;
         private final long[] streams;
         private final long event;
@@ -927,25 +968,29 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(called) return; 
-            Cuda.deleteEvent(event);
+            super.finalize(); 
+            synchronized(this) {
+                if (called) return; 
+                Cuda.deleteEvent(event);
+            }
             streamPool.returnStreamArray(streams);
             core.free(block[0], block[1]);
         }
         
         @Override 
-        public final synchronized void sync() {
-            if(called) return;
-            Cuda.eventSync_Del(event);
+        public final void sync() {
+            synchronized(this) {
+                if (called) return;
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             streamPool.returnStreamArray(streams);
             core.free(block[0], block[1]);
-            called = true;
         }
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="class: SplitKSyncer">
-    public static final class SplitKSyncer implements Syncer
-    {
+    public static final class SplitKSyncer implements Syncer {
         private final CudaStreamPool streamPool;
         private final long[] streams;
         private final long event;
@@ -972,26 +1017,30 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(called) return; 
-            Cuda.deleteEvent(event);
+            super.finalize();
+            synchronized(this) {
+                if (called) return; 
+                Cuda.deleteEvent(event);
+            }
             core.free(block[0], block[1]);//release resources
             streamPool.returnStreamArray(streams);
         }
              
         @Override
         public final synchronized void sync() {
-            if(called) return;
-            Cuda.eventSync_Del(event);
+            synchronized(this) {
+                if (called) return;
+                Cuda.eventSync_Del(event);
+                called = true;
+            }
             core.free(block[0], block[1]);//release resources
             streamPool.returnStreamArray(streams);
-            called = true;
         }
     }
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="class: StreamBlockResult">
-    public static final class StreamBlockResult extends Result<Float>
-    {
+    public static final class StreamBlockResult extends Result<Float> {
         private final CudaStreamPool streamPool;
         private final long stream;
         
@@ -1013,7 +1062,8 @@ public class CudaFloat32EngineBase extends EngineBase {
 
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(isDone()) return;
+            super.finalize(); 
+            if(isDone()) return;
             streamPool.returnStream(stream);
             core.free(block[0], block[1]);
         }
@@ -1030,8 +1080,7 @@ public class CudaFloat32EngineBase extends EngineBase {
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="class: FloatIndexedResult">
-    public static final class FloatIndexedResult extends IndexedResult<Float>
-    {
+    public static final class FloatIndexedResult extends IndexedResult<Float> {
         private final CudaStreamPool streamPool;
         private final long stream;
         
@@ -1056,7 +1105,8 @@ public class CudaFloat32EngineBase extends EngineBase {
 
         @Override
         protected void finalize() throws Throwable {
-            super.finalize(); if(isDone()) return;
+            super.finalize(); 
+            if(isDone()) return;
             streamPool.returnStream(stream);
             core.free(block1[0], block1[1]);
             core.free(block2[0], block2[1]);
@@ -10379,6 +10429,7 @@ public class CudaFloat32EngineBase extends EngineBase {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Random Function">
+    //<editor-fold defaultstate="collapsed" desc="bernouli">
     @Override
     public Syncer bernouli2D(long X_address, 
             int seed,
@@ -10429,6 +10480,102 @@ public class CudaFloat32EngineBase extends EngineBase {
     }
     
     @Override
+    public Syncer elu_bernouli_mul2D(long Y_address, long R_address,
+            long X_address, 
+            float alpha, float k, int seed,
+            float p, float v1, float v2,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.elu(alpha, k);
+        Cuda_random.function_bernouli_mul2D(stream, 
+                X_address, R_address,
+                Y_address, 
+                seed, 
+                p, v1, v2, 
+                func.type, func.params, func.params.length, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer softplus_bernouli_mul2D(long Y_address, long R_address,
+            long X_address, 
+            int seed,
+            float p, float v1, float v2,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.softplus();
+        Cuda_random.function_bernouli_mul2D(stream, 
+                X_address, R_address,
+                Y_address, 
+                seed, 
+                p, v1, v2, 
+                func.type, func.params, func.params.length, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer gelu_bernouli_mul2D(long Y_address, long R_address,
+            long X_address, 
+            int seed,
+            float p, float v1, float v2,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.gelu();
+        Cuda_random.function_bernouli_mul2D(stream, 
+                X_address, R_address,
+                Y_address, 
+                seed, 
+                p, v1, v2, 
+                func.type, func.params, func.params.length, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer sigmoid_bernouli_mul2D(long Y_address, long R_address,
+            long X_address, 
+            int seed,
+            float p, float v1, float v2,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.sigmoid();
+        Cuda_random.function_bernouli_mul2D(stream, 
+                X_address, R_address,
+                Y_address, 
+                seed, 
+                p, v1, v2, 
+                func.type, func.params, func.params.length, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    
+    @Override
+    public Syncer tanh_bernouli_mul2D(long Y_address, long R_address,
+            long X_address, 
+            int seed,
+            float p, float v1, float v2,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        FloatFuncConfig func = FloatFunc.tanh();
+        Cuda_random.function_bernouli_mul2D(stream, 
+                X_address, R_address,
+                Y_address, 
+                seed, 
+                p, v1, v2, 
+                func.type, func.params, func.params.length, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="uniform">
+    @Override
     public Syncer uniform2D(long X_address,
             int seed, 
             float vmin, float vmax,
@@ -10457,7 +10604,8 @@ public class CudaFloat32EngineBase extends EngineBase {
                 lengthv, width, stride);
         return new StreamSyncer(streamPool, stream);
     }
-
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="gaussian">
     @Override
     public Syncer gaussian2D(long X_address, 
             int seed1, int seed2,
@@ -10487,6 +10635,7 @@ public class CudaFloat32EngineBase extends EngineBase {
                 lengthv, width, stride);
         return new StreamSyncer(streamPool, stream);
     }
+    //</editor-fold>
     //</editor-fold>
  
     //<editor-fold defaultstate="collapsed" desc="Reduce Function">

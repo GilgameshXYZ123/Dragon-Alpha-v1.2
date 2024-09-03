@@ -10,8 +10,7 @@ package z.dragon.common.int32;
  * @author Gilgamesh
  * @param <V>
  */
-public interface Entry_int32<V> 
-{
+public interface Entry_int32<V> {
     public int getKey();
     
     public V getValue();

@@ -48,7 +48,7 @@ public class BatchNorm_Relu extends BatchNorm {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: InlineBatchNorm_Relu">
-    public static class InlineBatchNorm_Relu <T extends BatchNorm_Relu>extends InlineBatchNorm<T>
+    public static class InlineBatchNorm_Relu<T extends BatchNorm_Relu>extends InlineBatchNorm<T>
     {
         public InlineBatchNorm_Relu(T unit) { super(unit); }
          

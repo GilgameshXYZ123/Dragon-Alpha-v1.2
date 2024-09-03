@@ -16,8 +16,7 @@ import z.dragon.nn.unit.dual.DualUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreLinear2_LeakyRelu<T extends DualUnit> extends DualCore<T> 
-{
+public class CoreLinear2_LeakyRelu<T extends DualUnit> extends DualCore<T> {
     protected boolean likeX1;
     protected float alpha, beta, gamma;
     protected float k;
@@ -58,7 +57,7 @@ public class CoreLinear2_LeakyRelu<T extends DualUnit> extends DualCore<T>
                 eg.linear2_leakyRelu_deltaX_v2(grad_inplace, deltaY, holdX1(), holdX2(), alpha, beta, gamma, k));
         
         if(!backward_grads1) { grads[0].remote_delete(); grads[0] = null; }//deltaX1
-        if(!backward_grads2) { grads[1].remote_delete(); grads[1] = null; }//deltaX2
+        if(!backward_grads2) { grads[1].remote_delete(); grads[1] = null; }//deltaX2    
         return grads;//{deltaX1, deltaX2}
     }
     //</editor-fold>

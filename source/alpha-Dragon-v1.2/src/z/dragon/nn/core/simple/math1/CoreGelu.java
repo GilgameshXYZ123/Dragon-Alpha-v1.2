@@ -15,8 +15,7 @@ import z.dragon.nn.unit.simple.SimpleUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreGelu <T extends SimpleUnit> extends SimpleCore<T>
-{
+public class CoreGelu <T extends SimpleUnit> extends SimpleCore<T> {
     public CoreGelu(T unit) { super(unit); }
     
     //<editor-fold defaultstate="collapsed" desc="running-area: propagation">

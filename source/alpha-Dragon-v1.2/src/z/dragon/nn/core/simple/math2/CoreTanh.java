@@ -9,14 +9,15 @@ import z.dragon.engine.Engine;
 import z.dragon.engine.Tensor;
 import z.dragon.nn.core.simple.SimpleInplaceCore;
 import z.dragon.nn.unit.simple.SimpleUnit;
+import z.util.lang.annotation.Passed;
 
 /**
  *
  * @author Gilgamesh                                                       
  * @param <T>                                                       
  */
-public class CoreTanh<T extends SimpleUnit> extends SimpleInplaceCore<T>
-{
+@Passed("CudaFloat32Base")
+public class CoreTanh<T extends SimpleUnit> extends SimpleInplaceCore<T> {
     public CoreTanh(T unit, boolean inplace) { super(unit, inplace); }
     
     //<editor-fold defaultstate="collapsed" desc="running-area: propagation">

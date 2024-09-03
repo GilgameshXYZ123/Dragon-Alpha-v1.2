@@ -17,8 +17,7 @@ import z.dragon.engine.cuda.CudaFloat32EngineBase;
  *
  * @author Gilgamesh
  */
-public final class Cuda 
-{
+public final class Cuda {
     private Cuda() {}
     
     //<editor-fold defaultstate="collapsed" desc="CUDA: extensive">

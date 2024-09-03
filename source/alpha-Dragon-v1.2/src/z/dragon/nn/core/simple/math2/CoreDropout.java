@@ -10,14 +10,15 @@ import z.dragon.engine.Tensor;
 import z.dragon.engine.Tensor.TensorSet;
 import z.dragon.nn.core.simple.SimpleInplaceCore;
 import z.dragon.nn.unit.simple.SimpleUnit;
+import z.util.lang.annotation.Passed;
 
 /**
  *
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreDropout<T extends SimpleUnit> extends SimpleInplaceCore<T>
-{
+@Passed("CudaFloat32Base")
+public class CoreDropout<T extends SimpleUnit> extends SimpleInplaceCore<T> {
     protected boolean training = true;
     protected float p;
     

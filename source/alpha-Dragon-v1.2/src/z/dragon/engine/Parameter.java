@@ -15,8 +15,9 @@ import java.util.List;
  * all tensor to construct parameter must be leaf nodes
  * @author Gilgamesh
  */
-public class Parameter implements Serializable
-{
+public class Parameter implements Serializable {
+    private static final long serialVersionUID = 6667777L;
+    
     //<editor-fold defaultstate="collapsed" desc="static class: ParamSet">
     public static class ParamSet extends HashSet<Parameter> 
     {

@@ -15,8 +15,7 @@ import z.dragon.nn.unit.simple.SimpleUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreTrim<T extends SimpleUnit> extends SimpleInplaceCore<T>
-{
+public class CoreTrim<T extends SimpleUnit> extends SimpleInplaceCore<T> {
     protected int[] t0;//trimming on the start
     protected int[] t1;//trimming on the end
     

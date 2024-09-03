@@ -16,8 +16,7 @@ import z.dragon.nn.unit.dual.DualUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreQuadratic2Row<T extends DualUnit> extends DualCore<T>  
-{
+public class CoreQuadratic2Row<T extends DualUnit> extends DualCore<T> {
     protected float k11, k12, k22, k1, k2, C;   
     
     public CoreQuadratic2Row(T unit,

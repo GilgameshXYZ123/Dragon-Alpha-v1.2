@@ -9,8 +9,7 @@ package z.dragon.engine;
  *
  * @author Gilgamesh
  */
-public class EngineAlloc 
-{
+public class EngineAlloc {
     protected final Engine eg;
     public EngineAlloc(Engine engine) { this.eg = engine; }
     

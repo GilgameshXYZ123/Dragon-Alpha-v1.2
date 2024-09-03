@@ -142,8 +142,7 @@ public class Affine extends SimpleInplaceUnit {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: InlineAffine">
-    public static class InlineAffine<T extends Affine> extends SimpleInplaceInline<T> 
-    {
+    public static class InlineAffine<T extends Affine> extends SimpleInplaceInline<T> {
         public InlineAffine(T unit) { super(unit); }
         
         public int features() { return ut.features; }

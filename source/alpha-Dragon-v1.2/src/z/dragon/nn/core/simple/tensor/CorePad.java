@@ -15,8 +15,7 @@ import z.dragon.nn.unit.simple.SimpleUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CorePad<T extends SimpleUnit> extends SimpleInplaceCore<T>
-{
+public class CorePad<T extends SimpleUnit> extends SimpleInplaceCore<T> {
     protected int[] p0;//padding on the start
     protected int[] p1;//padding on the end
     

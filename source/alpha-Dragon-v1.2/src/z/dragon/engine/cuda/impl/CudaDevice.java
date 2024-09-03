@@ -14,8 +14,9 @@ import z.util.lang.annotation.Desc;
  *
  * @author Gilgamesh
  */
-public final class CudaDevice implements Serializable
-{
+public final class CudaDevice implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     public CudaDevice() { this(Cuda.getDeviceId()); }
     public CudaDevice(int device_id) { this.setId(device_id); }
     

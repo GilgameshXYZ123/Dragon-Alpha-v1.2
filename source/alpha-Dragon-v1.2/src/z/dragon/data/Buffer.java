@@ -12,8 +12,7 @@ import java.util.concurrent.Callable;
  * @author Gilgamesh
  * @param <T>
  */
-public class Buffer<T> 
-{
+public class Buffer<T> {
     private final byte[] lock = new byte[0];
     private final Thread worker;
     private volatile boolean start = false;

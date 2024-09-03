@@ -23,8 +23,7 @@ import z.util.xml.XML;
  *
  * @author Gilgamesh
  */
-public final class Soccer
-{
+public final class Soccer {
     public static final int label_size = 4;
     public static final int[] picture_dim = {128, 128, 3};
     

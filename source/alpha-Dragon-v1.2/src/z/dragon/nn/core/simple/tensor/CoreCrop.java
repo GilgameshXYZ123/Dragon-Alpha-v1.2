@@ -15,8 +15,7 @@ import z.dragon.nn.unit.simple.SimpleUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreCrop<T extends SimpleUnit> extends SimpleInplaceCore<T>
-{
+public class CoreCrop<T extends SimpleUnit> extends SimpleInplaceCore<T> {
     protected int[] start;
     protected int[] out_dim;
     

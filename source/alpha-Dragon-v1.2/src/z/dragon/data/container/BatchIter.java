@@ -13,8 +13,7 @@ import z.dragon.data.Pair;
  * @param <K>
  * @param <V>
  */
-public interface BatchIter<K, V> 
-{
+public interface BatchIter<K, V> {
     public BatchIter<K, V> shuffle_swap(float percent);
     public BatchIter<K, V> shuffle_sort();
     

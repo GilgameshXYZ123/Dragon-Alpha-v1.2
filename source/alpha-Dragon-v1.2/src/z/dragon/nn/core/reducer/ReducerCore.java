@@ -20,8 +20,7 @@ import z.dragon.nn.unit.reducer.Reducer;
  * @param <T>
  */
 @SuppressWarnings("unchecked")
-public abstract class ReducerCore<T extends Reducer> extends UnitCore<T>
-{
+public abstract class ReducerCore<T extends Reducer> extends UnitCore<T> {
     //<editor-fold defaultstate="collapsed" desc="member-parameters">
     transient private final UnitCoreMap<Object> arc = new UnitCoreMap<>();//solve the topology
     

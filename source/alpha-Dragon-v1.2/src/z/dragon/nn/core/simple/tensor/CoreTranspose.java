@@ -15,8 +15,7 @@ import z.dragon.nn.unit.simple.SimpleUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreTranspose<T extends SimpleUnit> extends SimpleInplaceCore<T>
-{
+public class CoreTranspose<T extends SimpleUnit> extends SimpleInplaceCore<T> {
     protected int idx1;//dim Idx1
     protected int idx2;//dim Idx2
     

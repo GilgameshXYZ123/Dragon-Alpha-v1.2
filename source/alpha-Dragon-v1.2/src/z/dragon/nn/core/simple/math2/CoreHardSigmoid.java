@@ -9,14 +9,15 @@ import z.dragon.engine.Engine;
 import z.dragon.engine.Tensor;
 import z.dragon.nn.core.simple.SimpleInplaceCore;
 import z.dragon.nn.unit.simple.SimpleUnit;
+import z.util.lang.annotation.Passed;
 
 /**
  *
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreHardSigmoid <T extends SimpleUnit> extends SimpleInplaceCore<T> 
-{
+@Passed("CudaFloat32Base")
+public class CoreHardSigmoid <T extends SimpleUnit> extends SimpleInplaceCore<T>  {
     public CoreHardSigmoid(T unit, boolean inplace) { super(unit, inplace); }
 
     //<editor-fold defaultstate="collapsed" desc="running-area: propagation">

@@ -14,8 +14,7 @@ import z.util.math.ExRandom;
  * @param <K>
  * @param <V>
  */
-public abstract class AbstractContainer<K, V> implements DataContainer<K, V> 
-{
+public abstract class AbstractContainer<K, V> implements DataContainer<K, V> {
     protected final ExRandom exr = new ExRandom();
     protected final Class<K> kclazz;
     protected final Class<V> vclazz;

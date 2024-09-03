@@ -11,8 +11,7 @@ import z.dragon.engine.Tensor;
 /**
  * @author Gilgamesh
  */
-public interface TensorIter 
-{
+public interface TensorIter {
     public static class TensorPair extends Pair<Tensor, Tensor> {
         public TensorPair(Tensor feature, Tensor label) { super(feature, label); }
     }

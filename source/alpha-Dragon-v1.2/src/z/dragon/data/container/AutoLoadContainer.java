@@ -21,8 +21,7 @@ import z.util.math.vector.Vector;
  * @param <V> 
  */
 @SuppressWarnings(value = "unchecked")
-public class AutoLoadContainer<K, V> extends AbstractContainer<K, V> 
-{
+public class AutoLoadContainer<K, V> extends AbstractContainer<K, V> {
     public static interface Loader<K, V> { public Pair<K, V> load(); }
     
     public static interface Triger { public boolean needLoad(AutoLoadContainer con, int batch); }

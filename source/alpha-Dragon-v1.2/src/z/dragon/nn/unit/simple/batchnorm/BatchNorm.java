@@ -139,7 +139,7 @@ public class BatchNorm extends GlobalBatchNorm {
             Tensor Y = (ut.affine?
                     eg.batchNorm(inplace, X, ut.dX_mean, ut.dX_var, ut.eps, ut.A.ts(), ut.B.ts()):
                     eg.batchNorm(inplace, X, ut.dX_mean, ut.dX_var, ut.eps));
-            if(ut.track_stats) Y.dual(()-> { ut.run_mean.c(); ut.run_var.c(); });
+            if (ut.track_stats) Y.dual(()-> { ut.run_mean.c(); ut.run_var.c(); });
             return Y;
         }
         //</editor-fold>

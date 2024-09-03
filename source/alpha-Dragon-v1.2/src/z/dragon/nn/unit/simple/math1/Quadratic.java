@@ -16,8 +16,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Quadratic extends SimpleFunction
-{
+public class Quadratic extends SimpleFunction {
     private static final long serialVersionUID = 562781240240001L;
     
     protected float alpha;

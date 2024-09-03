@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 import z.dragon.common.state.State.StateValue;
 
-public class State extends HashMap<String, StateValue>
-{
+public class State extends HashMap<String, StateValue> {
     private static final long serialVersionUID = 1L;
  
     //<editor-fold defaultstate="collapsed" desc="interface: StateValue">

@@ -16,8 +16,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Abs extends SimpleFunction
-{
+public class Abs extends SimpleFunction {
     private static final long serialVersionUID = 562781240210001L;
     
     protected float alpha;
@@ -49,8 +48,7 @@ public class Abs extends SimpleFunction
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="static class: InlineAbs">
-    public static class InlineAbs extends SimpleCore<Abs>
-    {
+    public static class InlineAbs extends SimpleCore<Abs> {
         public InlineAbs(Abs unit) { super(unit); }
     
         public float alpha() { return ut.alpha; }

@@ -14,8 +14,7 @@ import z.dragon.data.Pair;
  * @param <K>
  * @param <V>
  */
-public interface DataContainer<K, V>
-{
+public interface DataContainer<K, V> {
     public int size();
     default boolean isEmpty() { return size() == 0; }
     

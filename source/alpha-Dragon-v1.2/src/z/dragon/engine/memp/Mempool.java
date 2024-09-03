@@ -23,8 +23,9 @@ import static z.dragon.engine.EngineCore.NULL;
  * </pre>
  * @author Gilgameshf
  */
-public abstract class Mempool implements MemStatus, Serializable
-{
+public abstract class Mempool implements MemStatus, Serializable {
+    private static final long serialVersionUID = 1L;
+    
     public Mempool(long max_mem_size) { this.max_mem_size = max_mem_size; }
     
     //<editor-fold defaultstate="collapsed" desc="member params">
@@ -105,7 +106,8 @@ public abstract class Mempool implements MemStatus, Serializable
         if(mem_size <= 0) throw new IllegalArgumentException(String.format(
                 "mem_size { got %d } must > = 0", mem_size));
         if(mem_size > max_mem_size) throw new IllegalArgumentException(String.format(
-                "mem_size { got %d } > mempool.max_mem_size { got %d }", mem_size, max_mem_size));
+                "mem_size { got %d } > mempool.max_mem_size { got %d }", 
+                mem_size, max_mem_size));
     }
 
     public EngineBase engineBase() { return base; }

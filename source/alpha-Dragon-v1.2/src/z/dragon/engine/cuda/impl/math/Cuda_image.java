@@ -9,8 +9,7 @@ package z.dragon.engine.cuda.impl.math;
  *
  * @author Gilgamesh
  */
-public final class Cuda_image 
-{
+public final class Cuda_image {
     private Cuda_image() {}
     
     //<editor-fold defaultstate="collapsed" desc="image: char2float">

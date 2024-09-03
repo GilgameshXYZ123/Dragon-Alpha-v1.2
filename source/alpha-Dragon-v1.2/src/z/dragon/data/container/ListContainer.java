@@ -17,8 +17,7 @@ import z.util.math.vector.Vector;
  * @param <V> 
  */
  @SuppressWarnings(value = "unchecked")
-public class ListContainer<K, V> extends AbstractContainer<K, V>
-{
+public class ListContainer<K, V> extends AbstractContainer<K, V> {
     protected final ArrayList<K> karr;
     protected final ArrayList<V> varr;
    

@@ -711,11 +711,11 @@ public class Engine implements MemStatus {
         //release the memory of the tensor
         //must wait until the compute of the tensor is completed
         //if you delete a tensor participating in a computation, it may effects other tensor
-        core.free(X.c().mem_size, X.address);//X.address != NULL
-        
         synchronized (X) {
-            if(X.grad != null) { delete(X.grad); X.grad = null; }//X.clear_grad
-            if(X.carrier != null) {//clear X.carrier
+            //core.free(X.mem_size, X.address); X.address = 0L;//X.address != NULL
+            core.free(X.c().mem_size, X.address); X.address = 0L;//X.address != NULL
+            if (X.grad != null) { delete(X.grad); X.grad = null; }//X.clear_grad
+            if (X.carrier != null) {//clear X.carrier
                 if(!X.carrier.isEmpty()) {
                     X.carrier.forEach((ts) -> { if(ts != X) delete(ts); });
                     X.carrier.clear();
@@ -724,17 +724,17 @@ public class Engine implements MemStatus {
             }
         }
         
-        X.address = 0L;
         X.dim = null; 
         X.syncer = null;
         X.trace = null;
         X.mod_counter = null;
     }
     //</editor-fold>
-    public void delete(Tensor X)  {
-        if(X == null) return;
-        if(X.eg != this) { X.eg.delete(X); return; }
+    public boolean delete(Tensor X)  {
+        if (X == null) return false;
+        if (X.eg != this) { return X.eg.delete(X); }
         delete_core(X);
+        return true;
     }
     
     public void delete(Tensor... Xs) {
@@ -1475,9 +1475,10 @@ public class Engine implements MemStatus {
     
     //<editor-fold defaultstate="collapsed" desc="Tensor Trick">
     //<editor-fold defaultstate="collapsed" desc="reshape && view: X[oldDim] -> X'[newDim]">
+    public Tensor view_copy(Tensor X) { return view(false, X, X.dim); }
     @Passed("CudaFloat32EngieBase")
     public Tensor view(boolean inplace, Tensor X, int... dim) {
-        dim = (dim == null || dim.length == 0?
+        dim = (dim == null || dim.length == 0 ?
                 new int[] { X.dim(0), X.length() / X.dim(0) } ://flatten
                 negative_dim(X.length, dim));//newDim.length == oldDim.length
         
@@ -1488,7 +1489,8 @@ public class Engine implements MemStatus {
         
         Tensor Y = new Tensor(check, this, core.dataType(), dim);
         Y.copy_memoryMetaData(X);
-        Y.mod_counter = X.mod_counter;//important to let y inherit X.mod_count
+        Y.mod_counter = X.mod_counter;//inherent mod-count
+        Y.need_carry = X.need_carry; Y.carrier = X.carrier;//inherent carrier
         return Y;
     }
     
@@ -10160,7 +10162,7 @@ public class Engine implements MemStatus {
         return leakyRelu_bernouli_mul(X, k, p, pr, 0);//leakyRelu(X) * bernouli(p, 1/p, 0)
     }
     
-    public Tensor[] leakyRelu_bernouli_mul(Tensor X, float k,  float p) { return leakyRelu_bernouli_mul(X, k, p, 1.0f , 0.0f); }
+    public Tensor[] leakyRelu_bernouli_mul(Tensor X, float k, float p) { return leakyRelu_bernouli_mul(X, k, p, 1.0f , 0.0f); }
     @Passed("CudaFloat32EngieBase")
     public Tensor[] leakyRelu_bernouli_mul(Tensor X, float k, float p, float v1, float v2) {
         if(check) { require_dtype(X, "X"); }
@@ -10171,6 +10173,116 @@ public class Engine implements MemStatus {
                 R.c().address,//result1
                 X.address, 
                 k, p, v1, v2,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else { Y.setSyncer(sc); R.setSyncer(sc); }
+        return new Tensor[]{ Y, R };
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="elu_bernouli_mul">
+    public Tensor[] elu_dropout(Tensor X, float alpha, float k, float nonzero_percent) {
+        float p = nonzero_percent, pr = 1.0f / p;
+        return elu_bernouli_mul(X, alpha, k, p, pr, 0);//elu(X) * bernouli(p, 1/p, 0)
+    }
+    
+    public Tensor[] elu_bernouli_mul(Tensor X, float alpha, float k, float p) { return elu_bernouli_mul(X, alpha, k, p, 1.0f , 0.0f); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] elu_bernouli_mul(Tensor X, float alpha, float k, float p, float v1, float v2) {
+        if(check) { require_dtype(X, "X"); }
+        Tensor Y = this.empty(X.dim);
+        Tensor R = this.empty(X.dim);
+        Syncer sc = core.elu_bernouli2D_mul(
+                Y.c().address,//result0
+                R.c().address,//result1
+                X.address, 
+                alpha, k, p, v1, v2,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else { Y.setSyncer(sc); R.setSyncer(sc); }
+        return new Tensor[]{ Y, R };
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="softplus_bernouli_mul">
+    public Tensor[] softplus_dropout(Tensor X, float nonzero_percent) {
+        float p = nonzero_percent, pr = 1.0f / p;
+        return softplus_bernouli_mul(X, p, pr, 0);//softplus(X) * bernouli(p, 1/p, 0)
+    }
+    
+    public Tensor[] softplus_bernouli_mul(Tensor X, float p) { return softplus_bernouli_mul(X, p, 1.0f , 0.0f); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] softplus_bernouli_mul(Tensor X, float p, float v1, float v2) {
+        if(check) { require_dtype(X, "X"); }
+        Tensor Y = this.empty(X.dim);
+        Tensor R = this.empty(X.dim);
+        Syncer sc = core.softplus_bernouli2D_mul(
+                Y.c().address,//result0
+                R.c().address,//result1
+                X.address, 
+                p, v1, v2,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else { Y.setSyncer(sc); R.setSyncer(sc); }
+        return new Tensor[]{ Y, R };
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="gelu_bernouli_mul">
+    public Tensor[] gelu_dropout(Tensor X, float nonzero_percent) {
+        float p = nonzero_percent, pr = 1.0f / p;
+        return gelu_bernouli_mul(X, p, pr, 0);//gelu(X) * bernouli(p, 1/p, 0)
+    }
+    
+    public Tensor[] gelu_bernouli_mul(Tensor X, float p) { return gelu_bernouli_mul(X, p, 1.0f , 0.0f); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] gelu_bernouli_mul(Tensor X, float p, float v1, float v2) {
+        if(check) { require_dtype(X, "X"); }
+        Tensor Y = this.empty(X.dim);
+        Tensor R = this.empty(X.dim);
+        Syncer sc = core.gelu_bernouli2D_mul(
+                Y.c().address,//result0
+                R.c().address,//result1
+                X.address, 
+                p, v1, v2,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else { Y.setSyncer(sc); R.setSyncer(sc); }
+        return new Tensor[]{ Y, R };
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="sigmoid_bernouli_mul">
+    public Tensor[] sigmoid_dropout(Tensor X, float nonzero_percent) {
+        float p = nonzero_percent, pr = 1.0f / p;
+        return sigmoid_bernouli_mul(X, p, pr, 0);//sigmoid(X) * bernouli(p, 1/p, 0)
+    }
+    
+    public Tensor[] sigmoid_bernouli_mul(Tensor X, float p) { return sigmoid_bernouli_mul(X, p, 1.0f , 0.0f); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] sigmoid_bernouli_mul(Tensor X, float p, float v1, float v2) {
+        if(check) { require_dtype(X, "X"); }
+        Tensor Y = this.empty(X.dim);
+        Tensor R = this.empty(X.dim);
+        Syncer sc = core.sigmoid_bernouli2D_mul(
+                Y.c().address,//result0
+                R.c().address,//result1
+                X.address, 
+                p, v1, v2,
+                X.lengthv, X.lastDim());
+        if(sync) sc.sync(); else { Y.setSyncer(sc); R.setSyncer(sc); }
+        return new Tensor[]{ Y, R };
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="tanh_bernouli_mul">
+    public Tensor[] tanh_dropout(Tensor X, float nonzero_percent) {
+        float p = nonzero_percent, pr = 1.0f / p;
+        return tanh_bernouli_mul(X, p, pr, 0);//tanh(X) * bernouli(p, 1/p, 0)
+    }
+    
+    public Tensor[] tanh_bernouli_mul(Tensor X, float p) { return tanh_bernouli_mul(X, p, 1.0f , 0.0f); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor[] tanh_bernouli_mul(Tensor X, float p, float v1, float v2) {
+        if(check) { require_dtype(X, "X"); }
+        Tensor Y = this.empty(X.dim);
+        Tensor R = this.empty(X.dim);
+        Syncer sc = core.tanh_bernouli2D_mul(
+                Y.c().address,//result0
+                R.c().address,//result1
+                X.address, 
+                p, v1, v2,
                 X.lengthv, X.lastDim());
         if(sync) sc.sync(); else { Y.setSyncer(sc); R.setSyncer(sc); }
         return new Tensor[]{ Y, R };

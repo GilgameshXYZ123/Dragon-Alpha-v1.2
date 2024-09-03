@@ -9,8 +9,7 @@ package z.dragon.common.int32;
  *
  * @author Gilgamesh
  */
-public interface Iter_int32  
-{
+public interface Iter_int32 {
     public boolean hasNext();
     
     public int next();

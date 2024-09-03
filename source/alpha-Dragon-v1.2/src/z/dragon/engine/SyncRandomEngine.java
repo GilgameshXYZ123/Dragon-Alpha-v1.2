@@ -11,8 +11,7 @@ import z.util.lang.annotation.Passed;
  *
  * @author Gilgamesh
  */
-public class SyncRandomEngine 
-{
+public class SyncRandomEngine {
     protected final Engine eg;
     protected SyncRandomEngine(Engine eg) { this.eg = eg; }
     

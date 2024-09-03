@@ -13,12 +13,10 @@ import java.util.TreeMap;
  * [mem_size, blockList[addresses]]
  * @author Gilgamesh
  */
-public class Addrp1 extends TreeMap<Long, LinkedList<Long>>
-        implements Addrpool
-{
-    //<editor-fold defaultstate="collapsed" desc="member params & Basic-Functions">
+public class Addrp1 extends TreeMap<Long, LinkedList<Long>> implements Addrpool {
     private static final long serialVersionUID = 20233201250L;
     
+    //<editor-fold defaultstate="collapsed" desc="member params & Basic-Functions">
     private int size = 0;
     
     @Override public int size() { return size; }

@@ -11,8 +11,7 @@ package z.dragon.common.int64;
  * @author Gilgamesh
  * @param <V>
  */
-public interface Entry_int64<V> 
-{
+public interface Entry_int64<V> {
     public long getKey();
     
     public V getValue();

@@ -5,7 +5,6 @@
  */
 package z.dragon.dataset;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import static z.dragon.alpha.Alpha.Datas.data;
 import static z.dragon.alpha.Alpha.alpha;
@@ -18,8 +17,7 @@ import z.dragon.data.container.ListContainer;
  *
  * @author Gilgamesh
  */
-public final class Minist 
-{
+public final class Minist {
     private Minist() {}
     
     public static final int num_class = 10;//use one hot coding

@@ -19,8 +19,7 @@ import z.util.lang.annotation.Passed;
  * </pre>
  * @author Gilgamesh
  */
-public class Cuda_reduce 
-{
+public class Cuda_reduce {
     private Cuda_reduce() {}
     
     //<editor-fold defaultstate="collapsed" desc="common">

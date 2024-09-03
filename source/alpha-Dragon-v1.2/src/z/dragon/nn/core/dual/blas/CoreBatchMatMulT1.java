@@ -16,8 +16,7 @@ import z.dragon.nn.unit.dual.DualUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreBatchMatMulT1<T extends DualUnit> extends DualCore<T>
-{
+public class CoreBatchMatMulT1<T extends DualUnit> extends DualCore<T> {
     protected boolean likeX1;
     
     public CoreBatchMatMulT1(T unit, boolean likeX1) {

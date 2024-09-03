@@ -18,8 +18,7 @@ import z.dragon.nn.unit.reducer.Reducer;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreQuadraticSummary<T extends Reducer> extends ReducerCore<T>
-{
+public class CoreQuadraticSummary<T extends Reducer> extends ReducerCore<T> {
     protected float alpha;
     protected float beta;
     protected float gamma;

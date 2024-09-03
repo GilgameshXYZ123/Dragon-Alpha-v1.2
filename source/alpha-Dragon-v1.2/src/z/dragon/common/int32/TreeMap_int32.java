@@ -15,8 +15,9 @@ import z.dragon.common.int32.Entry_int32.FinalEnrty_int32;
  * @author Gilgamesh
  * @param <V>
  */
-public class TreeMap_int32<V> implements Serializable
-{
+public class TreeMap_int32<V> implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private static final boolean RED   = false;
     private static final boolean BLACK = true;
     

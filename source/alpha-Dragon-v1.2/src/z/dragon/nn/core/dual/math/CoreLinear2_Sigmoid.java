@@ -16,8 +16,7 @@ import z.dragon.nn.unit.dual.DualUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreLinear2_Sigmoid<T extends DualUnit> extends DualCore<T> 
-{
+public class CoreLinear2_Sigmoid<T extends DualUnit> extends DualCore<T> {
     protected boolean likeX1;
     protected float alpha, beta, gamma;
 

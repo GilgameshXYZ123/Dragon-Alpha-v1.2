@@ -15,8 +15,7 @@ import z.dragon.nn.unit.simple.SimpleUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreFlatten<T extends SimpleUnit> extends SimpleInplaceCore<T>
-{
+public class CoreFlatten<T extends SimpleUnit> extends SimpleInplaceCore<T> {
     transient protected int[] inDim;
     transient protected int[] outDim;
     

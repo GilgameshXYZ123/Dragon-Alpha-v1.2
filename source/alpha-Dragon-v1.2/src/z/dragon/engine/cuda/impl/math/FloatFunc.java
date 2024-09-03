@@ -9,8 +9,7 @@ package z.dragon.engine.cuda.impl.math;
  *
  * @author Gilgamesh
  */
-public class FloatFunc 
-{
+public class FloatFunc {
     public static class FloatFuncConfig {
         public int type;
         public float[] params;
@@ -36,5 +35,5 @@ public class FloatFunc
     public static FloatFuncConfig softplus() { return new FloatFuncConfig(fcode_softplus); }
     public static FloatFuncConfig gelu() { return new FloatFuncConfig(fcode_gelu); }
     public static FloatFuncConfig sigmoid() { return new FloatFuncConfig(fcode_sigmoid); }
-    public static FloatFuncConfig tanh() { return new FloatFuncConfig(fcode_tanh);}
+    public static FloatFuncConfig tanh() { return new FloatFuncConfig(fcode_tanh); }
 }

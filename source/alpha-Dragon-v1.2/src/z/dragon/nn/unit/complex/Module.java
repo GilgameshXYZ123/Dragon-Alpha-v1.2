@@ -33,8 +33,8 @@ import z.util.lang.annotation.Passed;
  */
 @SuppressWarnings("unchecked")
 @Passed("CudaFloat32Base")
-public abstract class Module extends Unit implements Train2Eval, AsyncStateUpdate
-{   
+public abstract class Module extends Unit implements Train2Eval, AsyncStateUpdate {   
+    private static final long serialVersionUID = 4124125555122341L;
     private boolean constructed = false;
     private final UnitMap<String>   unit_map  = new UnitMap<>();//<unit, fid_name>
     private final Map<String, Unit> runit_map = new HashMap<>();//<fid_name, unit>

@@ -17,8 +17,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class BatchMatMul extends DualFunction
-{
+public class BatchMatMul extends DualFunction {
     private static final long serialVersionUID = 1L;
     
     protected boolean likeX1;

@@ -9,17 +9,16 @@ import z.dragon.engine.Engine;
 import z.dragon.engine.Tensor;
 import z.dragon.nn.core.simple.SimpleInplaceCore;
 import z.dragon.nn.unit.simple.SimpleUnit;
+import z.util.lang.annotation.Passed;
 
 /**
  *
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreSoftplus<T extends SimpleUnit> extends SimpleInplaceCore<T>
-{
-    public CoreSoftplus(T unit, boolean inplace) {
-        super(unit, inplace); 
-    }
+@Passed("CudaFloat32Base")
+public class CoreSoftplus<T extends SimpleUnit> extends SimpleInplaceCore<T> {
+    public CoreSoftplus(T unit, boolean inplace) { super(unit, inplace);  }
     
     //<editor-fold defaultstate="collapsed" desc="running-area: propagation">
     @Override

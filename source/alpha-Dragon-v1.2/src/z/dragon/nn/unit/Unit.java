@@ -36,6 +36,8 @@ public abstract class Unit implements Stateful, StateReader,
         GradientControllable, BackwardHookable,
         Serializable
 {
+     private static final long serialVersionUID = 56278124000000000L;
+    
     //<editor-fold defaultstate="collapsed" desc="static class: UnitMap">
     public static class UnitMap<V> extends HashMap<Unit, V> 
     {
@@ -82,11 +84,8 @@ public abstract class Unit implements Stateful, StateReader,
     protected static final ExecutorService exec = Executors.newFixedThreadPool(4, daemonThreadFactory); 
     //</editor-fold>
     
-    private static final long serialVersionUID = 56278124000000000L;
-    
     //<editor-fold defaultstate="collapsed" desc="static class: UnitCoreManager">
-    public class UnitCoreManager 
-    {
+    public class UnitCoreManager {
         protected ArrayList<UnitCore<?>> buffer = new ArrayList<>();
         protected int count = 0;//how many nodes have been borrowed
         
@@ -110,7 +109,7 @@ public abstract class Unit implements Stateful, StateReader,
         }
         
         public void gc() { 
-            for(int i=0; i<count; i++) buffer.get(i).gc(); 
+            for (int i=0; i<count; i++) buffer.get(i).gc(); 
             count = 0;
         }
         

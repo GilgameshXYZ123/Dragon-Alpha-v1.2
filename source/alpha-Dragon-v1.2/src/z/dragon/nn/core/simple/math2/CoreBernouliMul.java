@@ -15,8 +15,7 @@ import z.dragon.nn.unit.simple.SimpleUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreBernouliMul<T extends SimpleUnit> extends SimpleInplaceCore<T>
-{
+public class CoreBernouliMul<T extends SimpleUnit> extends SimpleInplaceCore<T> {
     protected boolean training = true;
     protected float p, v1, v2;
     

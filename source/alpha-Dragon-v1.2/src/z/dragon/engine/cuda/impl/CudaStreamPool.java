@@ -11,8 +11,9 @@ import java.io.Serializable;
  *
  * @author Gilgamesh
  */
-public abstract class CudaStreamPool implements Serializable
-{
+public abstract class CudaStreamPool implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     protected final CudaDevice dev;
     protected int max_streamsize;
     protected int max_getsize_oneturn;
@@ -23,9 +24,6 @@ public abstract class CudaStreamPool implements Serializable
                 "maxStreamSize { got %d } must > 0", maxStreamSize));
         if(maxGetSizeOneTurn <= 0) throw new IllegalArgumentException(String.format(
                 "maxGetSizeOneTurn { got %d } must > 0", maxGetSizeOneTurn));
-//        if(maxGetSizeOneTurn > maxStreamSize) throw new IllegalArgumentException(String.format(
-//                "maxGetSizeOneTurn { got %d } must <= maxStreamSize { got %d }", 
-//                maxGetSizeOneTurn, maxStreamSize));
         
         this.dev = dev;
         this.max_streamsize = maxStreamSize;

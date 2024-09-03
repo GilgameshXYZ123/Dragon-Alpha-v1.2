@@ -12,8 +12,7 @@ import z.dragon.engine.Parameter;
 /**
  * @author Gilgamesh
  */
-public abstract class SimpleInplaceFunction extends SimpleInplaceUnit
-{
+public abstract class SimpleInplaceFunction extends SimpleInplaceUnit {
     private static final long serialVersionUID = 1L;
     
     protected SimpleInplaceFunction(boolean inplace) { super(inplace); }

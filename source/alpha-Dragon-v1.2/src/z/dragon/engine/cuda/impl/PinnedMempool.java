@@ -19,8 +19,9 @@ import z.util.lang.annotation.Passed;
  *
  * @author Gilgamesh
  */
-public class PinnedMempool implements MemStatus, Serializable
-{
+public class PinnedMempool implements MemStatus, Serializable{  
+    private static final long serialVersionUID = 1L;
+    
     public static final long MEM_1GB = alpha.MEM_1GB;
     public static final long MEM_1MB = alpha.MEM_1MB;
     
