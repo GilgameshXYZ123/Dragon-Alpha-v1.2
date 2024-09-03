@@ -145,7 +145,8 @@ public class Memp2 extends Mempool {
     @Override public int physical_block_num() { return gc.size(); }
     @Override public int buffered_block_num() { return pool.size(); }
    
-    @Override public long[] physical_addrs() { 
+    @Override 
+    public long[] physical_addrs() { 
         long[] addrs = new long[gc.size()]; int index = 0;
         for(long addr : gc.keySet()) addrs[index++] = addr;
         return addrs;
@@ -177,9 +178,8 @@ public class Memp2 extends Mempool {
     //<editor-fold defaultstate="collapsed" desc="running-area: alloc">
     @Override
     protected long[] search(long mem_size) {
-        if(mem_size < min_split_threshold) {//avoid arror of small memsize
-            return pool.remove_section(mem_size, (long) (mem_size * 1.5));
-        }
+        if(mem_size < min_split_threshold) //avoid arror of small memsize
+            return pool.remove_section(mem_size, (long) (mem_size * 1.5f));
         
         long[] block = pool.remove_ceiling(mem_size);
         if(block == null) return null;
@@ -192,7 +192,7 @@ public class Memp2 extends Mempool {
         long split_Rel = (long) (split_rel * block_size);
         
         if(((sub_size > split_abs) || (sub_size > split_abs)) && 
-           ((sub_size > split_Rel) || (sub_size > split_Rel)))
+           ((sub_size > split_Rel) || (sub_size > split_Rel))) 
         {
             if(node == null) node = new Mnode(true, block_size, block_address);
             

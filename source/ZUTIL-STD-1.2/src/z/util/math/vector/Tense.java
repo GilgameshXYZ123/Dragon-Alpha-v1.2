@@ -1622,68 +1622,6 @@ public class Tense
 	}
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="1D pooling">
-    public static void pool1D_avg_naive_ignore_padding(
-        float[][][] X, int IW, int FW,
-	float[][][] Y, int OW,
-	int N, int IC,
-	int sw, int pw)
-    {
-	for (int n = 0; n < N; n++)
-        for (int ic = 0; ic < IC; ic++) {
-            for (int ow = 0; ow < OW; ow++) {//ow < OW
-                float v = 0; int count = 0;//the padding part is not included
-                for (int fw = 0; fw < FW; fw++) {
-                    int iw = ow*sw - pw + fw;
-                    if (iw < 0 || iw >= IW) continue;
-                    v += X[n][iw][ic]; count++;
-		}
-                Y[n][ow][ic] = v / count;
-            }
-        }
-    }
-    
-    public static void pool1D_avg_naive(
-        float[][][] X, int IW, int FW,
-	float[][][] Y, int OW,
-	int N, int IC,
-	int sw, int pw)
-    {
-	for (int n = 0; n < N; n++)
-        for (int ic = 0; ic < IC; ic++) {
-            for (int ow = 0; ow<OW; ow++) {//ow < OW
-                float v = 0; 
-                for (int fw = 0; fw < FW; fw++) {
-                    int iw = ow*sw - pw + fw;
-                    if (iw < 0 || iw >= IW) continue;
-                    v += X[n][iw][ic]; 
-		}
-                Y[n][ow][ic] = v / FW;
-            }
-        }
-    }
-    
-    public static void pool1D_max_naive(
-            float[][][] X, int IW, int FW,
-            float[][][] Y, int OW,
-            int N, int IC,
-            int sw, int pw)
-    {
-	for (int n = 0; n < N; n++)
-        for (int ic = 0; ic < IC; ic++) {
-            for (int ow = 0; ow < OW; ow++) {//ow < OW
-                float v = - Float.MAX_VALUE;//the padding part is not included
-                for (int fw = 0; fw < FW; fw++) {
-                    int iw = ow*sw - pw + fw;
-                    if (iw < 0 || iw >= IW) continue;
-                    float x = X[n][iw][ic];
-                    if(v < x) v = x;
-		}
-                Y[n][ow][ic] = v;
-            }
-        }
-    }
-    //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="2D unpooing_average">
     public static void unpool2D_avgerage_naive(
@@ -1894,7 +1832,6 @@ public class Tense
         }
     }
     //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="2D unpooling_max">
     public static void unpool2D_max_naive(
         float[][][][] deltaY, float[][][][] Y, int OH, int OW,
@@ -1995,6 +1932,69 @@ public class Tense
                 }
                 
                 deltaX[n][ih][iw][ic] = v;
+            }
+        }
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="1D pooling">
+    public static void pool1D_avg_naive_ignore_padding(
+        float[][][] X, int IW, int FW,
+	float[][][] Y, int OW,
+	int N, int IC,
+	int sw, int pw)
+    {
+	for (int n = 0; n < N; n++)
+        for (int ic = 0; ic < IC; ic++) {
+            for (int ow = 0; ow < OW; ow++) {//ow < OW
+                float v = 0; int count = 0;//the padding part is not included
+                for (int fw = 0; fw < FW; fw++) {
+                    int iw = ow*sw - pw + fw;
+                    if (iw < 0 || iw >= IW) continue;
+                    v += X[n][iw][ic]; count++;
+		}
+                Y[n][ow][ic] = v / count;
+            }
+        }
+    }
+    
+    public static void pool1D_avg_naive(
+        float[][][] X, int IW, int FW,
+	float[][][] Y, int OW,
+	int N, int IC,
+	int sw, int pw)
+    {
+	for (int n = 0; n < N; n++)
+        for (int ic = 0; ic < IC; ic++) {
+            for (int ow = 0; ow<OW; ow++) {//ow < OW
+                float v = 0; 
+                for (int fw = 0; fw < FW; fw++) {
+                    int iw = ow*sw - pw + fw;
+                    if (iw < 0 || iw >= IW) continue;
+                    v += X[n][iw][ic]; 
+		}
+                Y[n][ow][ic] = v / FW;
+            }
+        }
+    }
+    
+    public static void pool1D_max_naive(
+            float[][][] X, int IW, int FW,
+            float[][][] Y, int OW,
+            int N, int IC,
+            int sw, int pw)
+    {
+	for (int n = 0; n < N; n++)
+        for (int ic = 0; ic < IC; ic++) {
+            for (int ow = 0; ow < OW; ow++) {//ow < OW
+                float v = - Float.MAX_VALUE;//the padding part is not included
+                for (int fw = 0; fw < FW; fw++) {
+                    int iw = ow*sw - pw + fw;
+                    if (iw < 0 || iw >= IW) continue;
+                    float x = X[n][iw][ic];
+                    if(v < x) v = x;
+		}
+                Y[n][ow][ic] = v;
             }
         }
     }

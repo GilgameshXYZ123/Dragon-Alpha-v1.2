@@ -37,7 +37,7 @@ public abstract class Mempool implements MemStatus, Serializable {
     private long used_mem_size = 0;//the length of memory has been used
     //buffered_memsize = total_mem_size - used_mem_size
     
-    private final HashSet<Long> grave = new HashSet<>(64);//an address can be freed only once
+    private final HashSet<Long> grave = new HashSet<>(128);//an address can be freed only once
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Basic-Functions">
@@ -159,7 +159,8 @@ public abstract class Mempool implements MemStatus, Serializable {
             if(L_sizeof_datatype < 0) throw new IllegalArgumentException(String.format(
                     "L_sizeof_datatype { got %d } must >= 0", L_sizeof_datatype));
             if(mem_length > Integer.MAX_VALUE) throw new IllegalArgumentException(String.format(
-                    "mem_length { got %d } > Integer.MAX_VALUE { got %d }", mem_length, Integer.MAX_VALUE));
+                    "mem_length { got %d } > Integer.MAX_VALUE { got %d }", 
+                    mem_length, Integer.MAX_VALUE));
             check_mem_size(mem_size);
         }
         //----------------------------------------------------------------------
@@ -195,9 +196,9 @@ public abstract class Mempool implements MemStatus, Serializable {
     //<editor-fold defaultstate="collapsed" desc="running-area: free & clear"> 
     protected abstract boolean recycle(long mem_size, long mem_address);//free: return tree if succeed to free
     public boolean free(boolean check, long mem_size, long mem_address) {
+        if (mem_address == NULL) return false;//can't delete an NULL mem_address
         mem_size <<= 2;//block[0] = mem_size, recover
         if(check) check_mem_size(mem_size);
-        if (mem_address == NULL) return false;//can't delete an NULL mem_address
         //----------------------------------------------------------------------
         
         boolean flag;

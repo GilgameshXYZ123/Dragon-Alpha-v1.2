@@ -5522,7 +5522,7 @@ public class CudaFloat32EngineBase extends EngineBase {
                 expXm_max_rowSum,//result: expXm_max = sumEachRow: exp(X - maxX)
                 width, stride, 1);
         
-        Cuda_function.div2D_field(stream, //final value: Y -> Y/V = expX / sumOfEachRow(Y)
+        Cuda_function.div2D_field(stream, //final value: Y -> Y / V = expX / sumOfEachRow(Y)
                 1.0f, Y_address       , 0.0f, 
                 1.0f, expXm_max_rowSum, 0.0f, 
                 0.0f, row_lengthv, 

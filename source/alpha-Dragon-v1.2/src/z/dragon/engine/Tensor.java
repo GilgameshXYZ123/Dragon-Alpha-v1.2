@@ -154,7 +154,7 @@ public class Tensor implements StateValue, Serializable {
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        eg.delete(this);
+        eg.delete_core(this);
     }
     //</editor-fold>
     
@@ -300,13 +300,11 @@ public class Tensor implements StateValue, Serializable {
     public final Syncer syncer() { return syncer; }
     public final synchronized void setSyncer(Syncer sc) { this.syncer = sc; }
     
-    public final Tensor c() {
-        synchronized(this) {
-            if(syncer != null) {
-                Syncer sc = syncer;
-                syncer = null;
-                sc.sync();
-            }
+    public final synchronized Tensor c() {
+        if (syncer != null) {
+            Syncer sc = syncer;
+            syncer = null;
+            sc.sync();
         }
         return this;
     }
@@ -499,9 +497,11 @@ public class Tensor implements StateValue, Serializable {
     public Tensor pixel_to_tensor(boolean inplace) { return eg.pixel_to_tensor(inplace, this); } 
     public Tensor tensor_to_pixel(boolean inplace) { return eg.tensor_to_pixel(inplace, this); }
     
-    public Tensor reshape(boolean inplace, int... dim) { return eg.reshape(inplace, this, dim); }
+    protected Tensor view = null, root = null;
     public Tensor view(boolean inplace, int... dim) { return eg.view(inplace, this, dim); }
     public Tensor view_copy() { return eg.view_copy(this); }
+    
+    public Tensor reshape(boolean inplace, int... dim) { return eg.reshape(inplace, this, dim); }
     public Tensor transpose(boolean inplace, int dimIdx1, int dimIdx2) { return eg.transpose(inplace, this, dimIdx1, dimIdx2); }
     
     public Tensor pad(boolean inplace, int... p) { return eg.pad(inplace, this, p); }

@@ -26,8 +26,7 @@ import java.util.function.Function;
  *
  * @author dell
  */
-public final class Matrix 
-{ 
+public final class Matrix  { 
     private Matrix() {}
     
     //<editor-fold defaultstate="collapsed" desc="Matrix-Checker-Function">
@@ -1462,10 +1461,12 @@ public final class Matrix
      * @param a 
      */
     @Passed
-    public static void unitalize(double[][] b, double[][] a)
-    {
-        for(int i=0;i<a.length;i++)
-            Vector.elementScalarDiv(a[i], Vector.norm(a[i]), b[i]);
+    public static void unitalize(double[][] b, double[][] a) {
+        for(int i=0; i<a.length;i++) {
+            double norm = Vector.norm(a[i]);
+            for (int j = 0; j<b.length; j++) b[i][j] = a[i][j] / norm;
+        }
+            
     }
     /**
      * {@link #unitalize(double[][], double[][]) }.
@@ -1473,8 +1474,7 @@ public final class Matrix
      * @return 
      */
     @Passed
-    public static double[][] unitalize(double[][] a)   
-    {
+    public static double[][] unitalize(double[][] a)   {
         double[][] b=new double[a.length][a[0].length];
         Matrix.unitalize(b, a);
         return b;
@@ -1491,14 +1491,15 @@ public final class Matrix
      * @param a 
      */
     @Passed
-    public static void schmidtNoramlization(double[][] b, double[][] a)
-    {
+    public static void schmidtNoramlization(double[][] b, double[][] a) {
         for(int i=0,j,width=a[0].length;i<a.length;i++)
         {
             System.arraycopy(a[i], 0, b[i], 0, width);
             for(j=0;j<i;j++)
             {
-                double k=Vector.dot(b[j], a[i])/Vector.dot(b[j], b[j]);
+                double k = Vector.dot(b[j], a[i]) / Vector.dot(b[j], b[j]);
+                
+                
                 Vector.elementSub(1, b[i], k, b[j], b[i]);
             }
         }

@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cifar10.resnet18_leaky_relu;
+package cifar10.resnet18_gelu_fused;
 
-import cifar10.resnet18_leaky_relu.Net.ResNet18;
+import cifar10.resnet18_gelu_fused.Net.ResNet18;
 import java.io.IOException;
 import static z.dragon.alpha.Alpha.alpha;
 import z.dragon.data.BufferedTensorIter;
@@ -40,8 +40,7 @@ public class train
     static int batch_size = 512;//512;
     static float lr = 0.001f;//learning_rate
     
-    public static void training(int epoch) throws IOException
-    {
+    public static void training(int epoch) throws IOException {
         ResNet18 net = new ResNet18().init(eg).println(); //net.load();
         net.train();
       
@@ -84,8 +83,7 @@ public class train
         net.save();
     }
     
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         try
         {
             //5 epochs: 30.451

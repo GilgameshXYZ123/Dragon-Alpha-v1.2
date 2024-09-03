@@ -48,20 +48,20 @@ public class Cuda_function_fusion_test2
 //        Tensor[] grads2 = eg.linear2_leakyRelu_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma, k);
 //        Tensor[] grads3 = eg.linear_2out(false, eg.leakyRelu_deltaX_v1(false, tdeltaY, tY1, k), alpha, 0, beta, 0);
         
-        Tensor tY1 = eg.linear2_elu(false, tX1, tX2, alpha, beta, gamma, alpha2, k);
-        Tensor[] grads1 = eg.linear2_elu_deltaX_v1(false, tdeltaY, tY1, alpha, beta, alpha2, k);
-        Tensor[] grads2 = eg.linear2_elu_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma,  alpha2, k);
-        Tensor[] grads3 = eg.linear_2out(false, eg.elu_deltaX_v1(false, tdeltaY, tY1, alpha2, k), alpha, 0, beta, 0);
+//        Tensor tY1 = eg.linear2_elu(false, tX1, tX2, alpha, beta, gamma, alpha2, k);
+//        Tensor[] grads1 = eg.linear2_elu_deltaX_v1(false, tdeltaY, tY1, alpha, beta, alpha2, k);
+//        Tensor[] grads2 = eg.linear2_elu_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma,  alpha2, k);
+//        Tensor[] grads3 = eg.linear_2out(false, eg.elu_deltaX_v1(false, tdeltaY, tY1, alpha2, k), alpha, 0, beta, 0);
 
 //        Tensor tY1 = eg.linear2_softplus(false, tX1, tX2, alpha, beta, gamma);
 //        Tensor[] grads1 = eg.linear2_softplus_deltaX_v1(false, tdeltaY, tY1, alpha, beta);
 //        Tensor[] grads2 = eg.linear2_softplus_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma);
 //        Tensor[] grads3 = eg.linear_2out(false, eg.softplus_deltaX_v1(false, tdeltaY, tY1), alpha, 0, beta, 0);
 
-//        Tensor tY1 = eg.linear2(false, tX1, tX2, alpha, beta, gamma);
-//        Tensor[] grads1 = eg.linear2_gelu_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma);
-//        Tensor[] grads2 = eg.linear2_gelu_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma);
-//        Tensor[] grads3 = eg.linear_2out(false, eg.gelu_deltaX(false, tdeltaY, tY1), alpha, 0, beta, 0);
+        Tensor tY1 = eg.linear2(false, tX1, tX2, alpha, beta, gamma);
+        Tensor[] grads1 = eg.linear2_gelu_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma);
+        Tensor[] grads2 = eg.linear2_gelu_deltaX_v2(false, tdeltaY, tX1, tX2, alpha, beta, gamma);
+        Tensor[] grads3 = eg.linear_2out(false, eg.gelu_deltaX(false, tdeltaY, tY1), alpha, 0, beta, 0);
 
 //        Tensor tY1 = eg.linear2_sigmoid(false, tX1, tX2, alpha, beta, gamma);
 //        Tensor[] grads1 = eg.linear2_sigmoid_deltaX_v1(false, tdeltaY, tY1, alpha, beta);

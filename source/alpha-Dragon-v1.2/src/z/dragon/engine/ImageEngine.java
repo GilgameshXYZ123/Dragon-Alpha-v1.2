@@ -1332,7 +1332,7 @@ public class ImageEngine {
         Tensor Y = eg.empty_int8(dimY);
         
         //compute the copy params-----------------------------------------------
-        int commonWidth = 1;//dimSize multiple: from (dimIndex + 1) to End
+        int commonWidth = 1;//dimSize mul: from (dimIndex + 1) to End
         for(int i = dimIdx + 1; i<ndim; i++) commonWidth *= dimX[0][i];
         
         int[] copyWidth = new int[X.length];
@@ -1417,7 +1417,7 @@ public class ImageEngine {
         }
        
         //compute the copy params-----------------------------------------------
-        int commonWidth = 1;//dimSize multiple: from (dimIndex + 1) to End
+        int commonWidth = 1;//dimSize mul: from (dimIndex + 1) to End
         for(int i = dimIdx + 1; i<ndim; i++) commonWidth *= dimX[i];
         
         int[] copyWidth = new int[Y.length];

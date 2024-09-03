@@ -54,7 +54,7 @@ public class CoreQuadratic2Center<T extends DualUnit> extends DualCore<T> {
         
         Tensor X1 = holdX1(), X2 = holdX2();
         if(backward_grads1 && backward_grads2)//(1) deltaX1 = deltaY * (k11*2*X1 + k12*X2 + k1)
-            return eg.quadratic2_center_deltaX(grad_inplace, deltaY, X1, X2, dim2, k11, k12, k22, k2, k1, C);
+            return eg.quadratic2_center_deltaX(grad_inplace, deltaY, X1, X2, dim2, k11, k12, k22, k1, k2, C);
         
         return new Tensor[] {//(2) deltaX2 = center_sum: deltaY * (k22*2*X2 + k12*X1 + k2)
             (backward_grads1 ? eg.quadratic2_center_deltaX1(grad_inplace, deltaY, X1, X2, dim2, k11, k12, k1) : null),

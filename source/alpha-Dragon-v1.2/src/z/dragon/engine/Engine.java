@@ -716,13 +716,17 @@ public class Engine implements MemStatus {
         X.trace = null;
         X.mod_counter = null;
         
-        Tensor grad = null;
+        Tensor grad = null, view = null, root = null;
         TensorSet carrier = null;
         synchronized (X) {
             if (X.grad != null) { grad = X.grad; X.grad = null; }
+            if (X.view != null) { view = X.view; X.view = null; }
+            if (X.root != null) { root = X.root; X.root = null; }
             if (X.carrier != null) { carrier = X.carrier; X.carrier = null; }
         }
         if (grad != null) delete(grad);
+        if (view != null) delete(view);
+        if (root != null) delete(root);
         if (carrier != null) { delete(carrier); carrier.clear(); }
     }
     //</editor-fold>
@@ -1488,6 +1492,8 @@ public class Engine implements MemStatus {
         Y.syncer = X.syncer;//inherent syncer
         Y.mod_counter = X.mod_counter;//inherent mod-count
         Y.need_carry = X.need_carry; Y.carrier = X.carrier;//inherent carrier
+        
+        X.view = Y; Y.root = X;
         return Y;
     }
     
@@ -1557,7 +1563,7 @@ public class Engine implements MemStatus {
         Tensor Y = this.empty(dimY);
         
         //compute the copy params-----------------------------------------------
-        int commonWidth = 1;//dimSize multiple: from (dimIndex + 1) to End
+        int commonWidth = 1;//dimSize mul: from (dimIndex + 1) to End
         for(int i = dimIdx + 1; i<ndim; i++) commonWidth *= dimX[0][i];
         
         int[] copyWidth = new int[X.length];
@@ -1653,7 +1659,7 @@ public class Engine implements MemStatus {
         }
        
         //compute the copy params-----------------------------------------------
-        int commonWidth = 1;//dimSize multiple: from (dimIndex + 1) to End
+        int commonWidth = 1;//dimSize mul: from (dimIndex + 1) to End
         for(int i = dimIdx + 1; i<ndim; i++) commonWidth *= dimX[i];
         
         int[] copyWidth = new int[Y.length];
@@ -1745,7 +1751,7 @@ public class Engine implements MemStatus {
         }
        
         //compute the copy params-----------------------------------------------
-        int commonWidth = 1;//dimSize multiple: from (dimIndex + 1) to End
+        int commonWidth = 1;//dimSize mul: from (dimIndex + 1) to End
         for(int i = dimIdx + 1; i<ndim; i++) commonWidth *= dimX[i];
         
         int[] copyWidth = new int[Y.length];
@@ -4077,7 +4083,8 @@ public class Engine implements MemStatus {
         return Y;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="linear2_center">
+    //<editor-fold defaultstate="collapsed" desc="BP: linear2_center">
+    //<editor-fold defaultstate="collapsed" desc="foward-propagation">
     public Tensor sub_center(boolean inplace, Tensor X1, Tensor X2) { return linear2_center(inplace, X1, X2, -1, 1.0f, -1.0f, 0);}
     public Tensor sub_center(boolean inplace, float alpha, Tensor X1, float beta, Tensor X2) {
         return linear2_center(inplace, X1, X2, -1, alpha, -beta, 0);
@@ -4114,6 +4121,30 @@ public class Engine implements MemStatus {
         if(sync) sc.sync(); else Y.setSyncer(sc);
         return Y;
     }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="foward-propagation">
+    public Tensor[] linear2_center_deltaX(boolean inplace, Tensor deltaY,
+            Tensor X1, Tensor X2, int dim2, 
+            float alpha, float beta, float gamma) {
+        return quadratic2_center_deltaX(inplace, deltaY, X1, X2, dim2, 
+                0.0f, 0.0f, 0.0f, 
+                alpha, beta, gamma);
+    }
+
+    public Tensor linear2_center_deltaX1(boolean inplace, Tensor deltaY, 
+            Tensor X1, Tensor X2, int dim2, 
+            float alpha) {
+        return quadratic2_center_deltaX1(inplace, deltaY, X1, X2, dim2, 
+                0.0f, 0.0f, alpha);
+    }
+
+    public Tensor linear2_center_deltaX2(Tensor deltaY, 
+            Tensor X1, Tensor X2, int dim2,
+            float beta) {
+        return quadratic2_center_deltaX2(deltaY, X1, X2, dim2, 
+                0.0f, 0.0f, beta);
+    }
+    //</editor-fold>
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="linear2_field">
     public Tensor sub_field(boolean inplace, Tensor X1, Tensor X2) { return linear2_field(inplace, X1, X2, 1.0f, -1.0f, 0.0f); }
@@ -4521,7 +4552,7 @@ public class Engine implements MemStatus {
     public Tensor[] quadratic2_center_deltaX(boolean inplace, Tensor deltaY,
             Tensor X1, Tensor X2, int dim2, 
             float k11, float k12, float k22,
-            float k2, float k1, float C) 
+            float k1, float k2, float C) 
     {
         if(dim2 == -1) dim2 = X1.lastDim();
         if(check) {//X1[dim0, dim1, dim2], X2[dim0, dim2]
@@ -5843,7 +5874,7 @@ public class Engine implements MemStatus {
             equals_valueStructure(deltaY, "deltaY", X2, "X2");
         }
          
-        Tensor deltaX1 = (inplace?  deltaY : this.empty(X1.dim));
+        Tensor deltaX1 = (inplace ? deltaY : this.empty(X1.dim));
         Tensor deltaX2 = this.empty(X2.dim);
         
         Syncer sc = core.linear2_gelu2D_deltaX_v2(
@@ -5853,7 +5884,7 @@ public class Engine implements MemStatus {
                 X1.address, X2.address, 
                 alpha, beta, gamma,
                 deltaY.lengthv, deltaY.lastDim());
-       if(sync) sc.sync(); else { deltaX1.setSyncer(sc); deltaX2.setSyncer(sc); }
+        if (sync) sc.sync(); else { deltaX1.setSyncer(sc); deltaX2.setSyncer(sc); }
         return new Tensor[]{ deltaX1, deltaX2 };
     }
     //</editor-fold>

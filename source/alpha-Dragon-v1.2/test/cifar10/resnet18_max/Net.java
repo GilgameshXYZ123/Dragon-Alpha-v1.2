@@ -5,7 +5,6 @@
  */
 package cifar10.resnet18_max;
 
-import cifar10.resnet18_leaky_relu.*;
 import static z.dragon.alpha.Alpha.UnitBuilder.nn;
 import static z.dragon.alpha.Alpha.UnitFunctional.F;
 import static z.dragon.alpha.Alpha.alpha;

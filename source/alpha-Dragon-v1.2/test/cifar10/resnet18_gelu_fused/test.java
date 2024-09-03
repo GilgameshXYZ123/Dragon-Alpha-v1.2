@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cifar10.resnet18_leaky_relu_attention;
+package cifar10.resnet18_gelu_fused;
 
-import cifar10.resnet18_leaky_relu_attention.Net.ResNet18;
+import cifar10.resnet18_gelu_fused.Net.ResNet18;
+import java.io.IOException;
 import static z.dragon.alpha.Alpha.alpha;
 import z.dragon.data.DataSet;
 import z.dragon.data.Pair;
@@ -24,43 +25,44 @@ import z.util.math.vector.Vector;
 public class test 
 {
     static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2"); }
-    static Mempool memp = alpha.engine.memp2(alpha.MEM_1GB * 6);
+    static Mempool memp = alpha.engine.memp3(alpha.MEM_1GB * 6);
     static Engine eg = alpha.engine.cuda_float32(0, memp, alpha.MEM_1MB * 1024);
-   
     
-    static int batch_size = 512;
-    public static void test() {
-        ResNet18 net = new ResNet18().eval().init(eg).println();
-        net.load();
+    static int batch_size = 64;
+    public static void test() throws IOException {
+        ResNet18 net = new ResNet18().init(eg).println(); net.load();
+        net.eval();
         
         LossFunction loss = alpha.loss.softmax_crossEntropy();
-//        DataSet<byte[], Integer> dataset = Cifar10.train();
-        DataSet<byte[], Integer> dataset = Cifar10.test();
+        DataSet<byte[], Integer> dataset = Cifar10.train();
+//        DataSet<byte[], Integer> dataset = Cifar10.test();
 //        
-        int batchIdx = 0;
+//        eg.sync(false).check(false);
         double accuracy = 0;
-        eg.sync(false).check(false);
-        
-        for(TensorIter iter = dataset.batch_iter(); iter.hasNext(); batchIdx++) {
+        int batchIdx = 0;
+        TensorIter iter = dataset.batch_iter();
+        while(iter.hasNext()) 
+        {
             Pair<Tensor, Tensor> pair = iter.next(eg, batch_size);
-            Tensor X = pair.input.c().linear(true, 2.0f, -1.0f);
-            Tensor Y = pair.label;
+            Tensor x = pair.input.c().linear(true, 2.0f, -1.0f);
+            Tensor y = pair.label;
             
-            Tensor Yh = net.forward(X)[0];
+            Tensor yh = net.forward(x)[0];
             
-            System.out.println("loss = " + loss.loss(Yh, Y).get());
+            float ls = loss.loss(yh, y).get();
+            System.out.println("loss = " + ls);
             
-            Tensor pre  = eg.row_max_index(Yh);
-            Tensor real = eg.row_max_index(pair.label);
-            
-            Vector.println("Y1: ", pre.value_int32());
-            Vector.println("Y2: ", real.value_int32());
-            
+            Tensor pre  = eg.row_max_index(yh).c();//<int 32>
+            Tensor real = eg.row_max_index(pair.label).c();
+            Vector.println("Y1: ", pre.value_int32(), 0, batch_size);
+            Vector.println("Y2: ", real.value_int32(), 0, batch_size);
             float eq = eg.straight_equal(pre, real).get();
-            System.out.println("eq = " + eq);
             accuracy += eq;
             
+            System.out.println("eq = " + eq);
+            
             net.gc(); pre.delete(); real.delete(); 
+            batchIdx++;
         }
         
         System.out.println("accuracy = " + accuracy / batchIdx);

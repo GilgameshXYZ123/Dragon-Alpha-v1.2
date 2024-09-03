@@ -3244,10 +3244,10 @@ public class EngineCore implements MemStatus {
     {
         int stride = ((width + 3) >> 2) << 2;
         if(check){
-            if(deltaX1_address == NULL) throw new NullPointerException("Tensor deltaX1 is null");
-            if(deltaX2_address == NULL) throw new NullPointerException("Tensor deltaX2 is null");
-            if(X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
-            if(X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
+            if (deltaX1_address == NULL) throw new NullPointerException("Tensor deltaX1 is null");
+            if (deltaX2_address == NULL) throw new NullPointerException("Tensor deltaX2 is null");
+            if (X1_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            if (X2_address == NULL) throw new NullPointerException("Tensor X2 is null");
             func_param_check(lengthv, width, stride);
         }
         return base.linear2_gelu2D_deltaX_v2(

@@ -287,7 +287,7 @@ public final class ExMatrix
         c[i][j]=t20;   c[i][j+1]=t21;   c[i][j+2]=t22;   c[i][j+3]=t23;
     }
     /**
-     * the size for the input Matrix a,b and c must be multiple of 4.
+     * the size for the input Matrix a,b and c must be mul of 4.
      * the input Matrix sb is used for buffering Matrix b to reduce the dimenson
      * to increase the productivity of CPU, when you use this function, you 
      * can set {@code sb=new double[4][b[0].length} or the 2-D Array with the

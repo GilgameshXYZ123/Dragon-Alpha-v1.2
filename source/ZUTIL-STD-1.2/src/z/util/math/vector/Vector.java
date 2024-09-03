@@ -29,8 +29,7 @@ import z.util.math.Sort;
  *
  * @author dell
  */
-public final class Vector
-{
+public final class Vector {
     private Vector() {}
     
     //<editor-fold defaultstate="collapsed" desc="String functions">
@@ -587,7 +586,7 @@ public final class Vector
     //</editor-fold>
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Vector: convert functions">
+    //<editor-fold defaultstate="collapsed" desc="Convert functions">
     //<editor-fold defaultstate="collapsed" desc="convert-functions: string -> vector">
     public static float[] to_float_vector(String str) { return Vector.to_float_vector(str.split(",")); }
     public static float[] to_float_vector(String[] tokens) {
@@ -721,6 +720,13 @@ public final class Vector
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="vector: math function">
+    public static int mul(int[] a) { return mul(a, 0, a.length-1); }
+    public static int mul(int[] a, int start, int end) {
+        int mul = 1;
+        for(int i=start; i<=end; i++) mul *= a[i];
+        return mul;
+    }
+    
     public static <T> T first_nonNull(T[] arr) { return first_nonNull(arr, 0); }
     public static <T> T first_nonNull(T[] arr, int index) {
         if(arr == null) return null;
@@ -733,13 +739,12 @@ public final class Vector
         T fn=Vector.first_nonNull(val);
         T t=fn;fn=val[0];val[0]=t;
     }
-    public static <T> void putFirstNoNullToHead(T[] val, int index)
-    {
+    public static <T> void putFirstNoNullToHead(T[] val, int index) {
         T fn=Vector.first_nonNull(val, index);
         T t=fn;fn=val[index];val[index]=t;
     }
     
-    //<editor-fold defaultstate="collapsed" desc="math: minValue">
+    //<editor-fold defaultstate="collapsed" desc="minValue">
     public static float minValue(float... arr) { return minValue(arr, 0, arr.length - 1); }
     public static float minValue(float[] arr, int low, int high) {
         if(low > high) { int t = low; low = high; high = t; }
@@ -788,7 +793,7 @@ public final class Vector
         return min;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="math: maxValue">
+    //<editor-fold defaultstate="collapsed" desc="maxValue">
     public static float maxValue(float... arr) { return maxValue(arr, 0, arr.length - 1); }
     public static float maxValue(float[] arr, int low, int high) {
         if(low > high) { int t = low; low = high; high = t; }
@@ -836,6 +841,195 @@ public final class Vector
         for(int i=low+1; i<=high; i++) if(max < arr[i]) max = arr[i];
         return max;
     }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="maxMin">
+    //<editor-fold defaultstate="collapsed" desc="maxMin<long>">
+    public static MaxMin<Long> maxMin(long[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Long> maxMin(long[] a, int low, int high) {
+        long max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            long ev = a[high]; 
+            if(max < ev) max = ev; else if(min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="maxMin: int">
+    public static MaxMin<Integer> maxMin(int[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Integer> maxMin(int[] a, int low, int high) {
+        int max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            int ev = a[high];
+            if(max < ev) max = ev; else if(min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    
+    public static MaxMin<Integer> maxMin(int[] a, int threshold) { return maxMin(a,  0, a.length - 1, threshold); }
+    public static MaxMin<Integer> maxMin(int[] a, int low, int high, int threshold) {
+        int max, min;
+        if (a[low] > a[low+1]) { max = a[low]; min = a[low + 1]; }
+        else { max = a[low+1]; min = a[low]; }
+        for (int i = 2 + low; i < high; i += 2) {
+            if (max - min > threshold) { return null; }//if there exists max-minValue > threshold, return null and early stopping.
+            if (a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min = a[i]; }
+        }
+        if (((high - low + 1) & 1) == 1) {//val.length is an odd number
+            int ev = a[high];
+            if (max < ev) max = ev; else if (min > ev) min=ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="maxMin: short">
+    public static MaxMin<Short> maxMin(short[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Short> maxMin(short[] a, int low, int high) {
+        short max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            short ev = a[high];
+            if(max < ev) max = ev; else if(min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    
+    public static MaxMin<Short> maxMin(short[] a, int threshold) { return maxMin(a,  0, a.length - 1, threshold); }
+    public static MaxMin<Short> maxMin(short[] a, int low, int high, int threshold) {
+        short max, min;
+        if (a[low] > a[low+1]) { max = a[low]; min = a[low + 1]; }
+        else { max = a[low+1]; min = a[low]; }
+        for (int i = 2 + low; i < high; i += 2) {
+            if (max - min > threshold) { return null; }//if there exists max-minValue > threshold, return null and early stopping.
+            if (a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min = a[i]; }
+        }
+        if (((high - low + 1) & 1) == 1) {//val.length is an odd number
+            short ev = a[high];
+            if (max < ev) max = ev; else if (min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="maxMin: char">
+    public static MaxMin<Character> maxMin(char[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Character> maxMin(char[] a, int low, int high) {
+        char max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            char ev = a[high];
+            if(max < ev) max = ev; else if(min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    
+    public static MaxMin<Character> maxMin(char[] a, int threshold) { return maxMin(a,  0, a.length - 1, threshold); }
+    public static MaxMin<Character> maxMin(char[] a, int low, int high, int threshold) {
+        char max, min;
+        if (a[low] > a[low+1]) { max = a[low]; min = a[low + 1]; }
+        else { max = a[low+1]; min = a[low]; }
+        for (int i = 2 + low; i < high; i += 2) {
+            if (max - min > threshold) { return null; }//if there exists max-minValue > threshold, return null and early stopping.
+            if (a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min = a[i]; }
+        }
+        if (((high - low + 1) & 1) == 1) {//val.length is an odd number
+            char ev = a[high];
+            if (max < ev) max = ev; else if (min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="maxMin: byte">
+    public static MaxMin<Byte> maxMin(byte[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Byte> maxMin(byte[] a, int low, int high) {
+        byte max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            byte ev = a[high];
+            if(max < ev) max = ev; else if(min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    
+    public static MaxMin<Byte> maxMin(byte[] a, int low, int high, int threshold) {
+        byte max, min;
+        if (a[low] > a[low+1]) { max = a[low]; min = a[low + 1]; }
+        else { max = a[low+1]; min = a[low]; }
+        for(int i = 2 + low; i < high; i += 2) {
+            if(max - min > threshold) { return null; }//if there exists max-minValue > threshold, return null and early stopping.
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min = a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            byte ev = a[high];
+            if (max < ev) max = ev; else if (min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="maxMin: double">
+    public static MaxMin<Double> maxMin(double[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Double> maxMin(double[] a, int low, int high) {
+        double max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            double ev = a[high];
+            if(max < ev) max = ev; else if(min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="maxMin: float">
+    public static MaxMin<Float> maxMin(float[] a) { return maxMin(a, 0, a.length - 1); }
+    public static MaxMin<Float> maxMin(float[] a, int low, int high) {
+        float max, min; 
+        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
+        else { max= a[low+1]; min = a[low];}
+        for(int i = 2 + low; i < high; i += 2) {
+            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
+            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
+        }
+        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
+            float ev = a[high];
+            if(max < ev) max = ev; else if(min > ev) min = ev;
+        }
+        return new MaxMin<>(max, min);
+    }
+    //</editor-fold>
     //</editor-fold>
     
     public static <T extends Comparable> T max(T[] val) {
@@ -1058,201 +1252,14 @@ public final class Vector
         return mm;
     }
     
-    //<editor-fold defaultstate="collapsed" desc="maxMin<long>">
-    public static MaxMin<Long> maxMin(long[] a) { return maxMin(a, 0, a.length - 1); }
-    public static MaxMin<Long> maxMin(long[] a, int low, int high) {
-        long max, min; 
-        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
-        else { max= a[low+1]; min = a[low];}
-        for(int i = 2 + low; i < high; i += 2) {
-            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
-            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
-        }
-        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
-            long ev = a[high]; 
-            if(max < ev) max = ev; else if(min > ev) min = ev;
-        }
-        return new MaxMin<>(max, min);
-    }
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="maxMin<int>">
-    public static MaxMin<Integer> maxMin(int[] a) { return maxMin(a, 0, a.length - 1); }
-    public static MaxMin<Integer> maxMin(int[] a, int low, int high) {
-        int max, min; 
-        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
-        else { max= a[low+1]; min = a[low];}
-        for(int i = 2 + low; i < high; i += 2) {
-            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
-            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
-        }
-        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
-            int ev = a[high];
-            if(max < ev) max = ev; else if(min > ev) min = ev;
-        }
-        return new MaxMin<>(max, min);
-    }
     
-    public static MaxMin<Integer> maxMin(int[] a, int threshold) { return maxMin(a,  0, a.length - 1, threshold); }
-    public static MaxMin<Integer> maxMin(int[] a, int low, int high, int threshold) {
-        int max, min;
-        if (a[low] > a[low+1]) { max = a[low]; min = a[low + 1]; }
-        else { max = a[low+1]; min = a[low]; }
-        for (int i = 2 + low; i < high; i += 2) {
-            if (max - min > threshold) { return null; }//if there exists max-minValue > threshold, return null and early stopping.
-            if (a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
-            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min = a[i]; }
-        }
-        if (((high - low + 1) & 1) == 1) {//val.length is an odd number
-            int ev = a[high];
-            if (max < ev) max = ev; else if (min > ev) min=ev;
-        }
-        return new MaxMin<>(max, min);
-    }
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="maxMin<short>">
-    public static MaxMin<Short> maxMin(short[] a) { return maxMin(a, 0, a.length - 1); }
-    public static MaxMin<Short> maxMin(short[] a, int low, int high) {
-        short max, min; 
-        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
-        else { max= a[low+1]; min = a[low];}
-        for(int i = 2 + low; i < high; i += 2) {
-            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
-            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
-        }
-        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
-            short ev = a[high];
-            if(max < ev) max = ev; else if(min > ev) min = ev;
-        }
-        return new MaxMin<>(max, min);
-    }
-    
-    public static MaxMin<Short> maxMin(short[] a, int threshold) { return maxMin(a,  0, a.length - 1, threshold); }
-    public static MaxMin<Short> maxMin(short[] a, int low, int high, int threshold) {
-        short max, min;
-        if (a[low] > a[low+1]) { max = a[low]; min = a[low + 1]; }
-        else { max = a[low+1]; min = a[low]; }
-        for (int i = 2 + low; i < high; i += 2) {
-            if (max - min > threshold) { return null; }//if there exists max-minValue > threshold, return null and early stopping.
-            if (a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
-            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min = a[i]; }
-        }
-        if (((high - low + 1) & 1) == 1) {//val.length is an odd number
-            short ev = a[high];
-            if (max < ev) max = ev; else if (min > ev) min = ev;
-        }
-        return new MaxMin<>(max, min);
-    }
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="maxMin<char>">
-    public static MaxMin<Character> maxMin(char[] a) { return maxMin(a, 0, a.length - 1); }
-    public static MaxMin<Character> maxMin(char[] a, int low, int high) {
-        char max, min; 
-        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
-        else { max= a[low+1]; min = a[low];}
-        for(int i = 2 + low; i < high; i += 2) {
-            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
-            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
-        }
-        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
-            char ev = a[high];
-            if(max < ev) max = ev; else if(min > ev) min = ev;
-        }
-        return new MaxMin<>(max, min);
-    }
-    
-    public static MaxMin<Character> maxMin(char[] a, int threshold) { return maxMin(a,  0, a.length - 1, threshold); }
-    public static MaxMin<Character> maxMin(char[] a, int low, int high, int threshold) {
-        char max, min;
-        if (a[low] > a[low+1]) { max = a[low]; min = a[low + 1]; }
-        else { max = a[low+1]; min = a[low]; }
-        for (int i = 2 + low; i < high; i += 2) {
-            if (max - min > threshold) { return null; }//if there exists max-minValue > threshold, return null and early stopping.
-            if (a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
-            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min = a[i]; }
-        }
-        if (((high - low + 1) & 1) == 1) {//val.length is an odd number
-            char ev = a[high];
-            if (max < ev) max = ev; else if (min > ev) min = ev;
-        }
-        return new MaxMin<>(max, min);
-    }
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="maxMin<byte>">
-    public static MaxMin<Byte> maxMin(byte[] a) { return maxMin(a, 0, a.length - 1); }
-    public static MaxMin<Byte> maxMin(byte[] a, int low, int high) {
-        byte max, min; 
-        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
-        else { max= a[low+1]; min = a[low];}
-        for(int i = 2 + low; i < high; i += 2) {
-            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
-            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
-        }
-        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
-            byte ev = a[high];
-            if(max < ev) max = ev; else if(min > ev) min = ev;
-        }
-        return new MaxMin<>(max, min);
-    }
-    
-    public static MaxMin<Byte> maxMin(byte[] a, int low, int high, int threshold) {
-        byte max, min;
-        if (a[low] > a[low+1]) { max = a[low]; min = a[low + 1]; }
-        else { max = a[low+1]; min = a[low]; }
-        for(int i = 2 + low; i < high; i += 2) {
-            if(max - min > threshold) { return null; }//if there exists max-minValue > threshold, return null and early stopping.
-            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
-            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min = a[i]; }
-        }
-        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
-            byte ev = a[high];
-            if (max < ev) max = ev; else if (min > ev) min = ev;
-        }
-        return new MaxMin<>(max, min);
-    }
-    //</editor-fold>
-    
-    //<editor-fold defaultstate="collapsed" desc="maxMin<double>">
-    public static MaxMin<Double> maxMin(double[] a) { return maxMin(a, 0, a.length - 1); }
-    public static MaxMin<Double> maxMin(double[] a, int low, int high) {
-        double max, min; 
-        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
-        else { max= a[low+1]; min = a[low];}
-        for(int i = 2 + low; i < high; i += 2) {
-            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
-            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
-        }
-        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
-            double ev = a[high];
-            if(max < ev) max = ev; else if(min > ev) min = ev;
-        }
-        return new MaxMin<>(max, min);
-    }
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="maxMin<float>">
-    public static MaxMin<Float> maxMin(float[] a) { return maxMin(a, 0, a.length - 1); }
-    public static MaxMin<Float> maxMin(float[] a, int low, int high) {
-        float max, min; 
-        if (a[low] > a[low+1]) { max = a[low]; min= a[low+1]; }
-        else { max= a[low+1]; min = a[low];}
-        for(int i = 2 + low; i < high; i += 2) {
-            if(a[i] > a[i + 1]) { if(max < a[i]) max = a[i]; if(min > a[i + 1]) min = a[i + 1]; }
-            else { if(max < a[i + 1]) max = a[i + 1]; if(min > a[i]) min=a[i]; }
-        }
-        if(((high - low + 1) & 1) == 1) {//val.length is an odd number
-            float ev = a[high];
-            if(max < ev) max = ev; else if(min > ev) min = ev;
-        }
-        return new MaxMin<>(max, min);
-    }
-    //</editor-fold>
 
     public static MaxMin<Double> maxMinABS(double[] val) {
         MaxMin<Double> mm=new MaxMin<>();
         Vector.maxMinABS(val, 0, val.length-1, mm);
         return mm;
     }
-    public static MaxMin<Double> maxMinABS(double[] val, int low, int high)
-    {
+    public static MaxMin<Double> maxMinABS(double[] val, int low, int high) {
         MaxMin<Double> mm=new MaxMin<>();
         Vector.maxMinABS(val, low, high, mm);
         return mm;
@@ -1312,8 +1319,7 @@ public final class Vector
      * @return distance between the two points
      */
     @Passed
-    public static double distance(double[] left, double[] right)
-    {
+    public static double distance(double[] left, double[] right) {
         double dis=0,r;
         for(int i=0;i<left.length;i++)
             {r=left[i]-right[i];dis+=r*r;}
@@ -2710,7 +2716,7 @@ public final class Vector
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Logarithm">
+    //<editor-fold defaultstate="collapsed" desc="math: logarithm">
     public static final float log2f = (float) Math.log(2);
     public static float[] log2(float[] X) {
         float[] Y = new float[X.length];
@@ -2804,12 +2810,81 @@ public final class Vector
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Vector-math-Function">
-    public static int mul(int[] a) {return multiple(a, 0, a.length-1);}
-    public static int multiple(int[] a, int start, int end) {
-        int mul = 1;
-        for(int i=start; i<=end; i++) mul *= a[i];
-        return mul;
+    //<editor-fold defaultstate="collapsed" desc="math: optimizer">
+    public static void Momentum(float[] W, float[] deltaW,
+            float[] V, float a1, float a2,
+            float lr_t, int length)
+    {
+        for(int i=0; i<length; i++) {
+            V[i] = a1*V[i] + a2*deltaW[i];
+            W[i] = W[i] - lr_t*V[i];
+        }
+    }
+    
+    public static void SGDMN(float[] W, float[] deltaW,
+            float[] V, float momentum, float dampen, float nesterov, 
+            float lr, int length)
+    {
+        float K = (nesterov * momentum) + (1.0f - nesterov);
+        for(int i=0; i<length; i++) {
+            V[i] = momentum*V[i] + (1 - dampen)*deltaW[i];
+            float step = nesterov * deltaW[i] + K*V[i];
+            W[i] -= lr*step;
+        }
+    }
+    
+    public static void RMSprop(float[] W, float[] deltaW,
+            float[] S, float a1, float a2, float e,
+            float k, int length)
+    {
+        for(int i=0;i<length;i++)
+        {
+            S[i] = a1*S[i] + a2*deltaW[i]*deltaW[i];
+            W[i] = W[i] - k * deltaW[i]/((float)Math.sqrt(S[i]) + e);
+        }
+    }
+    
+    public static void Adam(float[] W, float[] deltaW,
+            float[] V, float a1, float a2,
+            float[] S, float b1, float b2, float eps,
+            float lr, int length)
+    {
+        for(int i=0; i<length; i++) {
+            float dw = deltaW[i];
+            V[i] = a1*V[i] + a2*dw;
+            S[i] = b1*S[i] + b2*dw*dw;
+            W[i] = W[i] - lr * V[i] / ((float)Math.sqrt(S[i]) + eps);
+        }
+    }
+    
+    public static void Adamax(float[] W, float[] deltaW,
+            float[] V, float a1, float a2,
+            float[] S, float b1, float eps,
+            float lr, int length)
+    {
+        for(int i=0; i<length; i++) {
+            float dw = deltaW[i];
+            V[i] = a1*V[i] + a2*dw;
+            S[i] = Math.max(S[i] * b1, Math.abs(dw));
+            W[i] = W[i] - lr * V[i] / (S[i] + eps);
+        }
+    }
+     
+    public static void Adamod(float[] W, float[] deltaW,
+            float[] V, float a1, float a2,
+            float[] S, float b1, float b2, float e,
+            float[] G, float c1, float c2,
+            float lr, int length)
+    {
+        for(int i=0;i<length;i++) {
+            V[i] = a1*V[i] + a2*deltaW[i];
+            S[i] = b1*S[i] + b2*deltaW[i]*deltaW[i];
+            
+            float neta = (float) (lr / (Math.sqrt(S[i]) + e));
+            G[i] = c1*G[i] + c2*neta;
+            
+            W[i] -= Math.min(neta, G[i]) * V[i];
+        }
     }
     //</editor-fold>
     
@@ -2921,369 +2996,103 @@ public final class Vector
     //</editor-fold>
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Vector-Element-Operation">
-    public static void elementAdd(double[] a, double[] b, double[] c)
-    {for(int i=0;i<c.length;i++) c[i]=a[i]+b[i];}
-    
-    public static void elementAdd(float[] a, float[] b, float[] c)
-    {for(int i=0;i<c.length;i++) c[i]=a[i]+b[i];}
-    
-    public static void assign(float[] a, float value) {
-        for(int i=0; i<a.length; i++) a[i] = value;
-    }
-    
-    public static void elementAdd(double alpha, double[] a, double beta ,double[] b, double[] c)
-    {for(int i=0;i<c.length;i++) c[i]= alpha*a[i] + beta*b[i];}
-    
-    public static void elementAdd(float alpha, float[] a, float beta ,float[] b, float[] c)
-    {for(int i=0;i<c.length;i++) c[i]= alpha*a[i] + beta*b[i];}
-    
-    
-    public static void elementAddSquare(float[] a, float[] b, float[] c)
-    {
-        for(int i=0;i<c.length;i++) c[i] = a[i] + b[i]*b[i];
-    }
-     
-    public static void elementAddSquare(float alpha, float[] a, float beta ,float[] b, float[] c)
-    {
-        for(int i=0;i<c.length;i++) c[i] = alpha*a[i] + beta*b[i]*b[i];
-    }
-    
-     /**
-     * <pre>
-     * consider the input Array{@code left}, {@code right} as two vector
-     * int the space with the same dimension, find the difference.
-     * for each each components of
-     * {@code left}, {@code right}:
-     *      {@code result[i]=left[i]-right[i]}
-     * </pre>
-     * @param a
-     * @param b 
-     * @param c the difference between vector left and right
-     */
-    public static void elementSub(double[] a, double[] b, double[] c)
-    {for(int i=0;i<c.length;i++) c[i]=a[i]-b[i];}
-    
-    public static void elementSub(float[] a, float[] b, float[] c)
-    {for(int i=0;i<c.length;i++) c[i]=a[i]-b[i];}
-    
-    /**
-     * c[i] = alpha*a[i] - beta*b[i]
-     * @param alpha
-     * @param a
-     * @param beta
-     * @param b
-     * @param c 
-     */
-    public static void elementSub(double alpha, double[] a, double beta, double[] b, double[] c)
-    {for(int i=0;i<c.length;i++) c[i] = alpha*a[i] - beta*b[i];}
-    
-    public static void elementSub(float alpha, float[] a, float beta, float[] b, float[] c)
-    {for(int i=0;i<c.length;i++) c[i] = alpha*a[i] - beta*b[i];}
-    
-    /**
-     * <pre>
-     * This function may be widely used int Neural Network.
-     * for each element of the input Arrays {@code left}, {@code right}:
-     *      {@code c[i] = k * a[i] + (1-k) * b[i];}
-     * </pre>
-     * @param c
-     * @param a
-     * @param k
-     * @param b 
-     */
-    public static void momentum(double[] c, double[] a, double k, double[] b)
-    {Vector.elementAdd(k, a, 1-k, b, c);}
-    
-    /**
-     * <pre>
-     * Consider the two input Arrays {@code left}, {@code right} as two 
-     * vectors, compute the Hadamard product of them.
-     * for each component of {@code left}, {@code right}:
-     *      {@code c[i] = a[i]*b[i]}
-     * </pre>
-     * @param a
-     * @param b 
-     * @param c
-     */
-    public static void elementMul(double[] a, double[] b, double[] c)
-    {for(int i=0;i<c.length;i++) c[i]=a[i]*b[i];}
-    
-    public static void elementMul(float[] a, float[] b, float[] c)
-    {for(int i=0;i<c.length;i++) c[i]=a[i]*b[i];}
-    
-    /**
-     * c[i] = k*a[i]*b[i]
-     * @param k
-     * @param a
-     * @param b
-     * @param c 
-     */
-    public static void elementMul(double k, double[] a, double[] b, double[] c){
-        for(int i=0;i<c.length;i++) c[i]=k*a[i]*b[i];
-    }
-    
-    public static void elementMul(float k, float[] a, float[] b, float[] c){
-        for(int i=0;i<c.length;i++) c[i]=k*a[i]*b[i];
-    }
-    
-    public static void linear(float alpha, float[] a, float beta, float[] b){
-        for(int i=0; i<a.length; i++) b[i] = alpha*a[i] + beta;
-    }
-    
-    public static void elementMul(float a1, float[] A, float b1, 
-            float a2, float[] B, float b2, float[] C)
-    {
-        for(int i=0;i<C.length;i++) C[i]=(a1*A[i] + b1)*(a2*B[i] + b2);
-    }
-    /**
-     * <pre>
-     * Consider the two input Arrays {@code left}, {@code right} as two 
-     * vectors, compute the division by each component of them.
-     * for each component of {@code left}, {@code right}:
-     *      {@code c[i] = a[i]/b[i]}
-     * </pre>
-     * @param c
-     * @param a
-     * @param b 
-     */
-    public static void elementDiv(double[] a, double[] b, double[] c)
-    {for(int i=0;i<c.length;i++) c[i]=a[i]/b[i];}
-    
-    public static void elementDiv(float[] a, float[] b, float[] c)
-    {for(int i=0;i<c.length;i++) c[i]=a[i]/b[i];}
-    
-    /**
-     * c[i] = k*a[i]/b[i].
-     * @param k
-     * @param c
-     * @param a
-     * @param b 
-     */
-    public static void elementDiv(float k, double[] a, double[] b, double[] c)
-    {for(int i=0;i<c.length;i++) c[i] = k*a[i]/b[i];}
-    
-    public static void elementDiv(float k, float[] a, float[] b, float[] c)
-    {for(int i=0;i<c.length;i++) c[i] = k*a[i]/b[i];}
-    
-    /**
-     * b[i] = k/a[i].
-     * @param k
-     * @param a
-     * @param b 
-     */
-    public static void elementRpl(float k, double[] a, double[] b)
-    {for(int i=0;i<b.length;i++) b[i] = k/a[i];}
-    
-    public static void elementRpl(float k, float[] a, float[] b)
-    {for(int i=0;i<b.length;i++) b[i] = k/a[i];}
-    
-    /**
-     * b[i] = a[i]+k.
-     * @param a
-     * @param k
-     * @param b 
-     */
-    public static void elementScalarAdd(double[] a, double k, double[] b)
-    {for(int i=0;i<b.length;i++) b[i] = a[i]+k;}
-    
-    public static void elementScalarAdd(float[] a, float k, float[] b)
-    {for(int i=0;i<b.length;i++) b[i] = a[i]+k;}
-    
-    /**
-     * b[i] = alpha*a[i] + beta.
-     * @param alpha
-     * @param a
-     * @param beta
-     * @param b 
-     */
-    public static void elementScalarAdd(double alpha, double[] a, double beta, double[] b)
-    {for(int i=0;i<b.length;i++) b[i] = alpha*a[i] + beta;}
-    
-    public static void elementScalarAdd(float alpha, float[] a, float beta, float[] b)
-    {for(int i=0;i<b.length;i++) b[i] = alpha*a[i] + beta;}
-    
-    /**
-     * b[i] = a[i]*k.
-     * @param a
-     * @param k
-     * @param b 
-     */
-    public static void elementScalarMul(double[] a, double k, double[] b)
-    {for(int i=0;i<b.length;i++) b[i] = a[i]*k;}
-    
-    public static void elementScalarMul(float[] a, float k, float[] b)
-    {for(int i=0;i<b.length;i++) b[i] = a[i]*k;}
-    
-    /**
-     * b[i] = a[i]/k.
-     * @param a
-     * @param k
-     * @param b 
-     */
-    public static void elementScalarDiv(double[] a, double k, double[] b) {
-        for(int i=0;i<b.length;i++) b[i] = a[i]/k;
-    }
-    
-    public static void elementScalarDiv(float[] a, float k, float[] b) {
-        for(int i=0;i<b.length;i++) b[i] = a[i]/k;
-    }
-    
-    public static void Momentum(float[] W, float[] deltaW,
-            float[] V, float a1, float a2,
-            float lr_t, int length)
-    {
-        for(int i=0; i<length; i++) {
-            V[i] = a1*V[i] + a2*deltaW[i];
-            W[i] = W[i] - lr_t*V[i];
-        }
-    }
-    
-    public static void SGDMN(float[] W, float[] deltaW,
-            float[] V, float momentum, float dampen, float nesterov, 
-            float lr, int length)
-    {
-        float K = (nesterov * momentum) + (1.0f - nesterov);
-        for(int i=0; i<length; i++) {
-            V[i] = momentum*V[i] + (1 - dampen)*deltaW[i];
-            float step = nesterov * deltaW[i] + K*V[i];
-            W[i] -= lr*step;
-        }
-    }
-    
-    public static void RMSprop(float[] W, float[] deltaW,
-            float[] S, float a1, float a2, float e,
-            float k, int length)
-    {
-        for(int i=0;i<length;i++)
-        {
-            S[i] = a1*S[i] + a2*deltaW[i]*deltaW[i];
-            W[i] = W[i] - k * deltaW[i]/((float)Math.sqrt(S[i]) + e);
-        }
-    }
-    
-    public static void Adam(float[] W, float[] deltaW,
-            float[] V, float a1, float a2,
-            float[] S, float b1, float b2, float eps,
-            float lr, int length)
-    {
-        for(int i=0; i<length; i++) {
-            float dw = deltaW[i];
-            V[i] = a1*V[i] + a2*dw;
-            S[i] = b1*S[i] + b2*dw*dw;
-            W[i] = W[i] - lr * V[i] / ((float)Math.sqrt(S[i]) + eps);
-        }
-    }
-    
-    public static void Adamax(float[] W, float[] deltaW,
-            float[] V, float a1, float a2,
-            float[] S, float b1, float eps,
-            float lr, int length)
-    {
-        for(int i=0; i<length; i++) {
-            float dw = deltaW[i];
-            V[i] = a1*V[i] + a2*dw;
-            S[i] = Math.max(S[i] * b1, Math.abs(dw));
-            W[i] = W[i] - lr * V[i] / (S[i] + eps);
-        }
-    }
-     
-    public static void Adamod(float[] W, float[] deltaW,
-            float[] V, float a1, float a2,
-            float[] S, float b1, float b2, float e,
-            float[] G, float c1, float c2,
-            float lr, int length)
-    {
-        for(int i=0;i<length;i++) {
-            V[i] = a1*V[i] + a2*deltaW[i];
-            S[i] = b1*S[i] + b2*deltaW[i]*deltaW[i];
-            
-            float neta = (float) (lr / (Math.sqrt(S[i]) + e));
-            G[i] = c1*G[i] + c2*neta;
-            
-            W[i] -= Math.min(neta, G[i]) * V[i];
-        }
-    }
-    
-    
-    //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="Vector-Creator">
     //<editor-fold defaultstate="collapsed" desc="creator: arrayCopy">
     public static byte[] arrayCopy(byte[] a) {
         byte[] arr = new byte[a.length];
-        System.arraycopy(a, 0, arr, 0, a.length);
+        if (a.length < 64) for (int i=0; i<arr.length; i++) arr[i] = a[i];
+        else System.arraycopy(a, 0, arr, 0, a.length);
         return arr;
     }
     public static byte[] arrayCopy(byte[] a, int low, int high) {
-        byte[] arr = new byte[high - low + 1];
-        System.arraycopy(a, low, arr, 0, high - low + 1);
+        int len = high - low + 1;
+        byte[] arr = new byte[len];
+        if (len < 64) for (int i=0; i<len; i++) arr[i] = a[i + low];
+        else System.arraycopy(a, low, arr, 0, len);
         return arr;
     }
     
     public static char[] arrayCopy(char[] a) {
         char[] arr = new char[a.length];
-        System.arraycopy(a, 0, arr, 0, a.length);
+        if (a.length < 64) for (int i=0; i<arr.length; i++) arr[i] = a[i];
+        else System.arraycopy(a, 0, arr, 0, a.length);
         return arr;
     }
     public static char[] arrayCopy(char[] a, int low, int high) {
-        char[] arr = new char[high - low + 1];
-        System.arraycopy(a, low, arr, 0, high - low + 1);
+        int len = high - low + 1; 
+        char[] arr = new char[len];
+        if (len < 64) for (int i=0; i<len; i++) arr[i] = a[i + low];
+        else System.arraycopy(a, low, arr, 0, len);
         return arr;
     }
     
     public static int[] arrayCopy(int[] a) {
         int[] arr = new int[a.length];
-        System.arraycopy(a, 0, arr, 0, a.length);
+        if (a.length < 64) for (int i=0; i<arr.length; i++) arr[i] = a[i];
+        else System.arraycopy(a, 0, arr, 0, a.length);
         return arr;
     }
     public static int[] arrayCopy(int[] a, int low, int high) {
-        int[] arr = new int[high - low + 1];
-        System.arraycopy(a, low, arr, 0, high - low + 1);
+        int len = high - low + 1;
+        int[] arr = new int[len];
+        if (len < 64) for (int i=0; i<len; i++) arr[i] = a[i + low];
+        else System.arraycopy(a, low, arr, 0, len);
         return arr;
     }
 
     public static long[] arrayCopy(long[] a) {
         long[] arr = new long[a.length];
-        System.arraycopy(a, 0, arr, 0, a.length);
+        if (a.length < 64) for (int i=0; i<arr.length; i++) arr[i] = a[i];
+        else System.arraycopy(a, 0, arr, 0, a.length);
         return arr;
     }
     public static long[] arrayCopy(long[] a, int low, int high) {
-        long[] arr = new long[high - low + 1];
-        System.arraycopy(a, low, arr, 0, high - low + 1);
+        int len = high - low + 1;
+        long[] arr = new long[len];
+        if (len < 64) for (int i=0; i<len; i++) arr[i] = a[i + low];
+        else System.arraycopy(a, low, arr, 0, len);
         return arr;
     }
 
     public static float[] arrayCopy(float[] a) {
         float[] arr = new float[a.length];
-        System.arraycopy(a, 0, arr, 0, a.length);
+        if (a.length < 64) for (int i=0; i<arr.length; i++) arr[i] = a[i];
+        else System.arraycopy(a, 0, arr, 0, a.length);
         return arr;
     }
     public static float[] arrayCopy(float[] a, int low, int high) {
-        float[] arr = new float[high - low + 1];
-        System.arraycopy(a, low, arr, 0, high - low + 1);
+        int len = high - low + 1;
+        float[] arr = new float[len];
+        if (len < 64) for (int i=0; i<len; i++) arr[i] = a[i + low];
+        else System.arraycopy(a, low, arr, 0, len);
         return arr;
     }
 
     public static double[] arrayCopy(double[] a) {
         double[] arr = new double[a.length];
-        System.arraycopy(a, 0, arr, 0, a.length);
+        if (a.length < 64) for (int i=0; i<arr.length; i++) arr[i] = a[i];
+        else System.arraycopy(a, 0, arr, 0, a.length);
         return arr;
     }
     public static double[] arrayCopy(double[] a, int low, int high) {
-        double[] arr = new double[high - low + 1];
-        System.arraycopy(a, low, arr, 0, high - low + 1);
+        int len = high - low + 1;
+        double[] arr = new double[len];
+        if (len < 64) for (int i=0; i<len; i++) arr[i] = a[i + low];
+        else System.arraycopy(a, low, arr, 0, len);
         return arr;
     }
 
     public static Object[] arrayCopy(Object[] a) {
         Object[] arr = new Object[a.length];
-        System.arraycopy(a, 0, arr, 0, a.length);
+        if (a.length < 64) for (int i=0; i<arr.length; i++) arr[i] = a[i];
+        else System.arraycopy(a, 0, arr, 0, a.length);
         return arr;
     }
     public static Object[] arrayCopy(Object[] a, int low, int high) {
-        Object[] arr = new Object[high - low + 1];
-        System.arraycopy(a, low, arr, 0, high - low + 1);
+        int len = high - low + 1;
+        Object[] arr = new Object[len];
+        if (len < 64) for (int i=0; i<len; i++) arr[i] = a[i + low];
+        else System.arraycopy(a, low, arr, 0, len);
         return arr;
     }
     //</editor-fold>
@@ -4265,11 +4074,12 @@ public final class Vector
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="tensor operation">
-    //<editor-fold defaultstate="collapsed" desc="flattenL float">
+    //<editor-fold defaultstate="collapsed" desc="flatten: float">
     public static float[] flatten(float[][] mat) {
         int dim0 = mat.length, dim1 = mat[0].length;
-        float[] v = new float[dim0 * dim1];
-        int index = 0;
+        float[] v = new float[dim0 * dim1]; int index = 0;
+        
+        
         for(int i=0; i<dim0; i++)
             for(int j=0; j<dim1; j++)
                 v[index++] = mat[i][j];
@@ -4378,63 +4188,112 @@ public final class Vector
     
     //<editor-fold defaultstate="collapsed" desc="toND(byte)">  
     public static byte[][] to2D(byte[] X, int dim0, int dim1) {
-        byte[][] Y = new byte[dim0][dim1];
-        int index = 0;
-        for(int i=0; i<dim0; i++)
-            for(int j=0; j<dim1; j++)
-                Y[i][j] = X[index++];//X[index++]
+        byte[][] Y = new byte[dim0][dim1]; int index = 0;
+        if (dim1 < 64) {
+            for(int d0=0; d0<dim0; d0++)
+            for(int d1=0; d1<dim1; d1++)
+                Y[d0][d1] = X[index++];//X[index++]
+        }
+        else {
+            for(int d0=0; d0<dim0; d0++) {
+                System.arraycopy(X, index, Y[d0], 0, dim1);
+                index += dim1;
+            }
+        }
         return Y;
     }
     
     public static byte[][][] to3D(byte[] X, int dim0, int dim1, int dim2) {
-        byte[][][] Y = new byte[dim0][dim1][dim2];
-        int index = 0;
-        for(int i=0; i<dim0; i++)
-            for(int j=0; j<dim1; j++)
-                for(int k=0; k<dim2; k++)
-                    Y[i][j][k] = X[index++];
+        byte[][][] Y = new byte[dim0][dim1][dim2]; int index = 0;
+        if (dim2 < 64) {
+            for(int d0=0; d0<dim0; d0++)
+            for(int d1=0; d1<dim1; d1++)
+            for(int d2=0; d2<dim2; d2++)
+                Y[d0][d1][d2] = X[index++];
+        }
+        else {
+            for(int d0=0; d0<dim0; d0++)
+            for(int d1=0; d1<dim1; d1++) {
+                System.arraycopy(X, index, Y[d0][d1], 0, dim2);
+                index += dim2;
+            }
+        }
         return Y;
     }
     
     public static byte[][][][] to4D(byte[] X, int dim0, int dim1, int dim2, int dim3) {
-        byte[][][][] Y = new byte[dim0][dim1][dim2][dim3];
-        int index = 0;
-        for(int d0=0; d0<dim0; d0++)
+        byte[][][][] Y = new byte[dim0][dim1][dim2][dim3]; int index = 0;
+        if (dim3 < 64) {
+            for(int d0=0; d0<dim0; d0++)
             for(int d1=0; d1<dim1; d1++)
-                for(int d2=0; d2<dim2; d2++)
-                    for(int d3=0; d3<dim3; d3++)
-                        Y[d0][d1][d2][d3] = X[index++];
+            for(int d2=0; d2<dim2; d2++)
+            for(int d3=0; d3<dim3; d3++)
+                Y[d0][d1][d2][d3] = X[index++];
+        }
+        else {
+            for(int d0=0; d0<dim0; d0++)
+            for(int d1=0; d1<dim1; d1++)
+            for(int d2=0; d2<dim2; d2++) {
+                System.arraycopy(X, index, Y[d0][d1][d2], 0, dim3);
+                index += dim3;
+            }
+        }
         return Y;
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="toND(int)">  
     public static int[][] to2D(int[] X, int dim0, int dim1) {
         int[][] Y = new int[dim0][dim1];
-        int index = 0;
-        for(int i=0; i<dim0; i++)
-            for(int j=0; j<dim1; j++)
-                    Y[i][j] = X[index++];//X[index++]
+        int index = 0; 
+        if (dim1 < 64) {
+            for(int d0=0; d0<dim0; d0++)
+            for(int d1=0; d1<dim1; d1++)
+                Y[d0][d1] = X[index++];
+        }
+        else {
+            for(int d0=0; d0<dim0; d0++) {
+                System.arraycopy(X, index, Y[d0], 0, dim1);
+                index += dim1;
+            }
+        }
         return Y;
     }
     
     public static int[][][] to3D(int[] X, int dim0, int dim1, int dim2) {
-        int[][][] Y = new int[dim0][dim1][dim2];
-        int index = 0;
-        for(int i=0; i<dim0; i++)
+        int[][][] Y = new int[dim0][dim1][dim2]; int index = 0;
+        if (dim2 < 64) {
+            for(int i=0; i<dim0; i++)
             for(int j=0; j<dim1; j++)
-                for(int k=0; k<dim2; k++)
-                    Y[i][j][k] = X[index++];
+            for(int k=0; k<dim2; k++)
+                Y[i][j][k] = X[index++];
+        }
+        else {
+            for(int d0=0; d0<dim0; d0++)
+            for(int d1=0; d1<dim1; d1++) {
+                System.arraycopy(X, index, Y[d0][d1], 0, dim2);
+                index += dim2;
+            }
+        }
         return Y;
     }
     
     public static int[][][][] to4D(int[] X, int dim0, int dim1, int dim2, int dim3) {
-        int[][][][] Y = new int[dim0][dim1][dim2][dim3];
-        int index = 0;
-        for(int d0=0; d0<dim0; d0++)
+        int[][][][] Y = new int[dim0][dim1][dim2][dim3]; int index = 0;
+        if (dim3 < 64) {
+            for(int d0=0; d0<dim0; d0++)
             for(int d1=0; d1<dim1; d1++)
-                for(int d2=0; d2<dim2; d2++)
-                    for(int d3=0; d3<dim3; d3++)
-                        Y[d0][d1][d2][d3] = X[index++];
+            for(int d2=0; d2<dim2; d2++)
+            for(int d3=0; d3<dim3; d3++)
+                Y[d0][d1][d2][d3] = X[index++];
+        }
+        else {
+            for(int d0=0; d0<dim0; d0++)
+            for(int d1=0; d1<dim1; d1++)
+            for(int d2=0; d2<dim2; d2++) {
+                System.arraycopy(X, index, Y[d0][d1][d2], 0, dim3);
+                index += dim3;
+            }
+        }
         return Y;
     }
     //</editor-fold>
@@ -5034,4 +4893,11 @@ public final class Vector
         return np;
     }
     //</editor-fold>
+    
+    public static void elementSub(double alpha, double[] a, double beta, double[] b, double[] c)
+    {for(int i=0;i<c.length;i++) c[i] = alpha*a[i] - beta*b[i];}
+    
+    public static void elementSub(float alpha, float[] a, float beta, float[] b, float[] c)
+    {for(int i=0;i<c.length;i++) c[i] = alpha*a[i] - beta*b[i];}
+    
 }

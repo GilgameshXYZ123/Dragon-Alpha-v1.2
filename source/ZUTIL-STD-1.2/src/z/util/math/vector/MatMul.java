@@ -15,8 +15,7 @@ import z.util.lang.SimpleTimer;
  *
  * @author Gilgamesh
  */
-public class MatMul 
-{
+public class MatMul {
     static final ThreadFactory daemonThreadFactory = (Runnable r) -> { Thread t = new Thread(r); t.setDaemon(true); return t; };
     static final ExecutorService exec = Executors.newFixedThreadPool(16, daemonThreadFactory); 
     

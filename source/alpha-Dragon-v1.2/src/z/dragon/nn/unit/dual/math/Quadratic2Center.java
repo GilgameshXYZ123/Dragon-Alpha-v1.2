@@ -74,8 +74,7 @@ public class Quadratic2Center extends DualFunction {
     //</editor-fold>
    
     //<editor-fold defaultstate="collapsed" desc="static class: InlineQuadratic2">
-    public static class InlineQuadratic2Center extends DualCore<Quadratic2Center> 
-    {
+    public static class InlineQuadratic2Center extends DualCore<Quadratic2Center>  {
         public InlineQuadratic2Center(Quadratic2Center unit) { super(unit); }
 
         public int dim2() { return ut.dim2; }
@@ -101,7 +100,7 @@ public class Quadratic2Center extends DualFunction {
             
             Tensor X1 = holdX1(), X2 = holdX2();
             if(backward_grads1 && backward_grads2)//(1) deltaX1 = deltaY * (k11*2*X1 + k12*X2 + k1)
-                return eg.quadratic2_center_deltaX(grad_inplace, deltaY, X1, X2, ut.dim2, ut.k11, ut.k12, ut.k22, ut.k2, ut.k1, ut.C);
+                return eg.quadratic2_center_deltaX(grad_inplace, deltaY, X1, X2, ut.dim2, ut.k11, ut.k12, ut.k22, ut.k1, ut.k2, ut.C);
             
             return new Tensor[] {//(2) deltaX2 = deltaY * (k22*2*X2 + k12*X1 + k2)
                 (backward_grads1 ? eg.quadratic2_center_deltaX1(false, deltaY, X1, X2, ut.dim2, ut.k11, ut.k12, ut.k1) : null),

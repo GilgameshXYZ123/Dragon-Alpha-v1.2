@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cifar10.resnet18_leaky_relu_attention;
+package cifar10.resnet18_attention;
 
-import cifar10.resnet18_leaky_relu_attention.Net.ResNet18;
+import cifar10.resnet18_attention.Net.ResNet18;
 import static z.dragon.alpha.Alpha.alpha;
 import z.dragon.data.BufferedTensorIter;
 import z.dragon.data.DataSet;
@@ -28,10 +28,8 @@ public class train
     static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2"); }
     static Mempool memp = alpha.engine.memp2(alpha.MEM_1GB * 8);
     static Engine eg = alpha.engine.cuda_float32(0, memp, alpha.MEM_1MB * 1024);
-//    static Engine eg = alpha.engine.cuda_float32(0, 1, memp, alpha.MEM_1MB*1024, true);//30.167
     static {
         CudaFloat32EngineBase cu32 = (CudaFloat32EngineBase) eg.engineBase();
-//        cu32.field_var_safe(false);
     }
     
     static int batch_size = 512;//512;
@@ -40,8 +38,9 @@ public class train
     public static void training(int epoch) {
         ResNet18 net = new ResNet18().train().init(eg).println(); 
         
-        Optimizer opt = alpha.optim.Adam(net.param_map(), lr).amsgrad(true);//25 epoch, 141.5s, 0.7807, 0.9870
+//        Optimizer opt = alpha.optim.Adam(net.param_map(), lr).amsgrad(true);//25 epoch, 141.5s, 0.7807, 0.9870
 //        Optimizer opt = alpha.optim.Adam(net.param_map(), lr).L2coef(1e-2f);//40 epoch, 229.ms, 0.793, 0.906
+
 
 //        Optimizer opt = alpha.optim.Adamax(net.param_map(), lr);//25 epoch, 143.763, 0.7454, 0.989
 //        Optimizer opt = alpha.optim.Adamax(net.param_map(), lr).L2coef(1e-2f);//50 epoch, 288.047, 0.7624, 0.9671
@@ -52,7 +51,7 @@ public class train
 //        Optimizer opt = alpha.optim.RAdam(net.params());//30 epoch, 174.419,  0.7396, 0.9849
 //        Optimizer opt = alpha.optim.RAdam(net.params()).L2coef(1e-2f);//60 epoch, 345.753, 0.7619, 0.8874
         
-//        Optimizer opt = alpha.optim.AdamW(net.params()).amsgrad(true).println();//40 epoch, 230.219, 0.7887, 0.9955
+        Optimizer opt = alpha.optim.AdamW(net.params()).amsgrad(true).println();//40 epoch, 230.219, 0.7887, 0.9955
 
 //        Optimizer opt = alpha.optim.RMSprop(net.param_map());//30 epoch, 170.67, 0.751, 0.9909
 //        Optimizer opt = alpha.optim.RMSprop(net.param_map()).learning_rate(0.001f).L2(1e-4f);//60 epoch, 343.841, 0.7317, 0.8999
@@ -100,8 +99,7 @@ public class train
 //        alpha.stat.save_zip(opt, opt_weight);
     }
     
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         try
         {
             //28.125

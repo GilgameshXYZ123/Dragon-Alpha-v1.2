@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cifar10.resnet18_leaky_relu_attention;
+package cifar10.resnet18_attention;
 
 import static z.dragon.alpha.Alpha.UnitBuilder.nn;
 import static z.dragon.alpha.Alpha.UnitFunctional.F;
@@ -15,13 +15,12 @@ import z.dragon.nn.unit.complex.Module;
 /**
  * @author Gilgamesh
  */
-public class Net
-{
+public class Net {
     public static class BasicBlock extends Module {
         Unit conv1, bn1, conv2, bn2, downsample;
         public BasicBlock(int in_channel, int out_channel, int stride) {
             conv1 = nn.conv3D(false, in_channel, out_channel, 3, stride, 1);
-            bn1 = nn.batchNorm_leakyRelu(nn.batchNorm(out_channel), nn.leakyRelu());
+            bn1 = nn.batchNorm_gelu(nn.batchNorm(out_channel), nn.gelu());
             
             conv2 = nn.conv3D(false, out_channel, out_channel, 3, 1, 1);
             bn2 = nn.batchNorm(out_channel);
@@ -40,7 +39,7 @@ public class Net
             X = bn2.forward(conv2.forward(X));
             
             if(downsample != null) res = downsample.forward(res);
-            return F.add_leakyRelu(X[0], res[0]);
+            return F.add_gelu(X[0], res[0]);
         }
     }
     
@@ -64,10 +63,9 @@ public class Net
             Tensor V = Wv.forward(X)[0];//[N, HW, C]
             
             Tensor score = F.batchMatMulT1(Q, K)[0];//[N, C, HW] * [N, HW, C] -> [N, C, C]
-            score = F.sdiv(div, score)[0];
-            score = F.softmax(-1, score)[0];//[N, C, C]
+            score = F.softmax(-1, F.sdiv(div, score))[0];//[N, C, C]
             
-            return F.reshape(F.batchMatMulT2(V, score), dim);//[N, HW, C] * [N, C, C] -> N[N, HW, C]
+            return F.view(F.batchMatMulT2(V, score), dim);//[N, HW, C] * [N, C, C] -> N[N, HW, C]
         }
     }
     
@@ -100,24 +98,24 @@ public class Net
     public static class ResNet18 extends Module {
         Unit prepare = nn.sequence(//div2, channel = 64,
                 nn.conv3D(false, 3, 64, 7, 2, 3),
-                nn.batchNorm_leakyRelu(nn.batchNorm(64), nn.leakyRelu())
+                nn.batchNorm_gelu(nn.batchNorm(64), nn.gelu())
         );
         
         Unit layer1 = nn.sequence(//div2, channel = 64
                 new BasicBlock(64, 64, 1),
                 new BasicBlock(64, 64, 1)
         );
-        
         Unit layer2 = nn.sequence(//div4, channel = 128
                 new BasicBlock(64, 128, 2),
                 new BasicBlock(128, 128, 1)
         );
+        Unit attn1 = new AttentionBlock(128);
         
         Unit layer3 = nn.sequence(//div8, channel = 256
                 new BasicBlock(128, 256, 2),
                 new BasicBlock(256, 256, 1)
         );
-        Unit attn = new AttentionBlock(128);
+        Unit attn2 = new AttentionBlock(256);
         
         Unit layer4 = nn.sequence(//div16, channel = 256
                 new BasicBlock(256, 512, 2),
@@ -129,7 +127,7 @@ public class Net
         Unit fc = nn.sequence(
                 nn.dropout(0.9f),
                 nn.fullconnect(true, 512, 128),
-                nn.leakyRelu_dropout(nn.leakyRelu(), nn.dropout(0.9f)),
+                nn.gelu_dropout(nn.gelu(), nn.dropout(0.9f)),
                 nn.fullconnect(true, 128, 10)
         );
 
@@ -137,11 +135,13 @@ public class Net
         public Tensor[] __forward__(Tensor... X) {
             X = prepare.forward(X);
             X = layer1.forward(X);
-            X = layer2.forward(X);
             
-            X = F.add_softplus(attn.forward(X)[0], X[0]);
+            X = layer2.forward(X);
+            X = F.add_gelu(attn1.forward(X)[0], X[0]);
             
             X = layer3.forward(X);
+            X = F.add_gelu(attn2.forward(X)[0], X[0]);
+            
             X = layer4.forward(X);
             X = pool.forward(X);
             return fc.forward(F.flatten(X));

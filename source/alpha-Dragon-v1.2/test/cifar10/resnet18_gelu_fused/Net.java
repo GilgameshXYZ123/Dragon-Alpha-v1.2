@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cifar10.resnet18_leaky_relu;
+package cifar10.resnet18_gelu_fused;
 
 import static z.dragon.alpha.Alpha.UnitBuilder.nn;
 import static z.dragon.alpha.Alpha.UnitFunctional.F;
@@ -21,8 +21,8 @@ public class Net
         Unit conv1, bn1, conv2, bn2, downsample;
         public BasicBlock(int in_channel, int out_channel, int stride) {
             conv1 = nn.conv3D(false, in_channel, out_channel, 3, stride, 1);
-            bn1 = nn.batchNorm(false, out_channel);
-           
+            bn1 = nn.batchNorm_gelu(nn.batchNorm(out_channel), nn.gelu());
+            
             conv2 = nn.conv3D(false, out_channel, out_channel, 3, 1, 1);
             bn2 = nn.batchNorm(out_channel);
            
@@ -36,27 +36,18 @@ public class Net
         @Override
         public Tensor[] __forward__(Tensor... X) {
             Tensor[] res = X;
-            
-            X = conv1.forward(X);
-            X = bn1.forward(X);
-            X = F.leakyRelu(X);
-            
-            X = conv2.forward(X);
-            X = bn2.forward(X);
+            X = bn1.forward(conv1.forward(X));
+            X = bn2.forward(conv2.forward(X));
             
             if(downsample != null) res = downsample.forward(res);
-            X = F.add(X[0], res[0]);
-            X = F.leakyRelu(X);
-            
-            return X;
+            return F.add_gelu(X[0], res[0]);
         }
     }
     
     public static class ResNet18 extends Module {
         Unit prepare = nn.sequence(//div2, channel = 64
                 nn.conv3D(false, 3, 64, 7, 2, 3),
-                nn.batchNorm(false, 64),
-                nn.leakyRelu()
+                nn.batchNorm_gelu(nn.batchNorm(64), nn.gelu())
         );
         
         Unit layer1 = nn.sequence(//div2, channel = 64
@@ -84,8 +75,7 @@ public class Net
         Unit fc = nn.sequence(
                 nn.dropout(0.9f),
                 nn.fullconnect(true, 512, 128),
-                nn.leakyRelu(),
-                nn.dropout(false, 0.9f),
+                nn.gelu_dropout(nn.gelu(), nn.dropout(0.9f)),
                 nn.fullconnect(true, 128, 10)
         );
         
@@ -97,14 +87,14 @@ public class Net
             X = layer2.forward(X);
             X = layer3.forward(X);
             X = layer4.forward(X);
-             
             X = pool.forward(X);
-            X = fc.forward(F.flatten(X));
             
+            X = fc.forward(F.flatten(X));
             return X;
         } 
         
-        String weight = "C:\\Users\\Gilgamesh\\Desktop\\cifar10-resnet18.zip";
+        static String weight = "C:\\Users\\Gilgamesh\\Desktop\\cifar10-resnet18.zip";
+        static String opt_weight = "C:\\Users\\Gilgamesh\\Desktop\\cifar10-resnet18-opt.zip";
         public void load() { alpha.stat.load_zip(this, weight); };
         public void save() { alpha.stat.save_zip(this, weight); }
     }

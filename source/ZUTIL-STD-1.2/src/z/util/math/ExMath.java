@@ -14,8 +14,7 @@ import z.util.lang.annotation.Passed;
  *
  * @author dell
  */
-public final class ExMath 
-{         
+public final class ExMath {         
     private ExMath() {}
     
     //<editor-fold defaultstate="collapsed" desc="class: Function">
