@@ -10,8 +10,7 @@ package z.dragon.nn.optim.lr_schedular;
  *
  * @author Gilgamesh
  */
-public class ExponentialLr extends LrSchedular
-{
+public class ExponentialLr extends LrSchedular {
     protected float gamma;
     protected float minLr;
     

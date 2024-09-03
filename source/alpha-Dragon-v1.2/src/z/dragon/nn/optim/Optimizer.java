@@ -23,8 +23,7 @@ import z.dragon.engine.Tensor.TensorList;
  *
  * @author Gilgamesh
  */
-public abstract class Optimizer implements Stateful, StateReader
-{
+public abstract class Optimizer implements Stateful, StateReader {
     protected float lr;
     private LrSchedular lr_schedular;
     

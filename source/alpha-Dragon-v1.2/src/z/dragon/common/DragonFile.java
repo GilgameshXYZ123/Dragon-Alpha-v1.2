@@ -26,8 +26,7 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class DragonFile 
-{
+public class DragonFile {
     private DragonFile() {}
     
     public static final DragonFile instance() { return fl; }

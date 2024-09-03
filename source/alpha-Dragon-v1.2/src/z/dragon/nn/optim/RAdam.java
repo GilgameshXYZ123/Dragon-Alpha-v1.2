@@ -18,8 +18,7 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class RAdam extends Optimizer
-{
+public class RAdam extends Optimizer {
     protected float lr_t, eps_t;
     protected int t;//step
     

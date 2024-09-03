@@ -17,8 +17,9 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Split extends FurcateFunction
-{
+public class Split extends FurcateFunction {
+    private static final long serialVersionUID = 1L;
+    
     protected int dimIdx;
     protected int[] section;
     

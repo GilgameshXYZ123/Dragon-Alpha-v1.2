@@ -9,8 +9,7 @@ package z.dragon.nn.optim.lr_schedular;
  *
  * @author Gilgamesh
  */
-public class CosAnnealingLr extends LrSchedular
-{
+public class CosAnnealingLr extends LrSchedular {
     protected float minLr;
     protected float tmax;
     protected int epoch;

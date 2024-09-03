@@ -16,8 +16,7 @@ import z.dragon.nn.unit.dual.DualUnit;
  * @author Gilgamesh
  * @param <T>
  */
-public class CoreMatMul<T extends DualUnit> extends DualCore<T>
-{
+public class CoreMatMul<T extends DualUnit> extends DualCore<T> {
     public CoreMatMul(T unit) { super(unit); }
 
     //<editor-fold defaultstate="collapsed" desc="running-area: propagation">

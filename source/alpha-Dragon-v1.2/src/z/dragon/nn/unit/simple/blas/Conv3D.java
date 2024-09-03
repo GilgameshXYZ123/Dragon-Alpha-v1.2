@@ -245,7 +245,6 @@ public class Conv3D extends SimpleUnit {
                 if(deltaB != null) { deltaB.dual(()-> { gc.countDown(); }).remote_sync(); }
                 if(deltaX != null) { deltaX.dual(()-> { gc.countDown(); }); }
             }
-        
             return deltaX;
         }
         //</editor-fold>

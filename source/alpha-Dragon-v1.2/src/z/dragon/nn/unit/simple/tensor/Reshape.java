@@ -17,8 +17,7 @@ import z.util.math.vector.Vector;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Reshape extends SimpleInplaceFunction
-{
+public class Reshape extends SimpleInplaceFunction {
     private static final long serialVersionUID = 1L;
     
     protected int[] outDim;

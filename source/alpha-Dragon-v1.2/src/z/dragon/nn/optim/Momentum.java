@@ -18,8 +18,7 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class Momentum extends Optimizer
-{
+public class Momentum extends Optimizer {
     protected float lr_t;
     
     protected float beta, a1, a2, expBeta;

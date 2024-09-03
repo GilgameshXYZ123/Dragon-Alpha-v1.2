@@ -17,8 +17,7 @@ import z.util.math.vector.Vector;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Trim extends SimpleInplaceFunction
-{
+public class Trim extends SimpleInplaceFunction {
     private static final long serialVersionUID = 1L;
     
     protected int[] t0;//trimming on the start

@@ -11,8 +11,7 @@ import java.util.function.Function;
  *
  * @author Gilgamesh
  */
-public final class LambdaLr extends LrSchedular
-{
+public final class LambdaLr extends LrSchedular {
     private Function<Float, Float> updater;
     
     public LambdaLr(Function<Float, Float> updater) {

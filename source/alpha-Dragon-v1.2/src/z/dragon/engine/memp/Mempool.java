@@ -152,10 +152,7 @@ public abstract class Mempool implements MemStatus, Serializable {
     protected abstract long[] alloc(final long mem_size);//alloc new memory,
    
     public synchronized long[] malloc(boolean check, int mem_length, long L_sizeof_datatype) {
-        //----------------------------------------------------------------------
         mem_length = (mem_length + 3) >> 2 << 2;//padding: mem_length % 4 == 0
-        //----------------------------------------------------------------------
-        
         final long mem_size = mem_length << L_sizeof_datatype;
         
         if(check) {
@@ -165,51 +162,51 @@ public abstract class Mempool implements MemStatus, Serializable {
                     "mem_length { got %d } > Integer.MAX_VALUE { got %d }", mem_length, Integer.MAX_VALUE));
             check_mem_size(mem_size);
         }
+        //----------------------------------------------------------------------
         
-        long[] block = search(mem_size);
-        
-        if(block == null) {//max_available_size >= max_alloc_size
-            long max_available_size = max_mem_size - used_mem_size;
-            if(mem_size > max_available_size) alloc_gc(mem_size);
+        long[] block;
+        synchronized(this) {
+            block = search(mem_size);
             
-            long max_alloc_size = max_mem_size - total_mem_size;
-            if(mem_size > max_alloc_size) {//insufficient mem_size to alloc new mem_block
-                if(mem_size > buffered_mem_size() || buffered_block_num() == 0) memory_insufficient();
-                if(!alloc_free(mem_size, max_alloc_size)) memory_insufficient();
+            if(block == null) {//max_available_size >= max_alloc_size
+                long max_available_size = max_mem_size - used_mem_size;
+                if (mem_size > max_available_size) alloc_gc(mem_size);
+            
+                long max_alloc_size = max_mem_size - total_mem_size;
+                if(mem_size > max_alloc_size) {//insufficient mem_size to alloc new mem_block
+                    if(mem_size > buffered_mem_size() || buffered_block_num() == 0) memory_insufficient();
+                    if(!alloc_free(mem_size, max_alloc_size)) memory_insufficient();
+                }
+            
+                //to malloc new blocks, we have: mem_length <= max_alloc_length
+                if((block = alloc(mem_size)) == null) memory_insufficient();
             }
-            
-            //to malloc new blocks, we have: mem_length <= max_alloc_length
-            if((block = alloc(mem_size)) == null) memory_insufficient();
-        }
         
-        used_mem_size += block[0];//block_size
-        grave.remove(block[1]);//block_address, rise again
+            used_mem_size += block[0];//block_size
+            grave.remove(block[1]);//block_address, rise again
+        }
         
         //----------------------------------------------------------------------
         block[0] >>= 2;//block is produced by alloc: block[0] = mem_size, so mem_size % 4 == 0;
-        //----------------------------------------------------------------------
-        
         return block;
     }
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="running-area: free & clear"> 
     protected abstract boolean recycle(long mem_size, long mem_address);//free: return tree if succeed to free
-    public synchronized boolean free(boolean check, long mem_size, long mem_address) {
-        //----------------------------------------------------------------------
+    public boolean free(boolean check, long mem_size, long mem_address) {
         mem_size <<= 2;//block[0] = mem_size, recover
+        if(check) check_mem_size(mem_size);
+        if (mem_address == NULL) return false;//can't delete an NULL mem_address
         //----------------------------------------------------------------------
         
-        if(check) check_mem_size(mem_size);
-        
-        //you can't delete an NULL mem_address, or delete an mem_address twice
-        if(mem_address == NULL || grave.contains(mem_address)) return false;
-        
-        boolean flag = recycle(mem_size, mem_address);
-        
-        grave.add(mem_address);
-        used_mem_size -= mem_size;
-        
+        boolean flag;
+        synchronized(this) {
+            if (grave.contains(mem_address)) return false;//can't delete an mem_address twice
+            flag = recycle(mem_size, mem_address);
+            grave.add(mem_address);
+            used_mem_size -= mem_size;
+        }
         return flag;
     }
     

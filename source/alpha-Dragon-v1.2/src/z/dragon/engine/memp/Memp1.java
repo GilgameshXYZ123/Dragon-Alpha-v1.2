@@ -12,8 +12,9 @@ import z.dragon.common.int64.ArrayList_int64;
  * Mark1: Naive Memory Pool
  * @author Gilgamesh
  */
-public class Memp1 extends Mempool
-{
+public class Memp1 extends Mempool {
+    private static final long serialVersionUID = 1L;
+    
     public Memp1(long maxMemorySize) { super(maxMemorySize); }
     
     //<editor-fold defaultstate="collapsed" desc="member params && Basic-Functions">

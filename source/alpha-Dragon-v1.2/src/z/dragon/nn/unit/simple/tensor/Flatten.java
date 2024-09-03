@@ -16,8 +16,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Flatten extends SimpleInplaceFunction
-{
+public class Flatten extends SimpleInplaceFunction {
     private static final long serialVersionUID = 1L;
     
     transient protected int[] inDim;

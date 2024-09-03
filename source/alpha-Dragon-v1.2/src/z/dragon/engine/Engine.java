@@ -14,6 +14,7 @@ import z.dragon.common.MemStatus;
 import z.dragon.common.state.State.StateValue;
 import z.dragon.engine.Result.IndexedResult;
 import z.dragon.engine.Syncer.ChainSyncer;
+import z.dragon.engine.Tensor.TensorSet;
 import z.dragon.engine.memp.Mempool;
 import z.util.lang.annotation.Passed;
 import z.util.math.vector.Vector;
@@ -707,27 +708,22 @@ public class Engine implements MemStatus {
     
     //<editor-fold defaultstate="collapsed" desc="delete Tensor">
     //<editor-fold defaultstate="collaped" desc="delete-core">
-    void delete_core(Tensor X) {
-        //release the memory of the tensor
+    protected void delete_core(Tensor X) {
         //must wait until the compute of the tensor is completed
         //if you delete a tensor participating in a computation, it may effects other tensor
-        synchronized (X) {
-            //core.free(X.mem_size, X.address); X.address = 0L;//X.address != NULL
-            core.free(X.c().mem_size, X.address); X.address = 0L;//X.address != NULL
-            if (X.grad != null) { delete(X.grad); X.grad = null; }//X.clear_grad
-            if (X.carrier != null) {//clear X.carrier
-                if(!X.carrier.isEmpty()) {
-                    X.carrier.forEach((ts) -> { if(ts != X) delete(ts); });
-                    X.carrier.clear();
-                }
-                X.carrier = null;
-            }
-        }
-        
-        X.dim = null; 
-        X.syncer = null;
+        core.free(X.c().mem_size, X.address);//release the memory of the tensor
+        X.address = 0L;
         X.trace = null;
         X.mod_counter = null;
+        
+        Tensor grad = null;
+        TensorSet carrier = null;
+        synchronized (X) {
+            if (X.grad != null) { grad = X.grad; X.grad = null; }
+            if (X.carrier != null) { carrier = X.carrier; X.carrier = null; }
+        }
+        if (grad != null) delete(grad);
+        if (carrier != null) { delete(carrier); carrier.clear(); }
     }
     //</editor-fold>
     public boolean delete(Tensor X)  {
@@ -1489,6 +1485,7 @@ public class Engine implements MemStatus {
         
         Tensor Y = new Tensor(check, this, core.dataType(), dim);
         Y.copy_memoryMetaData(X);
+        Y.syncer = X.syncer;//inherent syncer
         Y.mod_counter = X.mod_counter;//inherent mod-count
         Y.need_carry = X.need_carry; Y.carrier = X.carrier;//inherent carrier
         return Y;
@@ -5821,7 +5818,7 @@ public class Engine implements MemStatus {
             Tensor X1, Tensor X2,
             float alpha, float beta, float gamma)
     {
-        if(check) {
+        if (check) {
             require_dtype(X1); require_dtype(X2);
             equals_valueStructure(X1, "X1", X2, "X2"); 
         }
@@ -5830,7 +5827,7 @@ public class Engine implements MemStatus {
                 X1.address, X2.address, 
                 alpha, beta, gamma,
                 X1.lengthv, X1.lastDim());
-        if(sync) sc.sync(); else Y.setSyncer(sc);
+        if (sync) sc.sync(); else Y.setSyncer(sc);
         return Y;
     }
     //</editor-fold>

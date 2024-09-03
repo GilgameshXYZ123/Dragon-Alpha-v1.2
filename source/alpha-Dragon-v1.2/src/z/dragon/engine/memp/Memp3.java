@@ -13,8 +13,9 @@ import z.dragon.engine.memp.Memp2.Mnode;
  * Mark3
  * @author Gilgamesh
  */
-public class Memp3 extends Memp2
-{
+public class Memp3 extends Memp2 {
+    private static final long serialVersionUID = 1L;
+    
     //<editor-fold defaultstate="collapsed" desc="class: Combiner">
     public class Combiner 
     {

@@ -17,8 +17,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class LinearSummary extends ReduceFunction
-{
+public class LinearSummary extends ReduceFunction {
     private static final long serialVersionUID = 1L;
     
     protected float alpha;

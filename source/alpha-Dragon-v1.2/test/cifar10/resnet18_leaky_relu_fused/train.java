@@ -107,7 +107,7 @@ public class train
             //25 epochs for Adam: 143.273 -> 130 s
             //50 epochs for SGD
             //30 epcohs for SGDMN
-            training(25);
+            training(5);
         }
         catch(Exception e) {
             e.printStackTrace();

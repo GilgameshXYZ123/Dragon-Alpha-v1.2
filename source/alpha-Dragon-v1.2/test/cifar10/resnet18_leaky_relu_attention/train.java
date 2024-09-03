@@ -32,7 +32,6 @@ public class train
     static {
         CudaFloat32EngineBase cu32 = (CudaFloat32EngineBase) eg.engineBase();
 //        cu32.field_var_safe(false);
-        System.gc();
     }
     
     static int batch_size = 512;//512;
@@ -83,14 +82,13 @@ public class train
                 if(batchIdx % 10 == 0) {
                     float ls = loss.loss(yh, Y).get();
                     System.out.println(batchIdx + ": loss = " + ls + ", lr = " + opt.learning_rate());
-//                    System.gc();
                 }
                 
                 net.backward(loss.gradient(yh, Y));
                 opt.update().clear_grads();
                 net.gc();
                 
-                System.gc();
+//                System.gc();
             }
         }
         

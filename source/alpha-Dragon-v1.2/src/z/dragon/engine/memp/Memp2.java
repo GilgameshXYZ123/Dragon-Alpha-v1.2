@@ -13,11 +13,11 @@ import z.dragon.data.EntryList;
  * Mark2
  * @author Gilgamesh
  */
-public class Memp2 extends Mempool
-{
+public class Memp2 extends Mempool {
+    private static final long serialVersionUID = 1L;
+    
     //<editor-fold defaultstate="collapsed" desc="class: Mnode">
-    protected class Mnode 
-    {
+    protected class Mnode {
         public Mnode(boolean free, long mem_size, long mem_address) {
             this.free = free;
             this.mem_size = mem_size;
@@ -73,8 +73,7 @@ public class Memp2 extends Mempool
             pool.remove(mem_size, mem_address);
         }
         
-        protected Mnode union() 
-        {
+        protected Mnode union() {
             Mnode n; free = true;
             Mnode n0 = last, n1 = this, n2 = next;
             

@@ -52,12 +52,12 @@ public class CoreLinear2_LeakyRelu<T extends DualUnit> extends DualCore<T> {
             boolean backward_grads1, boolean backward_grads2) {
         if(!backward_grads) return null;
         
-        Tensor[] grads = (is_holdY()? //V1: holdY / V2: hold{X1, X2}
+        Tensor[] grads = (is_holdY() ? //V1: holdY / V2: hold{X1, X2}
                 eg.linear2_leakyRelu_deltaX_v1(grad_inplace, deltaY, holdY(), alpha, beta, k) :
                 eg.linear2_leakyRelu_deltaX_v2(grad_inplace, deltaY, holdX1(), holdX2(), alpha, beta, gamma, k));
         
-        if(!backward_grads1) { grads[0].remote_delete(); grads[0] = null; }//deltaX1
-        if(!backward_grads2) { grads[1].remote_delete(); grads[1] = null; }//deltaX2    
+        if (!backward_grads1) { grads[0].remote_delete(); grads[0] = null; }//deltaX1
+        if (!backward_grads2) { grads[1].remote_delete(); grads[1] = null; }//deltaX2    
         return grads;//{deltaX1, deltaX2}
     }
     //</editor-fold>

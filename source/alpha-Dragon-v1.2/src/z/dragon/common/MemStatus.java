@@ -9,8 +9,7 @@ package z.dragon.common;
  *
  * @author Gilgamesh
  */
-public interface MemStatus 
-{
+public interface MemStatus {
     public long max_mem_size();
     public long total_mem_size();
     public long used_mem_size();

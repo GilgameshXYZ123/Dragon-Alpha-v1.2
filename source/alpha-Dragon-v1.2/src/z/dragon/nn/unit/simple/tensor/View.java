@@ -7,7 +7,6 @@ package z.dragon.nn.unit.simple.tensor;
 
 import z.dragon.engine.Engine;
 import z.dragon.engine.Tensor;
-import z.dragon.nn.core.UnitCore;
 import z.dragon.nn.unit.simple.SimpleInplaceInline;
 import z.dragon.nn.unit.simple.SimpleInplaceFunction;
 import z.util.lang.annotation.Passed;
@@ -18,8 +17,7 @@ import z.util.math.vector.Vector;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class View extends SimpleInplaceFunction
-{
+public class View extends SimpleInplaceFunction {
     private static final long serialVersionUID = 1L;
     
     protected int[] outDim;

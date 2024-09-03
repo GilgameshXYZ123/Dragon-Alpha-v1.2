@@ -5,7 +5,7 @@
             <url>src/z/dragon/engine/Engine.java</url>
             <bookmark id="1">
                 <name/>
-                <line>1797</line>
+                <line>1806</line>
                 <key/>
             </bookmark>
         </file>
@@ -31,6 +31,7 @@
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/simple/pool/adaptive/CoreAdaptiveAvgPool1D.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/attention/Attention.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/dual/math/CoreLinear2_Softplus.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/cuda/impl/CudaStreamPool.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/reducer/math/CoreQuadraticSummary.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/math2/Log.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/math2/bernouli/Relu_BernouliMul.java</file>
@@ -74,7 +75,7 @@
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/affine/Affine_Tanh.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/simple/math2/CoreMin.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/math2/Arctan.java</file>
-            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/math2/bernouli/Softplus_BernouliMul.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/cifar10/resnet18_leaky_relu/train.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/cifar10/resnet18_leaky_relu_fused/train4.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/simple/tensor/CoreView.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/common/int32/TreeMap_int32.java</file>
@@ -107,8 +108,8 @@
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/simple/tensor/CoreFlatten.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/data/ImageFolder.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/dual/math/CoreDiv.java</file>
-            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/cifar10/resnet18_leaky_relu_attention/Net.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/EngineAlloc.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/cifar10/resnet18_leaky_relu_attention/Net.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/test/cuda/function/Cuda_function_fusion_test2.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/common/int64/Entry_int64.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/blas/Deconv2D.java</file>
@@ -131,6 +132,7 @@
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/common/state/IntArrayValue.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/simple/math2/CoreHardSigmoid.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/math2/Linear.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/dual/DualCore.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/dual/math/CoreLinear2_Tanh.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/reducer/math/CoreQuadraticMean.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/simple/pool/CorePool1D.java</file>
@@ -138,6 +140,7 @@
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/dual/math/CoreQuadratic2Center.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/math2/bernouli/Elu_BernouliMul.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/math2/LogSoftmax.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/Tensor.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/batchnorm/global/GlobalBatchNorm_Relu.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/test/cuda/pool2D/Cuda_pool2D_indexed_test.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/simple/math1/CoreCos.java</file>
@@ -174,7 +177,6 @@
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/simple/tensor/CoreTranspose.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/math2/LeakyRelu.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/cifar10/resnet18_gelu/test.java</file>
-            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/math2/bernouli/Tanh_BernouliMul.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/StrictSync.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/dual/math/CoreLinear2_Gelu.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/common/state/State.java</file>
@@ -209,7 +211,6 @@
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/ImageEngine.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/batchnorm/global/GlobalBatchNorm_Elu.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/SyncRandomEngine.java</file>
-            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/module/CoreModule.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/cuda/impl/math/Cuda_matMul.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/cuda/impl/math/Cuda_pool2D.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/batchnorm/global/GlobalSqBatchNorm.java</file>
@@ -227,7 +228,6 @@
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/batchnorm/BatchNorm_Gelu.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/reducer/tensor/CoreConcat.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/pool/MaxPool1D.java</file>
-            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/simple/SimpleCore.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/cifar10/TNet/Net.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/math1/Abs.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/math2/Softplus.java</file>
@@ -235,6 +235,7 @@
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/cifar10/resnet18_leaky_relu_fused/train2.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/dataset/Soccer.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/reducer/ReducerCore.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/Engine.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/simple/tensor/CoreRot180.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/simple/math2/CoreElu.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/cifar10/resnet18_softplus/train.java</file>
@@ -268,8 +269,8 @@
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/cuda/impl/CudaStreamCallback.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/data/Transform.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/SimpleUnit.java</file>
-            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/cuda/impl/PinnedMempool.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/core/simple/pool/CoreAvgPool1D.java</file>
+            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/Syncer.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/math2/Max.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/simple/math2/HardSigmoid.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/cuda/impl/CudaStreamp1.java</file>
@@ -278,7 +279,6 @@
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/test/cuda/batchnorm/Fused_Affine_LeakyRelu_backward1.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/test/cuda/batchnorm/Fused_BatchNorm_LeakyRelu_forward.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/dual/math/Quadratic2Row.java</file>
-            <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/engine/cuda/CudaFloat32EngineBase.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/test/cifar10/resnet18_softplus/test.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/dual/blas/MatMul.java</file>
             <file>file:/D:/virtual-discC-code/Dragon-alpha-3060ti/alpha-Dragon-v1.2/src/z/dragon/nn/unit/GradientControllable.java</file>

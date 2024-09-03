@@ -77,7 +77,7 @@ public abstract class SimpleCore<T extends SimpleUnit> extends UnitCore<T> {
         X = input[0]; Trace trace = X.trace(); if(trace != null) trace.callback(this, 0);
       
         X_mod_count = X.mod_count();//save: X.mod_count
-        this.__before_forward__(X.engine(), X);
+        __before_forward__(X.engine(), X);
         Y = __forward__(X.engine(), X.c());//wait until the computation on X is end
         Y_mod_count = Y.mod_count();//save: Y.mod_count
         

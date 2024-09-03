@@ -19,8 +19,7 @@ import static z.ui.JUI.ColorHandler.clr;
  *
  * @author Gilgamesh
  */
-public final class DragonPlot 
-{
+public final class DragonPlot {
     private DragonPlot() {}
     
     public static final DragonPlot plot = new DragonPlot();

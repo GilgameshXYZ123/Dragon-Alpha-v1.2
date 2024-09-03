@@ -95,8 +95,7 @@ public interface Syncer {
     public static Syncer onceCalled(Syncer sc) { return new OnceCalledSyncer(sc); }
     
     //<editor-fold defaultstate="collapsed" desc="static class: RemoteSync">
-    public static class RemoteSync
-    {
+    public static class RemoteSync {
         private static final ThreadFactory daemonThreadFactory = new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
@@ -121,19 +120,17 @@ public interface Syncer {
          */
         public static void sync(Tensor ts) {
             synchronized(ts) {
-                if(ts.syncer == null) return;
+                if (ts.syncer == null) return;
                 Syncer sc = ts.syncer;
-                Future<?> ft = exec.submit(() -> { sc.sync(); });
-                ts.syncer = new FutureSyncer<>(ft);
+                ts.syncer = new FutureSyncer<>(exec.submit(() -> { sc.sync(); }));
             }
         }
         
         public static void delete(Tensor ts) {
             synchronized(ts) {
-                if(ts.syncer == null) { ts.delete(); return; }    
+                if (ts.syncer == null) { ts.delete(); return; }    
                 Syncer sc = ts.syncer;
-                Future<?> ft = exec.submit(()-> { sc.sync(); ts.delete(); });
-                ts.syncer = new FutureSyncer<>(ft);
+                ts.syncer = new FutureSyncer<>(exec.submit(()-> { sc.sync(); ts.delete(); }));
             }
         }
     }

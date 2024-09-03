@@ -14,8 +14,7 @@ import z.dragon.engine.Parameter.ParamSet;
  *
  * @author Gilgamesh
  */
-public abstract class FurcateFunction extends Furcation
-{
+public abstract class FurcateFunction extends Furcation {
     private static final long serialVersionUID = 1L;
     
     @Override

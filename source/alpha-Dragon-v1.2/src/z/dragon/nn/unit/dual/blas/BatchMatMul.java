@@ -41,8 +41,7 @@ public class BatchMatMul extends DualFunction {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: InlineBatchMatMul">
-    public static class InlineBatchMatMul extends DualCore<BatchMatMul>
-    {
+    public static class InlineBatchMatMul extends DualCore<BatchMatMul> {
         public InlineBatchMatMul(BatchMatMul unit) { super(unit); }
 
         public final boolean likeX1() { return ut.likeX1; }
@@ -58,18 +57,18 @@ public class BatchMatMul extends DualFunction {
                 boolean grad_inplace, boolean backward_grads, 
                 boolean backward_grads1, boolean backward_grads2) 
         {
-            if(!backward_grads) return null;
+            if (!backward_grads) return null;
         
             int count = 0; Tensor deltaX1 = null, deltaX2 = null;
             //(1) deltaX1[batch, N, K] = deltaY[batch, N, M] * X2^T[batch, M, K]
             //(2) deltaX2[batch, K, M] = X1^T[batch, K, N] * deltaY[batch, N, M]
-            if(backward_grads1) { deltaX1 = eg.batchMatMulT2(deltaY, holdX2()); count++; }
-            if(backward_grads2) { deltaX2 = eg.batchMatMulT1(holdX1(), deltaY); count++; }
+            if (backward_grads1) { deltaX1 = eg.batchMatMulT2(deltaY, holdX2()); count++; }
+            if (backward_grads2) { deltaX2 = eg.batchMatMulT1(holdX1(), deltaY); count++; }
         
             if(grad_inplace) {//when deltaX1 and deltaX2 are cauculated, the deltaY is not needed
                 CountGc gc = new CountGc(count, deltaY);
-                if(deltaX1 != null) deltaX1.dual(()-> { gc.countDown(); });
-                if(deltaX2 != null) deltaX2.dual(()-> { gc.countDown(); });
+                if (deltaX1 != null) deltaX1.dual(()-> { gc.countDown(); });
+                if (deltaX2 != null) deltaX2.dual(()-> { gc.countDown(); });
             }
             return new Tensor[]{ deltaX1, deltaX2 };
         }

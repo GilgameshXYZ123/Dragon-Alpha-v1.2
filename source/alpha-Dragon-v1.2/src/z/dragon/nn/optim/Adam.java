@@ -25,8 +25,7 @@ import z.util.math.vector.Vector;
  * W = deltaW - lr_t * V / (sqrt(S) + eps_t).
  * @author Gilgamesh
  */
-public class Adam extends Optimizer
-{
+public class Adam extends Optimizer {
     protected float lr_t, eps_t;
     
     protected float beta1, a1, a2, expBeta1;

@@ -9,8 +9,7 @@ package z.dragon.nn.unit.simple;
  *
  * @author Gilgamesh
  */
-public abstract class SimpleInplaceUnit extends SimpleUnit
-{
+public abstract class SimpleInplaceUnit extends SimpleUnit {
     private static final long serialVersionUID = 1L;
     
     boolean inplace;

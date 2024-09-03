@@ -14,8 +14,7 @@ import z.dragon.engine.Parameter.ParamSet;
  *
  * @author Gilgamesh
  */
-public abstract class ReduceFunction extends Reducer
-{ 
+public abstract class ReduceFunction extends Reducer { 
     private static final long serialVersionUID = 1L;
     
     @Override

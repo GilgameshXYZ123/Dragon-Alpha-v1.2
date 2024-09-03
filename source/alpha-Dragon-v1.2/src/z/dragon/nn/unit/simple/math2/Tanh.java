@@ -16,8 +16,7 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Tanh extends SimpleInplaceFunction
-{
+public class Tanh extends SimpleInplaceFunction {
     private static final long serialVersionUID = 1L;
     
     public Tanh(boolean inplace) { super(inplace); }

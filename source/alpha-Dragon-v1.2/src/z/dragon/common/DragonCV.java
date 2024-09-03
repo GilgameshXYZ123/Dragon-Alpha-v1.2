@@ -39,11 +39,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Set;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -67,8 +65,7 @@ import z.util.math.vector.Vector;
  * default order of clr-channels: Blue, Green, Red.
  * @author Gilgamesh
  */
-public final class DragonCV 
-{
+public final class DragonCV {
     public final JUI.ColorHandler color = JUI.ColorHandler.clr;
     private DragonCV() {}
     

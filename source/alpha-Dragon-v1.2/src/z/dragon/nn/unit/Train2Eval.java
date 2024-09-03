@@ -9,8 +9,7 @@ package z.dragon.nn.unit;
  *
  * @author Gilgamesh
  */
-public interface Train2Eval 
-{
+public interface Train2Eval {
     public Train2Eval train();
     public Train2Eval eval();
     

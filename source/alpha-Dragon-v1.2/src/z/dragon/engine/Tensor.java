@@ -297,15 +297,16 @@ public class Tensor implements StateValue, Serializable {
     
     //<editor-fold defaultstate="collapsed" desc="Syncer: extended">
     transient protected volatile Syncer syncer;//to get the result of the last computation
-    
     public final Syncer syncer() { return syncer; }
     public final synchronized void setSyncer(Syncer sc) { this.syncer = sc; }
     
-    public final synchronized Tensor c() {
-        if(syncer != null) {
-            Syncer sc = syncer;
-            syncer = null;
-            sc.sync();
+    public final Tensor c() {
+        synchronized(this) {
+            if(syncer != null) {
+                Syncer sc = syncer;
+                syncer = null;
+                sc.sync();
+            }
         }
         return this;
     }
@@ -314,17 +315,12 @@ public class Tensor implements StateValue, Serializable {
     public Tensor remote_delete() { RemoteSync.delete(this); return this; }
     
     public Tensor dual(Syncer after) {
-        synchronized(this) {
-            Syncer before = this.syncer;
-            this.syncer = new DualSyncer(before, after);
-        }
+        synchronized(this) { Syncer before = syncer; syncer = new DualSyncer(before, after); }
         return this;
     }
     
     public Tensor follow(Tensor ts) {
-        synchronized(this) {
-            this.syncer = new FollowSyncer(ts);
-        }
+        synchronized(this) { syncer = new FollowSyncer(ts); }
         return this;
     }
     //</editor-fold>

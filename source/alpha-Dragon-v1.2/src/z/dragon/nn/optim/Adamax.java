@@ -18,8 +18,7 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class Adamax extends Optimizer
-{
+public class Adamax extends Optimizer {
     protected float lr_t;
     
     protected float beta1, a1, a2, expBeta1;

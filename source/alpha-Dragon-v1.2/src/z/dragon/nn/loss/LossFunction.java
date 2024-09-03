@@ -13,8 +13,7 @@ import z.dragon.engine.Tensor;
  * @author Gilgamesh
  */
 @SuppressWarnings("unchecked")
-public abstract class LossFunction
-{
+public abstract class LossFunction {
     private boolean average = true;
     private boolean zero_nan = false;//zero all NAN in loss
     
@@ -54,8 +53,8 @@ public abstract class LossFunction
         Engine eg = Yh.engine();
         Tensor loss = __loss_tensor__(Yh.c(), Y.c(), eg).c();
         
-        if(zero_nan) loss.zero_nan().c();
-        Result<Float> ls = (average? mean_loss(loss, eg) : sum_loss(loss, eg));
+        if (zero_nan) loss.zero_nan().c();
+        Result<Float> ls = (average ? mean_loss(loss, eg) : sum_loss(loss, eg));
         return Result.dual(ls, ()->{ loss.delete(); });
     }
     //</editor-fold>
@@ -67,10 +66,10 @@ public abstract class LossFunction
     public Tensor gradient(Tensor Yh, Tensor Y) {
         Engine eg = Yh.engine();
         Tensor grad = __gradient__(Yh.c(), Y.c(), eg);
-        if(zero_nan) grad.c().zero_nan().c();
-        if(average) grad = mean_gradient(grad.c(), eg);
+        if (zero_nan) grad.c().zero_nan().c();
+        if (average) grad = mean_gradient(grad.c(), eg);
         grad.carry(Y.need_carry(true)); 
-        if(grad != Yh) grad.setTrace(Yh.trace());
+        if (grad != Yh) grad.setTrace(Yh.trace());
         return grad;
     }
     //</editor-fold>

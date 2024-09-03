@@ -25,18 +25,17 @@ public abstract class Result<V> {
         return value;
     }
     
-    public void append(StringBuilder sb) 
-    {
+    public void append(StringBuilder sb)  {
         sb.append("Result { value = "); this.get();
         
         Class<?> cls = value.getClass();
-        if(cls == float[].class) sb.append(Arrays.toString((float[])value));
-        else if(cls == double[].class) sb.append(Arrays.toString((double[])value));
-        else if(cls == int[].class) sb.append(Arrays.toString((int[])value));
-        else if(cls == long[].class) sb.append(Arrays.toString((long[])value));
-        else if(cls == short[].class) sb.append(Arrays.toString((short[])value));
-        else if(cls == byte[].class ) sb.append(Arrays.toString((byte[])value));
-        else if(cls == boolean[].class) sb.append(Arrays.toString((boolean[])value));
+        if (cls == float[].class) sb.append(Arrays.toString((float[])value));
+        else if (cls == double[].class) sb.append(Arrays.toString((double[])value));
+        else if (cls == int[].class) sb.append(Arrays.toString((int[])value));
+        else if (cls == long[].class) sb.append(Arrays.toString((long[])value));
+        else if (cls == short[].class) sb.append(Arrays.toString((short[])value));
+        else if (cls == byte[].class ) sb.append(Arrays.toString((byte[])value));
+        else if (cls == boolean[].class) sb.append(Arrays.toString((boolean[])value));
         else sb.append(value); 
         
         sb.append(" }");

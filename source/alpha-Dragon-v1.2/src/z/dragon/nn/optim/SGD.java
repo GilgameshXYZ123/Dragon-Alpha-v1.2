@@ -16,8 +16,7 @@ import z.dragon.engine.Tensor;
  *
  * @author Gilgamesh
  */
-public class SGD extends Optimizer 
-{
+public class SGD extends Optimizer {
     public SGD(Parameter[] params, float lr) { super(params, lr); }
     public SGD(Collection<Parameter> params, float lr) { super(params, lr);  }
     public SGD(Map<String, Parameter> param_map, float lr) { super(param_map, lr);  }

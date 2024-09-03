@@ -16,8 +16,7 @@ import z.dragon.engine.Tensor;
  *
  * @author Gilgamesh
  */
-public class SGDMN extends Optimizer
-{
+public class SGDMN extends Optimizer {
     protected float momentum, dampen, nesterov;
     protected Tensor[] V;
     

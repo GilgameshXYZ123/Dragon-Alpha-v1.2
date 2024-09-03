@@ -17,8 +17,7 @@ import z.util.math.vector.Vector;
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")
-public class Pad extends SimpleInplaceFunction
-{
+public class Pad extends SimpleInplaceFunction {
     private static final long serialVersionUID = 1L;
     
     protected int[] p0;//padding on the start

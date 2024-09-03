@@ -33,8 +33,7 @@ Adamod(W):
  * </pre>
  * @author Gilgamesh
  */
-public class Adamod  extends Optimizer
-{
+public class Adamod  extends Optimizer {
     protected float lr_t, eps_t;
     
     protected float beta1, a1, a2, expBeta1;

@@ -11,8 +11,7 @@ import z.dragon.engine.EngineBase;
  *
  * @author Gilgamesh
  */
-public abstract class CFloat32Base extends EngineBase
-{
+public abstract class CFloat32Base extends EngineBase {
     public CFloat32Base(String dataType, long LsizeofDatatype) {
         super("Cfloat32", 2, "cint32", "cint8");
     }

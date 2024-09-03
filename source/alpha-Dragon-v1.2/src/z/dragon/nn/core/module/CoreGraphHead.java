@@ -12,7 +12,6 @@ import z.dragon.engine.Tensor.TensorSet;
 import z.dragon.nn.core.Trace;
 import z.dragon.nn.core.UnitCore;
 import z.dragon.nn.unit.complex.Module;
-import z.util.math.vector.Vector;
 
 @SuppressWarnings("unchecked")
 public class CoreGraphHead<T extends Module> extends UnitCore<T> {

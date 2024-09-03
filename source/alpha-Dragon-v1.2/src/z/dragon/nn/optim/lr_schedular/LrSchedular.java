@@ -9,8 +9,7 @@ package z.dragon.nn.optim.lr_schedular;
  *
  * @author Gilgamesh
  */
-public abstract class LrSchedular 
-{
+public abstract class LrSchedular {
     protected float initLr;
     protected float lr;
     

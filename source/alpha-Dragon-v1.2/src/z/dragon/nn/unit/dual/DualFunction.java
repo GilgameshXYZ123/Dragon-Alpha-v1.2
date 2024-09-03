@@ -14,8 +14,7 @@ import z.dragon.engine.Parameter.ParamSet;
  *
  * @author Gilgamesh
  */
-public abstract class DualFunction extends DualUnit
-{
+public abstract class DualFunction extends DualUnit {
     private static final long serialVersionUID = 1L;
     
     @Override
