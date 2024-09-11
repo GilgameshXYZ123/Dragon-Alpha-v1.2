@@ -41,7 +41,16 @@
 - JDK version $\ge$ 8.0, and CUDA version $\ge$ 11.5.
 - No requirement for three-part libraries.
 - You need to specify the home path of Alpha to load dlls.
-- If your JDK versoion is 8.0
+- If your JDK versoion is 8.0, there exisits format-imcompatible problems when reading a small portion of images in ILSVRC2012. These problems are attributed to the ImageIO.class of JDK8. To solve these questions, you can replaces these format-incompatible images by those in 
+-
+-
+-
+-     when reading a  images from ILSVRC2012
+-
+-
+-    may be some format-imcompatibility issues when reading images from ILSVRC2012, which are attriibuted to the ImageIO of JDK8. You can 
+-
+-   solve these issues by using higher-level JDK,
   
 # II. Files
 - **Arxiv.pdf**  an article talking about the background, characteristics, architecture and experiments of Alpha, preprinted on arxiv.org, at: https://arxiv.org/abs/2305.08819.<br>
