@@ -41,17 +41,9 @@
 - JDK version $\ge$ 8.0, and CUDA version $\ge$ 11.5.
 - No requirement for three-part libraries.
 - You need to specify the home path of Alpha to load dlls.
-- If your JDK versoion is 8.0, there exisits format-imcompatible problems when reading a small portion of images in ILSVRC2012. These problems are attributed to the ImageIO.class of JDK8. To solve these questions, you can replaces these format-incompatible images by those in 
+- There may exisit format-imcompatible problems when reading a small portion of images in ILSVRC2012, due to the bugs in ImageIO.class of JDK8. To solve these questions, you can replaces these images by those thoe in fold [example\repair], and using  higher versions of JDK may also works.
+- 
 -
--
--
--     when reading a  images from ILSVRC2012
--
--
--    may be some format-imcompatibility issues when reading images from ILSVRC2012, which are attriibuted to the ImageIO of JDK8. You can 
--
--   solve these issues by using higher-level JDK,
-  
 # II. Files
 - **Arxiv.pdf**  an article talking about the background, characteristics, architecture and experiments of Alpha, preprinted on arxiv.org, at: https://arxiv.org/abs/2305.08819.<br>
 - **exec**  the executable files of Alpha.
@@ -68,7 +60,6 @@
   - **alpha-code**  the experimental code of Alpha, you can take it as examples, to create your own Alpha-app. Before using Alpha’s API, you must specify the home-path of Alpha, in order to load the relative native libraries.<br>
   ![image](https://github.com/GilgameshXYZ123/Dragon-Alpha/assets/65615049/2586a7d0-0226-4bae-a575-5d9e2c8bdf66)
   - **pytorch-code**  the experimental code of PyTorch.<br>
-  - **experiment-data**  console output to track some metrics for both Alpha and PyTorch, in order to make a comparison.<br>
   - **test_cuda**  some related code to test Alpha&cu32. You can take it as examples of using Alpha’s operators.<br>
   
 # About me
