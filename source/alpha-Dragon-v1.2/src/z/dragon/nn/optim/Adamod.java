@@ -27,7 +27,7 @@ Adamod(W):
       (4) eps_t = eps * sqrt(1 - Us)
       (5) neta = lr_t / (sqrt(S) + eps_t)
       (6) G = c1*G + c2*neta
-      (7) neta = minValue(neta, G) * V
+      (7) neta = min(neta, G) * V
       (8) W -= stepSize  # gradient descent
       Uv *= alpha; Us *= beta.
  * </pre>

@@ -322,12 +322,12 @@ public final class DragonPlot {
     }
     
     public LineChart line_chart(Line... lines) { 
-        MaxMin<Float> mm = Vector.maxMin(lines[0].ys);
+        MaxMin<Float> mm = Vector.max_min(lines[0].ys);
         float ymax = mm.max(), ymin = mm.min();
         int maxlen = lines[0].xs.length;
         for(int i=1; i<lines.length; i++) {
             Line line = lines[i];
-            MaxMin<Float> tmm = Vector.maxMin(line.ys);
+            MaxMin<Float> tmm = Vector.max_min(line.ys);
             float tymax = tmm.max(); if(tymax > ymax) ymax = tymax;
             float tymin = tmm.min(); if(tymin < ymin) ymin = tymin;
             if(maxlen < line.xs.length) maxlen = line.xs.length;

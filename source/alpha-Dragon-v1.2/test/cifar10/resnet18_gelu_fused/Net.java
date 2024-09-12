@@ -15,8 +15,7 @@ import z.dragon.nn.unit.complex.Module;
 /**
  * @author Gilgamesh
  */
-public class Net
-{
+public class Net {
     public static class BasicBlock extends Module {
         Unit conv1, bn1, conv2, bn2, downsample;
         public BasicBlock(int in_channel, int out_channel, int stride) {

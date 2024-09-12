@@ -142,6 +142,12 @@ public abstract class Unit implements Stateful, StateReader,
     }
     
     public <T extends UnitCore<?>> ArrayList<T> unit_cores() { return (ArrayList<T>) ucm.buffer; }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize(); 
+        this.gc();
+    }
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="functions: find">

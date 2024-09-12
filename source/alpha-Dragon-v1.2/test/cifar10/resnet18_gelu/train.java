@@ -13,6 +13,7 @@ import z.dragon.data.Pair;
 import z.dragon.dataset.Cifar10;
 import z.dragon.engine.Engine;
 import z.dragon.engine.Tensor;
+import z.dragon.engine.cuda.CudaFloat32EngineBase;
 import z.dragon.engine.memp.Mempool;
 import z.dragon.nn.loss.LossFunction;
 import z.dragon.nn.optim.Optimizer;
@@ -27,6 +28,11 @@ public class train
     static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2"); }
     static Mempool memp = alpha.engine.memp1(alpha.MEM_1GB * 8);
     static Engine eg = alpha.engine.cuda_float32(0, memp, alpha.MEM_1MB * 1024);
+    static {
+        CudaFloat32EngineBase cu32 = (CudaFloat32EngineBase) eg.engineBase();
+        cu32.tf32(true);
+    }
+    
     
     static int batch_size = 512;//512;
     static float lr = 0.001f;//learning_rate
@@ -78,7 +84,7 @@ public class train
     {
         try
         {
-            training(25);
+            training(5);
         }
         catch(Exception e) {
             e.printStackTrace();

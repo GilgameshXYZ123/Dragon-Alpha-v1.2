@@ -12,6 +12,8 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 public final class Cuda_batchMatMul {
+    public static void main(String[] args) {}
+    
     private Cuda_batchMatMul() {}
 
     //<editor-fold defaultstate="collapsed" desc="streamSize">
@@ -91,7 +93,6 @@ public final class Cuda_batchMatMul {
             long dA_address, long dB_address,
             long dC_address,
             int Batch, int N, int M, int BK, int AK);
-
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="batchMatMul_texture">
     /**
@@ -140,6 +141,36 @@ public final class Cuda_batchMatMul {
             long dC_address,
             int Batch, int N, int M, int BK, int AK);
     //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="batchMatMul_mma">
+    /**
+     * <pre>
+     * Tensor Float32:
+     * (1) A belongs to Tensor[Batch,  N, AK]
+     * (2) B belongs to Tensor[Batch, BK,  M]
+     * (3) C belongs to Tensor[Batch,  N,  M]
+     * (4) for i from 1 to Batch
+     *      C[i] = A[i] * B[i]
+     * (5) (Batch, M, AK)%4 == 0 && >= 4.
+     * </pre>
+     * @param usedTexture
+     * @param streamArray
+     * @param length
+     * @param dA_address
+     * @param dB_address
+     * @param dC_address
+     * @param Batch
+     * @param N
+     * @param M
+     * @param BK
+     * @param AK
+     */
+    @Passed
+    public static native void batchMatMul_mma(boolean usedTexture,
+            long[] streamArray, int length,
+            long dA_address, long dB_address,
+            long dC_address,
+            int Batch, int N, int M, int BK, int AK);
+    //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="batchMatMulT1">
     /**
@@ -178,6 +209,33 @@ public final class Cuda_batchMatMul {
      */
     @Passed
     public static native void batchMatMulT1(long[] streamArray, int length,
+            long dA_address, long dB_address,
+            long dC_address,
+            int Batch, int CN, int AN, int M, int K);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="batchMatMulT1_mma">
+    /**
+     * <pre>
+     * Tensor Float32:
+     * (1) A belongs to Tensor[Batch,  K, AN] logically transpose(1, 2)-> A^T[Batch, AN, K]
+     * (2) B belongs to Tensor[Batch,  K,  M]
+     * (3) C belongs to Tensor[Batch, CN, M]
+     * (4) for i from 1 to Batch: C[i] = A^T[i] * B[i]
+     * (5) (Batch, AN, M)%4 == 0 && >= 4.
+     * </pre>
+     * @param streamArray
+     * @param length
+     * @param dA_address
+     * @param dB_address
+     * @param dC_address
+     * @param Batch
+     * @param CN
+     * @param AN
+     * @param M
+     * @param K
+     */
+    @Passed
+    public static native void batchMatMulT1_mma(long[] streamArray, int length,
             long dA_address, long dB_address,
             long dC_address,
             int Batch, int CN, int AN, int M, int K);
@@ -269,6 +327,35 @@ public final class Cuda_batchMatMul {
      */
     @Passed
     public static native void batchMatMulT2_texture(long[] streamArray, int length,
+            long dA_address, long dB_address,
+            long dC_address,
+            int Batch, int N, int CM, int BM, int K);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="batchMatMulT2_mma">
+    /**
+     * <pre>
+     * Tensor Float 32:
+     * (1) A belongs to Tensor[Batch,  N,  K]
+     * (2) B belongs to Tensor[Batch, BM,  K] logically transpose(1, 2)->Tensor[Batch, K, BM]
+     * (3) C belongs to Tensor[Batch,  N, CM]
+     * (4) for i from 1 to Batch: C[i] = A[i] * B^T[i]
+     * (5) (Batch, BM, K)%4 == 0 && >= 4.
+     * </pre>
+     * @param useTexture
+     * @param streamArray
+     * @param length
+     * @param dA_address
+     * @param dB_address
+     * @param dC_address
+     * @param Batch
+     * @param N
+     * @param CM
+     * @param BM
+     * @param K
+     */
+    @Passed
+    public static native void batchMatMulT2_mma(boolean useTexture,
+            long[] streamArray, int length,
             long dA_address, long dB_address,
             long dC_address,
             int Batch, int N, int CM, int BM, int K);

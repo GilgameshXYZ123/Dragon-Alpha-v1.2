@@ -5,6 +5,7 @@
  */
 package z.dragon.nn.core.dual.math;
 
+import z.dragon.engine.Counter.CountGc;
 import z.dragon.engine.Engine;
 import z.dragon.engine.Tensor;
 import z.dragon.nn.core.dual.DualCore;
@@ -16,7 +17,7 @@ import z.dragon.nn.unit.dual.DualUnit;
  * @param <T>
  */
 public class CoreLinear2Center<T extends DualUnit> extends DualCore<T> {
-    protected int dim2;
+    protected int dim0, dim2;
     protected float alpha, beta, gamma;
 
     public CoreLinear2Center(T unit, int dim2,
@@ -37,6 +38,7 @@ public class CoreLinear2Center<T extends DualUnit> extends DualCore<T> {
     //<editor-fold defaultstate="collapsed" desc="running-area: propagation">
     @Override
     protected Tensor __forward__(Engine eg, Tensor X1, Tensor X2) {
+        dim0 =  X2.length() / dim2;//X2.length = dim0 * dim2
         return eg.linear2_center(false, X1, X2, dim2, alpha, beta, gamma);
     }
 
@@ -47,15 +49,22 @@ public class CoreLinear2Center<T extends DualUnit> extends DualCore<T> {
     {
         if(!backward_grads) return null;
         
-        Tensor X1 = holdX1(), X2 = holdX2();
-        if(backward_grads1 && backward_grads2)//(1) deltaX1 = deltaY * X1 * alpha
-            return eg.linear2_center_deltaX(grad_inplace, deltaY, X1, X2, dim2, alpha, beta, gamma);
-                    
+        int gc_count = 0; Tensor deltaX1 = null, deltaX2 = null;
+        if (backward_grads1) { 
+            deltaX1 = eg.linear(false, alpha, deltaY, 0);
+            gc_count++;//(1) deltaX1 = deltaY * alpha
+        }
+        if (backward_grads) {
+            deltaX2 = eg.center_linear(deltaY, dim0, dim2, alpha, beta);
+            gc_count++;//(2) deltaX2 = field_sum: deltaY * beta
+        }
         
-        return new Tensor[] {//(2) deltaX2 = center_sum: deltaY * X2 * beta
-            (backward_grads1 ? eg.linear2_center_deltaX1(grad_inplace, deltaY, X1, X2, dim2, alpha) : null),
-            (backward_grads2 ? eg.linear2_center_deltaX2(deltaY, X1, X2, dim2, beta) : null)
-        };
+        if(grad_inplace) {//when deltaX1 and deltaX2 are cauculated, deltaY is not needed
+            CountGc gc = new CountGc(gc_count, deltaY);
+            if(deltaX1 != null) deltaX1.dual(()-> { gc.countDown(); });
+            if(deltaX2 != null) deltaX2.dual(()-> { gc.countDown(); });
+        }
+        return null;
     }
     //</editor-fold>
 }

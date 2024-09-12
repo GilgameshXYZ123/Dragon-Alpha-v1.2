@@ -4,6 +4,7 @@ package test.cuda.matMul;
 import static z.dragon.alpha.Alpha.alpha;
 import z.dragon.engine.Engine;
 import z.dragon.engine.Tensor;
+import z.dragon.engine.cuda.CudaFloat32EngineBase;
 import z.dragon.engine.cuda.impl.Cuda;
 import z.util.lang.SimpleTimer;
 import z.util.math.vector.Matrix;
@@ -19,10 +20,13 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class Cuda_matMul_test 
-{
+public class Cuda_matMul_test {
     static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2");}
     static Engine eg = alpha.engine.cuda_float32(0, alpha.engine.memp1());
+    static {
+        CudaFloat32EngineBase base = (CudaFloat32EngineBase) eg.engineBase();
+        base.matMul_tf32(true);
+    }
      
     static void multiply(float[][] A, float[][] B, float[][] C) {
         //step A = K
@@ -136,8 +140,10 @@ public class Cuda_matMul_test
             for(int m=1; m<=255; m++)  
                 for(int k=512; k<=517; k++) testCorrect(n, m, k);
 //        
-        int N = 2048, M = 2048, K = 2048;
-//        int N = 1024, M = 1024, K = 1024;
+//        int N = 2048, M = 2048, K = 2048;
+        int N = 1024, M = 1024, K = 1024;
+//        int N = 4096, M = 4096, K = 4096;
+
 //        int N = 256, M = 4096, K = 8192;
 //          int N = 256, M = 2048, K = 4096;
 //          int N = 256, M = 1024, K = 2048;
@@ -147,7 +153,7 @@ public class Cuda_matMul_test
 //        int N = 256, M = 1000, K = 4096;//6168.093750 GFlop/s,  5874.375488 GFlop/s
 //        int N = 256, M = 1000, K = 2048;// 4788.018066 GFlop/s, 4877.097168 GFlop/s
         
-//        testCorrect(N, M, K);
+        testCorrect(N, M, K);
         testSpeed(N, M, K);
 //        testSpeed(N, M, K);
 //        testSpeed(N, M, K);

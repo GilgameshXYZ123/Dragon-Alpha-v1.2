@@ -87,6 +87,16 @@ public class CudaFloat32EngineBase extends EngineBase {
         matMulT2_sk_maxPart                 = Init_smooth_maxPart(SM_count);
     }
    
+    public CudaFloat32EngineBase tf32(boolean flag) { 
+        matMul_tf32   = flag;
+        matMulT1_tf32 = flag;
+        matMulT2_tf32 = flag;
+        batchMatMul_tf32   = flag;
+        batchMatMulT1_tf32 = flag;
+        batchMatMulT2_tf32 = flag;
+        return this;
+    }
+    
     //<editor-fold defaultstate="collapsed" desc="Basic-Functions">
     public CudaStreamPool streamPool() {return streamPool;}
     public synchronized CudaFloat32EngineBase streamPool(CudaStreamPool streamPool) {  this.streamPool = streamPool; return this; }
@@ -1496,6 +1506,10 @@ public class CudaFloat32EngineBase extends EngineBase {
         return this;
     }
     
+    protected boolean matMul_tf32 = false;
+    public boolean matMul_tf32() { return matMul_tf32; }
+    public CudaFloat32EngineBase matMul_tf32(boolean flag) { matMul_tf32 = flag; return this; }
+    
     @Override
     public Syncer matMul(long C_address, 
             long A_address, long B_address, 
@@ -1517,9 +1531,14 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         //======[no need to split]==============================================
         if(fGridZ < 1.8f) {
-            Cuda_matMul.matMul(streamArray, length, 
-                    A_address, B_address, C_address,
-                    N, M, K);
+            if (matMul_tf32 && (N > 127) && (M > 127) && (K % 8 == 0)) 
+                Cuda_matMul.matMul_mma(streamArray, length, 
+                        A_address, B_address, C_address,
+                        N, M, K);
+            else /*default method*/
+                Cuda_matMul.matMul(streamArray, length, 
+                        A_address, B_address, C_address,
+                        N, M, K);
             return new StreamArraySyncer(streamPool, streamArray);
         }
         //======[split K to improve parallelism]================================
@@ -1590,9 +1609,14 @@ public class CudaFloat32EngineBase extends EngineBase {
         //======[no need to split]==============================================
         if(fGridZ < 1.8f) {
             //-----[stage1: Matrix Multiply]------------------------------------
-            Cuda_matMul.matMul(streamArray, length, 
-                    A_address, B_address, C_address, 
-                    N, M, K);
+            if (matMul_tf32 && (N > 127) && (M > 127) && (K % 8 == 0)) 
+                Cuda_matMul.matMul_mma(streamArray, length, 
+                        A_address, B_address, C_address, 
+                        N, M, K);
+            else /*default method*/
+                Cuda_matMul.matMul(streamArray, length, 
+                        A_address, B_address, C_address, 
+                        N, M, K);
         
             //-----[stage2: add Bias]-------------------------------------------
             long event = Cuda.newEvent_DisableTiming();
@@ -1699,6 +1723,10 @@ public class CudaFloat32EngineBase extends EngineBase {
         return this;
     }
     
+    protected boolean matMulT1_tf32 = false;
+    public boolean matMulT1_tf32() { return matMulT1_tf32; }
+    public CudaFloat32EngineBase matMulT1_tf32(boolean flag) { matMulT1_tf32 = flag; return this; }
+    
     @Override
     public Syncer matMulT1(long C_address,
             long A_address, long B_address, 
@@ -1720,9 +1748,14 @@ public class CudaFloat32EngineBase extends EngineBase {
         
         //======[no need to split]==============================================
         if(fGridZ < 1.8f) {
-            Cuda_matMul.matMulT1(streamArray, length,
-                    A_address, B_address, C_address,
-                    N, M, K);
+            if (matMulT1_tf32 && (N > 127) && (M > 127) && (K % 8 == 0)) 
+                Cuda_matMul.matMulT1_mma(streamArray, length,
+                        A_address, B_address, C_address,
+                        N, M, K);
+            else /*default method*/
+                Cuda_matMul.matMulT1(streamArray, length,
+                        A_address, B_address, C_address,
+                        N, M, K);
             return new StreamArraySyncer(streamPool, streamArray);
         }
         //======[split K to improve parallelism]================================
@@ -1809,6 +1842,10 @@ public class CudaFloat32EngineBase extends EngineBase {
         return this;
     }
     
+    protected boolean matMulT2_tf32 = false;
+    public boolean matMulT2_tf32() { return matMulT2_tf32; }
+    public CudaFloat32EngineBase matMulT2_tf32(boolean flag) { matMulT2_tf32 = flag; return this; }
+    
     @Override
     public Syncer matMulT2(long C_address,
             long A_address, long B_address, 
@@ -1829,10 +1866,15 @@ public class CudaFloat32EngineBase extends EngineBase {
         long[] streamArray = streamPool.getStreamArray(length);
             
         //======[no need to split]==============================================
-        if(fGridZ < 1.8f) { 
-            Cuda_matMul.matMulT2(streamArray, length, 
-                    A_address, B_address, C_address,
-                    N, M, K);
+        if (fGridZ < 1.8f) { 
+            if (matMulT2_tf32 && (N > 127) && (M > 127) && (K % 8 == 0))
+                Cuda_matMul.matMulT2_mma(streamArray, length, 
+                        A_address, B_address, C_address,
+                        N, M, K);
+            else /*default method*/
+                Cuda_matMul.matMulT2(streamArray, length, 
+                        A_address, B_address, C_address,
+                        N, M, K);
             return new StreamArraySyncer(streamPool, streamArray);
         }
         //======[split K to improve parallelism]================================
@@ -1883,10 +1925,11 @@ public class CudaFloat32EngineBase extends EngineBase {
     //<editor-fold defaultstate="collapsed" desc="batchMatMul">
     private boolean batchMatMul_useTexture = true;
     public boolean batchMatMul_useTexture() { return batchMatMul_useTexture; }
-    public CudaFloat32EngineBase batchMatMul_useTexture(boolean flag) {
-        this.batchMatMul_useTexture = flag;
-        return this;
-    }
+    public CudaFloat32EngineBase batchMatMul_useTexture(boolean flag) { batchMatMul_useTexture = flag; return this; }
+    
+    protected boolean batchMatMul_tf32 = false;
+    public boolean batchMatMul_tf32() { return batchMatMul_tf32; }
+    public CudaFloat32EngineBase batchMatMul_tf32(boolean flag) { batchMatMul_tf32 = flag; return this; }
 
     @Override
     public Syncer batchMatMul(long C_address, 
@@ -1895,20 +1938,27 @@ public class CudaFloat32EngineBase extends EngineBase {
     {
         int length = Cuda_batchMatMul.streamSize(N, M);
         long[] streamArray = streamPool.getStreamArray(length);
-        if(batchMatMul_useTexture && (N > 47) && (M > 47)) {
+        if (batchMatMul_tf32 && (N > 127) && (M > 127) && (BK % 2 == 0) && (BK > 7)) 
+            Cuda_batchMatMul.batchMatMul_mma(batchMatMul_useTexture,
+                    streamArray, length,
+                    A_address, B_address, C_address,
+                    Batch, N, M, BK, AK);
+        else if (batchMatMul_useTexture)
             Cuda_batchMatMul.batchMatMul_texture(streamArray, length,
                     A_address, B_address, C_address,
                     Batch, N, M, BK, AK);
-        }
-        else { 
+        else /*default method*/
             Cuda_batchMatMul.batchMatMul(streamArray, length, 
                     A_address, B_address, C_address,
                     Batch, N, M, BK, AK);
-        }
         return new StreamArraySyncer(streamPool, streamArray);
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="batchMatMulT1">
+    protected boolean batchMatMulT1_tf32 = false;
+    public boolean batchMatMulT1_tf32() { return batchMatMulT1_tf32; }
+    public CudaFloat32EngineBase batchMatMulT1_tf32(boolean flag) { batchMatMulT1_tf32 = flag; return this; }
+    
     @Override
     public Syncer batchMatMulT1(long C_address, 
             long A_address, long B_address, 
@@ -1916,19 +1966,25 @@ public class CudaFloat32EngineBase extends EngineBase {
     {
         int length = Cuda_batchMatMul.streamSize(CN, M);
         long[] streamArray = streamPool.getStreamArray(length);
-        Cuda_batchMatMul.batchMatMulT1(streamArray, length,
-                A_address, B_address, C_address,
-                Batch, CN, AN, M, K);
+        if (batchMatMulT1_tf32 && (CN > 127) && (M > 127) && (K > 7))
+            Cuda_batchMatMul.batchMatMulT1_mma(streamArray, length,
+                    A_address, B_address, C_address,
+                    Batch, CN, AN, M, K);
+        else /*default method*/
+            Cuda_batchMatMul.batchMatMulT1(streamArray, length,
+                    A_address, B_address, C_address,
+                    Batch, CN, AN, M, K);
         return new StreamArraySyncer(streamPool, streamArray);
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="batchMatMulT2">
     private boolean batchMatMulT2_useTexture = true;
     public boolean batchMatMulT2_useTexture() { return batchMatMulT2_useTexture; }
-    public CudaFloat32EngineBase batchMatMulT2_useTexture(boolean flag) {
-        this.batchMatMulT2_useTexture = flag;
-        return this;
-    }
+    public CudaFloat32EngineBase batchMatMulT2_useTexture(boolean flag) { batchMatMulT2_useTexture = flag; return this; }
+    
+    protected boolean batchMatMulT2_tf32 = false;
+    public boolean batchMatMulT2_tf32() { return batchMatMulT2_tf32; }
+    public CudaFloat32EngineBase batchMatMulT2_tf32(boolean flag) { batchMatMulT2_tf32 = flag; return this; }
     
     @Override
     public Syncer batchMatMulT2(long C_address, 
@@ -1939,16 +1995,19 @@ public class CudaFloat32EngineBase extends EngineBase {
         long[] streamArray = streamPool.getStreamArray(length);
         boolean useTexture = batchMatMulT2_useTexture && (N > 47) && (CM > 47);
         
-        if(useTexture) {
+        if (batchMatMulT2_tf32 && (N > 127) && (CM > 127) && (K > 7)) 
+            Cuda_batchMatMul.batchMatMulT2_mma(batchMatMulT2_useTexture,
+                    streamArray, length,
+                    A_address, B_address, C_address,
+                    Batch, N, CM, BM, K);
+        else if(useTexture) 
             Cuda_batchMatMul.batchMatMulT2_texture(streamArray, length,
                     A_address, B_address, C_address,
                     Batch, N, CM, BM, K);
-        }
-        else {
+        else /*default method*/
             Cuda_batchMatMul.batchMatMulT2(streamArray, length,
                     A_address, B_address, C_address, 
                     Batch, N, CM, BM, K);
-        }
         return new StreamArraySyncer(streamPool, streamArray);
     }
     //</editor-fold>
@@ -3399,7 +3458,7 @@ public class CudaFloat32EngineBase extends EngineBase {
             return new int[] { 0, OH_slice, OW_slice };
 	}
 
-	//------[Stage4: minValue factor]--------------------------------------------
+	//------[Stage4: min factor]--------------------------------------------
         //WZ_max % GridZ != 0, and WZ is not a prime number
 	//(1) E = OW / r * r = WZ_max * r = (k*GridZ + g) * r
 	//    E = (GridZ*k) * r + g*r, where: GridZ, k, and g are multually prime
@@ -4848,8 +4907,8 @@ public class CudaFloat32EngineBase extends EngineBase {
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="minValue, max, clip"> 
-    //<editor-fold defaultstate="collapsed" desc="minValue, min_dual">
+    //<editor-fold defaultstate="collapsed" desc="min, max, clip"> 
+    //<editor-fold defaultstate="collapsed" desc="min, min_dual">
     @Override
     public Syncer min2D(long Y_address, 
             float alpha, long X_address, float beta, 
@@ -11141,7 +11200,7 @@ public class CudaFloat32EngineBase extends EngineBase {
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="field_max, minValue">
+    //<editor-fold defaultstate="collapsed" desc="field_max, min">
     @Override
     public Syncer field_max(long Y_address,
             long X_address,

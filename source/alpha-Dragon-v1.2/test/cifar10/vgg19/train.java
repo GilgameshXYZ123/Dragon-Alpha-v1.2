@@ -21,19 +21,18 @@ import z.util.lang.SimpleTimer;
  *
  * @author Gilgamesh
  */
-public class train 
-{
-    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.1"); }
-    static Mempool memp = alpha.engine.memp1(alpha.MEM_1GB * 8);
+public class train {
+    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2"); }
+    static final Mempool memp = alpha.engine.memp2(alpha.MEM_1GB * 8);
     static Engine eg = alpha.engine.cuda_float32(0, memp, alpha.MEM_1MB * 1024);
     
-    static float lr = 0.001f;
+    static float lr = 0.0005f;
     static int batch_size = 512;
     
     public static void train(int epoch) {
         VGG19 net = new VGG19().train().init(eg).println();
     
-        Optimizer opt = alpha.optim.AdamW(net.params(), lr, 1e-4f).println();//45 epoch
+        Optimizer opt = alpha.optim.AdamW(net.params(), lr, 1e-3f).amsgrad(true).println();//45 epoch
 //        Optimizer opt = alpha.optim.SGDMN(net.params(), lr)//40 epoch
 //                .momentum(0.9f).nestorv(1).println();
         
@@ -76,7 +75,7 @@ public class train
     {
         try
         {
-            train(70);
+            train(44);
         }
         catch(Exception e) {
             e.printStackTrace();

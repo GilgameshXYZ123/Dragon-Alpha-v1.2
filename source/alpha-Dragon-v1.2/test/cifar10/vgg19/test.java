@@ -20,9 +20,8 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class test 
-{
-    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.1"); }
+public class test  {
+    static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2"); }
     static Mempool memp = alpha.engine.memp1(alpha.MEM_1GB * 8);
     static Engine eg = alpha.engine.cuda_float32(0, memp, alpha.MEM_1MB * 1024);
     
@@ -34,8 +33,8 @@ public class test
         
         LossFunction loss = alpha.loss.softmax_crossEntropy();
         
-        DataSet<byte[], Integer> dataset = Cifar10.train();
-//        DataSet<byte[], Integer> dataset = Cifar10.test();
+//        DataSet<byte[], Integer> dataset = Cifar10.train();
+        DataSet<byte[], Integer> dataset = Cifar10.test();
         
         eg.sync(false).check(false);
         double accuracy = 0;

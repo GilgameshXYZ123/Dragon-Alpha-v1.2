@@ -385,8 +385,8 @@ public final class DragonCV {
         frame.setResizable(false);
         frame.pack();
         
-        int height = Vector.maxValue(Hs) + 10 * (N + 1);
-        int width  = Vector.maxValue(Ws) + 7 * (M + 1);
+        int height = Vector.max(Hs) + 10 * (N + 1);
+        int width  = Vector.max(Ws) + 7 * (M + 1);
         frame.setSize(width, height);
         
         if(show_last_yx == null) { 
@@ -431,8 +431,8 @@ public final class DragonCV {
             Ws[i / M] += img.getWidth();
         }
        
-        int height = Vector.maxValue(Hs) + 10 * (N + 1);
-        int width  = Vector.maxValue(Ws) + 7 * (M + 1);
+        int height = Vector.max(Hs) + 10 * (N + 1);
+        int width  = Vector.max(Ws) + 7 * (M + 1);
         panel.setSize(width, height);
         return panel;
     }
@@ -465,8 +465,8 @@ public final class DragonCV {
         frame.setResizable(false);
         frame.pack();
         
-        int height = Vector.maxValue(Hs) + 10 * (N + 1);
-        int width  = Vector.maxValue(Ws) + 7 * (M + 1);
+        int height = Vector.max(Hs) + 10 * (N + 1);
+        int width  = Vector.max(Ws) + 7 * (M + 1);
         frame.setSize(width, height);
         
         if(show_last_yx == null) { 
@@ -781,8 +781,8 @@ public final class DragonCV {
             float ow1 = (float) (m00 * IW + m02), ow2 = (float) (m01 * IH + m02);
             float oh1 = (float) (m10 * IW + m12), oh2 = (float) (m11 * IH + m12);
 
-            int OW = (int) (Vector.maxValue(ow0, ow1, ow2, ow3));
-            int OH = (int) (Vector.maxValue(oh0, oh1, oh2, oh3));
+            int OW = (int) (Vector.max(ow0, ow1, ow2, ow3));
+            int OH = (int) (Vector.max(oh0, oh1, oh2, oh3));
             return transform(src, OH, OW);
         }
         

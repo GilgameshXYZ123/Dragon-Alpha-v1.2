@@ -1,9 +1,11 @@
 package test.cuda.matMul;
 
 
+import static test.cuda.matMul.Cuda_matMul_test.eg;
 import static z.dragon.alpha.Alpha.alpha;
 import z.dragon.engine.Engine;
 import z.dragon.engine.Tensor;
+import z.dragon.engine.cuda.CudaFloat32EngineBase;
 import z.dragon.engine.cuda.impl.Cuda;
 import z.util.lang.SimpleTimer;
 import z.util.math.vector.Matrix;
@@ -19,10 +21,13 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class Cuda_matMul_test_T1 
-{
+public class Cuda_matMul_test_T1 {
     static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2");}
     static Engine eg = alpha.engine.cuda_float32(0, alpha.engine.memp1());
+    static {
+        CudaFloat32EngineBase base = (CudaFloat32EngineBase) eg.engineBase();
+        base.matMulT1_tf32(true);
+    }
     
     //A(K*N), B(K*M), C(N*M), A^T(N*K)
     //C = A^T * B
@@ -66,8 +71,8 @@ public class Cuda_matMul_test_T1
         float[] C3 = eg.valueOf(tC2);
         
         //compare---------------------------------------------------------------
-        float sp1 = Vector.samePercent_relative(C2, C1, 1e-4f);
-        float sp2 = Vector.samePercent_relative(C3, C1, 1e-4f);
+        float sp1 = Vector.samePercent_relative(C2, C1, 1e-3f);
+        float sp2 = Vector.samePercent_relative(C3, C1, 1e-3f);
         
         System.out.print("CPU :"); Vector.println(C1, 0, 10);
         System.out.print("GPU1:" ); Vector.println(C2, 0, 10);
@@ -121,16 +126,20 @@ public class Cuda_matMul_test_T1
             
 //            testCorrect(9, 9, 512);
             
-//            testCorrect(1024, 1024, 1024);
-//            testSpeed(2048, 2048, 2048);
+            int N = 4096, M = 4096, K = 4096;
+            
+            testCorrect(1024, 1024, 1024);
+            testSpeed(2048, 2048, 2048);
+            testSpeed(N, M, K);
 
-            for(int n=1; n<=255;n++)
-                for(int m=1; m<=255; m++)  
-                    for(int k=128; k<=132; k++) testCorrect(n, m, k);
-
-            for(int n=1; n<=255; n++)
-                for(int m=1; m<=255; m++)  
-                    for(int k=512; k<=517; k++) testCorrect(n, m, k);
+//            for(int n=1; n<=255;n++)
+//                for(int m=1; m<=255; m++)  
+//                    for(int k=128; k<=132; k++) testCorrect(n, m, k);
+//
+//            for(int n=1; n<=255; n++)
+//                for(int m=1; m<=255; m++)  
+//                    for(int k=512; k<=517; k++) testCorrect(n, m, k);
+            
         }
         catch(Exception e) {
             e.printStackTrace();

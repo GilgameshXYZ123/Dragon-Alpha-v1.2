@@ -959,8 +959,8 @@ public class ImageEngine {
         float ow1 = m00 * IW + m02, ow2 = m01 * IH + m02;
         float oh1 = m10 * IW + m12, oh2 = m11 * IH + m12;
 
-        int OH = (int) Math.ceil(Vector.maxValue(oh0, oh1, oh2, oh3));
-        int OW = (int) Math.ceil(Vector.maxValue(ow0, ow1, ow2, ow3));
+        int OH = (int) Math.ceil(Vector.max(oh0, oh1, oh2, oh3));
+        int OW = (int) Math.ceil(Vector.max(ow0, ow1, ow2, ow3));
         return new int[]{ OH, OW };
     }
 

@@ -73,6 +73,8 @@ import z.dragon.nn.unit.dual.blas.MatMul;
 import z.dragon.nn.unit.dual.blas.MatMulT1;
 import z.dragon.nn.unit.dual.blas.MatMulT2;
 import z.dragon.nn.unit.dual.math.Quadratic2;
+import z.dragon.nn.unit.complex.extra.ChannelAttn;
+import z.dragon.nn.unit.complex.extra.ImageAttn;
 import z.dragon.nn.unit.simple.pool.adaptive.AdaptiveAvgPool2D;
 import z.dragon.nn.unit.simple.pool.adaptive.AdaptiveMaxPool2D;
 import z.dragon.nn.unit.simple.pool.AvgPool2D;
@@ -148,6 +150,7 @@ import z.dragon.nn.core.dual.blas.CoreMatMulT1;
 import z.dragon.nn.core.dual.blas.CoreMatMulT2;
 import z.dragon.nn.core.dual.math.CoreDiv;
 import z.dragon.nn.core.dual.math.CoreLinear2;
+import z.dragon.nn.core.dual.math.CoreLinear2Center;
 import z.dragon.nn.core.dual.math.CoreLinear2Row;
 import z.dragon.nn.core.dual.math.CoreLinear2_Elu;
 import z.dragon.nn.core.dual.math.CoreLinear2_Gelu;
@@ -225,7 +228,17 @@ import z.dragon.nn.core.simple.tensor.CoreRot180;
 import z.dragon.nn.core.simple.tensor.CoreTranspose;
 import z.dragon.nn.core.simple.tensor.CoreTrim;
 import z.dragon.nn.optim.RAdam;
+import z.dragon.nn.unit.complex.extra.BasicBlock;
+import z.dragon.nn.unit.complex.extra.BottleNeck;
+import z.dragon.nn.unit.complex.net.ResNet18;
+import z.dragon.nn.unit.complex.net.ResNet34;
+import z.dragon.nn.unit.complex.extra.ResNet50;
+import z.dragon.nn.unit.complex.extra.SEBlock;
+import z.dragon.nn.unit.complex.net.SENet;
+import z.dragon.nn.unit.complex.net.VGG16;
+import z.dragon.nn.unit.complex.net.VGG19;
 import z.dragon.nn.unit.dual.DualFunction;
+import z.dragon.nn.unit.dual.math.Linear2Center;
 import z.dragon.nn.unit.dual.math.Linear2Row;
 import z.dragon.nn.unit.dual.math.Linear2_Elu;
 import z.dragon.nn.unit.dual.math.Linear2_Gelu;
@@ -812,14 +825,103 @@ public final class Alpha {
          
         public static boolean dl_likeX1 = true;
     }
-    //</editor-fold>       
+    //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="class: UnitBuilder">
     public static class UnitBuilder {
         protected UnitBuilder() {}
         public static final UnitBuilder nn = new UnitBuilder();
         
+        //<editor-fold defaultstate="collapsed" desc="create: complex">
+        public BasicBlock BasicBlock(Unit activation, int in_channel, int out_channel, int stride) { return new BasicBlock(activation, in_channel, out_channel, stride); }
+        public BottleNeck BottleNeck(Unit activation, int in_channel, int hidden, int stride, int expand) { return new BottleNeck(activation, in_channel, hidden, stride, expand); }
+        public SEBlock SEBlock(Unit activation, int in_channel, int hidden1, int hidden2, int out_channel, int stride) { return new SEBlock(activation, in_channel, hidden1, hidden2, out_channel, stride); }
+        
+        public ImageAttn ImageAttn(int head, Unit mask) { return new ImageAttn(head, mask); }
+        public ChannelAttn ChannelAttn(int head, Unit mask) { return new ChannelAttn(head, mask); }
+        
+        public VGG16 VGG16(Unit act, boolean batchNorm) { return new VGG16(act, batchNorm); }
+        public VGG19 VGG19(Unit act, boolean batchNorm) { return new VGG19(act, batchNorm); }
+        
+        public ResNet18 ResNet18(Unit activation) { return new ResNet18(activation); }
+        public ResNet34 ResNet34(Unit activation) { return new ResNet34(activation); }
+        public ResNet50 ResNet50(Unit activation) { return new ResNet50(activation); }
+        public SENet SENet(Unit activation) { return new SENet(activation); }
+        //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="create: fusion">
+        public Unit fuse(Unit a, Unit b) {
+            //-----[linear2]----------------------------------------------------
+            if (a instanceof Linear2) {
+                if (b instanceof Relu)      return linear2_relu     ((Linear2)a, (Relu)b);
+                if (b instanceof LeakyRelu) return linear2_leakyRelu((Linear2)a, (LeakyRelu)b);
+                if (b instanceof Softplus)  return linear2_softplus ((Linear2)a, (Softplus)b);
+                if (b instanceof Gelu)      return linear2_gelu     ((Linear2)a, (Gelu)b);
+                if (b instanceof Sigmoid)   return linear2_sigmoid  ((Linear2)a, (Sigmoid)b);
+                if (b instanceof Tanh)      return linear2_tanh     ((Linear2)a, (Tanh)b);
+                throw new IllegalArgumentException();
+            }
+            
+            //-----[bernouliMul, dropout]---------------------------------------
+            if (b instanceof Dropout) {
+                if (a instanceof Relu)      return relu_dropout    ((Relu)a, (Dropout)b);
+                if (a instanceof LeakyRelu) return leakyRelu_dropout((LeakyRelu)a, (Dropout)b);
+                if (a instanceof Softplus)  return softplus_dropout ((Softplus)a, (Dropout)b);
+                if (a instanceof Gelu)      return gelu_dropout     ((Gelu)a, (Dropout)b);
+                throw new IllegalArgumentException();
+            }
+            
+            if (b instanceof BernouliMul) {
+                if (a instanceof Relu)      return relu_bernouliMul     ((Relu)a, (BernouliMul)b);
+                if (a instanceof LeakyRelu) return leakyRelu_bernouliMul((LeakyRelu)a, (BernouliMul)b);
+                if (a instanceof Softplus)  return softplus_bernouliMul ((Softplus)a, (BernouliMul)b);
+                if (a instanceof Gelu)      return gelu_bernouliMul     ((Gelu)a, (BernouliMul)b);
+                throw new IllegalArgumentException();
+            }
+            
+            //-----[affine, global batchnorm, batchnorm]------------------------
+            if (a instanceof Affine) {
+                if (b instanceof Relu)      return affine_relu     ((Affine)a, (Relu)b);
+                if (b instanceof LeakyRelu) return affine_leakyRelu((Affine)a, (LeakyRelu)b);
+                if (b instanceof Softplus)  return affine_softplus ((Affine)a, (Softplus)b);
+                if (b instanceof Gelu)      return affine_gelu     ((Affine)a, (Gelu)b);
+                if (b instanceof Sigmoid)   return affine_sigmoid  ((Affine)a, (Sigmoid)b);
+                if (b instanceof Tanh)      return affine_tanh     ((Affine)a, (Tanh)b);
+                throw new IllegalArgumentException();
+            }
+            
+            if (a instanceof BatchNorm) {
+                if (b instanceof Relu)      return batchNorm_relu     ((BatchNorm)a, (Relu)b);
+                if (b instanceof LeakyRelu) return batchNorm_leakyRelu((BatchNorm)a, (LeakyRelu)b);
+                if (b instanceof Softplus)  return batchNorm_softplus ((BatchNorm)a, (Softplus)b);
+                if (b instanceof Gelu)      return batchNorm_gelu     ((BatchNorm)a, (Gelu)b);
+                if (b instanceof Sigmoid)   return batchNorm_sigmoid  ((BatchNorm)a, (Sigmoid)b);
+                if (b instanceof Tanh)      return batchNorm_tanh     ((BatchNorm)a, (Tanh)b);
+                throw new IllegalArgumentException();
+            }
+            
+            if (a instanceof GlobalBatchNorm) {
+                if (b instanceof Relu)      return global_batchNorm_relu     ((GlobalBatchNorm)a, (Relu)b);
+                if (b instanceof LeakyRelu) return global_batchNorm_leakyRelu((GlobalBatchNorm)a, (LeakyRelu)b);
+                if (b instanceof Softplus)  return global_batchNorm_softplus ((GlobalBatchNorm)a, (Softplus)b);
+                if (b instanceof Gelu)      return global_batchNorm_gelu     ((GlobalBatchNorm)a, (Gelu)b);
+                if (b instanceof Sigmoid)   return global_batchNorm_sigmoid  ((GlobalBatchNorm)a, (Sigmoid)b);
+                if (b instanceof Tanh)      return global_batchNorm_tanh     ((GlobalBatchNorm)a, (Tanh)b);
+                throw new IllegalArgumentException();
+            }
+            
+            if (a instanceof Affine) {
+                if (b instanceof Relu)      return affine_relu     ((Affine)a, (Relu)b);
+                if (b instanceof LeakyRelu) return affine_leakyRelu((Affine)a, (LeakyRelu)b);
+                if (b instanceof Softplus)  return affine_softplus ((Affine)a, (Softplus)b);
+                if (b instanceof Gelu)      return affine_gelu     ((Affine)a, (Gelu)b);
+                if (b instanceof Sigmoid)   return affine_sigmoid  ((Affine)a, (Sigmoid)b);
+                if (b instanceof Tanh)      return affine_tanh     ((Affine)a, (Tanh)b);
+                throw new IllegalArgumentException();
+            }
+            
+            throw new IllegalArgumentException();
+        }
+        
         public Affine_Relu affine_relu(Affine afi, Relu af) { return new Affine_Relu(afi.inplace() && af.inplace(), afi.param_dim()); }
         public Affine_LeakyRelu affine_leakyRelu(Affine afi, LeakyRelu af) { return new Affine_LeakyRelu(afi.inplace() && af.inplace(), af.negative_slope(), afi.param_dim()); }
         public Affine_Elu affine_elu(Affine afi, Elu af) { return new Affine_Elu(afi.inplace() && af.inplace(), af.alpha(), af.negative_slope(), afi.param_dim()); }
@@ -1499,6 +1601,14 @@ public final class Alpha {
             return new Linear2Row(alpha, beta, gamma);
         }
         
+        public Linear2Center add_center() { return new Linear2Center(-1, 1.0f,  1.0f, 0.0f); }
+        public Linear2Center sub_center() { return new Linear2Center(-1, 1.0f, -1.0f, 0.0f); }
+        public Linear2Center add_center(float alpha, float beta) { return new Linear2Center(-1, alpha,  beta, 0.0f); }
+        public Linear2Center sub_center(float alpha, float beta) { return new Linear2Center(-1, alpha, -beta, 0.0f); } 
+        public Linear2Center linear2_center(float alpha, float beta, float gamma) {
+            return new Linear2Center(-1, alpha, beta, gamma);
+        }
+        
         public Quadratic2 mul() { return new Quadratic2(dl_likeX1, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f); }
         public Quadratic2 mul(float alpha) { return new Quadratic2(dl_likeX1, 0.0f, alpha, 0.0f, 0.0f, 0.0f, 0.0f); }
         public Quadratic2 sqadd() { return new Quadratic2(dl_likeX1, 1.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f); }        
@@ -1514,8 +1624,7 @@ public final class Alpha {
         public Quadratic2 sqsub(boolean likeX1) { return new Quadratic2(likeX1, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f); }      
         public Quadratic2 sqadd(boolean likeX1, float alpha, float beta) { return new Quadratic2(likeX1, alpha, 0.0f, beta, 0.0f, 0.0f, 0.0f); }        
         public Quadratic2 quadratic2(boolean likeX1, float k11, float k12, float k22, float k1, float k2, float C) {
-            return new Quadratic2(likeX1, k11, k12, k22, 
-                    k1, k2, C);
+            return new Quadratic2(likeX1, k11, k12, k22, k1, k2, C);
         }
         
         public Quadratic2Row mul_row() {return new Quadratic2Row(0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f); }
@@ -1527,7 +1636,7 @@ public final class Alpha {
             return new Quadratic2Row(k11, k12, k22, k1, k2, C);
         }
         
-        public Quadratic2Center mul_center() {return new Quadratic2Center(-1, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f); }
+        public Quadratic2Center mul_center() { return new Quadratic2Center(-1, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f); }
         public Quadratic2Center mul_center(float alpha) { return new Quadratic2Center(-1, 0.0f, alpha, 0.0f, 0.0f, 0.0f, 0.0f); }
         public Quadratic2Center sqadd_center() { return new Quadratic2Center(-1, 1.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f); }        
         public Quadratic2Center sqsub_center() { return new Quadratic2Center(-1, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f); }        
@@ -1559,7 +1668,7 @@ public final class Alpha {
         
         public LinearMean mean() { return new LinearMean(1.0f, 0.0f); }
         public LinearMean mean(float alpha) { return new LinearMean(alpha, 0.0f); }
-        public LinearMean linearMean(float alpha, float beta) { 
+        public LinearMean linear_mean(float alpha, float beta) { 
             return new LinearMean(alpha, beta); 
         }
         
@@ -2039,9 +2148,15 @@ public final class Alpha {
             return csp(inplace, new CoreFlatten<>(sp_func, inplace), X);
         }
         
+        public final Tensor[] view(Tensor X, int... out_dim) { 
+            return fsp(new CoreView<>(sp_func, sp_tensor_inplace, out_dim), new Tensor[]{ X }); 
+        }
         public final Tensor[] view(Tensor[] X, int... out_dim) { 
             return fsp(new CoreView<>(sp_func, sp_tensor_inplace, out_dim), X); 
         }
+        public final Tensor[] view(boolean inplace, Tensor X, int... out_dim) {
+            return csp(inplace, new CoreView<>(sp_func, inplace, out_dim), new Tensor[] { X });
+        }     
         public final Tensor[] view(boolean inplace, Tensor[] X, int... out_dim) {
             return csp(inplace, new CoreView<>(sp_func, inplace, out_dim), X);
         }
@@ -2449,6 +2564,14 @@ public final class Alpha {
             return cdu(new CoreLinear2Row<>(du_func, alpha, beta, gamma), X);
         }
         
+        public final Tensor[] add_center(Tensor... X) { return cdu(new CoreLinear2Center<>(du_func, -1, 1.0f,  1.0f, 0.0f), X); }
+        public final Tensor[] sub_center(Tensor... X) { return cdu(new CoreLinear2Center<>(du_func, -1, 1.0f, -1.0f, 0.0f), X); }
+        public final Tensor[] add_center(float alpha, float beta, Tensor... X) { return cdu(new CoreLinear2Center<>(du_func, -1, alpha,  beta, 0.0f), X); }
+        public final Tensor[] sub_center(float alpha, float beta, Tensor... X) { return cdu(new CoreLinear2Center<>(du_func, -1, alpha, -beta, 0.0f), X); }
+        public final Tensor[] linear2_center(float alpha, float beta, float gamma, Tensor... X) {
+            return cdu(new CoreLinear2Center<>(du_func, -1, alpha, beta, gamma), X);
+        }
+        
         public Tensor[] mul(Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, dl_likeX1, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f), X); }
         public Tensor[] mul(float alpha, Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, dl_likeX1, 0.0f, alpha, 0.0f, 0.0f, 0.0f, 0.0f), X); }
         public Tensor[] sqadd(Tensor... X) { return cdu(new CoreQuadratic2<>(du_func, dl_likeX1, 1.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f), X); }
@@ -2578,43 +2701,27 @@ public final class Alpha {
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="functional: reducer.math">
-        public Tensor[] sum(Tensor... X) { 
-            return cre(new CoreLinearSummary<>(re_func, 1.0f, 0.0f), X); 
-        }
-        public Tensor[] sum(float alpha, Tensor... X) {
-            return cre(new CoreLinearSummary<>(re_func, alpha, 0.0f), X); 
-        }
-        public Tensor[] linearSum(float alpha, float beta, Tensor... X) {
+        public Tensor[] sum(Tensor... X) { return cre(new CoreLinearSummary<>(re_func, 1.0f, 0.0f), X); }
+        public Tensor[] sum(float alpha, Tensor... X) { return cre(new CoreLinearSummary<>(re_func, alpha, 0.0f), X); }
+        public Tensor[] linear_sum(float alpha, float beta, Tensor... X) {
             return cre(new CoreLinearSummary<>(re_func, alpha, beta), X); 
         }
 
-        public Tensor[] mean(Tensor... X) { 
-            return cre(new CoreLinearMean<>(re_func, 1.0f, 0.0f), X); 
-        }
-        public Tensor[] mean(float alpha, Tensor... X) { 
-            return cre(new CoreLinearMean<>(re_func, alpha, 0.0f), X); 
-        }
-        public Tensor[] linearMean(float alpha, float beta, Tensor... X) { 
+        public Tensor[] mean(Tensor... X) { return cre(new CoreLinearMean<>(re_func, 1.0f, 0.0f), X); }
+        public Tensor[] mean(float alpha, Tensor... X) { return cre(new CoreLinearMean<>(re_func, alpha, 0.0f), X); }
+        public Tensor[] linear_mean(float alpha, float beta, Tensor... X) { 
             return cre(new CoreLinearMean<>(re_func, alpha, beta), X); 
         }
         
-        public Tensor[] squareSum(Tensor... X) {
-            return cre(new CoreQuadraticSummary<>(re_func, 1.0f, 0.0f, 0.0f), X);
-        }
-        public Tensor[] squareSum(float alpha, Tensor... X) {
-            return cre(new CoreQuadraticSummary<>(re_func, alpha, 0.0f, 0.0f), X);
-        }
-        public Tensor[] quadraticSum(float alpha, float beta, float gamma, Tensor... X) {
+        public Tensor[] sqsum(Tensor... X) { return cre(new CoreQuadraticSummary<>(re_func, 1.0f, 0.0f, 0.0f), X); }
+        public Tensor[] sqsum(float alpha, Tensor... X) { return cre(new CoreQuadraticSummary<>(re_func, alpha, 0.0f, 0.0f), X); }
+        public Tensor[] quadratic_sum(float alpha, float beta, float gamma, Tensor... X) {
             return cre(new CoreQuadraticSummary<>(re_func, alpha, beta, gamma), X);
         }
         
-        public Tensor[] squareMean(Tensor... X) {
-            return cre(new CoreQuadraticMean<>(re_func, 1.0f, 0.0f, 0.0f), X);
-        }
-        public Tensor[] squareMean(float alpha, Tensor... X) {
-            return cre(new CoreQuadraticMean<>(re_func, alpha, 0.0f, 0.0f), X);
-        }
-        public Tensor[] quadraticMean(float alpha, float beta, float gamma, Tensor... X) {
+        public Tensor[] sqmean(Tensor... X) { return cre(new CoreQuadraticMean<>(re_func, 1.0f, 0.0f, 0.0f), X); }
+        public Tensor[] sqmean(float alpha, Tensor... X) { return cre(new CoreQuadraticMean<>(re_func, alpha, 0.0f, 0.0f), X); }
+        public Tensor[] quadratic_mean(float alpha, float beta, float gamma, Tensor... X) {
             return cre(new CoreQuadraticMean<>(re_func, alpha, beta, gamma), X);
         }
         //</editor-fold>

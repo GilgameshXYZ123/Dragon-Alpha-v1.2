@@ -21,13 +21,11 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class test 
-{
+public class test {
     static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2"); }
     static Mempool memp = alpha.engine.memp2(alpha.MEM_1GB * 6);
     static Engine eg = alpha.engine.cuda_float32(0, memp, alpha.MEM_1MB * 1024);
    
-    
     static int batch_size = 512;
     public static void test() {
         ResNet18 net = new ResNet18().eval().init(eg).println();
@@ -36,7 +34,7 @@ public class test
         LossFunction loss = alpha.loss.softmax_crossEntropy();
 //        DataSet<byte[], Integer> dataset = Cifar10.train();
         DataSet<byte[], Integer> dataset = Cifar10.test();
-//        
+        
         int batchIdx = 0;
         double accuracy = 0;
         eg.sync(false).check(false);

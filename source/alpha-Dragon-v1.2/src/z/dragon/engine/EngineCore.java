@@ -2601,8 +2601,8 @@ public class EngineCore implements MemStatus {
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="minValue, max, clip">
-    //<editor-fold defaultstate="collapsed" desc="minValue, min2">
+    //<editor-fold defaultstate="collapsed" desc="min, max, clip">
+    //<editor-fold defaultstate="collapsed" desc="min, min2">
     public Syncer min2D(long Y_address,
             float alpha, long X_address, float beta, 
             float vmin,
@@ -8145,7 +8145,7 @@ public class EngineCore implements MemStatus {
                 width, stride);
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="field max, minValue">
+    //<editor-fold defaultstate="collapsed" desc="field max, min">
     public Syncer field_max(long Y_address,
             long X_address, 
             int length, int row_length, int width)
@@ -8449,7 +8449,7 @@ public class EngineCore implements MemStatus {
                 width, stride);
     }
     //</editor-fold> 
-    //<editor-fold defaultstate="collapsed" desc="row max, minValue">
+    //<editor-fold defaultstate="collapsed" desc="row max, min">
     public Syncer row_max(long Y_address, 
             long X_address,
             int field_length, int row_length,

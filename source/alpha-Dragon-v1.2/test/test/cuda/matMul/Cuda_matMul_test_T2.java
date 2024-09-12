@@ -1,8 +1,10 @@
 package test.cuda.matMul;
 
+import static test.cuda.matMul.Cuda_matMul_test_T1.eg;
 import static z.dragon.alpha.Alpha.alpha;
 import z.dragon.engine.Engine;
 import z.dragon.engine.Tensor;
+import z.dragon.engine.cuda.CudaFloat32EngineBase;
 import z.dragon.engine.cuda.impl.Cuda;
 import z.util.lang.SimpleTimer;
 import z.util.math.vector.Matrix;
@@ -18,10 +20,13 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class Cuda_matMul_test_T2 
-{
+public class Cuda_matMul_test_T2  {
     static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2");}
     static Engine eg = alpha.engine.cuda_float32(0, alpha.engine.memp1());
+    static {
+        CudaFloat32EngineBase base = (CudaFloat32EngineBase) eg.engineBase();
+        base.matMulT2_tf32(true);
+    }
      
     static void multiplyT2(float[][] A, float[][] B, float[][] C) {
         //step A = K
@@ -58,8 +63,8 @@ public class Cuda_matMul_test_T2
         float[] C3 = eg.valueOf(tC2);
         
         //compare---------------------------------------------------------------
-        float sp1 = Vector.samePercent_absolute(C2, C1);
-        float sp2 = Vector.samePercent_absolute(C3, C1);
+        float sp1 = Vector.samePercent_relative(C2, C1);
+        float sp2 = Vector.samePercent_relative(C3, C1);
         
         System.out.print("CPU :"); Vector.println(C1, 0, 10);
         System.out.print("GPU1:"); Vector.println(C2, 0, 10);
@@ -107,15 +112,16 @@ public class Cuda_matMul_test_T2
 //        
 //        testCorrect(65, 121, 518); return;
         
-        for(int n=1; n<=255;n++)
-            for(int m=1; m<=255; m++)  
-                for(int k=128; k<=132; k++) testCorrect(n, m, k);
-
-        for(int n=1; n<=255; n++)
-            for(int m=1; m<=255; m++)  
-                for(int k=512; k<=517; k++) testCorrect(n, m, k);
+//        for(int n=1; n<=255;n++)
+//            for(int m=1; m<=255; m++)  
+//                for(int k=128; k<=132; k++) testCorrect(n, m, k);
+//
+//        for(int n=1; n<=255; n++)
+//            for(int m=1; m<=255; m++)  
+//                for(int k=512; k<=517; k++) testCorrect(n, m, k);
         
-        int N = 2048, M = 2048, K = 2048;
+//        int N = 2048, M = 2048, K = 2048;
+        int N = 4096, M = 4096, K = 4096;
 //        int N = 1024, M = 1024, K = 1024;
 //        int N = 256, M = 4096, K = 8192;
 //          int N = 256, M = 2048, K = 4096;
@@ -127,8 +133,7 @@ public class Cuda_matMul_test_T2
 //        int N = 256, M = 1000, K = 2048;// 4788.018066 GFlop/s, 4877.097168 GFlop/s
         
 //        testCorrect(N/2, M/2, K/2);
-//        testSpeed(N, M, K);
-
+        testSpeed(N, M, K);
 //        testSpeed(256, 1024, 4096);
     }
 }

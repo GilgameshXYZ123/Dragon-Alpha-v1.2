@@ -4083,8 +4083,7 @@ public class Engine implements MemStatus {
         return Y;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="BP: linear2_center">
-    //<editor-fold defaultstate="collapsed" desc="foward-propagation">
+    //<editor-fold defaultstate="collapsed" desc="linear2_center">
     public Tensor sub_center(boolean inplace, Tensor X1, Tensor X2) { return linear2_center(inplace, X1, X2, -1, 1.0f, -1.0f, 0);}
     public Tensor sub_center(boolean inplace, float alpha, Tensor X1, float beta, Tensor X2) {
         return linear2_center(inplace, X1, X2, -1, alpha, -beta, 0);
@@ -4098,7 +4097,7 @@ public class Engine implements MemStatus {
     public Tensor linear2_center(boolean inplace, Tensor X1, Tensor X2, float alpha, float beta, float gamma) {
         return linear2_center(inplace, X1, X2, -1, alpha, beta, gamma);
     }
-    @Passed("CudaFloat32EngieBase")
+   @Passed("CudaFloat32EngieBase")
     public Tensor linear2_center(boolean inplace, 
             Tensor X1, Tensor X2, int dim2,
             float alpha, float beta, float gamma)
@@ -4121,30 +4120,6 @@ public class Engine implements MemStatus {
         if(sync) sc.sync(); else Y.setSyncer(sc);
         return Y;
     }
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="foward-propagation">
-    public Tensor[] linear2_center_deltaX(boolean inplace, Tensor deltaY,
-            Tensor X1, Tensor X2, int dim2, 
-            float alpha, float beta, float gamma) {
-        return quadratic2_center_deltaX(inplace, deltaY, X1, X2, dim2, 
-                0.0f, 0.0f, 0.0f, 
-                alpha, beta, gamma);
-    }
-
-    public Tensor linear2_center_deltaX1(boolean inplace, Tensor deltaY, 
-            Tensor X1, Tensor X2, int dim2, 
-            float alpha) {
-        return quadratic2_center_deltaX1(inplace, deltaY, X1, X2, dim2, 
-                0.0f, 0.0f, alpha);
-    }
-
-    public Tensor linear2_center_deltaX2(Tensor deltaY, 
-            Tensor X1, Tensor X2, int dim2,
-            float beta) {
-        return quadratic2_center_deltaX2(deltaY, X1, X2, dim2, 
-                0.0f, 0.0f, beta);
-    }
-    //</editor-fold>
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="linear2_field">
     public Tensor sub_field(boolean inplace, Tensor X1, Tensor X2) { return linear2_field(inplace, X1, X2, 1.0f, -1.0f, 0.0f); }
@@ -5137,8 +5112,8 @@ public class Engine implements MemStatus {
     //</editor-fold>
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="minValue, max, clip"> 
-    //<editor-fold defaultstate="collapsed" desc="BP: minValue">
+    //<editor-fold defaultstate="collapsed" desc="min, max, clip"> 
+    //<editor-fold defaultstate="collapsed" desc="BP: min">
     public Tensor min(boolean inplace, Tensor X, float vmin){ return min(inplace, 1, X, 0, vmin);}
     @Passed("CudaFloat32EngieBase")
     public Tensor min(boolean inplace, float alpha, Tensor X, float beta, float vmin) {
@@ -10548,7 +10523,7 @@ public class Engine implements MemStatus {
         return result;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="straight minValue & max">
+    //<editor-fold defaultstate="collapsed" desc="straight min & max">
     @Passed("CudaFloat32EngieBase")
     public Result<Float> straight_max(Tensor X)  {
         if(check) { require_dtype(X, "X"); }
@@ -10567,7 +10542,7 @@ public class Engine implements MemStatus {
         return result;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="straight minValue & max indexed">
+    //<editor-fold defaultstate="collapsed" desc="straight min & max indexed">
     @Passed("CudaFloat32EngieBase")
     public IndexedResult<Float> straight_max_indexed(Tensor X)  {
         if(check) { require_dtype(X, "X"); }
@@ -10920,7 +10895,7 @@ public class Engine implements MemStatus {
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="field max\minValue">
+    //<editor-fold defaultstate="collapsed" desc="field max\min">
     public Tensor field_max(Tensor X) { return field_max(X, -1); }
     @Passed("CudaFloat32EngieBase")
     public Tensor field_max(Tensor X, int row_length) {
@@ -10957,7 +10932,7 @@ public class Engine implements MemStatus {
         return Y;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="field max\minValue indexed">
+    //<editor-fold defaultstate="collapsed" desc="field max\min indexed">
     public Tensor[] field_max_indexed(Tensor X) { return field_max_indexed(X, -1); }
     @Passed("CudaFloat32EngieBase")
     public Tensor[] field_max_indexed(Tensor X, int row_length) {
@@ -11550,7 +11525,7 @@ public class Engine implements MemStatus {
     }    
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="row max\minValue">
+    //<editor-fold defaultstate="collapsed" desc="row max\min">
     public Tensor row_max(Tensor X) { return row_max(X, -1); }
     @Passed("CudaFloat32EngieBase")
     public Tensor row_max(Tensor X, int row_length) {
@@ -11585,7 +11560,7 @@ public class Engine implements MemStatus {
         return Y;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="row max\minValue indexed">
+    //<editor-fold defaultstate="collapsed" desc="row max\min indexed">
     public Tensor row_max_index(Tensor X) { return row_max_index(X, -1); }
     @Passed("CudaFloat32EngieBase")
     public Tensor row_max_index(Tensor X, int row_length) {

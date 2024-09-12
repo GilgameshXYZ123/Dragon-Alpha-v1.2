@@ -29,9 +29,9 @@ public class train
     static Mempool memp = alpha.engine.memp2(alpha.MEM_1GB * 8);
     static Engine eg = alpha.engine.cuda_float32(0, memp, alpha.MEM_1MB * 1024);
 //    static Engine eg = alpha.engine.cuda_float32(0, 1, memp, alpha.MEM_1MB*1024, true);//30.167
-    static {
+      static {
         CudaFloat32EngineBase cu32 = (CudaFloat32EngineBase) eg.engineBase();
-//        cu32.field_var_safe(false);
+//        cu32.tf32(true);
     }
     
     static int batch_size = 512;//512;
@@ -104,6 +104,7 @@ public class train
         {
             //28.125
             //30.42: 30.332 -> 30.245 -> 29.122 -> 28.802 -> 28.203 -> 27.449 -> 26.176 -> 25.1
+            //tf32: 24.839
             //25 epochs for Adam: 143.273 -> 130 s
             //50 epochs for SGD
             //30 epcohs for SGDMN

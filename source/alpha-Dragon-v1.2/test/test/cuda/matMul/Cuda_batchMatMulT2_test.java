@@ -17,17 +17,16 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class Cuda_batchMatMulT2_test 
-{
+public class Cuda_batchMatMulT2_test {
     static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2");}
     static Engine eg = alpha.engine.cuda_float32(0, alpha.engine.memp1());
     static {
         CudaFloat32EngineBase cu32 = (CudaFloat32EngineBase) eg.engineBase();
-        cu32.batchMatMulT2_useTexture(false);
+//        cu32.batchMatMulT2_useTexture(false);
+         cu32.tf32(true);
     }
     
-    static void matMulT2(float[][] A, float[][] B, float[][] C)
-    {
+    static void matMulT2(float[][] A, float[][] B, float[][] C) {
         int N = A.length, M = B.length, K = B[0].length;
         for(int k = 0;  k <K; k++)
             for(int i = 0; i < N; i++)
@@ -35,8 +34,7 @@ public class Cuda_batchMatMulT2_test
                     C[i][j] += A[i][k] * B[j][k];
     }
     
-    static void bmmT2(float[][][][] A, float[][][][] B, float[][][][] C) 
-    {
+    static void bmmT2(float[][][][] A, float[][][][] B, float[][][][] C)  {
         int dim0 = A.length;
         int dim1 = A[0].length;
         
@@ -45,8 +43,7 @@ public class Cuda_batchMatMulT2_test
                 matMulT2(A[d0][d1], B[d0][d1], C[d0][d1]);
     }
     
-    public static void testCorrect(int Batch0, int Batch1, int N, int M, int K)
-    {
+    public static void testCorrect(int Batch0, int Batch1, int N, int M, int K) {
         System.out.println("TestCorrect:");
         System.out.format("[Batch0, Batch1, N, M, K] = [%d, %d, %d, %d, %d]\n",
                 Batch0, Batch1, N, M, K);
@@ -76,15 +73,14 @@ public class Cuda_batchMatMulT2_test
         System.out.print("GPU = "); Vector.println(C2, 0, 10);
         
         //compare---------------------------------------------------------------
-        float sp = Vector.samePercent_absolute(C2, C1);
+        float sp = Vector.samePercent_relative(C2, C1);
         System.out.println("sp = " + sp);
         
         eg.delete(tA, tB, tC);
         if(sp != 1.0f) {throw new RuntimeException(N+" "+M+" "+K);}
     }
     
-    public static void testSpeed(int Batch0, int Batch1, int N, int M, int K) 
-    {
+    public static void testSpeed(int Batch0, int Batch1, int N, int M, int K) {
         eg.check(false);
         eg.sync(false);
         
@@ -118,19 +114,30 @@ public class Cuda_batchMatMulT2_test
         System.out.println(", Performance = "+ gigaFlops+" GFlop/s");
     }
     
-    public static void main(String[] args) 
-    {
-        Vector.PRINT_DIFFERENT = true;
-        for(int K=7; K<=9; K++)
-        for(int N=1; N <= 82; N++)
-            for(int M=1; M <= 96; M++)  
-                testCorrect(5, 3, N, M, K);
+    public static void main(String[] args) {
+//        Vector.PRINT_DIFFERENT = true;
+//        for(int K=7; K<=9; K++)
+//        for(int N=1; N <= 82; N++)
+//            for(int M=1; M <= 96; M++)  
+//                testCorrect(5, 3, N, M, K);
         
         //[64, 256, 128]
 //        [64, 8, 256, 32] * [64, 8, 32, 256]
-//        int Batch0 = 16, Batch1 = 8;
-//        int N = 255, M = 340, K = 256;
+        int Batch0 = 8, Batch1 = 8;
+        //int N = 512, M = 512, K = 512;
+        
+//        int N = 112 * 112, M = 128, K = 128;
+//        int N = 56 * 56, M = 256, K = 256;
+//        int N = 28 * 28, M = 512, K = 512;
+//        int N = 14 * 14, M = 512, K = 512;
+        
+//        int N = 128, M = 128, K = 112 * 112;
+//        int N = 256, M = 256, K = 56 * 56;
+        int N = 512, M = 512, K = 28 * 28;
+//        int N = 1024, M = 1024, K = 14 * 14;//low
+        
 //        testCorrect(Batch0, Batch1, N, M, K);
-//        testSpeed(Batch0*2, Batch1, N, M, K);
+        //testSpeed(Batch0*2, Batch1, N, M, K);
+        testSpeed(Batch0, Batch1, N, M, K);
     }
 }

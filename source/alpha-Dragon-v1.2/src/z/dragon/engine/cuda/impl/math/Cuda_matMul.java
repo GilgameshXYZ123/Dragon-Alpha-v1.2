@@ -110,7 +110,6 @@ public final class Cuda_matMul {
             long dA_address, long dB_address,
             long dC_address,
             int N, int M, int K);
-
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="matMulSK">
     /**
@@ -139,6 +138,33 @@ public final class Cuda_matMul {
             long dA_address, long dB_address,
             long dC_address, long dCBuf_address,
             int N, int M, int K);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="matMul_mma">
+    /**
+     * <pre>
+     * Tensor-Float32:
+     * (1) A belongs to Mat[N, K]
+     * (2) B belongs to Mat[K, M]
+     * (3) C belongs to Mat[N, M]
+     * (4) C = A * B
+     * (5) (N, M, K)%4 == 0 && >= 4.
+     * </pre>
+     *
+     * @param streamArray
+     * @param length
+     * @param dA_address
+     * @param dB_address
+     * @param dC_address
+     * @param N N = dA.height = dC.height
+     * @param M M = dB.width = dC.width = dC.stride = dB.stride
+     * @param K K = dA.width = dB.height = dA.stride
+     */
+    @Passed
+    public static native void matMul_mma(long[] streamArray, int length,
+            long dA_address, long dB_address,
+            long dC_address,
+            int N, int M, int K);
+
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="matMul44T1">
@@ -228,6 +254,33 @@ public final class Cuda_matMul {
             long dC_address, long dCBuf_address,
             int N, int M, int K);
     //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="matMul44T1_mma">
+    /**
+     * <pre>
+     * Tensor-Float32:
+     * (1) A^T belongs to Mat[N, K], A belongs to Mat[K, N]
+     * (2) B belongs to Mat[K, M]
+     * (3) C belongs to Mat[N, M]
+     * (4) C = (A^T) * B
+     * (5) (N, M, K)%4 == 0 && >= 4.
+     * </pre>
+     *
+     * @param streams
+     * @param length
+     * @param dA_address
+     * @param dB_address
+     * @param dC_address
+     * @param N N = A.width = C.height
+     * @param M M = B.width = C.width
+     * @param K K = A.height = B.height
+     */
+    @Passed
+    public static native void matMulT1_mma(long[] streams, int length,
+            long dA_address,
+            long dB_address,
+            long dC_address,
+            int N, int M, int K);
+    //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="matMul44T2">
     /**
@@ -264,7 +317,6 @@ public final class Cuda_matMul {
             long dB_address,
             long dC_address,
             int N, int M, int K);
-
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="matMul44T2_SK">
     /**
@@ -292,6 +344,32 @@ public final class Cuda_matMul {
             long dA_address,
             long dB_address,
             long dC_address, long dC_buf_address,
+            int N, int M, int K);
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="matMul44T2_mma">
+    /**
+     * <pre>
+     * Tensor-Float32:
+     * (1) A belongs to Mat[N, K]
+     * (2) B belongs to Mat[M, K], B^T belongs to Mat[K, M]
+     * (3) C belongs to Mat[N, M]
+     * (4) C = A * B^T.
+     * </pre>
+     *
+     * @param streams
+     * @param length
+     * @param dA_address
+     * @param dB_address
+     * @param dC_address
+     * @param N N = A.height = C.height
+     * @param M M = C.width = B.height
+     * @param K K = A.width = B.width
+     */
+    @Passed
+    public static native void matMulT2_mma(long[] streams, int length,
+            long dA_address,
+            long dB_address,
+            long dC_address,
             int N, int M, int K);
     //</editor-fold>
 }

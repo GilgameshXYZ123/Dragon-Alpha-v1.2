@@ -51,8 +51,7 @@ public class Linear2Row extends DualFunction {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: InlineLinear2Row">
-    public static class InlineLinear2Row extends DualCore<Linear2Row>
-    {
+    public static class InlineLinear2Row extends DualCore<Linear2Row> {
         transient protected int row_length;
         
         public InlineLinear2Row(Linear2Row unit) { super(unit); }
@@ -76,7 +75,7 @@ public class Linear2Row extends DualFunction {
             if(!backward_grads) return null;
 
             int gc_count = 0; Tensor deltaX1 = null, deltaX2 = null;
-            if(backward_grads1) { 
+            if (backward_grads1) { 
                 deltaX1 = eg.linear(false, ut.alpha, deltaY, 0);
                 gc_count++;//(1) deltaX1 = deltaY * alpha
             }

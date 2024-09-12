@@ -22,15 +22,15 @@ import z.util.math.vector.Vector;
  * <pre>
  * read X from the last layer.
  * alloc: A, B
- * compute: Y(the next layer will read)
- * 
- * read deltaY from the next layer:
- * alloc: deltaW, deltaX(is need)
- * compute: deltaX(the last layer will read)
- * 
- * forward: Y = X(*)A + B #element multiply
- * back: deltaX = deltaY*W^T
- * </pre>
+ compute: Y(the next layer will read)
+ 
+ read deltaY from the next layer:
+ alloc: deltaW, deltaX(is need)
+ compute: deltaX(the last layer will read)
+ 
+ forward: Y = X(*)A + B #element matMul
+ back: deltaX = deltaY*W^T
+ </pre>
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")

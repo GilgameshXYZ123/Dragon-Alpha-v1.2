@@ -30,6 +30,7 @@ public class train
     static Engine eg = alpha.engine.cuda_float32(0, memp, alpha.MEM_1MB * 1024);
     static {
         CudaFloat32EngineBase cu32 = (CudaFloat32EngineBase) eg.engineBase();
+        cu32.tf32(true);
     }
     
     static int batch_size = 512;//512;
@@ -40,7 +41,6 @@ public class train
         
 //        Optimizer opt = alpha.optim.Adam(net.param_map(), lr).amsgrad(true);//25 epoch, 141.5s, 0.7807, 0.9870
 //        Optimizer opt = alpha.optim.Adam(net.param_map(), lr).L2coef(1e-2f);//40 epoch, 229.ms, 0.793, 0.906
-
 
 //        Optimizer opt = alpha.optim.Adamax(net.param_map(), lr);//25 epoch, 143.763, 0.7454, 0.989
 //        Optimizer opt = alpha.optim.Adamax(net.param_map(), lr).L2coef(1e-2f);//50 epoch, 288.047, 0.7624, 0.9671
@@ -65,7 +65,7 @@ public class train
         LossFunction loss = alpha.loss.softmax_crossEntropy();
         DataSet<byte[], Integer> train_set = Cifar10.train();
         BufferedTensorIter iter = train_set.buffered_iter(eg, batch_size);
-        eg.sync(false).check(false);
+//        eg.sync(false).check(false);
         
         int batchIdx = 0; 
         SimpleTimer timer = new SimpleTimer().record();
@@ -96,7 +96,6 @@ public class train
         System.out.println("total = " + (1.0f*div/1000));
         System.out.println("for each sample:" + time/batch_size);
         net.save();
-//        alpha.stat.save_zip(opt, opt_weight);
     }
     
     public static void main(String[] args) {
@@ -105,9 +104,9 @@ public class train
             //28.125
             //30.42: 30.332 -> 30.245 -> 29.122 -> 28.802 -> 28.203 -> 27.449 -> 26.176
             //25 epochs for Adam: 143.273 -> 130 s
-            //50 epochs for SGD
+            //50 epochs for SGD 43.216
             //30 epcohs for SGDMN
-            training(25);
+            training(30);
         }
         catch(Exception e) {
             e.printStackTrace();
