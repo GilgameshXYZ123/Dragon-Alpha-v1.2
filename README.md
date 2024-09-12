@@ -17,8 +17,8 @@
 > - [12] _Cuda_reduce_: It includes some reduction operators, and can be used to find mean, variance, maximum, minimum, etc. To enhance flexibility, these reduction operators are fused with element-wise linear transformations ($Y = \alpha X + \beta$).
 > - [13] _Cuda_matMul_: contains 3 types of matrix multiplications, $A * B$, $A * B^T$, and $A^T * B$.
 > - [14] _Cuda_batchMatMul_: contains 3 types of batch matrix multiplications, $A * B$, $A * B^T$, and $A^T * B$.
->> These 14 libs have corresponding dlls and VS2017-studio projects. Due to my limited personal ability, I don't have enough time to write comments and optimize all kernel functions. Instead, I pay attention to optimize the kernels with the highest performance up-limit. Specifically, matrix multiplication have good performance when dimensions are multiples of $64$; convolutional operators perform well with $64\times$ channel sizes. I foucused on enhancing the readbility of source code, I believe smart you can understand them without too much comments. To better understand __Cu32__, I suggest you to read the java code of _CudaFloat32EngineBase_, which contains some higher-level operatioal logics of __Cu32__.
- 
+>> These 14 libs have corresponding dlls and Visual-studio-2017 projects. The complied dlls of cu32 is in dir [Dragon-Alpha-v1.2/native-lib/cuda_float32 and cuda_float32_cu118], where dlls in [cuda_float32] are compiled by nvcc-11.5 and those in [cuda_float32_cu118] are compiled by nvcc-11.8. The Visual-studio-2017 projects of cu32 are in dir [source\engune-cuda-base]. Pelease make sure your VS-studio can process CUDA-runtime projects. Due to my limited personal ability, I don't have enough time to write comments and optimize all kernel functions. Instead, I pay attention to optimize the kernels with the highest performance up-limit. Specifically, matrix multiplication have good performance when dimensions are multiples of $64$; convolutional operators perform well with $64\times$ channel sizes. I foucused on enhancing the readbility of source code, I believe smart you can understand them without too much comments. To better understand __Cu32__, I suggest you to read the java code of _CudaFloat32EngineBase_, which contains some higher-level operatioal logics of __Cu32__.
+
 **2.** __The__ __complication__ __of__ __Cu32__. Under the Apache-2.0 License, you can modify and recompile the source of ___Cu32___. Now, __Cu32__ is only compiled for 64-bit Windows, so kindly recompile it using NVCC for other Operating Systems, like Centos, and Ubuntu.  I recommand nvcc-11.5 compilter for RTX-30X0 (Ampere) GPU, and nvcc-11.8 for RTX-40X0 (Lovelace) GPU, however, I suggest you to try different nvcc versions on your platforms. Except that _Cuda_dconv3D_deltaX_ requires $compute$ and $sm \ge 60$, the other libs only requires $compute$ and $sm \ge 52$. According to my experience, $compute = sm = 52$, $61$, $70$, or $86$ can usually brings good performance, besides, I encourage you to try different compile conifgurations on your hardware to select the best.
 
 **3.**. __Convolution__ __algorithms__ __in__ __Cu32__. There are multiple convolution algorithms in ___Cu32___:
@@ -43,7 +43,9 @@
 - You need to specify the home path of Alpha to load dlls.
 - There may exisit format-imcompatible problems when reading a small portion of images in ILSVRC2012, due to the bugs in ImageIO.class of JDK8. To solve these questions, you can replaces these images by those thoe in fold [example\repair], and using  higher versions of JDK may also works.
 - 
--
+**3.** The 
+
+
 # II. Files
 - **Arxiv.pdf**  an article talking about the background, characteristics, architecture and experiments of Alpha, preprinted on arxiv.org, at: https://arxiv.org/abs/2305.08819.<br>
 - **exec**  the executable files of Alpha.
