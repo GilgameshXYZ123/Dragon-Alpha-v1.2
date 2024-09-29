@@ -131,7 +131,7 @@ public class ImageFolder extends DataSet<byte[], Integer> {
     }
     //</editor-fold>
     public synchronized ImageFolder init() {
-        if(!ff.inited) img_exec = Executors.newFixedThreadPool(num_threads, daemonThreadFactory);
+        if (!ff.inited) img_exec = Executors.newFixedThreadPool(num_threads, daemonThreadFactory);
         ff.init(); 
         return this; 
     }
@@ -143,6 +143,8 @@ public class ImageFolder extends DataSet<byte[], Integer> {
     @Override public TensorPair get(Engine eg) { return create_tensor_pair(eg, ff.container().get(1)); }
     @Override public TensorPair get(Engine eg, int batch) { return create_tensor_pair(eg, ff.container().get(batch)); }
     
+    @Override public ImageFolder[] split_clear(int sub_size) { ImageFolder[] subs = split(sub_size); clear(); return subs; }
+    @Override public ImageFolder[] split_clear(float percent) { ImageFolder[] subs = split(percent); clear(); return subs; }
     @Override public ImageFolder[] split(float percent) { return split((int)(size() * percent)); }
     @Override public ImageFolder[] split(int sub_size) {
         FileFolder[] ffs = ff.split(sub_size);
@@ -150,8 +152,17 @@ public class ImageFolder extends DataSet<byte[], Integer> {
         ImageFolder last  = new ImageFolder(ffs[1], pixel_transform, num_threads);
         return new ImageFolder[]{ first, last };
     }
+
+    @Override public ImageFolder[] class_split_clear(float percent) { ImageFolder[] subs = class_split(percent); clear(); return subs; }
+    @Override public Map<Integer, Integer> class_sample_num() { return ff.class_sample_num(); }
+    @Override public ImageFolder[] class_split(float percent) {
+        FileFolder[] ffs = ff.class_split(percent);
+        ImageFolder first = new ImageFolder(ffs[0], pixel_transform, num_threads);
+        ImageFolder last  = new ImageFolder(ffs[1], pixel_transform, num_threads);
+        return new ImageFolder[]{ first, last };
+    }
     //</editor-fold>
     
     @Override
-    public TensorIter batch_iter() {  return new BIter(ff.container().batch_iter());  }
+    public TensorIter batch_iter() { return new BIter(ff.container().batch_iter());  }
 }

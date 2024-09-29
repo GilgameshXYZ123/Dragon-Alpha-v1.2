@@ -68,8 +68,9 @@ public class FileFolder extends DataSet<File, Integer> {
         sb.append("}");
     }
     //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="running-area">
+    @Override public FileFolder[] split_clear(int sub_size) { FileFolder[] subs = split(sub_size); clear(); return subs; }
+    @Override public FileFolder[] split_clear(float percent) { FileFolder[] subs = split(percent); clear(); return subs; }
     @Override public FileFolder[] split(float percent) { return split((int)(size() * percent)); }
     @Override public FileFolder[] split(int sub_size) {
         DataContainer<File, Integer>[] contas = con.split(sub_size);
@@ -78,8 +79,16 @@ public class FileFolder extends DataSet<File, Integer> {
         return new FileFolder[]{ first, last };
     }
 
+    @Override public FileFolder[] class_split_clear(float percent) { FileFolder[] subs = class_split(percent); clear(); return subs; }
+    @Override public FileFolder[] class_split(float percent) {
+        DataContainer<File, Integer>[] contas = con.class_split(percent);
+        FileFolder first = new FileFolder(contas[0], root_dir, labels);
+        FileFolder last  = new FileFolder(contas[1], root_dir, labels);
+        return new FileFolder[]{ first, last };
+    }
+    
     public synchronized FileFolder init() {
-        if(inited) return this;
+        if (inited) return this;
        
         File[] dirs = root_dir.listFiles();
         if(labels == null || labels.isEmpty()) {//default method to init label

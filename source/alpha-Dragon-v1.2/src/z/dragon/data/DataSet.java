@@ -108,8 +108,8 @@ public class DataSet<K, V> {
     public TensorPair get(Engine eg, int batch) { return create_tensor_pair(eg, con.get(batch)); }
     public void clear() { con.clear(); }
     
-    public DataSet<K, V>[] split_clear(float percent) { DataSet<K, V>[] dataset = split(percent); clear(); return dataset; }
-    public DataSet<K, V>[] split_clear(int sub_size) { DataSet<K, V>[] dataset = split(sub_size); clear(); return dataset; }
+    public DataSet<K, V>[] split_clear(float percent) { DataSet<K, V>[] subs = split(percent); clear(); return subs; }
+    public DataSet<K, V>[] split_clear(int sub_size) { DataSet<K, V>[] subs = split(sub_size); clear(); return subs; }
     public DataSet<K, V>[] split(float percent) { return split((int)(size() * percent)); }
     public DataSet<K, V>[] split(int sub_size) {
         DataContainer<K, V>[] contas = con.split(sub_size);
