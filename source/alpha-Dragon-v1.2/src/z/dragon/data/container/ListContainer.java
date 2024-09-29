@@ -7,7 +7,10 @@ package z.dragon.data.container;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import z.dragon.data.Pair;
 import z.util.math.vector.Vector;
 
@@ -18,8 +21,8 @@ import z.util.math.vector.Vector;
  */
  @SuppressWarnings(value = "unchecked")
 public class ListContainer<K, V> extends AbstractContainer<K, V> {
-    protected final ArrayList<K> karr;
-    protected final ArrayList<V> varr;
+    protected final ArrayList<K> karr;//input feature
+    protected final ArrayList<V> varr;//label
    
     public ListContainer(Class<K> input_clazz, Class<V> label_clazz, int init_capacity) {
        super(input_clazz, label_clazz);
@@ -31,6 +34,18 @@ public class ListContainer<K, V> extends AbstractContainer<K, V> {
     @Override public int size() { return karr.size(); }
     public List<K> inputs() { return karr;}
     public List<V> labels() { return varr; }
+    
+    @Override
+    public Map<V, Integer> class_sample_num() {
+        final int size = size();
+        Map<V, Integer> total = new HashMap<>(32);//get the total number of samples of each class
+        for (int i=0; i<size; i++) {
+            V label = varr.get(i); 
+            Integer num = total.get(label); if (num == null) num = 0; 
+            total.put(label, ++num); 
+        }
+        return total;
+    }
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="operators: write">
@@ -160,7 +175,7 @@ public class ListContainer<K, V> extends AbstractContainer<K, V> {
     @Override
     public ListContainer<K, V>[] split(int sub_size) {
         if (sub_size <= 0) throw new IllegalArgumentException(String.format("sub_size (%d) <= 0", sub_size));
-        if (sub_size >= size()) throw new IllegalArgumentException(String.format("sub_size (%d) >= size", sub_size));
+        if (sub_size >= size()) throw new IllegalArgumentException(String.format("sub_size (%d) >= size { %d }", sub_size, size()));
         
         start_read();
         int size = size();
@@ -170,6 +185,52 @@ public class ListContainer<K, V> extends AbstractContainer<K, V> {
         for (int i=0; i<sub_size; i++)   first.add(karr.get(i), varr.get(i));//[0:sub_size - 1]
         for (int i=sub_size; i<size; i++) last.add(karr.get(i), varr.get(i));//[sub_size : size - 1]
         finish_read();
+        
+        return new ListContainer[]{ first, last};
+    }
+    
+    @Override
+    public DataContainer<K, V>[] class_split(float percent) {
+        if (percent <= 0) throw new IllegalArgumentException(String.format("percent (%d) <= 0", percent));
+        if (percent >= 1) throw new IllegalArgumentException(String.format("percent (%d) >= 0", percent));
+        
+        start_read();
+        final int size = size();
+        int sub_size = (int) (size * percent);
+        if (sub_size <= 0) throw new IllegalArgumentException(String.format("sub_size (%d) <= 0", sub_size));
+        if (sub_size >= size) throw new IllegalArgumentException(String.format("sub_size (%d) >= size (%d)", sub_size, size));
+                
+        ListContainer<K, V> first = new ListContainer(this.kclazz, this.vclazz, sub_size);
+        ListContainer<K, V> last  = new ListContainer(this.kclazz, this.vclazz, size - sub_size);
+        
+        //------[first pass]----------------------------------------------------
+        Map<V, Integer> total = class_sample_num();
+        for (Entry<V, Integer> kv : total.entrySet()) {
+            int num = kv.getValue();
+            if (num <= 1) throw new IllegalArgumentException(String.format(
+                    "for key { %s }: sample.size { %d } <= 1",
+                    kv.getKey(), num));
+            
+            int threshold = (int) Math.ceil(num * percent);//the end sample-idx of a class 
+            if (threshold == num) threshold = num - 1;
+            kv.setValue(threshold);
+        }
+        
+        //------[second pass]---------------------------------------------------
+        Map<V, Integer> counter = new HashMap<>(total.size());
+        for (int i=0; i<size; i++) {
+            K feature = karr.get(i);
+            V label = varr.get(i);
+            
+            int threshold = total.get(label);
+            Integer idx = counter.get(label); if (idx == null) idx = 0;
+            (idx < threshold ? first : last).add(feature, label);//threshold >= 1
+            counter.put(label, ++idx);
+        }
+        
+        finish_read();
+        counter.clear();
+        total.clear();
         
         return new ListContainer[]{ first, last};
     }

@@ -16,12 +16,12 @@ import z.util.math.ExRandom;
  */
 public abstract class AbstractContainer<K, V> implements DataContainer<K, V> {
     protected final ExRandom exr = new ExRandom();
-    protected final Class<K> kclazz;
-    protected final Class<V> vclazz;
+    protected final Class<K> kclazz;//input feature
+    protected final Class<V> vclazz;//label
     
     protected AbstractContainer(Class<K> input_clazz, Class<V> label_clazz) {
-        if(input_clazz == null) throw new NullPointerException("input_class<K> is null");
-        if(label_clazz == null) throw new NullPointerException("label_class<V> is null");
+        if (input_clazz == null) throw new NullPointerException("input_class<K> is null");
+        if (label_clazz == null) throw new NullPointerException("label_class<V> is null");
         
         this.kclazz = input_clazz;
         this.vclazz = label_clazz;

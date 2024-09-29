@@ -5,6 +5,7 @@
  */
 package z.dragon.data;
 
+import java.util.Map;
 import z.dragon.data.container.BatchIter;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -31,14 +32,14 @@ public class DataSet<K, V> {
     //<editor-fold defaultstate="collapsed" desc="Basic-Functions">
     public DataSet set_seed(long seed) { con.seed_seed(seed); return this; }
     
-    public Transform<K[]>  input_transform() { return key_transform; }
+    public Transform<K[]> input_transform() { return key_transform; }
     public DataSet<K, V> input_transform(Transform<K[]> input_transform) {
         if(input_transform == null) throw new NullPointerException("input_transform is null");
         this.key_transform = input_transform;
         return this;
     }
     
-    public Transform<V[]>  label_transform() { return value_transform; }
+    public Transform<V[]> label_transform() { return value_transform; }
     public DataSet<K, V> label_transform(Transform<V[]> label_transform) {
         if(label_transform == null) throw new NullPointerException("label_transform is null");
         this.value_transform = label_transform;
@@ -59,8 +60,8 @@ public class DataSet<K, V> {
     public void append(StringBuilder sb) {
         sb.append(getClass().getSimpleName()).append(" { ");
         sb.append("size = ").append(size());
-        sb.append(", input_class").append(input_class());
-        sb.append(", label_class").append(label_class());
+        sb.append(", input_class = ").append(input_class());
+        sb.append(", label_class = ").append(label_class());
         sb.append("}");
     }
     
@@ -70,6 +71,8 @@ public class DataSet<K, V> {
         this.append(sb);
         return sb.toString();
     }
+    
+    public Map<V, Integer> class_sample_num() { return con.class_sample_num(); }
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="operators">
@@ -105,6 +108,8 @@ public class DataSet<K, V> {
     public TensorPair get(Engine eg, int batch) { return create_tensor_pair(eg, con.get(batch)); }
     public void clear() { con.clear(); }
     
+    public DataSet<K, V>[] split_clear(float percent) { DataSet<K, V>[] dataset = split(percent); clear(); return dataset; }
+    public DataSet<K, V>[] split_clear(int sub_size) { DataSet<K, V>[] dataset = split(sub_size); clear(); return dataset; }
     public DataSet<K, V>[] split(float percent) { return split((int)(size() * percent)); }
     public DataSet<K, V>[] split(int sub_size) {
         DataContainer<K, V>[] contas = con.split(sub_size);
@@ -113,15 +118,12 @@ public class DataSet<K, V> {
         return new DataSet[]{ first, last };
     }
     
-    public DataSet<K, V>[] split_clear(float percent) {
-        DataSet<K, V>[] dataset = split(percent);
-        this.clear();
-        return dataset;
-    }
-    public DataSet<K, V>[] split_clear(int sub_size) {
-        DataSet<K, V>[] dataset = split(sub_size);
-        this.clear();
-        return dataset;
+    public DataSet<K, V>[] class_split_clear(float percent) { DataSet<K, V>[] dataset = class_split(percent); clear(); return dataset; }
+    public DataSet<K, V>[] class_split(float percent) {
+        DataContainer<K, V>[] contas = con.class_split(percent);
+        DataSet<K, V> first = new DataSet<>(contas[0]);
+        DataSet<K, V> last  = new DataSet<>(contas[1]);
+        return new DataSet[]{ first, last };
     }
     //</editor-fold>
     

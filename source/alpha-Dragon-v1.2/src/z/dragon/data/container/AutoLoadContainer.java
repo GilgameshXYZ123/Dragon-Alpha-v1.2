@@ -6,6 +6,8 @@
 package z.dragon.data.container;
 
 import java.lang.reflect.Array;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -114,9 +116,20 @@ public class AutoLoadContainer<K, V> extends AbstractContainer<K, V> {
         sb.append(getClass().getSimpleName()).append(" { ");
         sb.append("size = ").append(size());
         sb.append(", thread_num = ").append(thread_num);
-        sb.append(", input_class").append(input_class());
-        sb.append(", label_class").append(label_class());
+        sb.append(", input_class = ").append(input_class());
+        sb.append(", label_class= ").append(label_class());
         sb.append("}");
+    }
+    
+    @Override
+    public Map<V, Integer> class_sample_num() {
+        Map<V, Integer> total = new HashMap<>(32);//get the total number of samples of each class
+        for (int i=0; i<size; i++) {
+            V label = varr[i]; 
+            Integer num = total.get(label); if (num == null) num = 0; 
+            total.put(label, ++num); 
+        }
+        return total;
     }
     //</editor-fold>
 
@@ -326,6 +339,11 @@ public class AutoLoadContainer<K, V> extends AbstractContainer<K, V> {
     
     @Override
     public DataContainer<K, V>[] split(int sub_size) {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
+    
+    @Override
+    public DataContainer<K, V>[] class_split(float percent) {
         throw new UnsupportedOperationException("Not supported yet."); 
     }
     //</editor-fold>

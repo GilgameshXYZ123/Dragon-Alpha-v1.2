@@ -14,8 +14,7 @@ import z.dragon.engine.cuda.impl.Cuda_expk2;
  *
  * @author Gilgamesh
  */
-public class Cuda_pool1D_indexed_test 
-{
+public class Cuda_pool1D_indexed_test  {
     static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2");}
     static Engine eg = alpha.engine.cuda_float32(0, alpha.engine.memp1(alpha.MEM_1GB * 4));
      
