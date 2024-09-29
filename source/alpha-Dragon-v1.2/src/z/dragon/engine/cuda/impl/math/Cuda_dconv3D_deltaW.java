@@ -27,41 +27,33 @@ public final class Cuda_dconv3D_deltaW {
         return 1.0f * padding_size / input_size;
     }
     
-    public static int[] output_feature_dim(
-            int IH, int IW, 
-            int FH, int FW, 
-            int N, int OC,
-            int sh, int sw, int ph, int pw) {
+    public static int[] output_feature_dim(int IH, int IW, int FH, int FW, int N, int OC,
+            int sh, int sw, int ph, int pw)
+    {
         int OH = (IH + (ph << 1) - FH) / sh + 1;
         int OW = (IW + (pw << 1) - FW) / sw + 1;
         return new int[]{ N, OH, OW, OC };
     }
     
-    public static int[] input_feature_dim(
-            int OH, int OW, 
-            int FH, int FW, 
-            int N, int IC,
-            int sh, int sw, int ph, int pw) {
+    public static int[] input_feature_dim(int OH, int OW, int FH, int FW, int N, int IC,
+            int sh, int sw, int ph, int pw) 
+    {
         int IH = (OH - 1)*sh + FH - 2*ph;
         int IW = (OW - 1)*sw + FW - 2*pw;
         return new int[]{ N, IH, IW, IC };
     }
     
-    public static int[] im2col_matrix_dim(
-            int FH, int FW, 
-            int OH, int OW,
-            int N, int OC, int IC) {
+    public static int[] im2col_matrix_dim(int FH, int FW, int OH, int OW, int N, int OC, int IC) {
         int GN = OC;
         int GM = FH * FW * IC;
         int GK = N  * OH * OW;
         return new int[]{GN, GM, GK};
     }
     
-    public static int[] img2col_matrix_dim_logically(
-            int OH, int OW, 
-            int FH, int FW,
+    public static int[] img2col_matrix_dim_logically(int OH, int OW, int FH, int FW, 
             int N, int OC, int IC, 
-            int sh, int sw) {
+            int sh, int sw) 
+    {
         int OHp = OH + (OH - 1) * (sh - 1);
         int OWp = OW + (OW - 1) * (sw - 1);
         int GN = OC;
@@ -72,7 +64,6 @@ public final class Cuda_dconv3D_deltaW {
     
     public static int[] out_padding(int ph, int pw) { return new int[]{ ph, pw }; }
     //</editor-fold>
-    
     //<editor-fold defaultstate="collapsed" desc="blockNum">
     public static final int GEMM_nblock(int FH, int FW, int OC, int IC) {
         int GN = OC, GM = FH * FW * IC;

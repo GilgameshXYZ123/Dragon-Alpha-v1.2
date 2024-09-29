@@ -18,7 +18,7 @@ import z.dragon.nn.unit.simple.SimpleUnit;
  *
  * @author Gilgamesh
  */
-public class DepthWiseConv3D extends SimpleUnit {
+public class DepthwiseConv3D extends SimpleUnit {
     private static final long serialVersionUID = 962781240122221L;
     
     protected int OC;
@@ -31,7 +31,7 @@ public class DepthWiseConv3D extends SimpleUnit {
     transient protected Parameter W;
     transient protected Parameter B;
     
-    public DepthWiseConv3D(boolean biased, 
+    public DepthwiseConv3D(boolean biased, 
             int out_channels,//out_channesl = in_channels * multiplier
             int kernel_height, int kernel_width,
             int stride_height, int stride_width,
@@ -56,7 +56,7 @@ public class DepthWiseConv3D extends SimpleUnit {
     public int[] fans() { return new int[] { FH*FW, FH*FW }; }//[fan_in, fan_out], out_channels = 1
     
     public int[] out_size() { return new int[] { OH, OW }; }
-    public DepthWiseConv3D out_size(int... out_size) {
+    public DepthwiseConv3D out_size(int... out_size) {
         if(out_size == null || out_size.length != 2) throw new IllegalArgumentException(
                 "out_size == null || out_size.length != 2");
         OH = out_size[0]; OW = out_size[1];
@@ -65,7 +65,7 @@ public class DepthWiseConv3D extends SimpleUnit {
     
     public Parameter weight_param() { return W; }
     public Tensor weight() { return W.ts(); }
-    public DepthWiseConv3D weight(Tensor weight) {
+    public DepthwiseConv3D weight(Tensor weight) {
         if(Tensor.isNull(weight)) throw new NullPointerException("weight is null");
         if(!weight.dimEquals(FH, FW, OC)) throw new IllegalArgumentException(String.format(
                 "%s : weight.dim { got %s } != [FH, FW, OC] = [%d, %d, %d]", 
@@ -77,7 +77,7 @@ public class DepthWiseConv3D extends SimpleUnit {
     
     public Parameter bias_param() { return B; }
     public Tensor bias() { return B.ts(); }
-    public DepthWiseConv3D bias(Tensor bias) {
+    public DepthwiseConv3D bias(Tensor bias) {
         if(Tensor.isNull(bias)) throw new NullPointerException("bias is null");
         if(!bias.dimEquals(OC)) throw new IllegalArgumentException(String.format(
                 "%s : bias.dim { got %s } != [OC] = [%d]",
@@ -90,7 +90,7 @@ public class DepthWiseConv3D extends SimpleUnit {
     public static boolean default_pre_alloc_forward = true;
     protected boolean pre_alloc_forward = default_pre_alloc_forward;
     public boolean pre_alloc_forward() { return this.pre_alloc_forward; }
-    public DepthWiseConv3D pre_alloc_forward(boolean flag) { pre_alloc_forward = flag; return this; }
+    public DepthwiseConv3D pre_alloc_forward(boolean flag) { pre_alloc_forward = flag; return this; }
     
     @Override
     public void append(String pre, StringBuilder sb) {
@@ -164,10 +164,11 @@ public class DepthWiseConv3D extends SimpleUnit {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: InlineDepthWiseConv3D"> 
-    public static class InlineDepthWiseConv3D extends SimpleCore<DepthWiseConv3D>
-    {
+    public static class InlineDepthWiseConv3D extends SimpleCore<DepthwiseConv3D> {
         transient private int IH, IW, IC;
-        public InlineDepthWiseConv3D(DepthWiseConv3D unit) { super(unit); }
+        transient private Tensor y;
+         
+        public InlineDepthWiseConv3D(DepthwiseConv3D unit) { super(unit); }
         
         //<editor-fold defaultstate="collapsed" desc="Basic-Functions">
         public boolean biased() { return ut.biased; }
@@ -184,12 +185,25 @@ public class DepthWiseConv3D extends SimpleUnit {
         //<editor-fold defaultstate="collapsed" desc="running-area: forward-propagation">
         @Override
         protected void __before_forward__(Engine eg, Tensor X) { 
+            ut.reset_backward();
             IH = X.dim(-3); IW = X.dim(-2); IC = X.dim(-1);
+            y = (ut.pre_alloc_forward ? //X[N, IH, IW, IC] -> Y[N, OH, OW, OC]
+                    eg.alloc.depthwise_conv3D(X, ut.W.ts(), ut.OH, ut.OW, ut.sh, ut.sw, ut.ph, ut.pw) : 
+                    null);
         }
         
         @Override
         protected Tensor __forward__(Engine eg, Tensor X) {
-            return null;
+            if(ut.pre_alloc_forward) { 
+                Tensor out = y.c(); y = null;
+                return (ut.biased ? //X[N, IH, IW, IC] -> Y[N, OH, OW, OC]
+                        eg.depthwise_conv3D_biased(out, X, ut.W.ts(), ut.sh, ut.sw, ut.ph, ut.pw, ut.B.ts()) :
+                        eg.depthwise_conv3D(out, X, ut.W.ts(), ut.sh, ut.sw, ut.ph, ut.pw));
+            }
+            
+            return (ut.biased ? //X[N, IH, IW, IC] -> Y[N, OH, OW, OC]
+                    eg.depthwise_conv3D_biased(X, ut.W.ts(), ut.OH, ut.OW, ut.sh, ut.sw, ut.ph, ut.pw, ut.B.ts()) :
+                    eg.depthwise_conv3D(X, ut.W.ts(), ut.OH, ut.OW, ut.sh, ut.sw, ut.ph, ut.pw));
         }
         //</editor-fold>
 
@@ -201,31 +215,30 @@ public class DepthWiseConv3D extends SimpleUnit {
             Tensor deltaW = null, deltaB = null, deltaX = null;
             int gc_count = 0;
             
-            if(ut.W.need_grads()) {//find the gradient of filters
+            if (ut.W.need_grads()) {//find the gradient of filters
                 deltaW = eg.depthwise_conv3D_deltaW(holdX(), deltaY, ut.FH, ut.FW, ut.sh, ut.sw, ut.ph, ut.pw);
                 ut.W.accumulate(ut.baseW(), deltaW);
-                if(grad_inplace) gc_count++;
+                if (grad_inplace) gc_count++;
             }
             
-            if(ut.biased && ut.B.need_grads()) {//find the gradient of bias
+            if (ut.biased && ut.B.need_grads()) {//find the gradient of bias
                 deltaB = eg.field_sum(deltaY, ut.OC);
                 ut.B.accumulate(ut.baseB(), deltaB);
                 if(grad_inplace) gc_count++;
             }
              
-            if(backward_grads) {//find the gradient of input-features
+            if (backward_grads) {//find the gradient of input-features
                 deltaX = eg.depthwise_conv3D_deltaX(deltaY, ut.W.ts(), IH, IW, IC, ut.sh, ut.sw, ut.ph, ut.pw);
                 ut.W.ts().follow(deltaX);//When compute deltaX, W can't be changed
                 if(grad_inplace) gc_count++;
             }
             
-            if(gc_count != 0) {//when deltaW, deltaB, deltaX are cauculated, deltaY is not needed
+            if (gc_count != 0) {//when deltaW, deltaB, deltaX are cauculated, deltaY is not needed
                 Counter.CountGc gc = new Counter.CountGc(gc_count, deltaY);
                 if(deltaW != null) { deltaW.dual(()-> { gc.countDown(); }).remote_sync(); }
                 if(deltaB != null) { deltaB.dual(()-> { gc.countDown(); }).remote_sync(); }
                 if(deltaX != null) { deltaX.dual(()-> { gc.countDown(); }); }
             }
-            
             return deltaX;
         }
         //</editor-fold>

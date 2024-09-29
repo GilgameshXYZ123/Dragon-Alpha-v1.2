@@ -15,15 +15,14 @@ import z.dragon.nn.unit.complex.Module;
 /**
  * @author Gilgamesh
  */
-public class Net
-{
+public class Net {
     public static class BasicBlock extends Module {
         Unit conv1, bn1, conv2, bn2, downsample;
         public BasicBlock(int in_channel, int out_channel, int stride) {
            conv1 = nn.conv3D(false, in_channel, out_channel, 3, stride, 1);
            bn1 = nn.batchNorm(false, out_channel);
            
-           conv2 = nn.conv3D(false, out_channel, out_channel, 3, 1, 1);
+           conv2 = nn.conv3D(false, out_channel, out_channel, 5, 1, 2);
            bn2 = nn.batchNorm(out_channel);
            
            if(stride != 1 || out_channel != in_channel)

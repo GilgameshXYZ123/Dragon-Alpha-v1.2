@@ -43,39 +43,66 @@ public class Net {
         }
     }
     
+    public static class BasicBlock2 extends Module {
+        Unit conv1, bn1, conv2, bn2, downsample;
+        public BasicBlock2(int in_channel, int out_channel, int stride) {
+            conv1 = nn.conv3D(false, in_channel, out_channel, 3, stride, 1);
+            bn1 = nn.batchNorm_gelu(nn.batchNorm(out_channel), nn.gelu());
+            
+            conv2 = nn.conv3D(false, out_channel, out_channel, 5, 1, 2);
+            bn2 = nn.batchNorm(out_channel);
+           
+            if(stride != 1 || out_channel != in_channel)
+                downsample = nn.sequence(
+                        nn.conv3D(false, in_channel, out_channel, 3, stride, 1),
+                        nn.batchNorm(out_channel)
+                );
+        }
+        
+        @Override
+        public Tensor[] __forward__(Tensor... X) {
+            Tensor[] res = X;
+            X = bn1.forward(conv1.forward(X));
+            X = bn2.forward(conv2.forward(X));
+            
+            if(downsample != null) res = downsample.forward(res);
+            return F.add_gelu(X[0], res[0]);
+        }
+    }
+    
     public static class ResNet18 extends Module {
-        Unit prepare = nn.sequence(//div2, channel = 64
-                nn.conv3D(false, 3, 64, 7, 2, 3),
+        Unit prepare = nn.sequence(//div2, channel = 64 32
+                nn.conv3D(false, 3, 64, 7, 1, 3),
                 nn.batchNorm_gelu(nn.batchNorm(64), nn.gelu())
         );
         
-        Unit layer1 = nn.sequence(//div2, channel = 64
-                new BasicBlock(64, 64, 1),
+        Unit layer1 = nn.sequence(//div2, channel = 64 16
+                new BasicBlock(64, 64, 2),
                 new BasicBlock(64, 64, 1)
         );
         
-        Unit layer2 = nn.sequence(//div4, channel = 128
-                new BasicBlock(64, 128, 2),
+        Unit layer2 = nn.sequence(//div4, channel = 128 8
+                new BasicBlock( 64, 128, 2),
                 new BasicBlock(128, 128, 1)
         );
         
         Unit layer3 = nn.sequence(//div8, channel = 256
-                new BasicBlock(128, 256, 2),
+                new BasicBlock(128, 256, 1),
                 new BasicBlock(256, 256, 1)
         );
         
         Unit layer4 = nn.sequence(//div16, channel = 256
-                new BasicBlock(256, 512, 2),
-                new BasicBlock(512, 512, 1)
+                new BasicBlock2(256, 512, 1),
+                new BasicBlock2(512, 512, 1)
         );
         
         Unit pool = nn.adaptive_avgPool2D(1, 1);
         
         Unit fc = nn.sequence(
                 nn.dropout(0.9f),
-                nn.fullconnect(true, 512, 128),
-                nn.gelu_dropout(nn.gelu(), nn.dropout(0.9f)),
-                nn.fullconnect(true, 128, 10)
+                nn.fullconnect(true, 512, 512),
+                nn.fuse(nn.gelu(), nn.dropout(0.9f)),
+                nn.fullconnect(true, 512, 10)
         );
         
         @Override

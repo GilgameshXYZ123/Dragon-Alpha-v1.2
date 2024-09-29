@@ -142,7 +142,7 @@ public class Cuda_pool2D_test
         int nIter = 1000;
         for(int i=0; i< nIter; i++)
         {
-//            tY = eg.pool2D_max(tX, FH, FW, sh, sw, ph, pw).c();eg.delete(tY);
+            tY = eg.pool2D_max(tX, FH, FW, sh, sw, ph, pw).c();eg.delete(tY);
 //            tY = eg.pool2D_max(tY, tX, FH, FW, sh, sw);
 //            tY = eg.pool2D_avg(tX, FH, FW, sh, sw, ph, pw).c(); eg.delete(tY);
 //            tY = eg.pool2D_avg(tY, tX, FH, FW, sh, sw);
@@ -163,26 +163,26 @@ public class Cuda_pool2D_test
     
     public static void main(String[] args)
     {
-        testCorrect(128, 128, 3, 3, 256, 64, 2, 2, 0, 0);
+//        testCorrect(128, 128, 3, 3, 256, 64, 2, 2, 0, 0);
         
 //        int IH = 62, IW = 62;
 //	int N = 4, IC = 192;
 //	int FH = 4, FW = 4;
 //	int sh = 2, sw = 2, ph = 1, pw = 1;
         int IH = 16, IW = 16;
-	int N = 4, IC = 128;
+	int N = 512, IC = 256;
 //	int FH = 4, FW = 4, sh = 2, sw = 2, ph = 1, pw = 1;
-        int FH = 3, FW = 3, sh = 2, sw = 2, ph = 1, pw = 1;
+        int FH = 3, FW = 3, sh = 1, sw = 1, ph = 1, pw = 1;
 //        int FH = 2, FW = 2, sh = 2, sw = 2, ph = 0, pw = 0;
 
         try
         {
-            for(int ic = 1; ic <= 128; ic++)
-                testCorrect(IH, IW, FH, FW, N, ic, sh, sw, ph, pw);
+//            for(int ic = 1; ic <= 128; ic++)
+//                testCorrect(IH, IW, FH, FW, N, ic, sh, sw, ph, pw);
             
 //            testCorrect(31, 31, 3, 3, 4, 72, 1, 2, 1, 1);
 //            testCorrect(IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
-//            testSpeed(IH, IW, FH, FW, N*2, IC, sh, sw, ph, pw);
+            testSpeed(IH, IW, FH, FW, N, IC, sh, sw, ph, pw);
         }
         catch(Exception e) {
             e.printStackTrace();

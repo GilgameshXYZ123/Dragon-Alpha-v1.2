@@ -109,12 +109,11 @@ public abstract class UnitCore<T extends Unit> implements BackwardHookable {
     private final transient GradientAggregator aggr = new GradientAggregator();
     
     protected final Tensor aggregateGradient(Map<UnitCore<?>, Object> arc) {
-        //System.out.println("BP: " + ut.name() + ", " + this + ". " + this.hashCode());
-        
         arc.forEach(aggr); 
         TensorList grads = aggr.grads;
         if (grads.isEmpty()) return null;
         
+        //grads.clear should in syncer to ensure synchronization
         Tensor deltaY; int gsize = grads.size();
         if (gsize == 1) { deltaY = grads.get(0); grads.clear(); }
         else if (gsize == 2) {

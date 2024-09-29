@@ -112,6 +112,17 @@ public class DataSet<K, V> {
         DataSet<K, V> last  = new DataSet<>(contas[1]);
         return new DataSet[]{ first, last };
     }
+    
+    public DataSet<K, V>[] split_clear(float percent) {
+        DataSet<K, V>[] dataset = split(percent);
+        this.clear();
+        return dataset;
+    }
+    public DataSet<K, V>[] split_clear(int sub_size) {
+        DataSet<K, V>[] dataset = split(sub_size);
+        this.clear();
+        return dataset;
+    }
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="batch_iterator">

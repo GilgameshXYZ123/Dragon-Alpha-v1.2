@@ -119,6 +119,7 @@ public interface Syncer {
          * @param ts 
          */
         public static void sync(Tensor ts) {
+            if (ts.eg.sync()) { ts.c(); return; }
             synchronized(ts) {
                 if (ts.syncer == null) return;
                 Syncer sc = ts.syncer;
@@ -127,6 +128,7 @@ public interface Syncer {
         }
         
         public static void delete(Tensor ts) {
+            if (ts.eg.sync) { ts.c(); ts.delete(); return; }
             synchronized(ts) {
                 if (ts.syncer == null) { ts.delete(); return; }    
                 Syncer sc = ts.syncer;

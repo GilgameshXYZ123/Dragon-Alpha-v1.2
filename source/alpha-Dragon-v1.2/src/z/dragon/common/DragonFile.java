@@ -26,7 +26,7 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class DragonFile {
+public final class DragonFile {
     private DragonFile() {}
     
     public static final DragonFile instance() { return fl; }
@@ -35,28 +35,72 @@ public class DragonFile {
     public BufferedFile create(File file) { return new BufferedFile(file); }
     public BufferedFile create(String path) { return new BufferedFile(new File(path)); }
     
+    //<editor-fold defaultstate="collapsed" desc="IO: bytes">
     public byte[] to_bytes(BufferedFile bf) { return bf.to_bytes(); }
     public byte[] to_bytes(File file) { return create(file).to_bytes(); }
     public byte[] to_bytes(String path) { return create(path).to_bytes(); }
-    public void wt_bytes(BufferedFile buf, byte... bytes) { buf.wt_bytes(bytes); }
-    public void wt_bytes(File file, byte... bytes) { create(file).wt_bytes(bytes); }
-    public void wt_bytes(String path, byte... bytes) { create(path).wt_bytes(bytes); }
     
+    public void write_bytes(BufferedFile buf, byte... bytes) { buf.write_bytes(false, bytes); }
+    public void write_bytes(File file, byte... bytes) { create(file).write_bytes(false, bytes); }
+    public void write_bytes(String path, byte... bytes) { create(path).write_bytes(false, bytes); }
+    
+    public void append_bytes(BufferedFile buf, byte... bytes) { buf.write_bytes(true, bytes); }
+    public void append_bytes(File file, byte... bytes) { create(file).write_bytes(true, bytes); }
+    public void append_bytes(String path, byte... bytes) { create(path).write_bytes(true, bytes); }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="IO: chars">
     public char[] to_chars(BufferedFile file) { return file.to_chars(); }
     public char[] to_chars(File file) { return create(file).to_chars(); }
     public char[] to_chars(String path) { return create(path).to_chars(); }
-    public void wt_chars(BufferedFile buf, char... chars) { buf.wt_chars(chars); }
-    public void wt_chars(File file, char... chars) { create(file).wt_chars(chars); }
-    public void wt_chars(String path, char... chars) { create(path).wt_chars(chars); }
     
+    public void write_chars(BufferedFile buf, char... chars) { buf.write_chars(false, chars); }
+    public void write_chars(File file, char... chars) { create(file).write_chars(false, chars); }
+    public void write_chars(String path, char... chars) { create(path).write_chars(false, chars); }
+    
+    public void append_chars(BufferedFile buf, char... chars) { buf.write_chars(true, chars); }
+    public void append_chars(File file, char... chars) { create(file).write_chars(true, chars); }
+    public void append_chars(String path, char... chars) { create(path).write_chars(true, chars); }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="IO: int">
+    public int[] to_int_array(File file) { return create(file).to_int_array(); }
     public int[] to_int_array(String path) { return create(path).to_int_array(); }
-    public void wt_int_array(String path, int... arr) { create(path).wt_int_array(arr); }
     
+    public void write_int_array(File file, int... arr) { create(file).write_int_array(false, arr); }
+    public void write_int_array(String path, int... arr) { create(path).write_int_array(false, arr); }
+    
+    public void append_int_array(File file, int... arr) { create(file).write_int_array(true, arr); }
+    public void append_int_array(String path, int... arr) { create(path).write_int_array(true, arr); }
+    //<</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="IO: float">
+    public float[] to_float_array(File file) { return create(file).to_float_array(); }
     public float[] to_float_array(String path) { return create(path).to_float_array(); }
-    public void wt_float_array(String path, float... arr) { create(path).wt_float_array(arr); }
     
+    public void write_float_array(File path, float... arr) { create(path).write_float_array(false, arr); }
+    public void write_float_array(String path, float... arr) { create(path).write_float_array(false, arr); }
+    
+    public void append_float_array(File file, float... arr) { create(file).write_float_array(true, arr); }
+    public void append_float_array(String path, float... arr) { create(path).write_float_array(true, arr); }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="IO: double">
+    public double[] to_double_array(File file) { return create(file).to_double_array(); }
     public double[] to_double_array(String path) { return create(path).to_double_array(); }
-    public void wt_double_array(String path, double... arr) { create(path).wt_double_array(arr); }
+    
+    public void write_double_array(File file, double... arr) { create(file).write_double_array(false, arr); }
+    public void write_double_array(String path, double... arr) { create(path).write_double_array(false, arr); }
+    
+    public void append_double_array(File file, double... arr) { create(file).write_double_array(true, arr); }
+    public void append_double_array(String path, double... arr) { create(path).write_double_array(true, arr); }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="IO: string">
+    public String to_string(String path) { return new String(create(path).to_chars()); }
+    public String to_string(File file) { return new String(create(file).to_chars()); }
+
+    public void write_string(String path, String str) { create(path).write_chars(false, str.toCharArray()); }
+    public void write_string(File file, String str) { create(file).write_chars(false, str.toCharArray()); }
+    
+    public void append_string(String path, String str) { create(path).write_chars(true, str.toCharArray()); }
+    public void append_string(File file, String str) { create(file).write_chars(true, str.toCharArray()); }
+    //</editor-fold>
     
     public void for_each_line(BufferedFile bf, Consumer<String> con) { bf.for_each_line(con); }
     public void for_each_line(File file, Consumer<String> con) { create(file).for_each_line(con); }
@@ -71,8 +115,7 @@ public class DragonFile {
     public BufferedFile move(String src, String dst) { return create(src).move(new File(dst)); }
     
     //<editor-fold defaultstate="collapsed" desc="static class: BufferedFile">
-    public static class BufferedFile 
-    {
+    public static class BufferedFile {
         protected final File file;
         protected int buf_size = 2048;
         
@@ -129,11 +172,12 @@ public class DragonFile {
             return buf;
         }
         
-        public void wt_bytes(byte... bytes) {
+        public void write_bytes(byte... bytes) { write_bytes(false, bytes); }
+        public void write_bytes(boolean append, byte... bytes) {
             FileOutputStream out = null;
             BufferedOutputStream bout = null;
             try {
-                out = new FileOutputStream(file);
+                out = new FileOutputStream(file, append);
                 bout = new BufferedOutputStream(out);
                 bout.write(bytes);
             }
@@ -171,11 +215,12 @@ public class DragonFile {
             return buf;
         }
         
-        public void wt_chars(char[] chars) {
+        public void write_chars(char[] chars) { write_chars(false, chars); }
+        public void write_chars(boolean append, char[] chars) {
             FileWriter bw = null;
             BufferedWriter bfw = null;
             try {
-                bw = new FileWriter(file);
+                bw = new FileWriter(file, append);
                 bfw = new BufferedWriter(bw);
                 bfw.write(chars);
             }
@@ -187,14 +232,17 @@ public class DragonFile {
         }
         //</editor-fold>
         
-        public void wt_int_array(int... arr) { wt_bytes(Vector.toString(arr).getBytes()); }
         public int[] to_int_array() { return Vector.to_int_vector(new String(to_bytes())); }
+        public void write_int_array(int... arr) { BufferedFile.this.write_bytes(Vector.toString(arr).getBytes()); }
+        public void write_int_array(boolean append, int... arr) { write_bytes(append, Vector.toString(arr).getBytes()); }
         
-        public void wt_float_array(float... arr) { wt_bytes(Vector.toString(arr).getBytes()); }
         public float[] to_float_array() { return Vector.to_float_vector(new String(to_bytes())); }
+        public void write_float_array(float... arr) { BufferedFile.this.write_bytes(Vector.toString(arr).getBytes()); }
+        public void write_float_array(boolean append, float... arr) { write_bytes(append, Vector.toString(arr).getBytes()); }
         
-        public void wt_double_array(double... arr) { wt_bytes(Vector.toString(arr).getBytes()); }
         public double[] to_double_array() { return Vector.to_double_vector(new String(to_bytes())); }
+        public void write_double_array(double... arr) { BufferedFile.this.write_bytes(Vector.toString(arr).getBytes()); }
+        public void write_double_array(boolean append, double... arr) { write_bytes(append, Vector.toString(arr).getBytes()); }
         
         protected FileReader reader;
         protected BufferedReader bufReader;

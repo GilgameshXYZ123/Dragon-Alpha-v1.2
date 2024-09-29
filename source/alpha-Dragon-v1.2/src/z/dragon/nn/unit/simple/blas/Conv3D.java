@@ -158,7 +158,7 @@ public class Conv3D extends SimpleUnit {
     @Override
     public void state(State dic) {
         dic.put(weight_key(), W.ts());
-        if(biased) dic.put(bias_key(), B.ts());
+        if (biased) dic.put(bias_key(), B.ts());
     }
     
     @Override
@@ -203,13 +203,13 @@ public class Conv3D extends SimpleUnit {
             if(ut.pre_alloc_forward) { 
                 Tensor out = y.c(); y = null;
                 return (ut.biased ? //X[N, IH, IW, IC] -> Y[N, OH, OW, OC]
-                    eg.conv3D_biased(out, X, ut.W.ts(), ut.sh, ut.sw, ut.ph, ut.pw, ut.B.ts()) :
-                    eg.conv3D(out, X, ut.W.ts(), ut.sh, ut.sw, ut.ph, ut.pw));
+                        eg.conv3D_biased(out, X, ut.W.ts(), ut.sh, ut.sw, ut.ph, ut.pw, ut.B.ts()) :
+                        eg.conv3D(out, X, ut.W.ts(), ut.sh, ut.sw, ut.ph, ut.pw));
             }
             
             return (ut.biased ? //X[N, IH, IW, IC] -> Y[N, OH, OW, OC]
-                   eg.conv3D_biased(X, ut.W.ts(), ut.OH, ut.OW, ut.sh, ut.sw, ut.ph, ut.pw, ut.B.ts()) :
-                   eg.conv3D(X, ut.W.ts(), ut.OH, ut.OW, ut.sh, ut.sw, ut.ph, ut.pw));
+                    eg.conv3D_biased(X, ut.W.ts(), ut.OH, ut.OW, ut.sh, ut.sw, ut.ph, ut.pw, ut.B.ts()) :
+                    eg.conv3D(X, ut.W.ts(), ut.OH, ut.OW, ut.sh, ut.sw, ut.ph, ut.pw));
         }
         //</editor-fold>
 
@@ -221,19 +221,19 @@ public class Conv3D extends SimpleUnit {
             Tensor deltaW = null, deltaB = null, deltaX = null;
             int gc_count = 0;
         
-            if(ut.W.need_grads()) {//find the gradient of filters
+            if (ut.W.need_grads()) {//find the gradient of filters
                 deltaW = eg.conv3D_deltaW(holdX(), deltaY, ut.FH, ut.FW, ut.sh, ut.sw, ut.ph, ut.pw);
                 ut.W.accumulate(ut.baseW(), deltaW);
-                if(grad_inplace) gc_count++;
+                if (grad_inplace) gc_count++;
             }
         
-            if(ut.biased && ut.B.need_grads()) {//find the gradient of bias
+            if (ut.biased && ut.B.need_grads()) {//find the gradient of bias
                 deltaB = eg.field_sum(deltaY, ut.OC);
                 ut.B.accumulate(ut.baseB(), deltaB);
                 if(grad_inplace) gc_count++;
             }
         
-            if(backward_grads) {//find the gradient of input-features
+            if (backward_grads) {//find the gradient of input-features
                 deltaX = eg.conv3D_deltaX(deltaY, ut.W.ts(), IH, IW, ut.sh, ut.sw, ut.ph, ut.pw);
                 ut.W.ts().follow(deltaX);//When compute deltaX, W can't be changed
                 if(grad_inplace) gc_count++;

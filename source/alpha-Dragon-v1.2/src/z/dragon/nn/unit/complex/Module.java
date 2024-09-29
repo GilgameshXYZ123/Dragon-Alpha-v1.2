@@ -189,7 +189,10 @@ public abstract class Module extends Unit implements Train2Eval, AsyncStateUpdat
     //update state async--------------------------------------------------------
     private boolean update_state_sync = false;
     @Override public boolean update_state_sync() { return update_state_sync; }
-    @Override public <T extends AsyncStateUpdate> T update_state_sync(boolean flag) { update_state_sync = flag; return (T) this; }
+    @Override 
+    public <T extends AsyncStateUpdate> T update_state_sync(boolean flag) { 
+        update_state_sync = flag; return (T) this; 
+    }
     
     @Override
     public void update_state(State dic, boolean partial, List<Future<?>> fts) {

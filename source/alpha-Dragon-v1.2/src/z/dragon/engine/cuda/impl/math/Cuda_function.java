@@ -492,7 +492,6 @@ public final class Cuda_function {
             float alpha, float beta, float gamma,
             long dY_address,
             int lengthv, int mem_width, int mem_stride);
-
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="linear_dual2D_center">
     /**
@@ -3587,6 +3586,55 @@ public final class Cuda_function {
     //</editor-fold>
     //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="repeat functions">
+    /**
+     * <pre>
+     * X[M] -> Y[N, M].
+     * (1) M = row_lengthv = X.lengthv 
+     * (2) N = field_length = Y.lengthv / X.lengthv
+     * for i from 0 to N: Y[i] = alpha*X + beta
+     * </pre>
+     * @param cudaStream_address
+     * @param dX_address
+     * @param row_lengthv
+     * @param alpha
+     * @param beta
+     * @param dY_address
+     * @param lengthv
+     * @param mem_width
+     * @param mem_stride 
+     */
+    public static native void repeat_linear2D_row(long cudaStream_address,
+            long dX_address, int row_lengthv,//row_lengthv = X_lengthv
+            float alpha, float beta,
+            long dY_address,
+            int lengthv, int mem_width, int mem_stride);
+    
+      /**
+     * <pre>
+     * X[M] -> Y[N, M].
+     * (1) M = row_lengthv = X.lengthv 
+     * (2) N = field_length = Y.lengthv / X.lengthv
+     * for i from 0 to N: Y[i] = alpha*X^2 + beta*X + gamma
+     * </pre>
+     * @param cudaStream_address
+     * @param dX_address
+     * @param row_lengthv
+     * @param alpha
+     * @param beta
+     * @param gamma
+     * @param dY_address
+     * @param lengthv
+     * @param mem_width
+     * @param mem_stride 
+     */
+    public static native void repeat_quadratic2D_row(long cudaStream_address,
+            long dX_address, int row_lengthv,//row_lengthv = X_lengthv
+            float alpha, float beta, float gamma,
+            long dY_address,
+            int lengthv, int mem_width, int mem_stride);
+    //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="Optimizer">
     //<editor-fold defaultstate="collapsed" desc="Momentum">
     /**

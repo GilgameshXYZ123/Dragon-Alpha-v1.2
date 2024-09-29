@@ -89,7 +89,7 @@ public class Net
         );
         
         Unit layer3 = nn.sequence(//div = 8, 128-> 1024
-                new SEBlock(512, 256, 256, 1024, 2),
+                new SEBlock( 512, 256, 256, 1024, 2),
                 new SEBlock(1024, 256, 256, 1024, 1),
                 new SEBlock(1024, 256, 256, 1024, 1),
                 new SEBlock(1024, 256, 256, 1024, 1),

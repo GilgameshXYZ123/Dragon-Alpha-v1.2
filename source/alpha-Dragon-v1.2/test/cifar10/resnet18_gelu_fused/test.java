@@ -34,8 +34,8 @@ public class test
         net.eval();
         
         LossFunction loss = alpha.loss.softmax_crossEntropy();
-        DataSet<byte[], Integer> dataset = Cifar10.train();
-//        DataSet<byte[], Integer> dataset = Cifar10.test();
+//        DataSet<byte[], Integer> dataset = Cifar10.train();
+        DataSet<byte[], Integer> dataset = Cifar10.test();
 //        
 //        eg.sync(false).check(false);
         double accuracy = 0;

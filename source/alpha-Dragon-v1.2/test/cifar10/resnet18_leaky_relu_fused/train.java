@@ -23,8 +23,7 @@ import z.util.lang.SimpleTimer;
  *
  * @author Gilgamesh
  */
-public class train 
-{
+public class train {
     static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2"); }
     static Mempool memp = alpha.engine.memp2(alpha.MEM_1GB * 8);
     static Engine eg = alpha.engine.cuda_float32(0, memp, alpha.MEM_1MB * 1024);
@@ -85,7 +84,9 @@ public class train
                 }
                 
                 net.backward(loss.gradient(yh, Y));
-                opt.update().clear_grads();
+                
+                if (batchIdx % 2 == 0) opt.sum_grads().update().clear_grads();
+//                opt.update().clear_grads();
                 net.gc();
             }
         }
@@ -108,7 +109,7 @@ public class train
             //25 epochs for Adam: 143.273 -> 130 s
             //50 epochs for SGD
             //30 epcohs for SGDMN
-            training(5);
+            training(25);
         }
         catch(Exception e) {
             e.printStackTrace();

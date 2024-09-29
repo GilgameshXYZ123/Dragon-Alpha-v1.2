@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Function;
-import static z.dragon.alpha.Alpha.NeuralParam.*;
+import static z.dragon.alpha.Alpha.AlphaParam.*;
 import z.dragon.common.DragonCV;
 import z.dragon.common.DragonFile;
 import z.dragon.common.state.State;
@@ -62,9 +62,9 @@ import z.dragon.nn.optim.lr_schedular.LambdaLr;
 import z.dragon.nn.unit.complex.Sequence;
 import z.dragon.nn.unit.furcation.tensor.Chunk;
 import z.dragon.nn.unit.furcation.tensor.Split;
-import z.dragon.nn.unit.reducer.tensor.Concat;
-import z.dragon.nn.unit.reducer.math.LinearMean;
-import z.dragon.nn.unit.reducer.math.LinearSummary;
+import z.dragon.nn.unit.combiner.tensor.Concat;
+import z.dragon.nn.unit.combiner.math.LinearMean;
+import z.dragon.nn.unit.combiner.math.LinearSummary;
 import z.dragon.nn.unit.dual.blas.BatchMatMul;
 import z.dragon.nn.unit.dual.blas.BatchMatMulT1;
 import z.dragon.nn.unit.dual.blas.BatchMatMulT2;
@@ -73,8 +73,8 @@ import z.dragon.nn.unit.dual.blas.MatMul;
 import z.dragon.nn.unit.dual.blas.MatMulT1;
 import z.dragon.nn.unit.dual.blas.MatMulT2;
 import z.dragon.nn.unit.dual.math.Quadratic2;
-import z.dragon.nn.unit.complex.extra.ChannelAttn;
-import z.dragon.nn.unit.complex.extra.ImageAttn;
+import z.dragon.nn.unit.complex.block.ChannelMHA;
+import z.dragon.nn.unit.complex.block.ImageMHA;
 import z.dragon.nn.unit.simple.pool.adaptive.AdaptiveAvgPool2D;
 import z.dragon.nn.unit.simple.pool.adaptive.AdaptiveMaxPool2D;
 import z.dragon.nn.unit.simple.pool.AvgPool2D;
@@ -113,8 +113,8 @@ import z.dragon.nn.unit.simple.tensor.Transpose;
 import z.dragon.nn.unit.simple.tensor.Reshape;
 import z.dragon.nn.unit.Unit;
 import z.dragon.nn.unit.dual.math.Linear2;
-import z.dragon.nn.unit.reducer.math.QuadraticMean;
-import z.dragon.nn.unit.reducer.math.QuadraticSummary;
+import z.dragon.nn.unit.combiner.math.QuadraticMean;
+import z.dragon.nn.unit.combiner.math.QuadraticSummary;
 import z.dragon.nn.unit.simple.batchnorm.SqBatchNorm;
 import z.dragon.nn.unit.simple.math2.LogSoftmax;
 import z.dragon.nn.unit.simple.math2.Softmax;
@@ -165,12 +165,12 @@ import z.dragon.nn.core.dual.math.CoreQuadratic2Row;
 import z.dragon.nn.core.furcation.FurcationCore;
 import z.dragon.nn.core.furcation.tensor.CoreChunk;
 import z.dragon.nn.core.furcation.tensor.CoreSplit;
-import z.dragon.nn.core.reducer.ReducerCore;
-import z.dragon.nn.core.reducer.math.CoreLinearMean;
-import z.dragon.nn.core.reducer.math.CoreLinearSummary;
-import z.dragon.nn.core.reducer.math.CoreQuadraticMean;
-import z.dragon.nn.core.reducer.math.CoreQuadraticSummary;
-import z.dragon.nn.core.reducer.tensor.CoreConcat;
+import z.dragon.nn.core.combiner.CombinerCore;
+import z.dragon.nn.core.combiner.math.CoreLinearMean;
+import z.dragon.nn.core.combiner.math.CoreLinearSummary;
+import z.dragon.nn.core.combiner.math.CoreQuadraticMean;
+import z.dragon.nn.core.combiner.math.CoreQuadraticSummary;
+import z.dragon.nn.core.combiner.tensor.CoreConcat;
 import z.dragon.nn.core.simple.SimpleCore;
 import z.dragon.nn.unit.simple.SimpleFunction;
 import z.dragon.nn.unit.simple.batchnorm.BatchNorm;
@@ -228,12 +228,13 @@ import z.dragon.nn.core.simple.tensor.CoreRot180;
 import z.dragon.nn.core.simple.tensor.CoreTranspose;
 import z.dragon.nn.core.simple.tensor.CoreTrim;
 import z.dragon.nn.optim.RAdam;
-import z.dragon.nn.unit.complex.extra.BasicBlock;
-import z.dragon.nn.unit.complex.extra.BottleNeck;
+import z.dragon.nn.unit.complex.block.BasicBlock;
+import z.dragon.nn.unit.complex.block.BottleNeck;
+import z.dragon.nn.unit.complex.block.Inception;
 import z.dragon.nn.unit.complex.net.ResNet18;
 import z.dragon.nn.unit.complex.net.ResNet34;
-import z.dragon.nn.unit.complex.extra.ResNet50;
-import z.dragon.nn.unit.complex.extra.SEBlock;
+import z.dragon.nn.unit.complex.net.ResNet50;
+import z.dragon.nn.unit.complex.block.SEBlock;
 import z.dragon.nn.unit.complex.net.SENet;
 import z.dragon.nn.unit.complex.net.VGG16;
 import z.dragon.nn.unit.complex.net.VGG19;
@@ -250,7 +251,11 @@ import z.dragon.nn.unit.dual.math.Linear2_Tanh;
 import z.dragon.nn.unit.dual.math.Quadratic2Center;
 import z.dragon.nn.unit.dual.math.Quadratic2Row;
 import z.dragon.nn.unit.furcation.FurcateFunction;
-import z.dragon.nn.unit.reducer.ReduceFunction;
+import z.dragon.nn.unit.combiner.CombinerFunction;
+import z.dragon.nn.unit.complex.block.ConvNeXtBlock;
+import z.dragon.nn.unit.complex.block.GatedBlock;
+import z.dragon.nn.unit.complex.block.LargeKernelAttn;
+import z.dragon.nn.unit.complex.net.ConvNeXt;
 import z.dragon.nn.unit.simple.affine.Affine_Elu;
 import z.dragon.nn.unit.simple.affine.Affine_Gelu;
 import z.dragon.nn.unit.simple.affine.Affine_LeakyRelu;
@@ -274,6 +279,7 @@ import z.dragon.nn.unit.simple.batchnorm.global.GlobalBatchNorm_Relu;
 import z.dragon.nn.unit.simple.batchnorm.global.GlobalBatchNorm_Sigmoid;
 import z.dragon.nn.unit.simple.batchnorm.global.GlobalBatchNorm_Softplus;
 import z.dragon.nn.unit.simple.batchnorm.global.GlobalBatchNorm_Tanh;
+import z.dragon.nn.unit.simple.blas.DepthwiseConv3D;
 import z.dragon.nn.unit.simple.math1.Gelu;
 import z.dragon.nn.unit.simple.math2.Clip;
 import z.dragon.nn.unit.simple.math2.HardSigmoid;
@@ -293,6 +299,7 @@ import z.dragon.nn.unit.simple.math2.bernouli.Tanh_BernouliMul;
 import z.dragon.nn.unit.simple.math2.dropout.Relu_Dropout;
 import z.dragon.nn.unit.simple.math2.dropout.Sigmoid_Dropout;
 import z.dragon.nn.unit.simple.math2.dropout.Softplus_Dropout;
+import z.dragon.nn.unit.simple.math2.dropout.Tanh_Dropout;
 import z.dragon.nn.unit.simple.pool.AvgPool1D;
 import z.dragon.nn.unit.simple.pool.MaxPool1D;
 import z.dragon.nn.unit.simple.pool.adaptive.AdaptiveAvgPool1D;
@@ -801,8 +808,9 @@ public final class Alpha {
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="class: NeuralParam">
-    public static class NeuralParam {
+    //<editor-fold defaultstate="collapsed" desc="class: AlphaParam">
+    public static class AlphaParam {
+        //<editor-fold defaultstate="collapsed" desc="unit params">
         public static boolean sp_math2_inplace = true;
         public static boolean sp_tensor_inplace = true;
         public static boolean sp_affine_inplace = true;
@@ -824,6 +832,50 @@ public final class Alpha {
         public static boolean avgunpool2D_ignore_padding = false;
          
         public static boolean dl_likeX1 = true;
+        //</editor-fold>
+        
+        //<editor-fold defaultstate="collapsed" desc="optimizer params">
+        public static float Momentum_beta = 0.9f;
+        
+        public static float SGDMN_momentum = 0.9f;
+        public static float SGDMN_dampen = 0.0f;
+        public static float nestrov = 0.0f;
+        
+        public static float RMSprop_lr = 1e-2f;
+        public static float RMSprop_beta = 0.99f;
+        public static float RMSprop_eps = 1e-8f;
+        
+        public static float Adam_lr = 1e-3f;
+        public static float Adam_beta1 = 0.9f;
+        public static float Adam_beta2 = 0.999f;
+        public static float Adam_eps = 1e-8f;
+        
+        public static float Adamax_lr = 2e-3f;
+        public static float Adamax_beta1 = 0.9f;
+        public static float Adamax_beta2 = 0.999f;
+        public static float Adamax_eps = 1e-8f;
+        
+        public static float AdamW_lr = 1e-3f;
+        public static float AdamW_beta1 = 0.9f;
+        public static float AdamW_beta2 = 0.999f;
+        public static float AdamW_eps = 1e-8f;
+        public static float AdamW_L1 = 0;
+        public static float AdamW_L2 = 1e-2f;
+        
+        public static float RAdam_lr = 1e-3f;
+        public static float RAdam_beta1 = 0.9f;
+        public static float RAdam_beta2 = 0.999f;
+        public static float RAdam_eps = 1e-8f;
+        
+        public static float Adamod_lr = 1e-3f;
+        public static float Adamod_beta1 = 0.9f;
+        public static float Adamod_beta2 = 0.999f;
+        public static float Adamod_beta3 = 0.999f;
+        public static float Adamod_eps = 1e-8f;
+        
+        public static float cosAnnealingLr_minLr = 0.0001f;
+        public static float cosAnnealingLr_Tmax = (float) Math.PI;
+        //</editor-fold>
     }
     //</editor-fold>
     
@@ -832,22 +884,56 @@ public final class Alpha {
         protected UnitBuilder() {}
         public static final UnitBuilder nn = new UnitBuilder();
         
-        //<editor-fold defaultstate="collapsed" desc="create: complex">
-        public BasicBlock BasicBlock(Unit activation, int in_channel, int out_channel, int stride) { return new BasicBlock(activation, in_channel, out_channel, stride); }
-        public BottleNeck BottleNeck(Unit activation, int in_channel, int hidden, int stride, int expand) { return new BottleNeck(activation, in_channel, hidden, stride, expand); }
-        public SEBlock SEBlock(Unit activation, int in_channel, int hidden1, int hidden2, int out_channel, int stride) { return new SEBlock(activation, in_channel, hidden1, hidden2, out_channel, stride); }
+        //<editor-fold defaultstate="collapsed" desc="create: block">
+        public Inception Inception(Unit act, int in_channels,
+            int channel_1x1, 
+            int channel_3x3_reduce, int channel_3x3,
+            int channel_5x5_reduce, int channel_5x5,
+            int pool_proj) {
+            return new Inception(act, in_channels,
+                    channel_1x1, 
+                    channel_3x3_reduce, channel_3x3,
+                    channel_5x5_reduce, channel_5x5,
+                    pool_proj);
+        }
         
-        public ImageAttn ImageAttn(int head, Unit mask) { return new ImageAttn(head, mask); }
-        public ChannelAttn ChannelAttn(int head, Unit mask) { return new ChannelAttn(head, mask); }
+        public BasicBlock BasicBlock(Unit act, int in_channel, int out_channel, int stride) { return new BasicBlock(act, in_channel, out_channel, stride); }
+        public BottleNeck BottleNeck(Unit act, int in_channel, int hidden, int stride, int expand) { return new BottleNeck(act, in_channel, hidden, stride, expand); }
+        public SEBlock SEBlock(Unit act, int in_channel, int hidden1, int hidden2, int out_channel, int stride) { return new SEBlock(act, in_channel, hidden1, hidden2, out_channel, stride); }
         
+        public GatedBlock GatedBlock(Unit act, Unit norm, int in_channel, int kernel) { return new GatedBlock(act, norm, in_channel, 1.0f, 1, kernel); }
+        public GatedBlock GatedBlock(Unit act, Unit norm, int in_channel, float conv_ratio, int expand, int kernel) {
+            return new GatedBlock(act, norm, in_channel, conv_ratio, expand, kernel);
+        }
+        
+        public ConvNeXtBlock ConvNeXtBlock(int in_channel, int out_channel, int expand) { return new ConvNeXtBlock(gelu(), layerNorm(in_channel), in_channel, expand, out_channel, 7); }
+        public ConvNeXtBlock ConvNeXtBlock(int in_channel, int out_channel, int expand, int kernel) { return new ConvNeXtBlock(gelu(), layerNorm(in_channel), in_channel, expand, out_channel, kernel); }
+        public ConvNeXtBlock ConvNeXtBlock(Unit act, Unit norm, int in_channel, int expand, int out_channel, int kernel) {
+            return new ConvNeXtBlock(act, norm, in_channel, expand, out_channel, kernel);
+        }
+        
+        public LargeKernelAttn LargeKernelAttn(Unit mask, int channel, int kernel) { return new LargeKernelAttn(null, mask, channel, -1, kernel); }
+        public LargeKernelAttn LargeKernelAttn(Unit mask, int channel, int hidden, int kernel) { return new LargeKernelAttn(null, mask, channel, hidden, kernel); }
+        public LargeKernelAttn LargeKernelAttn(Unit act, Unit mask, int channel, int kernel) { return new LargeKernelAttn(act, mask, channel, -1, kernel); }
+        public LargeKernelAttn LargeKernelAttn(Unit act, Unit mask, int channel, int hidden, int kernel) { 
+            return new LargeKernelAttn(act, mask, channel, hidden, kernel);
+        }
+        
+        public ImageMHA ImageMHA(int head, Unit mask) { return new ImageMHA(head, mask); }
+        public ChannelMHA ChannelMHA(int head, Unit mask) { return new ChannelMHA(head, mask); }
+        //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="create: net">
         public VGG16 VGG16(Unit act, boolean batchNorm) { return new VGG16(act, batchNorm); }
         public VGG19 VGG19(Unit act, boolean batchNorm) { return new VGG19(act, batchNorm); }
         
-        public ResNet18 ResNet18(Unit activation) { return new ResNet18(activation); }
-        public ResNet34 ResNet34(Unit activation) { return new ResNet34(activation); }
-        public ResNet50 ResNet50(Unit activation) { return new ResNet50(activation); }
-        public SENet SENet(Unit activation) { return new SENet(activation); }
+        public ResNet18 ResNet18(Unit act) { return new ResNet18(act); }
+        public ResNet34 ResNet34(Unit act) { return new ResNet34(act); }
+        public ResNet50 ResNet50(Unit act) { return new ResNet50(act); }
+        public SENet SENet(Unit act) { return new SENet(act); }
+        
+        public ConvNeXt ConvNeXt(int in_channel, int expand) { return new ConvNeXt(in_channel, expand); }
         //</editor-fold>
+        
         //<editor-fold defaultstate="collapsed" desc="create: fusion">
         public Unit fuse(Unit a, Unit b) {
             //-----[linear2]----------------------------------------------------
@@ -858,16 +944,20 @@ public final class Alpha {
                 if (b instanceof Gelu)      return linear2_gelu     ((Linear2)a, (Gelu)b);
                 if (b instanceof Sigmoid)   return linear2_sigmoid  ((Linear2)a, (Sigmoid)b);
                 if (b instanceof Tanh)      return linear2_tanh     ((Linear2)a, (Tanh)b);
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException(String.format("This fusion (%s + %s) is not supported",
+                    a.getClass().getSimpleName(), b.getClass().getSimpleName()));
             }
             
-            //-----[bernouliMul, dropout]---------------------------------------
+            //-----[dropout -> bernouliMul]-------------------------------------
             if (b instanceof Dropout) {
                 if (a instanceof Relu)      return relu_dropout    ((Relu)a, (Dropout)b);
                 if (a instanceof LeakyRelu) return leakyRelu_dropout((LeakyRelu)a, (Dropout)b);
                 if (a instanceof Softplus)  return softplus_dropout ((Softplus)a, (Dropout)b);
                 if (a instanceof Gelu)      return gelu_dropout     ((Gelu)a, (Dropout)b);
-                throw new IllegalArgumentException();
+                if (a instanceof Sigmoid)   return sigmoid_dropout  ((Sigmoid)a, (Dropout)b); 
+                if (a instanceof Tanh)      return tanh_dropout     ((Tanh)a, (Dropout)b); 
+                throw new IllegalArgumentException(String.format("This fusion (%s + %s) is not supported",
+                    a.getClass().getSimpleName(), b.getClass().getSimpleName()));
             }
             
             if (b instanceof BernouliMul) {
@@ -875,20 +965,13 @@ public final class Alpha {
                 if (a instanceof LeakyRelu) return leakyRelu_bernouliMul((LeakyRelu)a, (BernouliMul)b);
                 if (a instanceof Softplus)  return softplus_bernouliMul ((Softplus)a, (BernouliMul)b);
                 if (a instanceof Gelu)      return gelu_bernouliMul     ((Gelu)a, (BernouliMul)b);
-                throw new IllegalArgumentException();
+                if (a instanceof Sigmoid)   return sigmoid_bernouliMul  ((Sigmoid)a, (BernouliMul)b);
+                if (a instanceof Tanh)      return tanh_bernouliMul     ((Tanh)a, (BernouliMul)b);
+                throw new IllegalArgumentException(String.format("This fusion (%s + %s) is not supported",
+                    a.getClass().getSimpleName(), b.getClass().getSimpleName()));
             }
             
-            //-----[affine, global batchnorm, batchnorm]------------------------
-            if (a instanceof Affine) {
-                if (b instanceof Relu)      return affine_relu     ((Affine)a, (Relu)b);
-                if (b instanceof LeakyRelu) return affine_leakyRelu((Affine)a, (LeakyRelu)b);
-                if (b instanceof Softplus)  return affine_softplus ((Affine)a, (Softplus)b);
-                if (b instanceof Gelu)      return affine_gelu     ((Affine)a, (Gelu)b);
-                if (b instanceof Sigmoid)   return affine_sigmoid  ((Affine)a, (Sigmoid)b);
-                if (b instanceof Tanh)      return affine_tanh     ((Affine)a, (Tanh)b);
-                throw new IllegalArgumentException();
-            }
-            
+            //-----[batchnorm-> global batchnorm -> affine ]--------------------
             if (a instanceof BatchNorm) {
                 if (b instanceof Relu)      return batchNorm_relu     ((BatchNorm)a, (Relu)b);
                 if (b instanceof LeakyRelu) return batchNorm_leakyRelu((BatchNorm)a, (LeakyRelu)b);
@@ -896,7 +979,8 @@ public final class Alpha {
                 if (b instanceof Gelu)      return batchNorm_gelu     ((BatchNorm)a, (Gelu)b);
                 if (b instanceof Sigmoid)   return batchNorm_sigmoid  ((BatchNorm)a, (Sigmoid)b);
                 if (b instanceof Tanh)      return batchNorm_tanh     ((BatchNorm)a, (Tanh)b);
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException(String.format("This fusion (%s + %s) is not supported",
+                    a.getClass().getSimpleName(), b.getClass().getSimpleName()));
             }
             
             if (a instanceof GlobalBatchNorm) {
@@ -906,7 +990,8 @@ public final class Alpha {
                 if (b instanceof Gelu)      return global_batchNorm_gelu     ((GlobalBatchNorm)a, (Gelu)b);
                 if (b instanceof Sigmoid)   return global_batchNorm_sigmoid  ((GlobalBatchNorm)a, (Sigmoid)b);
                 if (b instanceof Tanh)      return global_batchNorm_tanh     ((GlobalBatchNorm)a, (Tanh)b);
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException(String.format("This fusion (%s + %s) is not supported",
+                    a.getClass().getSimpleName(), b.getClass().getSimpleName()));
             }
             
             if (a instanceof Affine) {
@@ -916,10 +1001,24 @@ public final class Alpha {
                 if (b instanceof Gelu)      return affine_gelu     ((Affine)a, (Gelu)b);
                 if (b instanceof Sigmoid)   return affine_sigmoid  ((Affine)a, (Sigmoid)b);
                 if (b instanceof Tanh)      return affine_tanh     ((Affine)a, (Tanh)b);
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException(String.format("This fusion (%s + %s) is not supported",
+                    a.getClass().getSimpleName(), b.getClass().getSimpleName()));
             }
             
-            throw new IllegalArgumentException();
+            if (a instanceof Affine) {
+                if (b instanceof Relu)      return affine_relu     ((Affine)a, (Relu)b);
+                if (b instanceof LeakyRelu) return affine_leakyRelu((Affine)a, (LeakyRelu)b);
+                if (b instanceof Softplus)  return affine_softplus ((Affine)a, (Softplus)b);
+                if (b instanceof Gelu)      return affine_gelu     ((Affine)a, (Gelu)b);
+                if (b instanceof Sigmoid)   return affine_sigmoid  ((Affine)a, (Sigmoid)b);
+                if (b instanceof Tanh)      return affine_tanh     ((Affine)a, (Tanh)b);
+                throw new IllegalArgumentException(String.format("This fusion (%s + %s) is not supported",
+                    a.getClass().getSimpleName(), b.getClass().getSimpleName()));
+            }
+            
+            //------[Exception]-------------------------------------------------
+            throw new IllegalArgumentException(String.format("This fusion (%s + %s) is not supported",
+                    a.getClass().getSimpleName(), b.getClass().getSimpleName()));
         }
         
         public Affine_Relu affine_relu(Affine afi, Relu af) { return new Affine_Relu(afi.inplace() && af.inplace(), afi.param_dim()); }
@@ -1001,14 +1100,15 @@ public final class Alpha {
         public Elu_Dropout elu_dropout(Elu af, Dropout dp) { return new Elu_Dropout(af.inplace() && dp.inplace(), af.alpha(), af.negative_slope(), dp.nonzero_percent()); }
         public Softplus_Dropout softplus_dropout(Softplus af, Dropout dp) { return new Softplus_Dropout(af.inplace() && dp.inplace(), dp.nonzero_percent()); }
         public Gelu_Dropout gelu_dropout(Gelu af, Dropout dp) { return new Gelu_Dropout(dp.inplace(), dp.nonzero_percent()); }
-        public Sigmoid_Dropout softplus_dropout(Sigmoid af, Dropout dp) { return new Sigmoid_Dropout(af.inplace() && dp.inplace(), dp.nonzero_percent()); }
-       
+        public Sigmoid_Dropout sigmoid_dropout(Sigmoid af, Dropout dp) { return new Sigmoid_Dropout(af.inplace() && dp.inplace(), dp.nonzero_percent()); }
+        public Tanh_Dropout tanh_dropout(Tanh af, Dropout dp) { return new Tanh_Dropout(af.inplace() && dp.inplace(), dp.nonzero_percent()); }
+        
         public Relu_BernouliMul relu_bernouliMul(Relu af, BernouliMul bm) { return new Relu_BernouliMul(af.inplace() && bm.inplace(), bm.p(), bm.v1(), bm.v2()); }
         public LeakyRelu_BernouliMul leakyRelu_bernouliMul(LeakyRelu af, BernouliMul bm) { return new LeakyRelu_BernouliMul(af.inplace() && bm.inplace(), af.negative_slope(), bm.p(), bm.v1(), bm.v2()); }
         public Elu_BernouliMul elu_bernouliMul(Elu af, BernouliMul bm) { return new Elu_BernouliMul(af.inplace() && bm.inplace(), af.alpha(), af.negative_slope(), bm.p(), bm.v1(), bm.v2()); }
         public Softplus_BernouliMul softplus_bernouliMul(Softplus af, BernouliMul bm) { return new Softplus_BernouliMul(af.inplace() && bm.inplace(), bm.p(), bm.v1(), bm.v2()); }
         public Gelu_BernouliMul gelu_bernouliMul(Gelu af, BernouliMul bm) { return new Gelu_BernouliMul(bm.inplace(), bm.p(), bm.v1(), bm.v2()); }
-        public Sigmoid_BernouliMul softplus_bernouliMul(Sigmoid af, BernouliMul bm) { return new Sigmoid_BernouliMul(af.inplace() && bm.inplace(), bm.p(), bm.v1(), bm.v2()); }
+        public Sigmoid_BernouliMul sigmoid_bernouliMul(Sigmoid af, BernouliMul bm) { return new Sigmoid_BernouliMul(af.inplace() && bm.inplace(), bm.p(), bm.v1(), bm.v2()); }
         public Tanh_BernouliMul tanh_bernouliMul(Tanh af, BernouliMul bm) { return new Tanh_BernouliMul(af.inplace() && bm.inplace(), bm.p(), bm.v1(), bm.v2()); }
         //</editor-fold>
         
@@ -1464,7 +1564,7 @@ public final class Alpha {
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="create: simple.blas.Conv3D">
-        public Conv3D point_conv3D(boolean biased, 
+        public Conv3D pointwise_conv3D(boolean biased, 
                 int in_channel, int out_channel) {
             return new Conv3D(biased, 
                     in_channel, out_channel,
@@ -1521,6 +1621,27 @@ public final class Alpha {
                     in_channel,     out_channel,
                     kernel_height,  kernel_width,
                     stride_height,  stride_width,
+                    padding_height, padding_width,
+                    -1, -1);
+        }
+        //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="create: simple.blas.DepthwiseConv3D">
+        public DepthwiseConv3D depthwise_conv3D(boolean  biased, int out_channel, 
+                int kernel, int stride, int padding) {
+            return new DepthwiseConv3D(biased, out_channel, 
+                    kernel, kernel,
+                    stride, stride,
+                    padding, padding,
+                    -1, -1);
+        }
+        
+        public DepthwiseConv3D depthwise_conv3D(boolean  biased, int out_channel, 
+                int kernel_height,  int kernel_width,
+                int stride_height,  int stride_width,
+                int padding_height, int padding_width) {
+            return new DepthwiseConv3D(biased, out_channel, 
+                    kernel_height, kernel_width,
+                    stride_height, stride_width,
                     padding_height, padding_width,
                     -1, -1);
         }
@@ -1659,7 +1780,7 @@ public final class Alpha {
         }
         //</editor-fold>
 
-        //<editor-fold defaultstate="collapsed" desc="create: reducer.math">
+        //<editor-fold defaultstate="collapsed" desc="create: combiner.math">
         public LinearSummary sum() { return new LinearSummary(1.0f, 0.0f);  }
         public LinearSummary sum(float alpha) { return new LinearSummary(alpha, 0.0f); }
         public LinearSummary linear_sum(float alpha, float beta) {
@@ -1684,7 +1805,7 @@ public final class Alpha {
             return new QuadraticMean(alpha, beta, gamma);
         }
         //</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="create: reducer.tensor">
+        //<editor-fold defaultstate="collapsed" desc="create: combiner.tensor">
         public Concat concat() { return new Concat(-1); }
         public Concat concat(int dimIdx) { return new Concat(dimIdx); }
         //</editor-fold>
@@ -1746,12 +1867,12 @@ public final class Alpha {
             @Override public int index_of_core(UnitCore core) { return -1; }
         };
         
-        private static final ReduceFunction re_func = new ReduceFunction() {
+        private static final CombinerFunction re_func = new CombinerFunction() {
             { name = "Alpha.functional.reduce_function"; }
             private static final long serialVersionUID = 1L;
             @Override public final boolean need_grads() { return false; }//without params
             @Override public final void append(String pre, StringBuilder sb) { sb.append(name); }
-            @Override protected ReducerCore<?> create_unit_core() { return null; }
+            @Override protected CombinerCore<?> create_unit_core() { return null; }
             @Override protected UnitCoreManager create_ucm() { return null; } 
             @Override public int index_of_core(UnitCore core) { return -1; }
         }; 
@@ -1914,7 +2035,7 @@ public final class Alpha {
         }
         //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="carrier: reducer">
-        private static Tensor[] cre(ReducerCore<?> core, Tensor[] X) {//Reducer Carrier
+        private static Tensor[] cre(CombinerCore<?> core, Tensor[] X) {//Reducer Carrier
             Tensor[] Y = core.forward(X);//if X is output of OneOffUnitCore, X.need_carry = true
             Y[0].need_carry(true); Y[0].carry(X);//X[0: N-1] -> Y
             core.hook_after_backward((self)->{
@@ -2700,7 +2821,7 @@ public final class Alpha {
         }
         //</editor-fold>
         
-        //<editor-fold defaultstate="collapsed" desc="functional: reducer.math">
+        //<editor-fold defaultstate="collapsed" desc="functional: combiner.math">
         public Tensor[] sum(Tensor... X) { return cre(new CoreLinearSummary<>(re_func, 1.0f, 0.0f), X); }
         public Tensor[] sum(float alpha, Tensor... X) { return cre(new CoreLinearSummary<>(re_func, alpha, 0.0f), X); }
         public Tensor[] linear_sum(float alpha, float beta, Tensor... X) {
@@ -2725,7 +2846,7 @@ public final class Alpha {
             return cre(new CoreQuadraticMean<>(re_func, alpha, beta, gamma), X);
         }
         //</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="functional: reducer.tensor">
+        //<editor-fold defaultstate="collapsed" desc="functional: combiner.tensor">
         public Tensor[] concat(Tensor... X) { return cre(new CoreConcat<>(re_func, -1), X); }
         public Tensor[] concat(int dimIdx, Tensor... X) { return cre(new CoreConcat(re_func, dimIdx), X); }
         //</editor-fold>
@@ -2760,16 +2881,12 @@ public final class Alpha {
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="Binary Cross Entropy">
-        public BinaryCrossEntropy binaryCrossEntropy() { 
-            return new BinaryCrossEntropy(1.0f, 1.0f);
-        }
+        public BinaryCrossEntropy binaryCrossEntropy() { return new BinaryCrossEntropy(1.0f, 1.0f);}
         public BinaryCrossEntropy binaryCrossEntropy(float alpha, float beta) { 
             return new BinaryCrossEntropy(alpha, beta);
         }
         
-        public SigmoidBinaryCrossEntropy sigmoid_binaryCrossEntropy() {
-            return new SigmoidBinaryCrossEntropy(1.0f, 1.0f);
-        }
+        public SigmoidBinaryCrossEntropy sigmoid_binaryCrossEntropy() { return new SigmoidBinaryCrossEntropy(1.0f, 1.0f); }
         public SigmoidBinaryCrossEntropy sigmoid_binaryCrossEntropy(float alpha, float beta) {
             return new SigmoidBinaryCrossEntropy(alpha, beta);
         }
@@ -2807,8 +2924,7 @@ public final class Alpha {
                 return this;
             }
             
-            public WeightedSummary create() 
-            {
+            public WeightedSummary create() {
                 float[] w = new float[weights.size()]; {
                     int index = 0; 
                     for(float weight : weights) w[index++] = weight;
@@ -2831,8 +2947,7 @@ public final class Alpha {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="class: Opim">
-    public static class Optim 
-    {
+    public static class Optim {
         protected Optim() {}
         public static final Optim optim = new Optim();
 
@@ -2840,205 +2955,100 @@ public final class Alpha {
         public SGD SGD(Collection<Parameter> params, float lr) { return new SGD(params, lr);  }
         public SGD SGD(Map<String, Parameter> params, float lr) { return new SGD(params, lr); }
         
-        public static float Momentum_beta = 0.9f;
-        
-        public Momentum Momentum(Collection<Parameter> params, float lr) { 
-            return new Momentum(params, lr, Momentum_beta); 
-        }
+       
+        public Momentum Momentum(Collection<Parameter> params, float lr) { return new Momentum(params, lr, Momentum_beta); }
         public Momentum Momentum(Collection<Parameter> params, float lr, float beta) {
             return new Momentum(params, lr, beta);
         }
-        
-        public Momentum Momentum(Map<String, Parameter> param_map, float lr) { 
-            return new Momentum(param_map, lr, Momentum_beta); 
-        }
+        public Momentum Momentum(Map<String, Parameter> param_map, float lr) { return new Momentum(param_map, lr, Momentum_beta); }
         public Momentum Momentum(Map<String, Parameter> param_map, float lr, float beta) {
             return new Momentum(param_map, lr, beta);
         }
         
-        
-        public static float SGDMN_momentum = 0.9f;
-        public static float SGDMN_dampen = 0.0f;
-        public static float nestrov = 0.0f;
-        
-        public SGDMN SGDMN(Collection<Parameter> params, float lr) {
-            return new SGDMN(params, lr, SGDMN_momentum, SGDMN_dampen, nestrov);
-        }
+        public SGDMN SGDMN(Collection<Parameter> params, float lr) { return new SGDMN(params, lr, SGDMN_momentum, SGDMN_dampen, nestrov); }
         public SGDMN SGDMN(Collection<Parameter> params, float lr, float momentum, float dampen, float nestrov) {
             return new SGDMN(params, lr, momentum, dampen, nestrov);
         }
-        
-        public SGDMN SGDMN(Map<String, Parameter> param_map, float lr) {
-            return new SGDMN(param_map, lr, SGDMN_momentum, SGDMN_dampen, nestrov);
-        }
+        public SGDMN SGDMN(Map<String, Parameter> param_map, float lr) { return new SGDMN(param_map, lr, SGDMN_momentum, SGDMN_dampen, nestrov); }
         public SGDMN SGDMN(Map<String, Parameter> param_map, float lr, float momentum, float dampen, float nestrov) {
             return new SGDMN(param_map, lr, momentum, dampen, nestrov);
         }
         
-
-        public static float RMSprop_lr = 1e-2f;
-        public static float RMSprop_beta = 0.99f;
-        public static float RMSprop_eps = 1e-8f;
-        
-        public RMSprop RMSprop(Collection<Parameter> params) {
-            return new RMSprop(params, RMSprop_lr, RMSprop_beta, RMSprop_eps);
-        }
-        public RMSprop RMSprop(Collection<Parameter> params, float lr) { 
-            return new RMSprop(params, lr, RMSprop_beta, RMSprop_eps);
-        }
+        public RMSprop RMSprop(Collection<Parameter> params) { return new RMSprop(params, RMSprop_lr, RMSprop_beta, RMSprop_eps); }
+        public RMSprop RMSprop(Collection<Parameter> params, float lr) { return new RMSprop(params, lr, RMSprop_beta, RMSprop_eps); }
         public RMSprop RMSprop(Collection<Parameter> params, float lr, float beta, float eps) {
             return new RMSprop(params, lr, beta, eps);
         }
-        
-        public RMSprop RMSprop(Map<String, Parameter> param_map) {
-            return new RMSprop(param_map, RMSprop_lr, RMSprop_beta, RMSprop_eps);
-        }
-        public RMSprop RMSprop(Map<String, Parameter> param_map, float lr) { 
-            return new RMSprop(param_map, lr, RMSprop_beta, RMSprop_eps);
-        }
+        public RMSprop RMSprop(Map<String, Parameter> param_map) { return new RMSprop(param_map, RMSprop_lr, RMSprop_beta, RMSprop_eps); }
+        public RMSprop RMSprop(Map<String, Parameter> param_map, float lr) { return new RMSprop(param_map, lr, RMSprop_beta, RMSprop_eps); }
         public RMSprop RMSprop(Map<String, Parameter> param_map, float lr, float beta, float eps) {
             return new RMSprop(param_map, lr, beta, eps);
         }
         
-        
-        public static float Adam_lr = 1e-3f;
-        public static float Adam_beta1 = 0.9f;
-        public static float Adam_beta2 = 0.999f;
-        public static float Adam_eps = 1e-8f;
-        
-        public Adam Adam(Collection<Parameter> params) { 
-            return new Adam(params, Adam_lr, Adam_beta1, Adam_beta2, Adam_eps); 
-        }
-        public Adam Adam(Collection<Parameter> params, float lr) { 
-            return new Adam(params, lr, Adam_beta1, Adam_beta2, Adam_eps); 
-        }
+        public Adam Adam(Collection<Parameter> params) { return new Adam(params, Adam_lr, Adam_beta1, Adam_beta2, Adam_eps); }
+        public Adam Adam(Collection<Parameter> params, float lr) { return new Adam(params, lr, Adam_beta1, Adam_beta2, Adam_eps); }
         public Adam Adam(Collection<Parameter> params, float lr, float beta1, float beta2, float eps) {
             return new Adam(params, lr, beta1, beta2, eps);
         }       
-        
-        public Adam Adam(Map<String, Parameter> param_map) { 
-            return new Adam(param_map, Adam_lr, Adam_beta1, Adam_beta2, Adam_eps); 
-        }
-        public Adam Adam(Map<String, Parameter> param_map, float lr) { 
-            return new Adam(param_map, lr, Adam_beta1, Adam_beta2, Adam_eps); 
-        }
+        public Adam Adam(Map<String, Parameter> param_map) { return new Adam(param_map, Adam_lr, Adam_beta1, Adam_beta2, Adam_eps); }
+        public Adam Adam(Map<String, Parameter> param_map, float lr) { return new Adam(param_map, lr, Adam_beta1, Adam_beta2, Adam_eps); }
         public Adam Adam(Map<String, Parameter> param_map, float lr, float beta1, float beta2, float eps) {
             return new Adam(param_map, lr, beta1, beta2, eps);
         }       
         
-        
-        public static float Adamax_lr = 2e-3f;
-        public static float Adamax_beta1 = 0.9f;
-        public static float Adamax_beta2 = 0.999f;
-        public static float Adamax_eps = 1e-8f;
-        
-        public Adamax Adamax(Collection<Parameter> params) { 
-            return new Adamax(params, Adamax_lr, Adamax_beta1, Adamax_beta2, Adamax_eps); 
-        }
-        public Adamax Adamax(Collection<Parameter> params, float lr) { 
-            return new Adamax(params, lr, Adamax_beta1, Adamax_beta2, Adamax_eps); 
-        }
+        public Adamax Adamax(Collection<Parameter> params) { return new Adamax(params, Adamax_lr, Adamax_beta1, Adamax_beta2, Adamax_eps); }
+        public Adamax Adamax(Collection<Parameter> params, float lr) { return new Adamax(params, lr, Adamax_beta1, Adamax_beta2, Adamax_eps); }
         public Adamax Adamax(Collection<Parameter> params, float lr, float beta1, float beta2, float eps) {
             return new Adamax(params, lr, beta1, beta2, eps);
         }
         
-        public Adamax Adamax(Map<String, Parameter> param_map) { 
-            return new Adamax(param_map, Adamax_lr, Adamax_beta1, Adamax_beta2, Adamax_eps); 
-        }
-        public Adamax Adamax(Map<String, Parameter> param_map, float lr) { 
-            return new Adamax(param_map, lr, Adamax_beta1, Adamax_beta2, Adamax_eps); 
-        }
+        public Adamax Adamax(Map<String, Parameter> param_map) { return new Adamax(param_map, Adamax_lr, Adamax_beta1, Adamax_beta2, Adamax_eps); }
+        public Adamax Adamax(Map<String, Parameter> param_map, float lr) { return new Adamax(param_map, lr, Adamax_beta1, Adamax_beta2, Adamax_eps); }
         public Adamax Adamax(Map<String, Parameter> param_map, float lr, float beta1, float beta2, float eps) {
             return new Adamax(param_map, lr, beta1, beta2, eps);
         }
        
-        
-        public static float AdamW_lr = 1e-3f;
-        public static float AdamW_beta1 = 0.9f;
-        public static float AdamW_beta2 = 0.999f;
-        public static float AdamW_eps = 1e-8f;
-        public static float AdamW_L1 = 0;
-        public static float AdamW_L2 = 1e-2f;
-        
-        public AdamW AdamW(Collection<Parameter> params) {
-            return new AdamW(params, AdamW_lr, AdamW_beta1, AdamW_beta2, AdamW_eps, AdamW_L1, AdamW_L2); 
-        }
-        public AdamW AdamW(Collection<Parameter> params, float lr, float L2) {
-            return new AdamW(params, lr, AdamW_beta1, AdamW_beta2, AdamW_eps, AdamW_L1, L2); 
-        }
+        public AdamW AdamW(Collection<Parameter> params) { return new AdamW(params, AdamW_lr, AdamW_beta1, AdamW_beta2, AdamW_eps, AdamW_L1, AdamW_L2); }
+        public AdamW AdamW(Collection<Parameter> params, float lr, float L2) { return new AdamW(params, lr, AdamW_beta1, AdamW_beta2, AdamW_eps, AdamW_L1, L2); }
         public AdamW AdamW(Collection<Parameter> params, float lr, 
                 float beta1, float beta2, float eps,
                 float L1, float L2) {
             return new AdamW(params, lr, beta1, beta2, eps, L1, L2);
         }
-        
-        public AdamW AdamW(Map<String, Parameter> param_map) {
-            return new AdamW(param_map, AdamW_lr, AdamW_beta1, AdamW_beta2, AdamW_eps, AdamW_L1, AdamW_L2); 
-        }
-        public AdamW AdamW(Map<String, Parameter> param_map, float lr, float L2) {
-            return new AdamW(param_map, lr, AdamW_beta1, AdamW_beta2, AdamW_eps, AdamW_L1, L2); 
-        }
+        public AdamW AdamW(Map<String, Parameter> param_map) { return new AdamW(param_map, AdamW_lr, AdamW_beta1, AdamW_beta2, AdamW_eps, AdamW_L1, AdamW_L2); }
+        public AdamW AdamW(Map<String, Parameter> param_map, float lr, float L2) { return new AdamW(param_map, lr, AdamW_beta1, AdamW_beta2, AdamW_eps, AdamW_L1, L2); }
         public AdamW AdamW(Map<String, Parameter> param_map, float lr, 
                 float beta1, float beta2, float eps,
                 float L1, float L2) {
             return new AdamW(param_map, lr, beta1, beta2, eps, L1, L2);
         }
         
-        
-        public static float RAdam_lr = 1e-3f;
-        public static float RAdam_beta1 = 0.9f;
-        public static float RAdam_beta2 = 0.999f;
-        public static float RAdam_eps = 1e-8f;
-        
-        public RAdam RAdam(Collection<Parameter> params) { 
-            return new RAdam(params, RAdam_lr, RAdam_beta1, RAdam_beta2, RAdam_eps); 
-        }
-        public RAdam RAdam(Collection<Parameter> params, float lr) { 
-            return new RAdam(params, lr, RAdam_beta1, RAdam_beta2, RAdam_eps); 
-        }
+        public RAdam RAdam(Collection<Parameter> params) { return new RAdam(params, RAdam_lr, RAdam_beta1, RAdam_beta2, RAdam_eps); }
+        public RAdam RAdam(Collection<Parameter> params, float lr) { return new RAdam(params, lr, RAdam_beta1, RAdam_beta2, RAdam_eps); }
         public RAdam RAdam(Collection<Parameter> params, float lr, float beta1, float beta2, float eps) {
             return new RAdam(params, lr, beta1, beta2, eps);
         }       
-        
-        public RAdam RAdam(Map<String, Parameter> param_map) { 
-            return new RAdam(param_map, RAdam_lr, RAdam_beta1, RAdam_beta2, RAdam_eps); 
-        }
-        public RAdam RAdam(Map<String, Parameter> param_map, float lr) { 
-            return new RAdam(param_map, lr, RAdam_beta1, RAdam_beta2, RAdam_eps); 
-        }
+        public RAdam RAdam(Map<String, Parameter> param_map) { return new RAdam(param_map, RAdam_lr, RAdam_beta1, RAdam_beta2, RAdam_eps); }
+        public RAdam RAdam(Map<String, Parameter> param_map, float lr) { return new RAdam(param_map, lr, RAdam_beta1, RAdam_beta2, RAdam_eps); }
         public RAdam RAdam(Map<String, Parameter> param_map, float lr, float beta1, float beta2, float eps) {
             return new RAdam(param_map, lr, beta1, beta2, eps);
         }       
         
-        public static float Adamod_lr = 1e-3f;
-        public static float Adamod_beta1 = 0.9f;
-        public static float Adamod_beta2 = 0.999f;
-        public static float Adamod_beta3 = 0.999f;
-        public static float Adamod_eps = 1e-8f;
-        
-        public Adamod Adamod(Collection<Parameter> params) { 
-            return new Adamod(params, Adamod_lr, Adamod_beta1, Adamod_beta2, Adamod_eps, Adamod_beta3); 
-        }
-        public Adamod Adamod(Collection<Parameter> params, float lr) { 
-            return new Adamod(params, lr, Adamod_beta1, Adamod_beta2, Adamod_eps, Adamod_beta3); 
-        }
+        public Adamod Adamod(Collection<Parameter> params) { return new Adamod(params, Adamod_lr, Adamod_beta1, Adamod_beta2, Adamod_eps, Adamod_beta3); }
+        public Adamod Adamod(Collection<Parameter> params, float lr) { return new Adamod(params, lr, Adamod_beta1, Adamod_beta2, Adamod_eps, Adamod_beta3); }
         public Adamod Adamod(Collection<Parameter> params, float lr, float beta1, float beta2, float eps, float beta3) {
             return new Adamod(params, lr, beta1, beta2, eps, beta3);
         }
-        
-        public Adamod Adamod(Map<String, Parameter> param_map) { 
-            return new Adamod(param_map, Adamod_lr, Adamod_beta1, Adamod_beta2, Adamod_eps, Adamod_beta3); 
-        }
-        public Adamod Adamod(Map<String, Parameter> param_map, float lr) { 
-            return new Adamod(param_map, lr, Adamod_beta1, Adamod_beta2, Adamod_eps, Adamod_beta3); 
-        }
+        public Adamod Adamod(Map<String, Parameter> param_map) { return new Adamod(param_map, Adamod_lr, Adamod_beta1, Adamod_beta2, Adamod_eps, Adamod_beta3); }
+        public Adamod Adamod(Map<String, Parameter> param_map, float lr) { return new Adamod(param_map, lr, Adamod_beta1, Adamod_beta2, Adamod_eps, Adamod_beta3); }
         public Adamod Adamod(Map<String, Parameter> param_map, float lr,  float beta1, float beta2, float eps, float beta3) {
             return new Adamod(param_map, lr, beta1, beta2, eps, beta3);
         }
         //</editor-fold>
 
         //<editor-fold defaultstate="collpased" desc="creat: LrSchedular">
-        public CosAnnealingLr cosAnnealingLr(float Tmax) { return new CosAnnealingLr(Tmax, 0f); }
+        public CosAnnealingLr cosAnnealingLr() { return new CosAnnealingLr(cosAnnealingLr_Tmax, cosAnnealingLr_minLr); }
+        public CosAnnealingLr cosAnnealingLr(float Tmax) { return new CosAnnealingLr(Tmax, cosAnnealingLr_minLr); }
         public CosAnnealingLr cosAnnealingLr(float Tmax, float minLr) { return new CosAnnealingLr(Tmax, minLr); }
 
         public ExponentialLr exponentialLr(float gamma, float minLr) { return new ExponentialLr(gamma, minLr); }
@@ -3049,8 +3059,7 @@ public final class Alpha {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="class: Datas">
-    public static class Datas 
-    {
+    public static class Datas {
         protected Datas() {}
         public static final Datas data = new Datas();
         
@@ -3315,23 +3324,32 @@ public final class Alpha {
         public Int8ToTensorInt8 int8_to_tensor_int8(int... dim) { return new Int8ToTensorInt8(dim); }
         
         //<editor-fold defaultstate="collapsed" desc="class: OnehotTransform: int[] -> Tensor"> 
-        public static class Onehot implements Transform<Integer[]> 
-        {
-            protected final int num_class;
+        public static class Onehot implements Transform<Integer[]> {
+            protected int num_class;
+            protected float alpha;
+            protected float beta;
             
-            private Onehot(int num_class) {  this.num_class = num_class; }
+            private Onehot(int num_class, float alpha, float beta) { 
+                this.num_class = num_class;
+                this.alpha = alpha;
+                this.beta = beta;
+            }
             
-            public final int num_class() { return num_class; }
+            public int num_class() { return num_class; }
+            public float alpha() { return alpha; }
+            public float beta() { return beta; }
 
             @Override
             public final Tensor transform(Engine eg, Integer[] value) {
                 int[] labels = new int[value.length];
                 for(int i=0; i<labels.length; i++) labels[i] = value[i];
-                return eg.onehot(labels, num_class);
+                return eg.onehot(labels, alpha, beta, num_class);
             }
         }
         //</editor-fold>
-        public Onehot onehot(int num_class) { return new Onehot(num_class); }
+        public Onehot onehot(int num_class) { return new Onehot(num_class, 1.0f, 0.0f); }
+        public Onehot onehot(int num_class, float alpha) { return new Onehot(num_class, alpha, (1.0f - alpha) / (num_class - 1)); }
+        public Onehot onehot(int num_class, float alpha, float beta) { return new Onehot(num_class, alpha, beta); }
         //</editor-fold>
         
         //<editor-fold defaultstate="collapsed" desc="create: Buffer">
@@ -3345,8 +3363,7 @@ public final class Alpha {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="class: States">
-    public static class Stats
-    {
+    public static class Stats {
         protected Stats() {}
         
         public static final Stats stat = new Stats();
@@ -3358,7 +3375,10 @@ public final class Alpha {
         public boolean update(Stateful st, State dic) { return update(st, dic, default_partial); }
         public boolean update(Stateful st, State dic, boolean partial) {
             try { st.update_state(dic, partial); } 
-            catch(Exception e) { throw new RuntimeException(e); }
+            catch(Exception e) { 
+                e.printStackTrace();
+                throw new RuntimeException(e); 
+            }
             return true;
         }
         

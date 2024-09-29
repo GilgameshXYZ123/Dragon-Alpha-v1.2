@@ -228,8 +228,8 @@ public abstract class Unit implements Stateful, StateReader,
     
     public Tensor[] forward(Tensor... X) {
         UnitCore core = ucm.get();
-        if(this.before_backward != null) core.hook_before_backward(before_backward);
-        if(this.after_backward != null) core.hook_after_backward(after_backward);
+        if (this.before_backward != null) core.hook_before_backward(before_backward);
+        if (this.after_backward != null) core.hook_after_backward(after_backward);
         return core.forward(X); 
     }
     

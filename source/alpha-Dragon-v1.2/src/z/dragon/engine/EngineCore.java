@@ -830,20 +830,18 @@ public class EngineCore implements MemStatus {
         
         if(FH <= ph) throw new IllegalArgumentException(String.format("FH { got %d } <= ph { got %d }", FH, ph));
         if(FW <= pw) throw new IllegalArgumentException(String.format("FW { got %d } <= pw { got %d }", FW, pw));
-        if(FH < sh) throw new IllegalArgumentException(String.format("FH { got %d } < sh { got %d }", FH, sh));
-        if(FW < sw) throw new IllegalArgumentException(String.format("FW { got %d } < sw { got %d }", FW, sw));
+        if(FH <  sh) throw new IllegalArgumentException(String.format("FH { got %d } < sh { got %d }", FH, sh));
+        if(FW <  sw) throw new IllegalArgumentException(String.format("FW { got %d } < sw { got %d }", FW, sw));
         
         if(FH > IH + (ph << 1)) throw new IllegalArgumentException(String.format(
                 "FH { got %d } > IH { got %d } + 2 * ph { %d }", FH, IH, ph));
         if(FW > IW + (pw << 1)) throw new IllegalArgumentException(String.format(
                 "FW { got %d } > IW { got %d } + 2 * pw { %d }", FW, IW, pw));
         
-        if(IH - FH + (ph << 1) < (OH - 1)*sh) throw new IllegalArgumentException(String.format(
-                "IH { got %d } - FH { got %d } + 2 * ph { got %d } >= OH { got %d } - 1) * sh { got %d }",
-                IH, FH, ph, OH, sh));
-        if(IW - FW + (pw << 1) < (OW - 1)*sw) throw new IllegalArgumentException(String.format(
-                "IW { got %d } - FW { got %d } + 2 * pw { got %d } >= OW { got %d } - 1) * sw { got %d }", 
-                IW, FW, pw, OW, sw));
+//        if(IH - FH + (ph << 1) + 1 < (OH - 1)*sh) throw new IllegalArgumentException(String.format(
+//                "IH { %d } - FH { %d } + 2 * ph { %d } >= OH { %d } - 1) * sh { %d }", IH, FH, ph, OH, sh));
+//        if(IW - FW + (pw << 1) + 1 < (OW - 1)*sw) throw new IllegalArgumentException(String.format(
+//                "IW { %d } - FW { %d } + 2 * pw { %d } >= OW { %d } - 1) * sw { %d }", IW, FW, pw, OW, sw));
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="forward propagation">
@@ -1143,9 +1141,9 @@ public class EngineCore implements MemStatus {
         if(check) {
             if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");//X[N, IH, IW, IC]
             if(X_address == NULL) throw new NullPointerException("Tensor X is null");//Y[N, OH, OW, OC]
-            if(W_address == NULL) throw new NullPointerException("Tensor W is null");//W[FH, FW, OC: M * IC]
-            conv3D_param_check(OH, OW, IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
+            if(W_address == NULL) throw new NullPointerException("Tensor W is null");//W[FH, FW, OC]
             if(OC % IC != 0) throw new IllegalArgumentException(String.format("OC { got %d } %% IC { got %d } ! = 0", OC, IC));
+            conv3D_param_check(OH, OW, IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
         }
         
         return base.depthwise_conv3D(Y_address, OH, OW, 
@@ -1169,9 +1167,10 @@ public class EngineCore implements MemStatus {
         if(check) {
             if(Y_address == NULL) throw new NullPointerException("Tensor Y is null");//X[N, IH, IW, IC]
             if(X_address == NULL) throw new NullPointerException("Tensor X is null");//Y[N, OH, OW, OC]
-            if(W_address == NULL) throw new NullPointerException("Tensor W is null");//W[OC, FH, FW, IC]
-            conv3D_param_check(OH, OW, IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
+            if(W_address == NULL) throw new NullPointerException("Tensor W is null");//W[FH, FW, OC]
             if(OC % IC != 0) throw new IllegalArgumentException(String.format("OC { got %d } %% IC { got %d } ! = 0", OC, IC));
+            conv3D_param_check(OH, OW, IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
+            
             if(Bias_address == NULL) throw new NullPointerException("Tensor Bias is null");//Bias[OC]
             func_param_check_row(lengthv, OC_4x, OC, OC_4x);
         }
@@ -1189,7 +1188,7 @@ public class EngineCore implements MemStatus {
     //<editor-fold defaultstate="collapsed" desc="backward propagation">
     public Syncer depthwise_conv3D_deltaW(
             long deltaW_address, int FH, int FW, 
-            long X_address, int IH, int IW,
+            long      X_address, int IH, int IW,
             long deltaY_address, int OH, int OW,
             int N, int IC, int OC,
             int sh, int sw, int ph, int pw)
@@ -1198,8 +1197,8 @@ public class EngineCore implements MemStatus {
             if(deltaW_address == NULL) throw new NullPointerException("Tensor deltaW is null");
             if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
             if(X_address == NULL) throw new NullPointerException("Tensor X is null");
-            conv3D_param_check(OH, OW, IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
             if(OC % IC != 0) throw new IllegalArgumentException(String.format("OC { got %d } %% IC { got %d } ! = 0", OC, IC));
+            conv3D_param_check(OH, OW, IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
         }
         return base.depthwise_conv3D_deltaW(
                 deltaW_address, FH, FW, 
@@ -1214,7 +1213,7 @@ public class EngineCore implements MemStatus {
     public Syncer depthwise_conv3D_deltaX(
             long deltaX_address, int IH, int IW,
             long deltaY_address, int OH, int OW,
-            long W_address, int FH, int FW,
+            long      W_address, int FH, int FW,
             int N, int IC, int OC,
             int sh, int sw, int ph ,int pw)
     {
@@ -1222,8 +1221,8 @@ public class EngineCore implements MemStatus {
             if(deltaX_address == NULL) throw new NullPointerException("Tensor deltaX is null");
             if(deltaY_address == NULL) throw new NullPointerException("Tensor deltaY is null");
             if(W_address == NULL) throw new NullPointerException("Tensor W is null");
-            conv3D_param_check(OH, OW, IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
             if(OC % IC != 0) throw new IllegalArgumentException(String.format("OC { got %d } %% IC { got %d } ! = 0", OC, IC));
+            conv3D_param_check(OH, OW, IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
         }
         return base.depthwise_conv3D_deltaX(
                 deltaX_address, IH, IW, 
@@ -6760,6 +6759,42 @@ public class EngineCore implements MemStatus {
         }
         return base.tensor2pix2D(Y_address,
                 X_address, 
+                lengthv, width, stride);
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="Math Function">
+    public Syncer repeat_linear2D_row(long Y_address, 
+            long X_address, int row_lengthv, 
+            float alpha, float beta,
+            int lengthv, int width) 
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(Y_address  == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.repeat_linear2D_row(Y_address, 
+                X_address, row_lengthv, 
+                alpha, beta, 
+                lengthv, width, stride);
+    }
+
+    public Syncer repeat_quadratic2D_row(long Y_address, 
+            long X_address, int row_lengthv, 
+            float alpha, float beta, float gamma,
+            int lengthv, int width) 
+    {
+        int stride = ((width + 3) >> 2) << 2;
+        if(check){
+            if(Y_address  == NULL) throw new NullPointerException("Tensor Y is null");
+            if(X_address == NULL) throw new NullPointerException("Tensor X1 is null");
+            func_param_check_row(lengthv, row_lengthv, width, stride);
+        }
+        return base.repeat_quadratic2D_row(Y_address, 
+                X_address, row_lengthv, 
+                alpha, beta, gamma, 
                 lengthv, width, stride);
     }
     //</editor-fold>

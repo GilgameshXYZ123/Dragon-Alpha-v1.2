@@ -159,16 +159,16 @@ public class ListContainer<K, V> extends AbstractContainer<K, V> {
     
     @Override
     public ListContainer<K, V>[] split(int sub_size) {
-        if(sub_size <= 0) throw new IllegalArgumentException(String.format("sub_size (%d) <= 0", sub_size));
-        if(sub_size >= size()) throw new IllegalArgumentException(String.format("sub_size (%d) >= size", sub_size));
+        if (sub_size <= 0) throw new IllegalArgumentException(String.format("sub_size (%d) <= 0", sub_size));
+        if (sub_size >= size()) throw new IllegalArgumentException(String.format("sub_size (%d) >= size", sub_size));
         
         start_read();
         int size = size();
         ListContainer<K, V> first = new ListContainer(this.kclazz, this.vclazz, sub_size);
         ListContainer<K, V> last  = new ListContainer(this.kclazz, this.vclazz, size - sub_size);
         
-        for(int i=0; i<sub_size; i++)   first.add(karr.get(i), varr.get(i));//[0:sub_size - 1]
-        for(int i=sub_size; i<size; i++) last.add(karr.get(i), varr.get(i));//[sub_size : size - 1]
+        for (int i=0; i<sub_size; i++)   first.add(karr.get(i), varr.get(i));//[0:sub_size - 1]
+        for (int i=sub_size; i<size; i++) last.add(karr.get(i), varr.get(i));//[sub_size : size - 1]
         finish_read();
         
         return new ListContainer[]{ first, last};

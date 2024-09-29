@@ -127,8 +127,8 @@ public class ImageEngine {
     public Tensor read_pixels(File file, int... dim) { return read_pixels(file, dim[0], dim[1], dim[2]); }
     public Tensor read_pixels(File file, int IH, int IW, int IC) { return pixels(fl.to_bytes(file), IH, IW, IC); }
     
-    public void write_pixels(String path, Tensor X) { fl.wt_bytes(path, eg.valueOf_int8(X)); }
-    public void write_pixels(File file, Tensor X) { fl.wt_bytes(file, eg.valueOf_int8(X)); }
+    public void write_pixels(String path, Tensor X) { fl.write_bytes(path, eg.valueOf_int8(X)); }
+    public void write_pixels(File file, Tensor X) { fl.write_bytes(file, eg.valueOf_int8(X)); }
     
     public void write_zip_pixels(String path, Tensor X) { cv.write_zip_pixels(path, eg.valueOf_int8(X), X.dim()); }
     public void write_zip_pixels(File file, Tensor X) { cv.write_zip_pixels(file, eg.valueOf_int8(X), X.dim()); }
@@ -1159,8 +1159,7 @@ public class ImageEngine {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: ImageAffiner">
-    public static class ImageAffiner 
-    {
+    public static class ImageAffiner {
         private float m00 = 1.0f, m01 = 0.0f, m02 = 0.0f;
         private float m10 = 0.0f, m11 = 1.0f, m12 = 0.0f;
       
@@ -1696,6 +1695,7 @@ public class ImageEngine {
         return adjust_constrast(inplace, X, factor);
     }
     
+    public Tensor jit_color(float amp, boolean inplace, Tensor X) { return jit_color(amp, inplace, X, 0.0f, 0.0f, 0.0f); }
     public Tensor jit_color(float amp, boolean inplace, Tensor X, float brightness, float saturation, float contrast) {
         brightness += next_float(-amp, amp);
         saturation += next_float(-amp, amp);
@@ -1764,49 +1764,60 @@ public class ImageEngine {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class RandomImageAffiner">
-    public static class RandomImageAffiner extends ImageAffiner
-    {
+    public static class RandomImageAffiner extends ImageAffiner {
         protected final ImageEngine ieg;
         
         public RandomImageAffiner(ImageEngine ieg) { this.ieg = ieg; }
         
         //<editor-fold defaultstate="collapsed" desc="affine_operations">
-        public ImageAffiner random_translate(float amp, float ty, float tx) {
-            ty *= 1.0f + ieg.next_float(-amp, amp);
-            tx *= 1.0f + ieg.next_float(-amp, amp);
-            return translate(ty, tx);
+        public RandomImageAffiner random_translate(float move) { return random_translate(1.0f, move, move); }
+        public RandomImageAffiner random_translate(float amp, float ty, float tx) {
+            ty *= ieg.next_float(-amp, amp);//[-amp, +amp]
+            tx *= ieg.next_float(-amp, amp);
+            translate(ty, tx);
+            return this;
         } 
         
-        public ImageAffiner random_scale(float amp, float sy, float sx) {
-            sy *= 1.0f + ieg.next_float(-amp, amp);
+        public RandomImageAffiner random_scale(float amp) { return random_scale(amp, 1.0f, 1.0f); }
+        public RandomImageAffiner random_scale(float amp, float sy, float sx) {
+            sy *= 1.0f + ieg.next_float(-amp, amp);//[1 - amp, 1 + amp]
             sx *= 1.0f + ieg.next_float(-amp, amp);
-            return scale(sy, sx);
+            scale(sy, sx);
+            return this;
         }
         
-        public ImageAffiner random_horizontal_flip(float p, int width) {
-            return (ieg.next_float() <= p? horizontal_flip(width) : this);
+        public RandomImageAffiner random_horizontal_flip(float p, int width) {
+            if (ieg.next_float() <= p) horizontal_flip(width);
+            return this;
         }
         
-        public ImageAffiner random_vertical_filp(float p, int height) {
-            return (ieg.next_float() <= p? vertical_flip(height) : this);
+        public RandomImageAffiner random_vertical_filp(float p, int height) {
+            if (ieg.next_float() <= p) vertical_flip(height);
+            return this;
         }
         
-        public ImageAffiner random_shear(float amp, float shy, float shx) {
-            shy *= 1.0f + ieg.next_float(-amp, amp);
-            shx *= 1.0f + ieg.next_float(-amp, amp);
-            return shear(shy, shx);
+        public RandomImageAffiner random_shear(float amp) { return random_shear(amp, 1.0f, 1.0f); }
+        public RandomImageAffiner random_shear(float amp, float shy, float shx) {
+            shy *= ieg.next_float(-amp, amp);//[-amp, amp]
+            shx *= ieg.next_float(-amp, amp);
+            shear(shy, shx);
+            return this;
         }
         
-        public ImageAffiner random_rotate(float amp, float theta) {
-            theta *= 1.0f + ieg.next_float(-amp, amp);
-            return rotate(theta);
+        public RandomImageAffiner random_rotate(float amp) { return random_rotate(amp, 1); }
+        public RandomImageAffiner random_rotate(float amp, float theta) {
+            theta *= ieg.next_float(-amp, amp);//[-amp, amp]
+            rotate(theta);
+            return this;
         }
         
-        public ImageAffiner random_rotate(float amp, float theta, float cy, float cx) {
+        public RandomImageAffiner random_rotate(float amp, float cy, float cx) { return random_rotate(amp, 1, cy, cx); }
+        public RandomImageAffiner random_rotate(float amp, float theta, float cy, float cx) {
             theta *= 1.0f + ieg.next_float(-amp, amp);
             cy    *= 1.0f + ieg.next_float(-amp, amp);
             cx    *= 1.0f + ieg.next_float(-amp, amp);
-            return rotate(theta, cy, cx);
+            rotate(theta, cy, cx);
+            return this;
         }
         //</editor-fold>
     }

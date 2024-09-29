@@ -111,7 +111,6 @@ public class Cuda_conv3D_test
             int N, int IC, int OC,
             int sh, int sw, int ph, int pw)
     {
-        eg.check(false).sync(false);
         int[] ODim = Cuda_conv3D.output_feature_dim(IH, IW, FH, FW, N, OC, sh, sw, ph, pw);
         int OH = ODim[1], OW = ODim[2];
         
@@ -134,9 +133,11 @@ public class Cuda_conv3D_test
         Tensor tW = eg.tensor(W, OC, FH, FW, IC);
         Tensor tY = eg.empty(N, OH, OW, OC).c();
         
-        SimpleTimer timer = new SimpleTimer().record();
-        int nIter = 1000;
         tY = eg.conv3D(tY, tX, tW, sh, sw).c();//async
+        
+        int nIter = 1000;  
+        eg.check(false).sync(false);
+        SimpleTimer timer = new SimpleTimer().record();
         for(int i=0; i<nIter; i++) {
 //            tY = eg.conv3D(tX, tW, sh, sw, ph, pw); eg.delete(tY.c());//sync
             tY = eg.conv3D(tY, tX, tW, sh, sw).c();//async
@@ -152,12 +153,11 @@ public class Cuda_conv3D_test
                 (float)sizeV, time, performance);
     }
     
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
 //        int FH = 9, FW = 9, sh = 1, sw = 1, ph = 4, pw = 4;
 //        int FH = 8, FW = 8, sh = 1, sw = 1, ph = 4, pw = 4;
-//        int FH = 7, FW = 7, sh = 1, sw = 1, ph = 3, pw = 3;
-        int FH = 1, FW = 7, sh = 1, sw = 1, ph = 0, pw = 3;
+        int FH = 7, FW = 7, sh = 1, sw = 1, ph = 3, pw = 3;
+//        int FH = 1, FW = 7, sh = 1, sw = 1, ph = 0, pw = 3;
 //        int FH = 5, FW = 5, sh = 1, sw = 1, ph = 2, pw = 2;
 //        int FH = 3, FW = 3, sh = 1, sw = 1, ph = 1, pw = 1;
 //        int IH = 128, IW = 128, IC =   3, OC =  64, N = 128;//false

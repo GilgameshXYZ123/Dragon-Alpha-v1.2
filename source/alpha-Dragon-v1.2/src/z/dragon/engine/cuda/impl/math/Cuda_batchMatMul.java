@@ -12,8 +12,6 @@ import z.util.lang.annotation.Passed;
  * @author Gilgamesh
  */
 public final class Cuda_batchMatMul {
-    public static void main(String[] args) {}
-    
     private Cuda_batchMatMul() {}
 
     //<editor-fold defaultstate="collapsed" desc="streamSize">

@@ -19,8 +19,7 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class Cuda_upool2D_avg_test 
-{
+public class Cuda_upool2D_avg_test {
     static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2");}
     static Engine eg = alpha.engine.cuda_float32(0, alpha.engine.memp1());
     
@@ -143,20 +142,20 @@ public class Cuda_upool2D_avg_test
     }
     public static void main(String[] args)
     {
+        int OH = 16, OW = 16;
+	int N = 512, IC = 256;
+	int FH = 3, FW = 3;
+	int sh = 4, sw = 4, ph = 2, pw = 2;
+        
+        
 //        int OH = 32, OW = 32;
-//	int N = 2, IC = 255;
-//	int FH = 8, FW = 8;
-//	int sh = 4, sw = 4, ph = 2, pw = 2;
-        
-        
-        int OH = 32, OW = 32;
-	int N = 4, IC = 255;
-	int FH = 4, FW = 4;
-	int sh = 4, sw = 4, ph = 1, pw = 1;
-        for(int ic = 1; ic<=128; ic++) 
-            testCorrect(OH, OW, FH, FW, N, ic, sh, sw, ph, pw);
+//	int N = 4, IC = 255;
+//	int FH = 4, FW = 4;
+//	int sh = 4, sw = 4, ph = 1, pw = 1;
+//        for(int ic = 1; ic<=128; ic++) 
+//            testCorrect(OH, OW, FH, FW, N, ic, sh, sw, ph, pw);
         
 //        testCorrect(OH, OW, FH, FW, N, IC, sh, sw, ph, pw);
-//        testSpeed(OH, OW, FH, FW, N*2, IC, sh, sw, ph, pw);
+        testSpeed(OH, OW, FH, FW, N, IC, sh, sw, ph, pw);
     }
 }

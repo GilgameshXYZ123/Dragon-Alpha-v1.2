@@ -898,9 +898,7 @@ public class Engine implements MemStatus {
     public void set(Tensor X, StateValue value, boolean partial, String msg) {
         if(value == null && !partial) throw new RuntimeException(msg);
         if(value != null) try { set(X, value.toStringLines()); }
-        catch(Exception e) {
-            throw new RuntimeException(msg, e);
-        }
+        catch(Exception e) { throw new RuntimeException(msg, e); }
     }
     //</editor-fold>
     //</editor-fold>        
@@ -1370,10 +1368,11 @@ public class Engine implements MemStatus {
     public Tensor fullconnect_biased(Tensor X, Tensor W, Tensor Bias) {
         int ndimX = X.ndim(); if(ndimX == 2) return matMul_biased(X, W, Bias); 
         if(check) {
-            require_dtype(X, "X"); require_dtype(W, "W"); require_dtype(Bias, "Bias");
+            require_dtype(X, "X"); require_dtype(W, "W"); 
             must_greater_equal(ndimX, "X.ndim", 3);
             equals(W.ndim(), "W.ndim", 2);
             equals(X.dim(-1), "X.features", W.dim(0), "W.in_features");//K = XW = WH
+            require_dtype(Bias, "Bias");
             equals(Bias.length, "Bias.length", W.dim(1), "W.out_features");
         }
         
@@ -2117,6 +2116,7 @@ public class Engine implements MemStatus {
             equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
             equals(W.dim(0), "W.OC", Y.dim(3), "Y.OC");
             equals(W.dim(3), "W.IC", X.dim(3), "X.IC");
+            require_dtype(Bias, "Bias");
             equals(Bias.lastDim(), "Bias.lastDim", W.dim(0), "W.OC");
         }
         
@@ -2178,6 +2178,7 @@ public class Engine implements MemStatus {
             equals(X.ndim(), "X.ndim", 4);
             equals(W.ndim(), "W.ndim", 4);
             equals(W.dim(3), "W.IC ", X.dim(3), "X.IC");
+            require_dtype(Bias, "Bias");
             equals(Bias.lastDim(), "Bias.lastDim", W.dim(0), "W.OC");
         }
         
@@ -2349,6 +2350,7 @@ public class Engine implements MemStatus {
             equals(Y.dim(0), "Y.N", X.dim(0), "N");
             equals(W.dim(3), "W.OC", Y.dim(3), "Y.OC");
             equals(W.dim(0), "W.IC", X.dim(3), "X.IC");
+            require_dtype(Bias, "Bias");
             equals(Bias.lastDim(), "Bias.lastDim", W.dim(3), "W.OC");
         }
         
@@ -2382,6 +2384,7 @@ public class Engine implements MemStatus {
             equals(X.ndim(), "X.ndim", 4);
             equals(W.ndim(), "W.ndim", 4);
             equals(W.dim(0), "W.IC", X.dim(3), "X.IC");
+            require_dtype(Bias, "Bias");
             equals(Bias.lastDim(), "Bias.lastDim", W.dim(3), "W.OC");
         }
         
@@ -2771,11 +2774,78 @@ public class Engine implements MemStatus {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="DepthWise Convlution 3D">
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y)">
+    public Tensor depthwise_conv3D(Tensor Y, Tensor X, Tensor W, int sh, int sw) { return depthwise_conv3D(Y, X, W, sh, sw, -1, -1); }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor depthwise_conv3D(Tensor Y, Tensor X, Tensor W, int sh, int sw, int ph, int pw) {
+        if(check) {
+            require_dtype(Y, "Y"); require_dtype(X, "X"); require_dtype(W, "W"); 
+            equals(Y.ndim(), "Y.ndim", 4);
+            equals(X.ndim(), "X.ndim", 4);
+            equals(W.ndim(), "W.ndim", 3);
+            equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
+            equals(W.dim(2), "W.OC", Y.dim(3), "Y.OC");
+        }
+        
+        int[] dimY = Y.dim, dimX = X.dim, dimW = W.dim;
+        int OH = dimY[1], OW = dimY[2];//Y[N, OH, OW, OC]
+        int XN = dimX[0], IH = dimX[1], IW = dimX[2], IC = dimX[3];//X[N, IH, IW, IC]
+        int FH = dimW[0], FW = dimW[1], OC = dimW[2];//W[FH, FW, OC]
+        
+        if (ph == -1) ph = ((OH - 1)*sh + FH - IH + 1) >> 1;//ceiling
+        if (pw == -1) pw = ((OW - 1)*sw + FW - IW + 1) >> 1;//ceiling
+        
+        Syncer sc = core.depthwise_conv3D(
+                Y.address, OH, OW, 
+                X.address, IH, IW, 
+                W.address, FH, FW, 
+                XN, IC, OC, 
+                sh, sw, ph, pw);
+        if (sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="forward propagation: (Y, bias)">
+    public Tensor depthwise_conv3D_biased(Tensor Y, Tensor X, Tensor W, int sh, int sw, Tensor Bias) {
+        return depthwise_conv3D_biased(Y, X, W, sh, sw, -1, -1, Bias); 
+    }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor depthwise_conv3D_biased(Tensor Y, Tensor X, Tensor W, int sh, int sw, int ph, int pw, Tensor Bias) { 
+        if(check) {//W[FH, FW, OC]
+            require_dtype(Y, "Y"); require_dtype(X, "X"); require_dtype(W, "W"); 
+            equals(Y.ndim(), "Y.ndim", 4);
+            equals(X.ndim(), "X.ndim", 4);
+            equals(W.ndim(), "W.ndim", 3);
+            equals(Y.dim(0), "Y.batch", X.dim(0), "X.batch");
+            equals(W.dim(2), "W.OC", Y.dim(3), "Y.OC");
+            require_dtype(Bias, "Bias");
+            equals(Bias.lastDim(), "Bias.lastDim", W.dim(2), "W.OC");
+        }
+        
+        int[] dimY = Y.dim, dimX = X.dim, dimW = W.dim;
+        int OH = dimY[1], OW = dimY[2];//Y[N, OH, OW, OC]
+        int XN = dimX[0], IH = dimX[1], IW = dimX[2], IC = dimX[3];//X[N, IH, IW, IC]
+        int FH = dimW[0], FW = dimW[1], OC = dimW[2];//W[FH, FW, OC]
+        
+        if (ph == -1) ph = ((OH - 1)*sh + FH - IH + 1) >> 1;//ceiling
+        if (pw == -1) pw = ((OW - 1)*sw + FW - IW + 1) >> 1;//ceiling
+        
+        Syncer sc = core.depthwise_conv3D_biased(
+                Y.address, OH, OW,
+                X.address, IH, IW,
+                W.address, FH, FW, 
+                XN, IC, OC, 
+                sh, sw, ph, pw, 
+                Bias.address, Y.lengthv);
+        if(sync) sc.sync(); else Y.setSyncer(sc);
+        return Y;
+    }
+    //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="forward propagation: (OH, OW) -> Y">
-    public Tensor depthwise_conv3D(Tensor X, Tensor W, int sh, int sw, int ph, int pw) { return depthwise_conv3D(X, W, -1, -1, sh, sw, ph, pw);  }
+    public Tensor depthwise_conv3D(Tensor X, Tensor W, int sh, int sw, int ph, int pw) { return depthwise_conv3D(X, W, -1, -1, sh, sw, ph, pw); }
     @Passed("CudaFloat32EngieBase")
     public Tensor depthwise_conv3D(Tensor X, Tensor W, int OH, int OW, int sh, int sw, int ph, int pw) {
-        if(check) {//W[FH, FW, OC]
+        if(check) {
             require_dtype(X, "W"); require_dtype(W, "W"); 
             equals(X.ndim(), "X.ndim", 4);
             equals(W.ndim(), "W.ndim", 3);
@@ -2785,8 +2855,8 @@ public class Engine implements MemStatus {
         int XN = dimX[0], IH = dimX[1], IW = dimX[2], IC = dimX[3];//X[N, IH, IW, IC]
         int FH = dimW[0], FW = dimW[1], OC = dimW[2];//W[FH, FW, OC]
         
-        if(OH == -1) OH = (IH - FH + (ph << 1)) / sh + 1;//floor
-        if(OW == -1) OW = (IW - FW + (pw << 1)) / sw + 1;//floor
+        if (OH == -1) OH = (IH - FH + (ph << 1)) / sh + 1;//floor
+        if (OW == -1) OW = (IW - FW + (pw << 1)) / sw + 1;//floor
         
         Tensor Y = this.empty(XN, OH, OW, OC).c(); 
         Syncer sc = core.depthwise_conv3D(
@@ -2817,8 +2887,8 @@ public class Engine implements MemStatus {
         int XN = dimX[0], IH = dimX[1], IW = dimX[2], IC = dimX[3];//X[N, IH, IW, IC]
         int FH = dimW[0], FW = dimW[1], OC = dimW[2];//W[FH, FW, OC]
         
-        if(OH == -1) OH = (IH - FH + (ph << 1)) / sh + 1;//floor
-        if(OW == -1) OW = (IW - FW + (pw << 1)) / sw + 1;//floor
+        if (OH == -1) OH = (IH - FH + (ph << 1)) / sh + 1;//floor
+        if (OW == -1) OW = (IW - FW + (pw << 1)) / sw + 1;//floor
         Tensor Y = this.empty(XN, OH, OW, OC).c();
         
         Syncer sc = core.depthwise_conv3D_biased(
@@ -2828,11 +2898,44 @@ public class Engine implements MemStatus {
                 XN, IC, OC, 
                 sh, sw, ph, pw, 
                 Bias.address, Y.lengthv);
-        if(sync) sc.sync(); else Y.setSyncer(sc);
+        if (sync) sc.sync(); else Y.setSyncer(sc);
         return Y;
     }
     //</editor-fold>
     
+    //<editor-fold defaultstate="collapsed" desc="backward propagation: (deltaW)">
+    public Tensor depthwise_conv3D_deltaW(Tensor deltaW, Tensor X, Tensor deltaY, int sh, int sw) {
+        return depthwise_conv3D_deltaW(deltaW, X, deltaY, sh, sw, -1, -1);
+    }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor depthwise_conv3D_deltaW(Tensor deltaW, Tensor X, Tensor deltaY, int sh, int sw, int ph, int pw) {
+        if(check) {
+            require_dtype(deltaW, "deltaW"); require_dtype(X, "X"); require_dtype(deltaY, "deltaY"); 
+            equals(deltaY.ndim(), "deltaY.ndim", 4);
+            equals(X.ndim(), "X.ndim", 4);
+            equals(deltaW.ndim(), "deltaW.ndim", 3);
+            equals(deltaY.dim(0), "deltaY.batch", X.dim(0), "X.batch");
+            equals(deltaW.dim(2), "deltaW.OC", deltaY.dim(3), "deltaY.OC");
+        }
+        
+        int[] dimY = deltaY.dim, dimX = X.dim, dimW = deltaW.dim;
+        int OH = dimY[1], OW = dimY[2], OC = dimY[3];//Y[N, OH, OW, OC]
+        int XN = dimX[0], IH = dimX[1], IW = dimX[2], IC = dimX[3];//X[ N, IH, IW, IC]
+        int FH = dimW[0], FW = dimW[1];//W[FH, FW, OC]
+        
+        if (ph == -1) ph = ((OH - 1)*sh + FH - IH + 1) >> 1;//ceiling
+        if (pw == -1) pw = ((OW - 1)*sw + FW - IW + 1) >> 1;//ceiling
+        
+        Syncer sc = core.depthwise_conv3D_deltaW(
+                deltaW.address, FH, FW,
+                X.address, IH, IW, 
+                deltaY.address, OH, OW,
+                XN, IC, OC, 
+                sh, sw, ph, pw);
+        if (sync) sc.sync(); else deltaW.setSyncer(sc);
+        return deltaW;
+    }
+    //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="backward propagation: (FH, FW) -> deltaW">
     public Tensor depthwise_conv3D_deltaW(Tensor X, Tensor deltaY, int sh, int sw, int ph, int pw) {
         return depthwise_conv3D_deltaW(X, deltaY, -1, -1, sh, sw, ph, pw);
@@ -2850,18 +2953,52 @@ public class Engine implements MemStatus {
         int OH = dimY[1], OW = dimY[2], OC = dimY[3];//Y[N, OH, OW, OC]
         int XN = dimX[0], IH = dimX[1], IW = dimX[2], IC = dimX[3];//X[ N, IH, IW, IC]
         
-        if(FH == -1) FH = IH + (ph << 1) - (OH - 1)*sh;//ceiling
-        if(FW == -1) FW = IW + (pw << 1) - (OW - 1)*sw;//ceiling
+        if (FH == -1) FH = IH + (ph << 1) - (OH - 1)*sh;//ceiling
+        if (FW == -1) FW = IW + (pw << 1) - (OW - 1)*sw;//ceiling
         Tensor deltaW = this.empty(FH, FW, OC).c();
         
-        Syncer sc = core.conv3D_deltaW(
+        Syncer sc = core.depthwise_conv3D_deltaW(
                 deltaW.address, FH, FW,
                 X.address, IH, IW, 
-                deltaY.address, OH, OW, 
+                deltaY.address, OH, OW,
                 XN, IC, OC, 
                 sh, sw, ph, pw);
-        if(sync) sc.sync(); else deltaW.setSyncer(sc);
+        if (sync) sc.sync(); else deltaW.setSyncer(sc);
         return deltaW;
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="backward propagation: (deltaX)">
+    public Tensor depthwise_conv3D_deltaX(Tensor deltaX, Tensor deltaY, Tensor W, int sh, int sw) { 
+        return depthwise_conv3D_deltaX(deltaX, deltaY, W, sh, sw, -1, -1);
+    }
+    @Passed("CudaFloat32EngieBase")
+    public Tensor depthwise_conv3D_deltaX(Tensor deltaX, Tensor deltaY, Tensor W, int sh, int sw, int ph, int pw) {
+         if(check) {
+             require_dtype(deltaX, "deltaX"); require_dtype(deltaY, "deltaY"); require_dtype(W, "W"); 
+            equals(deltaX.ndim(), "deltaX.ndim", 4);
+            equals(deltaY.ndim(), "deltaY.ndim", 4);
+            equals(W.ndim(), "W.ndim", 3);
+            equals(W.dim(2), "W.OC", deltaY.dim(3), "Y.OC");
+            equals(deltaX.dim(0), "deltaX.batch", deltaY.dim(0), "deltaY.batch");
+        }
+        
+        int[] dimY = deltaY.dim, dimW = W.dim, dimX = deltaX.dim;
+        int YN = dimY[0], OH = dimY[1], OW = dimY[2];//Y[N, OH, OW, OC]
+        int FH = dimW[0], FW = dimW[1], OC = dimW[2];//W[FH, FW, OC]
+        int IH = dimX[1], IW = dimX[2], IC = dimX[3];//X[N, IH, IW, IC]
+        
+        if(ph == -1) ph = ((OH - 1)*sh + FH - IH + 1) >> 1;//ceiling
+        if(pw == -1) pw = ((OW - 1)*sw + FW - IW + 1) >> 1;//ceiling
+        
+        Syncer sc = core.depthwise_conv3D_deltaX(
+                deltaX.address, IH, IW, 
+                deltaY.address, OH, OW, 
+                W.address, FH, FW, 
+                YN, IC, OC, 
+                sh, sw, ph, pw);
+        if(sync) sc.sync(); else deltaX.setSyncer(sc);
+        return deltaX;
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="backward propagation: (IH, IW) -> deltaX">
@@ -2870,11 +3007,11 @@ public class Engine implements MemStatus {
     }
     @Passed("CudaFloat32EngieBase")
     public Tensor depthwise_conv3D_deltaX(Tensor deltaY, Tensor W, int IH, int IW, int IC, int sh, int sw, int ph, int pw) {
-         if(check) {//W[FH, FW, OC]
+         if(check) {
             require_dtype(deltaY, "deltaY"); require_dtype(W, "W"); 
             equals(deltaY.ndim(), "deltaY.ndim", 4);
-            equals(W.ndim(), "W.ndim", 4);
-            equals(W.dim(3), "W.OC", deltaY.dim(3), "Y.OC");
+            equals(W.ndim(), "W.ndim", 3);
+            equals(W.dim(2), "W.OC", deltaY.dim(3), "Y.OC");
         }
         
         int[] dimY = deltaY.dim, dimW = W.dim;
@@ -2896,10 +3033,6 @@ public class Engine implements MemStatus {
         return deltaX;
     }
     //</editor-fold>
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="DepthWise Deconvlution 3D">
-    
-    
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Pooling2D (NHWC)">
@@ -4021,24 +4154,18 @@ public class Engine implements MemStatus {
     
     //<editor-fold defaultstate="collapsed" desc="linear2">
     public Tensor sub(boolean inpalce, Tensor X1, Tensor X2) { return linear2(inpalce, X1, X2, 1.0f, -1.0f, 0.0f);}
-    public Tensor sub(boolean inplace, float alpha, Tensor X1, float beta, Tensor X2) {
-        return linear2(inplace, X1, X2, alpha, -beta, 0.0f);
-    }
+    public Tensor sub(boolean inplace, float alpha, Tensor X1, float beta, Tensor X2) { return linear2(inplace, X1, X2, alpha, -beta, 0.0f); }
     
     public Tensor add(boolean inplace, Tensor X1, Tensor X2) { return linear2(inplace, X1, X2, 1.0f, 1.0f, 0.0f); }
-    public Tensor add(boolean inplace, float alpha, Tensor X1, float beta, Tensor X2) {
-        return linear2(inplace, X1, X2, alpha, beta, 0.0f);
-    }
+    public Tensor add(boolean inplace, float alpha, Tensor X1, float beta, Tensor X2) { return linear2(inplace, X1, X2, alpha, beta, 0.0f); }
     
     public Tensor linear2(boolean inplace,//default likeX1
-            Tensor X1, Tensor X2, 
-            float alpha, float beta, float gamma) {
+            Tensor X1, Tensor X2, float alpha, float beta, float gamma) {
         return linear2(inplace, true, X1, X2, alpha, beta, gamma);
     }
     @Passed("CudaFloat32EngieBase")
     public Tensor linear2(boolean inplace, boolean likeX1, 
-            Tensor X1, Tensor X2,
-            float alpha, float beta, float gamma)
+            Tensor X1, Tensor X2, float alpha, float beta, float gamma)
     {
         if(check) {//Y = alpha*X1 + beta*X2 + gamma
             require_dtype(X1, "X1"); require_dtype(X2, "X2");
@@ -4054,12 +4181,8 @@ public class Engine implements MemStatus {
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="linear2_row">
-    public Tensor sub_row(boolean inplace, Tensor X1, Tensor X2) { 
-        return linear2_row(inplace, X1, X2, 1.0f, -1.0f, 0);
-    }
-    public Tensor add_row(boolean inplace, Tensor X1, Tensor X2) {
-        return linear2_row(inplace, X1, X2, 1.0f, 1.0f, 0);
-    }
+    public Tensor sub_row(boolean inplace, Tensor X1, Tensor X2) { return linear2_row(inplace, X1, X2, 1.0f, -1.0f, 0); }
+    public Tensor add_row(boolean inplace, Tensor X1, Tensor X2) { return linear2_row(inplace, X1, X2, 1.0f, 1.0f, 0); }
     public Tensor add_row(boolean inplace, float alpha, Tensor X1, float beta, Tensor X2) {
         return linear2_row(inplace, X1, X2, alpha, beta, 0);
     }
@@ -8989,7 +9112,7 @@ public class Engine implements MemStatus {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="pixel_to_tensor">
-    @Passed("CudaFloat32EngieBase")
+    @Passed("CudaFloat32EngieBase")//pixel[0-255] / 255.0f
     public Tensor pixel_to_tensor(boolean inplace, Tensor X) {
         if(check) { require_int8(X, "X"); }
         Tensor Y = this.empty(X.dim).c();
@@ -9021,6 +9144,66 @@ public class Engine implements MemStatus {
         long old_memLen = X.mem_size, oldAddr = X.address;
         X.copy_memoryMetaData_and_deleteSrc(Y);//let: X.dim = Y.dim/newDim, X.address = Y.address.newAddress
         X.dataType = Y.dataType;//X<int8> -> X<dtype>
+        
+        Syncer sc = Syncer.dual(sc1, ()->{ core.free(old_memLen, oldAddr); });
+        if(sync) sc.sync(); else X.setSyncer(sc);
+        return X;
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="row repeat function: [M] -> [N:field, M: row]">
+    //[M] -> [N, M]: Y = alpha*X + beta
+    public Tensor repeat_linear(boolean inplace,
+            Tensor X, int field_length, 
+            float alpha, float beta) 
+    {
+        if(check) {  require_dtype(X, "X"); }
+        
+        int dimX[] = X.dim, ndim = dimX.length;
+        int dimY[] = new int[ndim + 1]; dimY[0] = field_length;
+        for (int i=0; i<ndim; i++) dimY[i + 1] = dimX[i];
+        
+        Tensor Y = this.empty(dimY).c();
+        Syncer sc1 = core.repeat_linear2D_row(Y.address, 
+                X.address, X.lengthv, 
+                alpha, beta, 
+                Y.lengthv, Y.lastDim());
+        
+        //======[inplace = false, return the new Tensor Y]======================
+        if (!inplace) { if (sync) sc1.sync(); else Y.setSyncer(sc1); }
+        
+        //======[inplace = true, return the old Tensor X]=======================
+        long old_memLen = X.mem_size, oldAddr = X.address;
+        X.copy_memoryMetaData_and_deleteSrc(Y);//let: X.dim = Y.dim/newDim, X.address = Y.address.newAddress
+        
+        Syncer sc = Syncer.dual(sc1, ()->{ core.free(old_memLen, oldAddr); });
+        if(sync) sc.sync(); else X.setSyncer(sc);
+        return X;
+    }
+    
+    //[M] -> [N, M]: Y = alpha*X + beta
+    public Tensor repeat_quadratic(boolean inplace,
+            Tensor X, int field_length, 
+            float alpha, float beta, float gamma) 
+    {
+        if(check) {  require_dtype(X, "X"); }
+        
+        int dimX[] = X.dim, ndim = dimX.length;
+        int dimY[] = new int[ndim + 1]; dimY[0] = field_length;
+        for (int i=0; i<ndim; i++) dimY[i + 1] = dimX[i];
+        Tensor Y = this.empty(dimY).c();
+        
+        Syncer sc1 = core.repeat_quadratic2D_row(Y.address, 
+                X.address, X.lengthv,
+                alpha, beta, gamma,
+                Y.lengthv, Y.lastDim());
+        
+        //======[inplace = false, return the new Tensor Y]======================
+        if (!inplace) { if(sync) sc1.sync(); else Y.setSyncer(sc1); }
+        
+        //======[inplace = true, return the old Tensor X]=======================
+        long old_memLen = X.mem_size, oldAddr = X.address;
+        X.copy_memoryMetaData_and_deleteSrc(Y);//let: X.dim = Y.dim/newDim, X.address = Y.address.newAddress
         
         Syncer sc = Syncer.dual(sc1, ()->{ core.free(old_memLen, oldAddr); });
         if(sync) sc.sync(); else X.setSyncer(sc);
@@ -10687,7 +10870,7 @@ public class Engine implements MemStatus {
     //</editor-fold>  
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="field [field, row] reduce function">
+    //<editor-fold defaultstate="collapsed" desc="field reduce function: (N: field, M: row) -> (M)">
     //<editor-fold defaultstate="collapsed" desc="field linear">
     public Tensor field_mean(Tensor X) { return field_mean(X, -1); }
     public Tensor field_mean(Tensor X, int row_length) {
@@ -11008,7 +11191,7 @@ public class Engine implements MemStatus {
         
         //[Y_firstDim = Y.height = height, Y.lastDim = mem_width = Y.width]
         int width = X.lastDim(), height = row_length / width;
-        int[] dimY = (height > 1? new int[]{ height, width } : new int[]{ width });
+        int[] dimY = (height > 1 ? new int[]{ height, width } : new int[]{ width });
         Tensor var  = this.empty(dimY);
         Tensor mean = this.empty(dimY);
         
@@ -11070,7 +11253,7 @@ public class Engine implements MemStatus {
     //</editor-fold>
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="center [dim0, dim1, dim2] reduce function">
+    //<editor-fold defaultstate="collapsed" desc="center reduce function: (D0: dim0, D1: dim1, D2: dim2) -> (D0, D2)">
     //<editor-fold defaultstate="collapsed" desc="center_reduce_param_check">
     private void center_reduce_param_check(Tensor X, String name, int dim0, int dim2) {
         if(X.ndim() < 3) throw new RuntimeException(String.format(
@@ -11222,7 +11405,7 @@ public class Engine implements MemStatus {
     //</editor-fold>
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="row [field, row] reduce function">
+    //<editor-fold defaultstate="collapsed" desc="row reduce function: (N: field, M: row) -> (N)">
     //<editor-fold defaultstate="collapsed" desc="row_reduce_param_check">
     protected void row_reduce_param_check(Tensor X, int row_length) {
         if(X.ndim() <= 1) throw new IllegalArgumentException(String.format(

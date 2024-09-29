@@ -27,7 +27,7 @@ public class CosAnnealingLr extends LrSchedular {
     
     public float tmax() { return tmax; }
     public CosAnnealingLr tmax(float tmax) {
-        if(tmax == 0) throw new IllegalArgumentException("tmax can't be zero."); 
+        if (tmax == 0) throw new IllegalArgumentException("tmax can't be zero."); 
         this.tmax = tmax; 
         return this; 
     }

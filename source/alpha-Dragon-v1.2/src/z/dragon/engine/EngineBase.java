@@ -222,35 +222,35 @@ public abstract class EngineBase {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="DepthWiseConvolution3D">
-    public Syncer depthwise_conv3D(
+    public abstract Syncer depthwise_conv3D(
             long Y_address, int OH, int OW, 
             long X_address, int IH, int IW,
             long W_address, int FH, int FW,
             int N, int IC, int OC,
-            int sh, int sw, int ph, int pw) { return null; }
+            int sh, int sw, int ph, int pw);
     
-    public Syncer depthwise_conv3D_biased(
+    public abstract Syncer depthwise_conv3D_biased(
             long Y_address, int OH, int OW, 
             long X_address, int IH, int IW, 
             long W_address, int FH, int FW,         
             int N, int IC, int OC, 
             int sh, int sw, int ph, int pw,
             long Bias_address, //stride = OC, lengthv = N*OH*OW*OC
-            int lengthv, int width) { return null; } 
+            int lengthv, int width);
     
-    public Syncer depthwise_conv3D_deltaW(
+    public abstract Syncer depthwise_conv3D_deltaW(
             long deltaW_address, int FH, int FW, 
-            long X_address, int IH, int IW,
+            long      X_address, int IH, int IW,
             long deltaY_address, int OH, int OW,
             int N, int IC, int OC,
-            int sh, int sw, int ph, int pw) { return null; }
+            int sh, int sw, int ph, int pw);
     
-    public Syncer depthwise_conv3D_deltaX(
+    public abstract Syncer depthwise_conv3D_deltaX(
             long deltaX_address, int IH, int IW,
             long deltaY_address, int OH, int OW,
-            long W_address, int FH, int FW,
+            long      W_address, int FH, int FW,
             int N, int IC, int OC,
-            int sh, int sw, int ph, int pw) { return null; }
+            int sh, int sw, int ph, int pw);
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Pool2D">
@@ -1798,6 +1798,18 @@ public abstract class EngineBase {
     
     public abstract Syncer tensor2pix2D(long Y_address,
             long X_address, 
+            int lengthv, int width, int stride);
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="repeat functions">
+    public abstract Syncer repeat_linear2D_row(long Y_address,
+            long X_address, int row_lengthv,
+            float alpha, float beta,
+            int lengthv, int width, int stride);
+    
+    public abstract Syncer repeat_quadratic2D_row(long Y_address,
+            long X_address, int row_lengthv,
+            float alpha, float beta, float gamma,
             int lengthv, int width, int stride);
     //</editor-fold>
    

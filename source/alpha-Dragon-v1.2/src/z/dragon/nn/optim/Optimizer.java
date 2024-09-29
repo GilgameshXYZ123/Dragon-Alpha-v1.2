@@ -17,7 +17,6 @@ import z.dragon.engine.Tensor;
 import z.dragon.nn.optim.lr_schedular.LrSchedular;
 import z.dragon.common.state.State.Stateful;
 import z.dragon.engine.Parameter;
-import z.dragon.engine.Tensor.TensorList;
 
 /**
  *
@@ -78,7 +77,7 @@ public abstract class Optimizer implements Stateful, StateReader {
     public float learning_rate() { return lr; }
     public Optimizer learning_rate(float lr) {
         this.lr = lr; 
-        if(lr_schedular != null) lr_schedular.init(lr);
+        if (lr_schedular != null) lr_schedular.init(lr);
         return this;
     }
     
@@ -113,9 +112,9 @@ public abstract class Optimizer implements Stateful, StateReader {
     protected abstract void param_state(State dic, int index, String param_name);
     @Override
     public void state(State dic) {
-        if(param_names == null) return;
+        if (param_names == null) return;
         hypher_state(dic);
-        for(int i=0; i<params.length; i++) 
+        for (int i = 0; i < params.length; i++) 
             param_state(dic, i, param_names[i]);
     }
   
@@ -125,7 +124,7 @@ public abstract class Optimizer implements Stateful, StateReader {
     public void update_state(State dic, boolean partial) {
         if(param_names == null) return;
         update_hypher_state(dic, partial);
-        for(int i=0; i<params.length; i++) 
+        for (int i = 0; i < params.length; i++)
             update_param_state(dic, partial, i, param_names[i]);
     }
     //</editor-fold>
@@ -154,25 +153,25 @@ public abstract class Optimizer implements Stateful, StateReader {
     public synchronized Optimizer decay(float L2coef, float L1coef) {
         float alpha = (1 - L2coef) * lr;
         float beta = -lr * L1coef;
-        for(Parameter param : params) param.c().linear(true, alpha, beta);
-        for(Parameter param : params) param.c();
+        for (Parameter param : params) param.c().linear(true, alpha, beta);
+        for (Parameter param : params) param.c();
         return this;
     }
     
     public synchronized Optimizer zero_nan_params() { 
-        for(Parameter param : params) param.c().zero_nan();
-        for(Parameter param : params) param.c();
+        for (Parameter param : params) param.c().zero_nan();
+        for (Parameter param : params) param.c();
         return this;
     }
     
     public synchronized Optimizer zero_nan_gradients() {  
-        for(Parameter param : params) {
+        for (Parameter param : params) {
             List<Tensor> grads = param.grads() ; 
             if(grads.isEmpty()) continue;
             for(Tensor grad : grads) grad.c().zero_nan();
         }
         
-        for(Parameter param : params) {
+        for (Parameter param : params) {
             List<Tensor> grads = param.grads() ; 
             if(grads.isEmpty()) continue;
             for(Tensor grad : grads) grad.c();
@@ -183,16 +182,22 @@ public abstract class Optimizer implements Stateful, StateReader {
      
     //<editor-fold defaultstate="collapsed" desc="running-area: update">   
     public synchronized Optimizer sum_grads() {
-        TensorList list = new TensorList(params.length);
-        for(Parameter param : params) list.add(param.sum_grads());
-        Tensor.sync(list);
+        Tensor[] arr = new Tensor[params.length]; int index = 0; 
+        for (Parameter param : params) {
+            Tensor sum = param.sum_grads();
+            if (sum != null) arr[index++] = sum;
+        }
+        Tensor.sync(arr);
         return this;
     }
     
     public synchronized Optimizer mean_grads() {
-        TensorList list = new TensorList(params.length);
-        for(Parameter param : params) list.add(param.mean_grads());
-        Tensor.sync(list);
+        Tensor[] arr = new Tensor[params.length]; int index = 0;
+        for (Parameter param : params) {
+            Tensor mean = param.mean_grads();
+            if (mean != null) arr[index++] = mean;
+        }
+        Tensor.sync(arr);
         return this;
     }
     

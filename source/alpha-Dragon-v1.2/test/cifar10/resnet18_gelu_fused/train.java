@@ -35,16 +35,19 @@ public class train
         eg.kaiming_fan_mode = Engine.FanMode.fan_in_out;
         CudaFloat32EngineBase cu32 = (CudaFloat32EngineBase) eg.engineBase();
 //        cu32.conv3D_useTexture(true);
+        System.out.println(cu32.device().getTotalConstMemory());
+
     }
     
-    static int batch_size = 512;//512;
-    static float lr = 0.001f;//learning_rate
+    static int batch_size = 256;//512;
+    static float lr = 0.0005f;//learning_rate
     
     public static void training(int epoch) throws IOException {
         ResNet18 net = new ResNet18().init(eg).println(); //net.load();
         net.train();
       
-        Optimizer opt = alpha.optim.Adam(net.params(), lr);
+//        Optimizer opt = alpha.optim.Adam(net.params(), lr);
+        Optimizer opt = alpha.optim.AdamW(net.params(), 1e-3f, lr).amsgrad(true);
 //        Optimizer opt = alpha.optim.SGDMN(net.params(), lr).momentum(0.9f).nestorv(1);
 //        Optimizer opt = alpha.optim.SGD(net.params(), lr).println();
         
@@ -90,7 +93,7 @@ public class train
             //25 epochs for Adam 
             //50 epochs for SGD
             //30 epcohs for SGDMN
-            training(25);
+            training(35);
         }
         catch(IOException e) {
             e.printStackTrace();

@@ -20,8 +20,7 @@ import z.util.math.vector.Vector;
  *
  * @author Gilgamesh
  */
-public class Cuda_conv3D_dW_test 
-{
+public class Cuda_conv3D_dW_test  {
     static { alpha.home("C:\\Users\\Gilgamesh\\Desktop\\Dragon-alpha-v1.2");}
     static Engine eg = alpha.engine.cuda_float32(0, alpha.engine.memp1());
     static {
@@ -148,7 +147,7 @@ public class Cuda_conv3D_dW_test
         
         eg.check(false).sync(false);
         SimpleTimer timer = new SimpleTimer().record();
-        int nIter = 1;
+        int nIter = 1000;
         for(int i = 0;i < nIter;i++)
         {
             tdeltaW = eg.conv3D_deltaW(tX, tdeltaY, FH, FW, sh, sw, ph, pw); eg.delete(tdeltaW.c());
@@ -173,24 +172,23 @@ public class Cuda_conv3D_dW_test
         eg.delete(tX, tdeltaW, tdeltaY);
     }
     
-    public static void main(String[] args)
-    {
-     
+    public static void main(String[] args) {
 //        Vector.PRINT_DIFFERENT = true;
-
 //         int FH = 7, FW = 7, sh = 1, sw = 1, ph = 3, pw = 3;
-//        
 
         //======[3x3]===========================================================
         int FH = 3, FW = 3, sh = 1, sw = 1, ph = 1, pw = 1;
-        //int IH = 128, IW = 128, OH = 128, OW = 128, N = 64, IC = 64, OC = 64;
-        //int IH = 64, IW = 64, OH = 64, OW = 64, N = 64, OC = 128, IC = 128;
-        //int IH = 32, IW = 32, OH = 32, OW = 32, N = 64, OC = 256, IC = 256;
+       //int IH = 128, IW = 128, OH = 128, OW = 128, N = 64, IC = 64, OC = 64;
+       //int IH = 64, IW = 64, OH = 64, OW = 64, N = 64, OC = 128, IC = 128;
+       //int IH = 32, IW = 32, OH = 32, OW = 32, N = 64, OC = 256, IC = 256;
         //int IH = 16, IW = 16, OH = 16, OW = 16, N = 64, OC = 512, IC = 512;
         //int IH = 8, IW = 8, OH = 8, OW = 8, N = 64, OC = 1024, IC = 1024;
         
         //int IH = 96, IW = 96, OH = 96, OW = 96, N = 128, OC = 64, IC = 64;
-        //int IH = 48, IW = 48, OH = 48, OW = 48, N = 128, OC = 128, IC = 128;
+       // int IH = 48, IW = 48, OH = 48, OW = 48, N = 128, OC = 128, IC = 128;
+       int IH = 45, IW = 45, OH = 45, OW = 45, N = 128, OC = 128, IC = 128;
+       //int IH = 28, IW = 28, OH = 28, OW = 28, N = 128, OC = 128, IC = 128;
+       //int IH = 27, IW = 27, OH = 27, OW = 27, N = 128, OC = 256, IC = 256;
         //int IH = 24, IW = 24, OH = 24, OW = 24, N = 128, OC = 256, IC = 256;
         //int IH = 12, IW = 12, OH = 12, OW = 12, N = 64, OC = 512, IC = 512;
 

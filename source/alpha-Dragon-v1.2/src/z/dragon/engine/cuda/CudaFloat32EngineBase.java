@@ -22,6 +22,9 @@ import z.dragon.engine.cuda.impl.math.Cuda_batchMatMul;
 import z.dragon.engine.cuda.impl.math.Cuda_conv3D;
 import z.dragon.engine.cuda.impl.math.Cuda_dconv3D_deltaW;
 import z.dragon.engine.cuda.impl.math.Cuda_dconv3D_deltaX;
+import z.dragon.engine.cuda.impl.math.Cuda_depthwise_conv3D;
+import z.dragon.engine.cuda.impl.math.Cuda_depthwise_dconv3D_deltaW;
+import z.dragon.engine.cuda.impl.math.Cuda_depthwise_dconv3D_deltaX;
 import z.dragon.engine.cuda.impl.math.Cuda_function;
 import z.dragon.engine.cuda.impl.math.Cuda_image;
 import z.dragon.engine.cuda.impl.math.Cuda_pool2D;
@@ -34,6 +37,7 @@ import z.util.math.ExMath;
 import z.util.math.Num;
 import z.util.math.vector.Vector;
 import z.util.function.Int2Float;
+import z.dragon.engine.cuda.impl.math.Cuda_depthwise_dconv3D_deltaW.DWConvDW_GZ_Decider;
 
 /**
  *
@@ -80,13 +84,14 @@ public class CudaFloat32EngineBase extends EngineBase {
          
         //param initailze-------------------------------------------------------
         final int SM_count = dev.multiProcessorCount();
-        conv3D_dW_GemmSK_maxPart            = Init_smooth_maxPart(SM_count);
-        conv3D_dW_Im2colWinogradSHW_maxPart = Init_smooth_maxPart((int) (1.21f * SM_count)); 
-        matMul_sk_maxPart                   = Init_smooth_maxPart(SM_count);
-        matMulT1_sk_maxPart                 = Init_smooth_maxPart(SM_count);
-        matMulT2_sk_maxPart                 = Init_smooth_maxPart(SM_count);
+        conv3D_dW_GemmSK_maxPart      = Init_smooth_maxPart(SM_count);
+        conv3D_dW_WinogradSHW_maxPart = Init_smooth_maxPart((int) (1.21f * SM_count)); 
+        dwconv3D_dW_GemmSK_maxPart    = Init_smooth_maxPart((int) (3.28f * SM_count));
+        matMul_sk_maxPart             = Init_smooth_maxPart(SM_count);
+        matMulT1_sk_maxPart           = Init_smooth_maxPart(SM_count);
+        matMulT2_sk_maxPart           = Init_smooth_maxPart(SM_count);
     }
-   
+    
     public CudaFloat32EngineBase tf32(boolean flag) { 
         matMul_tf32   = flag;
         matMulT1_tf32 = flag;
@@ -104,7 +109,7 @@ public class CudaFloat32EngineBase extends EngineBase {
     public PinnedMempool buf_mempool() { return bufPool; }
     public synchronized CudaFloat32EngineBase buf_mempool(PinnedMempool mempool) { this.bufPool = mempool; return this; }
     
-    public CudaDevice device() {return dev;}
+    public CudaDevice device() { return dev; }
     
     @Override
     public void append(StringBuilder sb) {
@@ -2764,17 +2769,17 @@ public class CudaFloat32EngineBase extends EngineBase {
         return this;
     }
     
-    protected boolean conv3D_dW_Im2colWinogradV2_SHW_s4 = true;
-    public boolean conv3D_deltaW_Im2colWinogradV2_SHW_s4() { return conv3D_dW_Im2colWinogradV2_SHW_s4; }
-    public CudaFloat32EngineBase conv3D_deltaW_Im2colWinogradV2_SHW_s4(boolean flag) { conv3D_dW_Im2colWinogradV2_SHW_s4 = flag; return this; }
+    protected boolean conv3D_dW_WinogradV2_SHW_s4 = true;
+    public boolean conv3D_deltaW_WinogradV2_SHW_s4() { return conv3D_dW_WinogradV2_SHW_s4; }
+    public CudaFloat32EngineBase conv3D_deltaW_WinogradV2_SHW_s4(boolean flag) { conv3D_dW_WinogradV2_SHW_s4 = flag; return this; }
     
-    protected boolean conv3D_dW_Im2colWinogradV2_SHW_s8 = true;
-    public boolean conv3D_deltaW_Im2colWinogradV2_SHW_s8() { return conv3D_dW_Im2colWinogradV2_SHW_s8; }
-    public CudaFloat32EngineBase conv3D_deltaW_Im2colWinogradV2_SHW_s8(boolean flag) { conv3D_dW_Im2colWinogradV2_SHW_s8 = flag; return this; }
+    protected boolean conv3D_dW_WinogradV2_SHW_s8 = true;
+    public boolean conv3D_deltaW_WinogradV2_SHW_s8() { return conv3D_dW_WinogradV2_SHW_s8; }
+    public CudaFloat32EngineBase conv3D_deltaW_WinogradV2_SHW_s8(boolean flag) { conv3D_dW_WinogradV2_SHW_s8 = flag; return this; }
     
-    protected boolean conv3D_dW_Im2colWinogradV2_SHW_s16 = true;
-    public boolean conv3D_deltaW_Im2colWinogradV2_SHW_s16() { return conv3D_dW_Im2colWinogradV2_SHW_s16; }
-    public CudaFloat32EngineBase conv3D_deltaW_Im2colWinogradV2_SHW_s16(boolean flag) { conv3D_dW_Im2colWinogradV2_SHW_s16 = flag; return this; }
+    protected boolean conv3D_dW_WinogradV2_SHW_s16 = true;
+    public boolean conv3D_deltaW_WinogradV2_SHW_s16() { return conv3D_dW_WinogradV2_SHW_s16; }
+    public CudaFloat32EngineBase conv3D_deltaW_WinogradV2_SHW_s16(boolean flag) { conv3D_dW_WinogradV2_SHW_s16 = flag; return this; }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Configurations: GemmSK"> 
     protected int conv3D_dW_GemmSK_maxPart = 16;
@@ -2804,41 +2809,41 @@ public class CudaFloat32EngineBase extends EngineBase {
         return this;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Configurations: Im2colWinogradSHW"> 
-    protected int conv3D_dW_Im2colWinogradSHW_maxPart = 16;
-    public int conv3D_deltaW_Im2colWinogradSHW_maxPart() { return conv3D_dW_Im2colWinogradSHW_maxPart; } 
-    public CudaFloat32EngineBase conv3D_deltaW_Im2colWinogradSHW_maxPart(int maxPart) {
+    //<editor-fold defaultstate="collapsed" desc="Configurations: WinogradSHW"> 
+    protected int conv3D_dW_WinogradSHW_maxPart = 16;
+    public int conv3D_deltaW_WinogradSHW_maxPart() { return conv3D_dW_WinogradSHW_maxPart; } 
+    public CudaFloat32EngineBase conv3D_deltaW_WinogradSHW_maxPart(int maxPart) {
         if(maxPart < 4) throw new IllegalArgumentException(String.format(
                 "maxPart { got %d } must >= 4", maxPart));
-        conv3D_dW_Im2colWinogradSHW_maxPart = maxPart;
+        conv3D_dW_WinogradSHW_maxPart = maxPart;
         return this;
     }
     
-    protected float conv3D_dW_Im2colWinogradSHW_minBlock_perSM = 1.5f;
-    public float conv3D_deltaW_Im2colWinogradSHW_minBlock_perSM() { return conv3D_dW_Im2colWinogradSHW_minBlock_perSM; } 
-    public CudaFloat32EngineBase conv3D_deltaW_Im2colWinogradSHW_minBlock_perSM(float minBlock) {
+    protected float conv3D_dW_WinogradSHW_minBlock_perSM = 1.5f;
+    public float conv3D_deltaW_WinogradSHW_minBlock_perSM() { return conv3D_dW_WinogradSHW_minBlock_perSM; } 
+    public CudaFloat32EngineBase conv3D_deltaW_WinogradSHW_minBlock_perSM(float minBlock) {
         if(minBlock < 0) throw new IllegalArgumentException(String.format(
                 "minBlock { got %f } must >= 1", minBlock));
-        conv3D_dW_Im2colWinogradSHW_minBlock_perSM = minBlock;
+        conv3D_dW_WinogradSHW_minBlock_perSM = minBlock;
         return this;
     }
     
-    protected float conv3D_dW_Im2colWinogradSHW_maxBlock_perSM = 4.0f;
-    public float conv3D_deltaW_Im2colWinogradSHW_maxBlock_perSM() { return conv3D_dW_Im2colWinogradSHW_maxBlock_perSM; } 
-    public CudaFloat32EngineBase conv3D_deltaW_Im2colWinogradSHW_maxBlock_perSM(float maxBlock) {
+    protected float conv3D_dW_WinogradSHW_maxBlock_perSM = 4.0f;
+    public float conv3D_deltaW_WinogradSHW_maxBlock_perSM() { return conv3D_dW_WinogradSHW_maxBlock_perSM; } 
+    public CudaFloat32EngineBase conv3D_deltaW_WinogradSHW_maxBlock_perSM(float maxBlock) {
         if(maxBlock < 0) throw new IllegalArgumentException(String.format(
                 "maxBlock { got %f } must >= 1", maxBlock));
-        conv3D_dW_Im2colWinogradSHW_maxBlock_perSM = maxBlock;
+        conv3D_dW_WinogradSHW_maxBlock_perSM = maxBlock;
         return this;
     }
     //</editor-fold>
     
-    public static final int DECONV3D_DW_GEMMSK                     = 0;
-    public static final int DECONV3D_DW_GEMMSK_V2                  = 1;
-    public static final int DECONV3D_DW_GEMMSK_W1                  = 2;
-    public static final int DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S4  = 3;
-    public static final int DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S8  = 4;
-    public static final int DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S16 = 5;
+    public static final int DECONV3D_DW_GEMMSK              = 0;
+    public static final int DECONV3D_DW_GEMMSK_V2           = 1;
+    public static final int DECONV3D_DW_GEMMSK_W1           = 2;
+    public static final int DECONV3D_DW_WINOGRAD_V2_SHW_S4  = 3;
+    public static final int DECONV3D_DW_WINOGRAD_V2_SHW_S8  = 4;
+    public static final int DECONV3D_DW_WINOGRAD_V2_SHW_S16 = 5;
     //<editor-fold defaultstate="collapsed" desc="Decide Algorithm">
     static final int dc3dW_s4_nbase  = 28;//cache block size = 64 * 64, 2 + 28 = 39, 30 / 10 = 3 
     static final int[] dc3dW_s4_r = {//r = dc3dW_s4_r[n - 2]
@@ -3050,24 +3055,24 @@ public class CudaFloat32EngineBase extends EngineBase {
             final float psu2 = (float) Math.sqrt(psu), psu4 =(float) Math.sqrt(psu2); 
             float GemmV2 = 0; if((OC >= 64) && (IC >= 64)) GemmV2 = psu2 / conv3D_dW_GemmV2SK_Q;
             
-            //[speed of Im2colWinograd]-----------------------------------------
-            boolean Im2colWinograd = ((N & 7) == 0) && (IC >= 32);
+            //[speed of Winograd]-----------------------------------------------
+            boolean winograd = ((N & 7) == 0) && (IC >= 32);
             
-            float Im2colWinograd_s16 = 0; int Algo_Im2colWinograd_s16 = -1;
-            if(conv3D_dW_Im2colWinogradV2_SHW_s16 && Im2colWinograd && (OC >= 32) && (OW >= 8)) { int n = 0;
+            float winograd_s16 = 0; int Algo_Winograd_s16 = -1;
+            if(conv3D_dW_WinogradV2_SHW_s16 && winograd && (OC >= 32) && (OW >= 8)) { int n = 0;
                 if      ((FW % 9 == 0) && (OW >=  8) && (pw <= 4) && (FW - IW + OW - pw <= 5)) n = 9;//F(9,  8)
                 else if ((FW % 8 == 0) && (OW >=  9) && (pw <= 4) && (FW - IW + OW - pw <= 5)) n = 8;//F(8,  9)
                 else if ((FW % 7 == 0) && (OW >= 10) && (pw <= 3) && (FW - IW + OW - pw <= 4)) n = 7;//F(7, 10)
                 else if ((FW % 6 == 0) && (OW >= 11) && (pw <= 3) && (FW - IW + OW - pw <= 4) && (OC >= 64)) n = 6;//F(6, 11)
                 else if ((FW % 5 == 0) && (OW >= 12) && (pw <= 2) && (FW - IW + OW - pw <= 3) && (OC >= 64)) n = 5;//F(5, 12)
                 if (n != 0) { 
-                    Im2colWinograd_s16 = WGradSHW_s16_Derailleur[n - wgradSHW_s16_FW_min].apply(OW) * psu4;
-                    Algo_Im2colWinograd_s16 = n + dc3dW_s16_nbase;
+                    winograd_s16 = WGradSHW_s16_Derailleur[n - wgradSHW_s16_FW_min].apply(OW) * psu4;
+                    Algo_Winograd_s16 = n + dc3dW_s16_nbase;
                 }
             }
             
-            float Im2colWinograd_s8 = 0; int Algo_Im2colWinograd_s8 = -1;
-            if(conv3D_dW_Im2colWinogradV2_SHW_s8 && Im2colWinograd && (OC >= 64) && (OW >= 4)) { int n = 0;
+            float Winograd_s8 = 0; int Algo_Winograd_s8 = -1;
+            if(conv3D_dW_WinogradV2_SHW_s8 && winograd && (OC >= 64) && (OW >= 4)) { int n = 0;
                 if      ((FW % 8 == 0) && (OW >= 5)) n = 8;//F(8, 5)
                 else if ((FW % 5 == 0) && (OW >= 4)) n = 5;//F(5, 4)
                 else if ((FW % 4 == 0) && (OW >= 5)) n = 4;//F(4, 5)
@@ -3075,25 +3080,25 @@ public class CudaFloat32EngineBase extends EngineBase {
                 else if ((FW % 3 == 0) && (OW >= 6)) n = 3;//F(3, 6)
                 else if ((FW % 7 == 0) && (OW >= 2)) n = 7;//F(7, 2)
                 if (n != 0) { 
-                    Im2colWinograd_s8 = WGradSHW_s8_Derailleur[n - wgradSHW_s8_FW_min].apply(OW) * psu4;
-                    Algo_Im2colWinograd_s8 = n + dc3dW_s8_nbase;
+                    Winograd_s8 = WGradSHW_s8_Derailleur[n - wgradSHW_s8_FW_min].apply(OW) * psu4;
+                    Algo_Winograd_s8 = n + dc3dW_s8_nbase;
                 }
             }
             
-            float Im2colWinograd_s4 = 0; int Algo_Im2colWinograd_s4 = -1;
-            if(conv3D_dW_Im2colWinogradV2_SHW_s4 && Im2colWinograd && (OC >= 64) && (IC >= 64) && (OW >= 3)) { int n = 0;
+            float Winograd_s4 = 0; int Algo_Winograd_s4 = -1;
+            if(conv3D_dW_WinogradV2_SHW_s4 && winograd && (OC >= 64) && (IC >= 64) && (OW >= 3)) { int n = 0;
                 if      ((FW % 2 == 0) && (OW >= 3)) n = 2;//F(2, 3)
                //else if ((FW % 3 == 0) && (OW >= 2)) { n = 3; r = 2; OWr = OW % 3; }//F(3, 2)
                 if (n != 0) {
-                    Im2colWinograd_s4 = WGradSHW_s4_Derailleur[n - wgradSHW_s4_FW_min].apply(OW) * psu4;
-                    Algo_Im2colWinograd_s4 = n + dc3dW_s4_nbase; 
+                    Winograd_s4 = WGradSHW_s4_Derailleur[n - wgradSHW_s4_FW_min].apply(OW) * psu4;
+                    Algo_Winograd_s4 = n + dc3dW_s4_nbase; 
                 }
             }
             
             int Algo = DECONV3D_DW_GEMMSK; float speed = 1.0f;//default algorithm
-            if (speed < Im2colWinograd_s16) { Algo = Algo_Im2colWinograd_s16; speed = Im2colWinograd_s16; }
-            if (speed < Im2colWinograd_s8) { Algo = Algo_Im2colWinograd_s8; speed = Im2colWinograd_s8; }
-            if (speed < Im2colWinograd_s4) { Algo = Algo_Im2colWinograd_s4; speed = Im2colWinograd_s4; }
+            if (speed < winograd_s16) { Algo = Algo_Winograd_s16; speed = winograd_s16; }
+            if (speed < Winograd_s8) { Algo = Algo_Winograd_s8; speed = Winograd_s8; }
+            if (speed < Winograd_s4) { Algo = Algo_Winograd_s4; speed = Winograd_s4; }
             if (speed < GemmV2) Algo = DECONV3D_DW_GEMMSK_V2;
             return Algo;
         }
@@ -3117,11 +3122,11 @@ public class CudaFloat32EngineBase extends EngineBase {
             final float psu2 = (float) Math.sqrt(psu), psu4 =(float) Math.sqrt(psu2); 
             float GemmV2 = 0; if((OC >= 64) && (IC >= 64)) GemmV2 = psu2 / conv3D_dW_GemmV2SK_Q;
             
-            //[speed of Im2colWinograd]-----------------------------------------
-            boolean Im2colWinograd = ((N & 7) == 0) && (IC >= 32);
+            //[speed of Winograd]-----------------------------------------------
+            boolean Winograd = ((N & 7) == 0) && (IC >= 32);
             
-            float Im2colWinograd_s8 = 0; int Algo_Im2colWinograd_s8 = -1;
-            if(conv3D_dW_Im2colWinogradV2_SHW_s8 && Im2colWinograd && (OC >= 64) && (OW >= 4)) { int n = 0;
+            float Winograd_s8 = 0; int Algo_Winograd_s8 = -1;
+            if(conv3D_dW_WinogradV2_SHW_s8 && Winograd && (OC >= 64) && (OW >= 4)) { int n = 0;
                 if      ((FW % 8 == 0) && (OW >= 5)) n = 8;//F(8, 5)
                 else if ((FW % 5 == 0) && (OW >= 4)) n = 5;//F(5, 4)
                 else if ((FW % 4 == 0) && (OW >= 5)) n = 4;//F(4, 5)
@@ -3129,13 +3134,13 @@ public class CudaFloat32EngineBase extends EngineBase {
                 else if ((FW % 3 == 0) && (OW >= 6)) n = 3;//F(3, 6)
                 else if ((FW % 7 == 0) && (OW >= 2)) n = 7;//F(7, 2)
                 if (n != 0) { 
-                    Im2colWinograd_s8 = WGradSHW_s8_Derailleur[n - wgradSHW_s8_FW_min].apply(OW) * psu4;
-                    Algo_Im2colWinograd_s8 = n + dc3dW_s8_nbase;
+                    Winograd_s8 = WGradSHW_s8_Derailleur[n - wgradSHW_s8_FW_min].apply(OW) * psu4;
+                    Algo_Winograd_s8 = n + dc3dW_s8_nbase;
                 }
             }
             
             int Algo = DECONV3D_DW_GEMMSK; float speed = 1.0f;//default algorithm
-            if (speed < Im2colWinograd_s8) { Algo = Algo_Im2colWinograd_s8; speed = Im2colWinograd_s8; }
+            if (speed < Winograd_s8) { Algo = Algo_Winograd_s8; speed = Winograd_s8; }
             if (speed < GemmV2) Algo = DECONV3D_DW_GEMMSK_V2;
             return Algo;
         }
@@ -3189,7 +3194,7 @@ public class CudaFloat32EngineBase extends EngineBase {
         float expect_block_perSM = conv3D_dW_GemmSK_minBlock_perSM * (GK / (GK + 1024.0f));
         
         final int b2 = Cuda_dconv3D_deltaW.GEMMV2_nblock(FH, FW, OC, IC);
-        if(b2 >= SM_count * expect_block_perSM) return 1;//enough parallelism
+        if (b2 >= SM_count * expect_block_perSM) return 1;//enough parallelism
         
         //split tasks to improve parallelism------------------------------------
         final int b0 = Cuda_conv3D.GEMMV2_nblock(OH, OW, N, OC);
@@ -3204,8 +3209,8 @@ public class CudaFloat32EngineBase extends EngineBase {
         return GZ;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="GridZ: Im2colWinogradV2SHW">
-    protected int conv3D_dW_Im2colWinogradV2SHW_64x64_GridZ(//cache block size =  64 * 64
+    //<editor-fold defaultstate="collapsed" desc="GridZ: WinogradV2SHW">
+    protected int conv3D_dW_WinogradV2SHW_64x64_GridZ(//cache block size =  64 * 64
 	int OH, int OW, int IH, int IW, int FH, int FW,
 	int N, int IC, int OC, int n, int r)//F(n, r)
     {
@@ -3219,19 +3224,19 @@ public class CudaFloat32EngineBase extends EngineBase {
 	final int b1 = Cuda_conv3D.Im2colWinograd_64x64_nblock(IH, IW, N, IC, n);//increase with GK
 	final int b2 = Cuda_conv3D.Im2colWinograd_64x64_nblock(FH, FW, IC, OC, n);
 	int GZ = (int) ((b0 + b1) / (b2 * 1.45f)); if (GZ <= 2) {
-            float expect_block_perSM = 2.0f + conv3D_dW_Im2colWinogradSHW_maxBlock_perSM * (GK / (GK + 1024.0f));
+            float expect_block_perSM = 2.0f + conv3D_dW_WinogradSHW_maxBlock_perSM * (GK / (GK + 1024.0f));
             float expect_parallelism = (SM_count << 1) * expect_block_perSM;
             if (b2 >= expect_parallelism) return 1;//enough parallelism
 	}
 
 	//-----[Stage2]---------------------------------------------------------
-        int GZ2, mblock = conv3D_dW_Im2colWinogradSHW_maxPart * b2; float nblock;
+        int GZ2, mblock = conv3D_dW_WinogradSHW_maxPart * b2; float nblock;
 	if ((intensity > 14.5f) && (mblock > (nblock = 6.5641f * SM_count))) GZ2 = (int) (nblock / b2);
 	else {
-            float maxBlock_perSM = conv3D_dW_Im2colWinogradSHW_maxBlock_perSM * (b2 <= 32 ? 2 : 1);
+            float maxBlock_perSM = conv3D_dW_WinogradSHW_maxBlock_perSM * (b2 <= 32 ? 2 : 1);
             GZ2 = (int) ((SM_count * maxBlock_perSM + b2 - 1) / b2);
 	}
-        float size = (N * OH * OW / 512f) * (FH * FW * IC / 512f) * (OC / 1024f);
+        float size = (GK / 512f) * (FH * FW * IC / 512f) * (OC / 1024f);
         float coef = size / SM_count; if (coef < 0.35f) coef = 0.35f; else if (coef > 1f) coef = 1f;
         GZ2 = (int) (GZ2 * coef); if (GZ > GZ2) GZ = GZ2;
 
@@ -3242,11 +3247,11 @@ public class CudaFloat32EngineBase extends EngineBase {
 	else if (GZ < 32) GZ = (GZ + 3) >> 2 << 2;//padding to 4x
 	else GZ = (GZ + 7) >> 3 << 3;//padding to 8x
 
-	if (GZ > conv3D_dW_Im2colWinogradSHW_maxPart) GZ = conv3D_dW_Im2colWinogradSHW_maxPart;
+	if (GZ > conv3D_dW_WinogradSHW_maxPart) GZ = conv3D_dW_WinogradSHW_maxPart;
 	return GZ;
     }
     
-    protected int conv3D_dW_Im2colWinogradV2SHW_64x32_GridZ(//cache block size = 64 * 32
+    protected int conv3D_dW_WinogradV2SHW_64x32_GridZ(//cache block size = 64 * 32
 	int OH, int OW, int IH, int IW, int FH, int FW,
 	int N, int IC, int OC, int n, int r)//F(n, r)
     {
@@ -3261,18 +3266,18 @@ public class CudaFloat32EngineBase extends EngineBase {
 	final int b2 = Cuda_conv3D.Im2colWinograd_64x32_nblock(FH, FW, IC, OC, n);
 	int GZ = (int) ((b0 + b1) / (b2 * 1.45f)); 
         if (GZ <= 2) {
-            float expect_block_perSM = 2.0f + conv3D_dW_Im2colWinogradSHW_minBlock_perSM * (GK / (GK + 1024.0f));
+            float expect_block_perSM = 2.0f + conv3D_dW_WinogradSHW_minBlock_perSM * (GK / (GK + 1024.0f));
             float expect_parallelism = (SM_count << 1) * expect_block_perSM;
             if (b2 >= expect_parallelism) return 1;//enough parallelism
 	}
 
 	//-----[Stage2]---------------------------------------------------------
-	int GZ2, mblock = conv3D_dW_Im2colWinogradSHW_maxPart * b2; float nblock;
+	int GZ2, mblock = conv3D_dW_WinogradSHW_maxPart * b2; float nblock;
 	if      ((intensity > 14.5f) && (mblock > (nblock = 6.5641f * SM_count))) GZ2 = (int) (nblock / b2);
 	else if ((intensity > 13.5f) && (mblock > (nblock = 7.3846f * SM_count))) GZ2 = (int) (nblock / b2);
 	else if                         (mblock > (nblock = 9.8462f * SM_count))  GZ2 = (int) (nblock / b2);
 	else {
-            float maxBlock_perSM = conv3D_dW_Im2colWinogradSHW_maxBlock_perSM * (b2 <= 32 ? 2 : 1);
+            float maxBlock_perSM = conv3D_dW_WinogradSHW_maxBlock_perSM * (b2 <= 32 ? 2 : 1);
             GZ2 = (int) ((SM_count * maxBlock_perSM + b2 - 1) / b2);
 	}
         float size = (N * OH * OW / 512f) * (FH * FW * IC / 512f) * (OC / 1024f);
@@ -3286,11 +3291,11 @@ public class CudaFloat32EngineBase extends EngineBase {
 	else if (GZ < 32) GZ = (GZ + 3) >> 2 << 2;//padding to 4x
 	else GZ = (GZ + 7) >> 3 << 3;//padding to 8x
 
-	if (GZ > conv3D_dW_Im2colWinogradSHW_maxPart) GZ = conv3D_dW_Im2colWinogradSHW_maxPart;
+	if (GZ > conv3D_dW_WinogradSHW_maxPart) GZ = conv3D_dW_WinogradSHW_maxPart;
 	return GZ;
     }
         
-    protected int conv3D_dW_Im2colWinogradV2SHW_32x32_GridZ(//cache block size = 32 * 32
+    protected int conv3D_dW_WinogradV2SHW_32x32_GridZ(//cache block size = 32 * 32
 	int OH, int OW, int IH, int IW, int FH, int FW,
 	int N, int IC, int OC, int n, int r)//F(n, r)
     {
@@ -3303,13 +3308,13 @@ public class CudaFloat32EngineBase extends EngineBase {
 	final int b2 = Cuda_conv3D.Im2colWinograd_64x32_nblock(FH, FW, IC, OC, n);
 	int GZ = (int) ((b0 + b1) / (b2 * 1.45f)); 
         if (GZ <= 2) {
-            float expect_block_perSM = 2.0f + conv3D_dW_Im2colWinogradSHW_minBlock_perSM * (GK / (GK + 1024.0f));
+            float expect_block_perSM = 2.0f + conv3D_dW_WinogradSHW_minBlock_perSM * (GK / (GK + 1024.0f));
             float expect_parallelism = (SM_count << 1) * expect_block_perSM;
             if (b2 >= expect_parallelism) return 1;//enough parallelism
 	}
 
 	//-----[Stage2]---------------------------------------------------------
-	final float maxBlock_perSM = conv3D_dW_Im2colWinogradSHW_maxBlock_perSM * (b2 <= 32 ? 2 : 1);
+	final float maxBlock_perSM = conv3D_dW_WinogradSHW_maxBlock_perSM * (b2 <= 32 ? 2 : 1);
 	int GZ2 = (int) ((SM_count * maxBlock_perSM + b2 - 1) / b2);
         float size = (N * OH * OW / 512f) * (FH * FW * IC / 512f) * (OC / 1024f);
         float coef = size / SM_count; if (coef < 0.35f) coef = 0.35f; else if (coef > 1f) coef = 1f;
@@ -3322,17 +3327,17 @@ public class CudaFloat32EngineBase extends EngineBase {
 	else if (GZ < 32) GZ = (GZ + 3) >> 2 << 2;//padding to 4x
 	else GZ = (GZ + 7) >> 3 << 3;//padding to 8x
 
-	if (GZ > conv3D_dW_Im2colWinogradSHW_maxPart) GZ = conv3D_dW_Im2colWinogradSHW_maxPart;
+	if (GZ > conv3D_dW_WinogradSHW_maxPart) GZ = conv3D_dW_WinogradSHW_maxPart;
 	return GZ;
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="GridZ -> Slices: Im2colWinogradV2SHW">
-    protected int[] conv3D_dW_Im2colWinogradV2SHW_s4_slices(
+    //<editor-fold defaultstate="collapsed" desc="GridZ -> Slices: WinogradV2SHW">
+    protected int[] conv3D_dW_WinogradV2SHW_s4_slices(
 	int OH, int OW, int IH, int IW, int FH, int FW,
 	int N, int IC, int OC, int ph, 
         int n, int r) {//F(n, r)
-        final int GZ = conv3D_dW_Im2colWinogradV2SHW_64x64_GridZ(OH, OW, IH, IW, FH, FW, N, IC, OC, n, r);
-        final int[] Slice = conv3D_dW_Im2colWinogradV2_SHW_slices(OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r, GZ);
+        final int GZ = conv3D_dW_WinogradV2SHW_64x64_GridZ(OH, OW, IH, IW, FH, FW, N, IC, OC, n, r);
+        final int[] Slice = conv3D_dW_WinogradV2_SHW_slices(OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r, GZ);
         if (Slice == null) return Slice;
         int OH_slice = Slice[1], HZ = OH / OH_slice;
         int OW_slice = Slice[2], WZ = (OW + OW_slice - 1) / OW_slice;
@@ -3340,12 +3345,12 @@ public class CudaFloat32EngineBase extends EngineBase {
         return Slice;
     }
     
-    protected int[] conv3D_dW_Im2colWinogradV2SHW_s8_slices(
+    protected int[] conv3D_dW_WinogradV2SHW_s8_slices(
 	int OH, int OW, int IH, int IW, int FH, int FW,
 	int N, int IC, int OC, int ph,
         int n, int r) {//F(n, r)
-        final int GZ = conv3D_dW_Im2colWinogradV2SHW_64x32_GridZ(OH, OW, IH, IW, FH, FW, N, IC, OC, n, r);
-        final int[] Slice = conv3D_dW_Im2colWinogradV2_SHW_slices(OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r, GZ);
+        final int GZ = conv3D_dW_WinogradV2SHW_64x32_GridZ(OH, OW, IH, IW, FH, FW, N, IC, OC, n, r);
+        final int[] Slice = conv3D_dW_WinogradV2_SHW_slices(OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r, GZ);
         if (Slice == null) return Slice;
         final int OH_slice = Slice[1], HZ = OH / OH_slice;
         final int OW_slice = Slice[2], WZ = (OW + OW_slice - 1) / OW_slice;
@@ -3353,15 +3358,15 @@ public class CudaFloat32EngineBase extends EngineBase {
         return Slice;
     }
     
-    protected int[] conv3D_dW_Im2colWinogradV2SHW_s16_slices(
+    protected int[] conv3D_dW_WinogradV2SHW_s16_slices(
 	int OH, int OW, int IH, int IW, int FH, int FW,
 	int N, int IC, int OC, int ph,
 	int n, int r) {//F(n, r)
         boolean c64 = ((OC >= 64) && ((OC & 63) == (OC & 31))) || (OC >= 256);
         final int GZ = (c64 ?
-                conv3D_dW_Im2colWinogradV2SHW_64x32_GridZ(OH, OW, IH, IW, FH, FW, N, IC, OC, n, r):
-                conv3D_dW_Im2colWinogradV2SHW_32x32_GridZ(OH, OW, IH, IW, FH, FW, N, IC, OC, n, r));
-        final int[] Slice = conv3D_dW_Im2colWinogradV2_SHW_slices(OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r, GZ);
+                conv3D_dW_WinogradV2SHW_64x32_GridZ(OH, OW, IH, IW, FH, FW, N, IC, OC, n, r):
+                conv3D_dW_WinogradV2SHW_32x32_GridZ(OH, OW, IH, IW, FH, FW, N, IC, OC, n, r));
+        final int[] Slice = conv3D_dW_WinogradV2_SHW_slices(OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r, GZ);
         if (Slice == null) return Slice;
         final int OH_slice = Slice[1], HZ = OH / OH_slice;
         final int OW_slice = Slice[2], WZ = (OW + OW_slice - 1) / OW_slice;
@@ -3369,7 +3374,7 @@ public class CudaFloat32EngineBase extends EngineBase {
         return new int[] { Slice[0], Slice[1], Slice[2], (c64 ? 1 : 0) };
     }
     
-    protected int[] conv3D_dW_Im2colWinogradV2_SHW_slices(
+    protected int[] conv3D_dW_WinogradV2_SHW_slices(
 	int OH, int OW, int IH, int IW, int FH, int FW,
 	int N, int IC, int OC, int ph,
 	int n, int r,//F(n, r)
@@ -3402,7 +3407,7 @@ public class CudaFloat32EngineBase extends EngineBase {
             int OW_slice = r; 
             int WZ = OW / r; float fHZ = 1.0f * GZ / WZ; int HZ = (int) fHZ; 
             if (OW % OW_slice != 0) WZ++;
-            if ((HZ < HZ_max) && (fHZ - HZ > 0.55f) && ((HZ + 1) * WZ <= conv3D_dW_Im2colWinogradSHW_maxPart)) HZ++;
+            if ((HZ < HZ_max) && (fHZ - HZ > 0.55f) && ((HZ + 1) * WZ <= conv3D_dW_WinogradSHW_maxPart)) HZ++;
             int OH_slice = OH / HZ;
             if ((OW % r != 0) && ((OH_slice >> 1) > ph)) {//better slices layout
                 int g = OW / OW_slice;//most memory cost: 9/8 - > 5/4
@@ -3483,7 +3488,7 @@ public class CudaFloat32EngineBase extends EngineBase {
                 int OW_slice = x * r;
                 int WZ = OW / OW_slice; float fHZ = 1.0f * GZ / WZ; int HZ = (int) fHZ;
                 if (OW % OW_slice != 0) WZ++;
-                if ((HZ < HZ_max) && (fHZ - HZ > 0.55f) && ((HZ + 1) * WZ <= conv3D_dW_Im2colWinogradSHW_maxPart)) HZ++;
+                if ((HZ < HZ_max) && (fHZ - HZ > 0.55f) && ((HZ + 1) * WZ <= conv3D_dW_WinogradSHW_maxPart)) HZ++;
                 int OH_slice = OH / HZ;
                 return new int[] { 0, OH_slice, OW_slice };
             }
@@ -3539,15 +3544,15 @@ public class CudaFloat32EngineBase extends EngineBase {
             int algo = conv3D_deltaW_decide_algorithm(OH, OW, IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
             int GZ, Slice[] = null, n = 0, r = 0;
             for(;;) {
-                if      ((algo / 10) == DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S16) { n = algo - dc3dW_s16_nbase; r = dc3dW_s16_r[n - wgradSHW_s16_FW_min]; if ((Slice = conv3D_dW_Im2colWinogradV2SHW_s16_slices(OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r)) == null) algo = -1; else { algo /= 10; GZ = Slice[0]; break; } }
+                if      ((algo / 10) == DECONV3D_DW_WINOGRAD_V2_SHW_S16) { n = algo - dc3dW_s16_nbase; r = dc3dW_s16_r[n - wgradSHW_s16_FW_min]; if ((Slice = conv3D_dW_WinogradV2SHW_s16_slices(OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r)) == null) algo = -1; else { algo /= 10; GZ = Slice[0]; break; } }
                 if (algo == -1) algo = conv3D_deltaW_decide_algorithm_s8(OH, OW, IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);//reselect s8 Algorithms
                 
-                if      ((algo / 10) == DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S8)  { n = algo - dc3dW_s8_nbase;  r = dc3dW_s8_r [n - wgradSHW_s8_FW_min];  if ((Slice = conv3D_dW_Im2colWinogradV2SHW_s8_slices (OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r)) == null) algo = -1; else { algo /= 10; GZ = Slice[0]; break; } }
-                else if ((algo / 10) == DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S4)  { n = algo - dc3dW_s4_nbase;  r = dc3dW_s4_r [n - wgradSHW_s4_FW_min];  if ((Slice = conv3D_dW_Im2colWinogradV2SHW_s4_slices (OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r)) == null) algo = -1; else { algo /= 10; GZ = Slice[0]; break; } }
+                if      ((algo / 10) == DECONV3D_DW_WINOGRAD_V2_SHW_S8)  { n = algo - dc3dW_s8_nbase;  r = dc3dW_s8_r [n - wgradSHW_s8_FW_min];  if ((Slice = conv3D_dW_WinogradV2SHW_s8_slices (OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r)) == null) algo = -1; else { algo /= 10; GZ = Slice[0]; break; } }
+                else if ((algo / 10) == DECONV3D_DW_WINOGRAD_V2_SHW_S4)  { n = algo - dc3dW_s4_nbase;  r = dc3dW_s4_r [n - wgradSHW_s4_FW_min];  if ((Slice = conv3D_dW_WinogradV2SHW_s4_slices (OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r)) == null) algo = -1; else { algo /= 10; GZ = Slice[0]; break; } }
               
-//                if      ((algo / 10) == DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S8)  { n = algo - dc3dW_s8_nbase;  r = dc3dW_s8_r [n - wgradSHW_s8_FW_min];  if ((Slice = conv3D_dW_Im2colWinogradV2SHW_s8_slices (OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r)) == null) algo = -1; else { algo /= 10; GZ = Slice[0]; break; } }
-//                else if ((algo / 10) == DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S16) { n = algo - dc3dW_s16_nbase; r = dc3dW_s16_r[n - wgradSHW_s16_FW_min]; if ((Slice = conv3D_dW_Im2colWinogradV2SHW_s16_slices(OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r)) == null) algo = -1; else { algo /= 10; GZ = Slice[0]; break; } }
-//                else if ((algo / 10) == DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S4)  { n = algo - dc3dW_s4_nbase;  r = dc3dW_s4_r [n - wgradSHW_s4_FW_min];  if ((Slice = conv3D_dW_Im2colWinogradV2SHW_s4_slices (OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r)) == null) algo = -1; else { algo /= 10; GZ = Slice[0]; break; } }
+//                if      ((algo / 10) == DECONV3D_DW_WINOGRAD_V2_SHW_S8)  { n = algo - dc3dW_s8_nbase;  r = dc3dW_s8_r [n - wgradSHW_s8_FW_min];  if ((Slice = conv3D_dW_WinogradV2SHW_s8_slices (OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r)) == null) algo = -1; else { algo /= 10; GZ = Slice[0]; break; } }
+//                else if ((algo / 10) == DECONV3D_DW_WINOGRAD_V2_SHW_S16) { n = algo - dc3dW_s16_nbase; r = dc3dW_s16_r[n - wgradSHW_s16_FW_min]; if ((Slice = conv3D_dW_WinogradV2SHW_s16_slices(OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r)) == null) algo = -1; else { algo /= 10; GZ = Slice[0]; break; } }
+//                else if ((algo / 10) == DECONV3D_DW_WINOGRAD_V2_SHW_S4)  { n = algo - dc3dW_s4_nbase;  r = dc3dW_s4_r [n - wgradSHW_s4_FW_min];  if ((Slice = conv3D_dW_WinogradV2SHW_s4_slices (OH, OW, IH, IW, FH, FW, N, IC, OC, ph, n, r)) == null) algo = -1; else { algo /= 10; GZ = Slice[0]; break; } }
               
                 if (algo == -1) algo = conv3D_deltaW_decide_algorithm_GEMM(OH, OW, IH, IW, FH, FW, IC, OC, sh, sw);//reselect Gemm Algorithms
                 if (algo == DECONV3D_DW_GEMMSK_V2) { GZ = conv3D_dW_GemmSKV2_GridZ(OH, OW, IH, IW, FH, FW, N, IC, OC, GK); break; }
@@ -3561,9 +3566,9 @@ public class CudaFloat32EngineBase extends EngineBase {
             
             //------[decide stream size]----------------------------------------
             final int length;
-            if      (algo == DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S8)  length = Cuda_dconv3D_deltaW.Im2colWinogradV2_s8_nstream (OC, IC, OW, r);
-            else if (algo == DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S16) length = Cuda_dconv3D_deltaW.Im2colWinogradV2_s16_nstream(OC, IC, OW, r, Slice[3]);
-            else if (algo == DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S4)  length = Cuda_dconv3D_deltaW.Im2colWinogradV2_s4_nstream (OC, IC, OW, r);
+            if      (algo == DECONV3D_DW_WINOGRAD_V2_SHW_S8)  length = Cuda_dconv3D_deltaW.Im2colWinogradV2_s8_nstream (OC, IC, OW, r);
+            else if (algo == DECONV3D_DW_WINOGRAD_V2_SHW_S16) length = Cuda_dconv3D_deltaW.Im2colWinogradV2_s16_nstream(OC, IC, OW, r, Slice[3]);
+            else if (algo == DECONV3D_DW_WINOGRAD_V2_SHW_S4)  length = Cuda_dconv3D_deltaW.Im2colWinogradV2_s4_nstream (OC, IC, OW, r);
             else if (algo == DECONV3D_DW_GEMMSK_V2)                  length = Cuda_dconv3D_deltaW.GEMMV2_nstream(OC, IC);
             else   /*(algo == DECONV3D_DW_GEMMSK)*/                  length = Cuda_dconv3D_deltaW.GEMM_nstream(FH, FW, OC, IC);
             
@@ -3576,7 +3581,7 @@ public class CudaFloat32EngineBase extends EngineBase {
                         deltaW_address,
                         deltaW_buf_address,
                         N, IC, OC);
-            else if (algo == DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S8 && 
+            else if (algo == DECONV3D_DW_WINOGRAD_V2_SHW_S8 && 
                 Cuda_dconv3D_deltaW.Im2col_WinogradV2_SHW_s8_texture(streamArray, length, GZ, Slice[1], Slice[2],
                         X_address, IH, IW,
                         deltaY_address, OH, OW,
@@ -3584,7 +3589,7 @@ public class CudaFloat32EngineBase extends EngineBase {
                         deltaW_buf_address, FH, FW,
                         N, IC, OC,
                         ph, pw, n)); 
-            else if (algo == DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S16 &&
+            else if (algo == DECONV3D_DW_WINOGRAD_V2_SHW_S16 &&
                 Cuda_dconv3D_deltaW.Im2col_WinogradV2_SHW_s16_texture(streamArray, length, GZ, Slice[1], Slice[2], Slice[3], 
                         X_address, IH, IW,
                         deltaY_address, OH, OW, 
@@ -3592,7 +3597,7 @@ public class CudaFloat32EngineBase extends EngineBase {
                         deltaW_buf_address, FH, FW,
                         N, IC, OC, 
                         ph, pw, n));
-            else if (algo == DECONV3D_DW_IM2COL_WINOGRAD_V2_SHW_S4 && 
+            else if (algo == DECONV3D_DW_WINOGRAD_V2_SHW_S4 && 
                 Cuda_dconv3D_deltaW.Im2col_WinogradV2_SHW_s4_texture(streamArray, length, GZ, Slice[1], Slice[2],
                         X_address, IH, IW,
                         deltaY_address, OH, OW,
@@ -3895,6 +3900,183 @@ public class CudaFloat32EngineBase extends EngineBase {
             return new StreamArrayBlockSyncer(streamPool, streamArray, core, block);     
         }
         //</editor-fold>
+    }
+    //</editor-fold>
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="DepthWise Convolution3D">
+    //<editor-fold defaultstate="collapsed" desc="forward-propagation">
+    @Override
+    public Syncer depthwise_conv3D(
+            long Y_address, int OH, int OW, 
+            long X_address, int IH, int IW, 
+            long W_address, int FH, int FW, 
+            int N, int IC, int OC, 
+            int sh, int sw, int ph, int pw) 
+    {
+        long stream = streamPool.getStream();
+        Cuda_depthwise_conv3D.depthwise_conv3D(stream, 
+                X_address, IH, IW, 
+                W_address, FH, FW, 
+                Y_address, OH, OW, 
+                N, IC, OC, 
+                sh, sw, ph, pw);
+        return new StreamSyncer(streamPool, stream);
+    }
+
+    @Override
+    public Syncer depthwise_conv3D_biased(
+            long Y_address, int OH, int OW, 
+            long X_address, int IH, int IW, 
+            long W_address, int FH, int FW, 
+            int N, int IC, int OC, 
+            int sh, int sw, int ph, int pw, 
+            long Bias_address, //stride = OC, lengthv = N*OH*OW*OC
+            int lengthv, int width) 
+    {
+        long stream = streamPool.getStream();
+        Cuda_depthwise_conv3D.depthwise_conv3D(stream, 
+                X_address, IH, IW, 
+                W_address, FH, FW, 
+                Y_address, OH, OW, 
+                N, IC, OC, 
+                sh, sw, ph, pw);
+        Cuda_function.linear_dual2D_row(stream, Y_address,
+                Bias_address, OC,
+                1.0f, 1.0f, 0.0f,
+                Y_address,
+                lengthv, width, OC);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-propagation: deltaW">
+    //<editor-fold defaultstate="collapsed" desc="Configurations: GemmSK"> 
+    protected int dwconv3D_dW_GemmSK_maxPart = 32;
+    public int depthwise_conv3D_deltaW_Gemm_SK_maxpart() { return dwconv3D_dW_GemmSK_maxPart; }
+    public CudaFloat32EngineBase depthwise_conv3D_deltaW_Gemm_SK_maxpart(int maxPart) {
+        if(maxPart < 8) throw new IllegalArgumentException(String.format(
+                "maxPart { got %d } must >= 8", maxPart)); 
+        dwconv3D_dW_GemmSK_maxPart = maxPart;
+        return this;
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="GridZ: GemmSK">
+    protected final DWConvDW_GZ_Decider dwdconvdwGemmskGz = (LBX, LBK, FD, IH, IW, FH, FW, OH, OW, N, IC, OC) -> 
+            depthwise_conv3D_dW_decide_GridZ(LBX, LBK, FD, IH, IW, FH, FW, OH, OW, N, IC, OC);
+    
+    protected final float[] dw_conv3D_expect_blockNum_perSM = {
+         79.0f, 79.0f, 79.0f,//FD == 1, 2, 3
+        105.1f,//FD ==  4
+         65.6f,//FD ==  5
+         78.8f,//FD ==  6
+         91.9f,//FD ==  7
+        105.1f,//FD ==  8
+        118.2f,//FD ==  9
+        131.3f,//FD == 10
+        144.4f,//FD == 11
+         78.8f,//FD == 12
+         85.4f //FD == 13
+    };
+   
+    protected int depthwise_conv3D_dW_minimize_RK(int LBK, int N_OH, int OW, int GZ) {
+        final int GK = N_OH * OW;
+        int NH_slice = ((N_OH / GZ) >> LBK << LBK);
+        int GK_slice = NH_slice * OW;
+        int threshold = (int) (GK_slice * 0.25f);
+        int RK = GK - GZ * GK_slice; if (RK < threshold) return GZ;
+        
+        int start = 2, end = GZ;
+        if      (GZ > 32) start = (int) (GZ * 0.84f);//5
+        else if (GZ > 16) start = (int) (GZ * 0.75f);//4
+        else if (GZ >  8) start = (int) (GZ * 0.65f);//3
+        else if (GZ >  4) start = GZ - 2;
+        
+	for (int gz = start; gz < end; gz++) {
+            int nh_slice = ((N_OH / gz) >> LBK << LBK);
+            int rk = GK - gz * nh_slice * OW;
+            if (rk < RK) { RK = rk; GZ = gz; if (RK < threshold) return GZ; }
+	}
+	return GZ;
+    }
+    
+    protected int depthwise_conv3D_dW_decide_GridZ(int LBX, int LBK, int FD,
+            int IH, int IW, int FH, int FW, int OH, int OW,//call back function
+            int N, int IC, int OC)
+    {
+        final int N_OH = N * OH, BK = (1 << LBK);
+        if (N_OH < BK) throw new IllegalArgumentException(String.format(
+                "N { got %d } * OH { got %d } < BK { got %d  }", N, OH, BK));
+        if ((FD > 13) || (FD <= 0)) throw new IllegalArgumentException(String.format(
+                "FD { got %d } should in range of [1, 13]", FD));
+        
+        //-----[Stage0]---------------------------------------------------------
+        final int b0 = Cuda_depthwise_conv3D.GEMM_nblock(OH, OW, N, OC);
+        final int b1 = Cuda_depthwise_dconv3D_deltaX.GEMM_nblock(IH, IW, N, IC);
+        final int b2 = Cuda_depthwise_dconv3D_deltaW.GEMM_nblock(FH, FW, OC, LBX, FD);
+        int GZ = (int) ((b0 + b1) / (b2 * 1.45f));
+        
+        //-----[Stage1]---------------------------------------------------------
+        final int GK = N * OH * OW;
+	final int GZ1 = GK >> 7;//block.GK >= 128
+        if (GZ > GZ1) GZ = GZ1;
+        
+        //-----[Stage2]---------------------------------------------------------
+        final int SM_count = dev.multiProcessorCount();
+        float expect_blockNum = SM_count * dw_conv3D_expect_blockNum_perSM[FD - 1];
+        float coef =  GK / (128 * 1024.0f);//128 * 32 * 32 -> 1.0f
+        if (coef < 0.35f) coef = 0.35f; else if (coef > 1.0f) coef = 1.0f;
+        final int GZ2 = (int) (coef * expect_blockNum / b2); 
+        if (GZ > GZ2) GZ = GZ2;
+        
+        //-----[Stage3]---------------------------------------------------------
+	if (GZ < 2) GZ = 2; else GZ = (GZ + 3) >> 2 << 2;//padding GZ
+        if (GZ > dwconv3D_dW_GemmSK_maxPart) GZ = dwconv3D_dW_GemmSK_maxPart;
+        final int GZ3 = N_OH >> LBK; if (GZ > GZ3) GZ = GZ3;//(N * OH) / (GZ * BK) >= 1
+        
+        return depthwise_conv3D_dW_minimize_RK(LBK, N_OH, OW, GZ);
+    }
+    //</editor-fold>
+    
+    @Override
+    public Syncer depthwise_conv3D_deltaW(
+            long deltaW_address, int FH, int FW, 
+            long      X_address, int IH, int IW,
+            long deltaY_address, int OH, int OW,
+            int N, int IC, int OC, 
+            int sh, int sw, int ph, int pw) 
+    {
+        int GOC = OC / IC; if ((GOC != 1) && (GOC % 2 != 0)) throw new RuntimeException();
+        long stream = streamPool.getStream();
+        Cuda.memsetAsync(stream, deltaW_address, 0, (FH * FW * OC) << 2L);
+        Cuda_depthwise_dconv3D_deltaW.depthwise_dconv3D_deltaW_GemmSK(stream, dwdconvdwGemmskGz,
+                X_address, IH, IW, 
+                deltaY_address, OH, OW,
+                deltaW_address, FH, FW, 
+                N, IC, OC,
+                sh, sw, ph, pw);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="backward-porpagation: deltaX">
+    @Override
+    public Syncer depthwise_conv3D_deltaX(
+            long deltaX_address, int IH, int IW, 
+            long deltaY_address, int OH, int OW, 
+            long      W_address, int FH, int FW, 
+            int N, int IC, int OC, 
+            int sh, int sw, int ph, int pw) 
+    {
+        if (sh == 1 && sw == 1) {
+            long stream = streamPool.getStream();
+            Cuda_depthwise_dconv3D_deltaX.depthwise_dconv3D_deltaX_s1(stream, 
+                    deltaY_address, OH, OW,
+                    W_address, FH, FW,
+                    deltaX_address, IH, IW,
+                    N, IC, OC, 
+                    ph, pw);
+            return new StreamSyncer(streamPool, stream);
+        }
+        else throw new RuntimeException();
     }
     //</editor-fold>
     //</editor-fold>
@@ -9825,6 +10007,38 @@ public class CudaFloat32EngineBase extends EngineBase {
         long stream = streamPool.getStream();
         Cuda_function.tensor2pix2D(stream, X_address, 
                 Y_address,
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="repeat functions">
+    @Override
+    public Syncer repeat_linear2D_row(long Y_address, 
+            long X_address, int row_lengthv, 
+            float alpha, float beta,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        Cuda_function.repeat_linear2D_row(stream, 
+                X_address, row_lengthv,
+                alpha, beta,
+                Y_address, 
+                lengthv, width, stride);
+        return new StreamSyncer(streamPool, stream);
+    }
+
+    @Override
+    public Syncer repeat_quadratic2D_row(long Y_address, 
+            long X_address, int row_lengthv, 
+            float alpha, float beta, float gamma,
+            int lengthv, int width, int stride) 
+    {
+        long stream = streamPool.getStream();
+        Cuda_function.repeat_quadratic2D_row(stream, 
+                X_address, row_lengthv, 
+                alpha, beta, gamma,
+                Y_address, 
                 lengthv, width, stride);
         return new StreamSyncer(streamPool, stream);
     }

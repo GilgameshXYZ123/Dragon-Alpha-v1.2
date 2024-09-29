@@ -93,8 +93,7 @@ public class BatchNorm extends GlobalBatchNorm {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: InlineBatchNorm">
-    public static class InlineBatchNorm<T extends BatchNorm> extends InlineGlobalBatchNorm<T>
-    {
+    public static class InlineBatchNorm<T extends BatchNorm> extends InlineGlobalBatchNorm<T> {
         public InlineBatchNorm(T unit) { super(unit); }
          
         public boolean track_stats() { return ut.track_stats; }

@@ -8,7 +8,7 @@ package z.dragon.engine.cuda.impl.math;
 import z.util.lang.annotation.Passed;
 
 /**
- * Y[N, OH, OW, OC] = conv3D(X[N, IH, IW, IC], W[OC, FH, FW, IC], [ph, pw, sh, sw]).
+ * Y[N, OH, OW, OC] = conv3D(X[N, IH, IW, IC], W[OC, FH, FW, IC], [ph, pw], [sh, sw]).
  * @author Gilgamesh
  */
 public final class Cuda_conv3D {
@@ -27,31 +27,24 @@ public final class Cuda_conv3D {
         return 1.0f * pad_size / input_size;
     }
     
-    public static int[] img2col_matrix_dim(
-            int OH, int OW, 
-            int FH, int FW, 
-            int N, int IC, int OC) {
+    public static int[] img2col_matrix_dim(int OH, int OW, int FH, int FW, int N, int IC, int OC) {
         int GN = OC;
         int GM = N  * OH * OW;
         int GK = FH * FW * IC;
         return new int[]{ GN, GM, GK };
     }
     
-    public static int[] output_feature_dim(
-            int IH, int IW, 
-            int FH, int FW, 
-            int N, int OC,
-            int sh, int sw, int ph, int pw) {
+    public static int[] output_feature_dim(int IH, int IW, int FH, int FW,  int N, int OC,
+            int sh, int sw, int ph, int pw) 
+    {
         int OH = (IH + (ph << 1) - FH) / sh + 1;
         int OW = (IW + (pw << 1) - FW) / sw + 1;
         return new int[]{ N, OH, OW, OC };
     }
     
-    public static int[] input_feature_size(
-            int OH, int OW, 
-            int FH, int FW, 
-            int N, int IC,
-            int sh, int sw, int ph, int pw) {
+    public static int[] input_feature_size(int OH, int OW, int FH, int FW, int N, int IC,
+            int sh, int sw, int ph, int pw) 
+    {
         int IH = (OH - 1)*sh + FH - 2*ph;
         int IW = (OW - 1)*sw + FW - 2*pw;
         return new int[]{ N, IH, IW, IC };

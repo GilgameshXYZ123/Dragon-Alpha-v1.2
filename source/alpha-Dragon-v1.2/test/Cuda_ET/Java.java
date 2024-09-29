@@ -22,7 +22,7 @@ public class Java
         
         for(int i=0; i<1000; i++) bytes1[i] = bytes2[i];
          
-        alpha.fl.wt_bytes("C:\\Users\\Gilgamesh\\Desktop\\main2.tex", bytes1);
+        alpha.fl.write_bytes("C:\\Users\\Gilgamesh\\Desktop\\main2.tex", bytes1);
         
         System.out.println(bytes1.length);
     }

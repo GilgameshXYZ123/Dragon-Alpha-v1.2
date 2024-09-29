@@ -10,7 +10,7 @@ import z.dragon.engine.Tensor;
 import z.util.lang.annotation.Passed;
 
 /**
- *
+ * Gelu(dropout(X))
  * @author Gilgamesh
  */
 @Passed("CudaFloat32Base")

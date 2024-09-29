@@ -35,7 +35,7 @@ public class train
     
     
     static int batch_size = 512;//512;
-    static float lr = 0.001f;//learning_rate
+    static float lr = 0.0005f;//learning_rate
     
     public static void training(int epoch) {
         ResNet18 net = new ResNet18().init(eg).println(); //net.load();

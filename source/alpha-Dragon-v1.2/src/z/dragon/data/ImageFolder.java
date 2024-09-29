@@ -83,7 +83,7 @@ public class ImageFolder extends DataSet<byte[], Integer> {
      
     @Override
     public void append(StringBuilder sb) {
-        sb.append(getClass().getSimpleName()).append(" {");
+        sb.append(getClass().getSimpleName()).append(" { ");
         sb.append("size = ").append(size());
         sb.append(", input_class").append(input_class());
         sb.append(". label_class").append(label_class());

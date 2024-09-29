@@ -220,7 +220,7 @@ public class Cuda_conv3D_dX_test
 
 //          testCorrect(IH, IW, FH, FW, N, IC, OC, sh, sw, ph, pw);
             testSpeed(IH, IW, OH, OW, FH, FW, N, IC, OC, sh, sw, ph, pw);
-            return;
+            System.exit(-2);
         }
         
         

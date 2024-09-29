@@ -14,6 +14,54 @@ import z.util.lang.annotation.Passed;
 public final class Cuda_dconv3D_deltaX {
     private Cuda_dconv3D_deltaX() {}
     
+    //<editor-fold defaultstate="collapsed" desc="Common">
+    public static final double psu_Ims2(int IH, int IW, int FH, int FW, int OH, int OW) {
+        int OH0 = (IH >> 1) + ((FH + 1) >> 1) - 1;
+	int OW0 = (IW >> 1) + ((FW + 1) >> 1) - 1;
+	int OH1 = (IH >> 1) + (FH >> 1) - 1;
+	int OW1 = (IW >> 1) + (FW >> 1) - 1;
+	return 0.25 * ((OH0 + OH1) * (OW0 + OW1)) / (OH * OW);
+    }
+    
+    public static final float psu_s1(int IH, int IW, int FH, int FW, int OH, int OW) {
+        return (1.0f * ((IH - 1 + FH) * (IW - 1 + FW)) / (OH * OW));
+    }
+    
+    public static int[] img2col_matrix_dim(int IH, int IW, int FH, int FW, int N, int IC, int OC)  {
+        int GN = IC;
+        int GM = N  * IH * IW;
+        int GK = OC * FH * FW;
+        return new int[]{ GN, GM, GK };
+    }
+     
+    public static int[] getOutPaddingDim_deltaY(int FH, int FW, int ph, int pw) {
+        int oph = FH - ph - 1;
+        int opw = FH - pw - 1;
+        return new int[]{oph, opw};
+    }
+    
+    public static int[] output_feature_dim(int IH, int IW, int FH, int FW, int N, int OC,
+            int sh, int sw, int ph, int pw)
+    {
+        int OH = (IH + (ph << 1) - FH) / sh + 1;
+        int OW = (IW + (pw << 1) - FW) / sw + 1;
+        return new int[]{N, OH, OW, OC};
+    }
+    
+    public static int[] input_feature_dim(int OH, int OW, int FH, int FW, int N, int IC,
+            int sh, int sw, int ph, int pw) 
+    {
+        int IH = (OH - 1)*sh + FH - 2*ph;
+        int IW = (OW - 1)*sw + FW - 2*pw;
+        return new int[]{ N, IH, IW, IC };
+    }
+    
+    public static int[] out_paddding(int FH, int FW, int ph, int pw) {
+        int oph = FH - 1 - ph;
+        int opw = FW - 1 - pw;
+        return new int[] { oph, opw};
+    }
+    //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="blockNum">
     public static final int GEMM_nblock(int IH, int IW, int N, int IC) {
         int GN = IC, GM = N * IH * IW;
@@ -261,58 +309,6 @@ public final class Cuda_dconv3D_deltaX {
         return (grid_slice << 5) * n16;//GM_slice
     }
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Common">
-    public static final double psu_Ims2(int IH, int IW, int FH, int FW, int OH, int OW) {
-        int OH0 = (IH >> 1) + ((FH + 1) >> 1) - 1;
-	int OW0 = (IW >> 1) + ((FW + 1) >> 1) - 1;
-	int OH1 = (IH >> 1) + (FH >> 1) - 1;
-	int OW1 = (IW >> 1) + (FW >> 1) - 1;
-	return 0.25 * ((OH0 + OH1) * (OW0 + OW1)) / (OH * OW);
-    }
-    
-    public static final float psu_s1(int IH, int IW, int FH, int FW, int OH, int OW) {
-        return (1.0f * ((IH - 1 + FH) * (IW - 1 + FW)) / (OH * OW));
-    }
-    
-    public static int[] img2col_matrix_dim(
-            int IH, int IW, 
-            int FH, int FW, 
-            int N, int IC, int OC) 
-    {
-        int GN = IC;
-        int GM = N  * IH * IW;
-        int GK = OC * FH * FW;
-        return new int[]{ GN, GM, GK };
-    }
-     
-    public static int[] getOutPaddingDim_deltaY(int FH, int FW, int ph, int pw) {
-        int oph = FH - ph - 1;
-        int opw = FH - pw - 1;
-        return new int[]{oph, opw};
-    }
-    
-    public static int[] output_feature_dim(
-            int IH, int IW, 
-            int FH, int FW, 
-            int N, int OC,
-            int sh, int sw, int ph, int pw)
-    {
-        int OH = (IH + (ph << 1) - FH) / sh + 1;
-        int OW = (IW + (pw << 1) - FW) / sw + 1;
-        return new int[]{N, OH, OW, OC};
-    }
-    
-    public static int[] input_feature_dim(
-            int OH, int OW, 
-            int FH, int FW, 
-            int N, int IC,
-            int sh, int sw, int ph, int pw) 
-    {
-        int IH = (OH - 1)*sh + FH - 2*ph;
-        int IW = (OW - 1)*sw + FW - 2*pw;
-        return new int[]{ N, IH, IW, IC };
-    }
-    //</editor-fold>
     
     //======[kernel dense: for sh = sw = 1]=====================================
     //<editor-fold defaultstate="collapsed" desc="dconv3D_deltaX_s1">
@@ -387,7 +383,7 @@ public final class Cuda_dconv3D_deltaX {
     @Passed
     public static native void dconv3D_deltaX_s1(long[] streamArray, int length,
             long d_deltaY_address, int OH, int OW,
-            long dW_address, int FH, int FW,
+            long       dW_address, int FH, int FW,
             long d_deltaX_address, int IH, int IW,
             int N, int IC, int OC,
             int ph, int pw);
@@ -424,7 +420,7 @@ public final class Cuda_dconv3D_deltaX {
     @Passed
     public static native void dconv3D_deltaX_s1_SGM(long[] streamArray, int length,
             long d_deltaY_address, int OH, int OW,
-            long dW_address, int FH, int FW,
+            long       dW_address, int FH, int FW,
             long d_deltaX_address, int IH, int IW,
             int N, int IC, int OC,
             int ph, int pw,
@@ -534,7 +530,7 @@ public final class Cuda_dconv3D_deltaX {
     @Passed
     public static native void dconv3D_deltaX_s1_texture(long[] streamArray, int length,
             long d_deltaY_address, int OH, int OW,
-            long dW_address, int FH, int FW,
+            long       dW_address, int FH, int FW,
             long d_deltaX_address, int IH, int IW,
             int N, int IC, int OC,
             int ph, int pw);
@@ -571,7 +567,7 @@ public final class Cuda_dconv3D_deltaX {
     @Passed
     public static native void dconv3D_deltaX_s1_texture_SGM(long[] streamArray, int length,
             long d_deltaY_address, int OH, int OW,
-            long dW_address, int FH, int FW,
+            long       dW_address, int FH, int FW,
             long d_deltaX_address, int IH, int IW,
             int N, int IC, int OC,
             int ph, int pw,
@@ -657,7 +653,7 @@ public final class Cuda_dconv3D_deltaX {
     @Passed
     public static native void dconv3D_deltaX_W1(long[] streamArray, int length,
             long d_deltaY_address, 
-            long dW_address, 
+            long       dW_address, 
             long d_deltaX_address, int IH, int IW,
             int N, int IC, int OC);
     //</editor-fold>
@@ -687,7 +683,7 @@ public final class Cuda_dconv3D_deltaX {
     @Passed
     public static native void dconv3D_deltaX_W1_SGM(long[] streamArray, int length,
             long d_deltaY_address, 
-            long dW_address, 
+            long       dW_address, 
             long d_deltaX_address, int IH, int IW,
             int N, int IC, int OC,
             int GM_slice);

@@ -64,6 +64,22 @@ public class EngineAlloc {
         if(OW == -1) OW = (IW - 1)*sw + FW - (pw << 1);//floor
         return eg.empty(XN, OH, OW, WOC);
     }
+    
+    public Tensor depthwise_conv3D(Tensor X, Tensor W, int OH, int OW, int sh, int sw, int ph, int pw) {
+        if(eg.check) {
+            eg.require_dtype(X, "W"); eg.require_dtype(W, "W"); 
+            eg.equals(X.ndim(), "X.ndim", 4);
+            eg.equals(W.ndim(), "W.ndim", 3);
+        }
+        
+        int[] dimX = X.dim, dimW = W.dim;
+        int XN = dimX[0], IH = dimX[1], IW = dimX[2];//X[N, IH, IW, IC]
+        int FH = dimW[0], FW = dimW[1], OC = dimW[2];//W[FH, FW, OC]
+        
+        if (OH == -1) OH = (IH - FH + (ph << 1)) / sh + 1;//floor
+        if (OW == -1) OW = (IW - FW + (pw << 1)) / sw + 1;//floor
+        return eg.empty(XN, OH, OW, OC); 
+    }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="conv2D / deconv2D">
     public Tensor conv2D(Tensor X, Tensor W, int OW, int sw, int pw) {

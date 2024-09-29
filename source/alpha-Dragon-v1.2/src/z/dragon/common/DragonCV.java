@@ -147,8 +147,8 @@ public final class DragonCV {
     //<editor-fold defaultstate="collapsed" desc="function: pixelIO">
     public byte[] read_pixels(String path) { return alpha.fl.to_bytes(path); }
     public byte[] read_pixels(File file) { return alpha.fl.to_bytes(file); }
-    public void write_pixels(String path, byte[] pixels) { alpha.fl.wt_bytes(path, pixels); }
-    public void write_pixels(File file, byte[] pixels) { alpha.fl.wt_bytes(file, pixels); }
+    public void write_pixels(String path, byte[] pixels) { alpha.fl.write_bytes(path, pixels); }
+    public void write_pixels(File file, byte[] pixels) { alpha.fl.write_bytes(file, pixels); }
     
     public static final int BEST_SPEED = Deflater.BEST_SPEED;
     public static final int BEST_COMPRESSION = Deflater.BEST_COMPRESSION;

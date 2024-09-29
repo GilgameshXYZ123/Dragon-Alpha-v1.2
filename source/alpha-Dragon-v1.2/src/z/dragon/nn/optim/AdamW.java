@@ -127,7 +127,7 @@ public class AdamW extends Optimizer {
     protected void param_state(State dic, int index, String param_name) {
         dic.put(exp_avg_key(param_name), V[index]);
         dic.put(exp_avg_sq_key(param_name), S[index]);
-        if(amsgrad) dic.put(max_exp_avg_sq_key(param_name), Smax[index]);
+        if (amsgrad) dic.put(max_exp_avg_sq_key(param_name), Smax[index]);
     }
     
     @Override
@@ -188,9 +188,9 @@ public class AdamW extends Optimizer {
     
     @Override
     protected void __clear__() {
-        if(V != null) { Tensor.delete(V); V = null; }
-        if(S != null) { Tensor.delete(S); S = null; }
-        if(Smax != null) { Tensor.delete(Smax); Smax = null; }
+        if (V != null) { Tensor.delete(V); V = null; }
+        if (S != null) { Tensor.delete(S); S = null; }
+        if (Smax != null) { Tensor.delete(Smax); Smax = null; }
     }
     //</editor-fold>
 }

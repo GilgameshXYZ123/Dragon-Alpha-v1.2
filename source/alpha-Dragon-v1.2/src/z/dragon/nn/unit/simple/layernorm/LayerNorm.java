@@ -50,6 +50,7 @@ public class LayerNorm extends Affine {
     public void append(String pre, StringBuilder sb) { 
         sb.append(pre).append(default_name());
         sb.append(" { inplace = ").append(inplace());
+        sb.append(", affine = ").append(affine);
         sb.append(", [feature_num, param_dim] = [ ")
                 .append(features).append(", ")
                 .append(Arrays.toString(param_dim)).append(" ]");
@@ -88,9 +89,8 @@ public class LayerNorm extends Affine {
     }
     //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="static class: BatchNorm_builtin">
-    public static class InlineLayerNorm<T extends LayerNorm>  extends InlineAffine<T> 
-    {
+    //<editor-fold defaultstate="collapsed" desc="static class: LayerNorm_builtin">
+    public static class InlineLayerNorm<T extends LayerNorm>  extends InlineAffine<T> {
         public InlineLayerNorm(T unit) { super(unit); }
         
         public final boolean affine() { return ut.affine; }

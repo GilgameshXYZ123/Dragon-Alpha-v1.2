@@ -17,8 +17,9 @@ import z.dragon.nn.unit.complex.Module;
  */
 public class Net {
     public static class BasicBlock extends Module {
-        Unit conv1, bn1, conv2, bn2, downsample;
+        Unit conv1, bn1, conv2, dwconv, bn2, downsample;
         public BasicBlock(int in_channel, int out_channel, int stride) {
+            dwconv = nn.depthwise_conv3D(false, in_channel, 7, 1, 3);
             conv1 = nn.conv3D(false, in_channel, out_channel, 3, stride, 1);
             bn1 = nn.fuse(nn.batchNorm(out_channel), nn.gelu());
             
@@ -35,6 +36,7 @@ public class Net {
         @Override
         public Tensor[] __forward__(Tensor... X) {
             Tensor[] res = X;
+//            X = dwconv.forward(X);
             X = bn1.forward(conv1.forward(X));
             X = bn2.forward(conv2.forward(X));
             if(downsample != null) res = downsample.forward(res);
@@ -56,7 +58,7 @@ public class Net {
             Wv = nn.conv3D(false, channel, hidden, 3, 1, 1);
             Wy = nn.conv3D(false, hidden, channel, 3, 1, 1);
             dropout = nn.dropout(0.9f);
-            attn = nn.ImageAttn(head, dropout);
+            attn = nn.ImageMHA(head, dropout);
         }
 
         @Override
@@ -84,7 +86,7 @@ public class Net {
             Wv = nn.fullconnect(false, channel, hidden);
             Wy = nn.fullconnect(false, hidden, channel);
             dropout = nn.dropout(0.9f);
-            attn = nn.ChannelAttn(head, dropout);
+            attn = nn.ChannelMHA(head, dropout);
         }
         
         @Override
@@ -143,14 +145,14 @@ public class Net {
                 new BasicBlock(128, 128, 1)
         );
         
-        //Unit attn3 = new ChannelAttn(128, 64, 8);
+        //Unit attn3 = new ChannelMHA(128, 64, 8);
         Unit attn3 = new ImageAttn(128, 64, 4);
         Unit layer3 = nn.sequence(//div8, channel = 256, 8
                 new BasicBlock(128, 256, 2),
                 new BasicBlock(256, 256, 1)
         );
         
-        //Unit attn4 = new ChannelAttn(256, 128, 8);
+        //Unit attn4 = new ChannelMHA(256, 128, 8);
         Unit attn4 = new ImageAttn(256, 128, 4);
         Unit layer4 = nn.sequence(//div16, channel = 256, 4
                 new BasicBlock(256, 512, 2),
@@ -171,14 +173,8 @@ public class Net {
             X = prepare.forward(X);
             
             X = layer1.forward(X);
-            
-            X = F.add_gelu(attn2.forward(X)[0], X[0]);
             X = layer2.forward(X);
-            
-            X = F.add_gelu(attn3.forward(X)[0], X[0]);
             X = layer3.forward(X);
-            
-            X = F.add_gelu(attn4.forward(X)[0], X[0]);
             X = layer4.forward(X);
             
             X = pool.forward(X);

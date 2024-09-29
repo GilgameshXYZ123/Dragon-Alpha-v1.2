@@ -57,8 +57,7 @@ public class Parameter implements Serializable {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: GradList">
-    public static class GradList extends ArrayList<Tensor> 
-    {
+    public static class GradList extends ArrayList<Tensor> {
         private static final long serialVersionUID = 511515125121L;
         private final Parameter param;
         
@@ -67,8 +66,8 @@ public class Parameter implements Serializable {
 
         @Override
         public final synchronized boolean add(Tensor ts) {
-            if(!param.need_grads() || Tensor.isNull(ts)) return false;
-            if(ts.is_grad) throw new IllegalArgumentException("One tensor cannot be the gradient of two tensors");
+            if (!param.need_grads() || Tensor.isNull(ts)) return false;
+            if (ts.is_grad) throw new IllegalArgumentException("One tensor cannot be the gradient of two tensors");
             
             ts.is_grad = true;//map the lastest grad to ts (pay attention)
             param.tensor.grad = ts;
@@ -77,8 +76,7 @@ public class Parameter implements Serializable {
     }
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="static class: VirtualList">
-    public static final class VirtualList extends ArrayList<Tensor> 
-    {
+    public static final class VirtualList extends ArrayList<Tensor> {
         private static final long serialVersionUID = 4441241241L;
         
         VirtualList() { super(); }
@@ -94,8 +92,9 @@ public class Parameter implements Serializable {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="static class: VirtualParameter">
-    public static final class VirtualParameter extends Parameter 
-    {
+    public static final class VirtualParameter extends Parameter {
+        private static final long serialVersionUID = 1L;
+        
         VirtualParameter(Tensor tensor) { super(tensor, vir_grads); }
         
         @Override public final boolean need_grads() { return false; }
@@ -104,6 +103,9 @@ public class Parameter implements Serializable {
         @Override public final List<Tensor> grads() { return grads; }
         @Override public final Tensor grad(int index) { return null; }
         @Override public final void clear_grads() {}
+        
+        @Override public Tensor sum_grads() { return null; }
+        @Override public Tensor mean_grads() { return null; }
     }
     //</editor-fold>
     public static Parameter virual(Tensor tensor) { return new VirtualParameter(tensor); }
@@ -196,24 +198,34 @@ public class Parameter implements Serializable {
     //<editor-fold defaultstate="collapsed" desc="running-area: process gradients">
     public Tensor sum_grads() {//need sync after this operation
         synchronized(grads) {
-            if(grads.size() <= 1) return null;
+            if (grads.size() <  1) return null;
+            if (grads.size() == 1) return grads.get(0);
             
-            Tensor.sync(grads);//find the summary of all grads in grad_list
-            Tensor sum = tensor.eg.sum(true, grads);
-            for(Tensor grad : grads) if(grad != sum) grad.delete();
-            grads.clear(); grads.add(sum);
+            Tensor.sync(grads); 
+            Tensor sum = tensor.eg.sum(true, grads); 
+            sum.dual(()->{ 
+                for (Tensor g : grads) if (g != sum) g.delete(); 
+                grads.clear();
+                sum.is_grad = false;//avoid add exception
+                grads.add(sum);
+            });
             return sum;
         }
     }
     
     public Tensor mean_grads() {//need sync after this operation
         synchronized(grads) {
-            if(grads.size() <= 1) return null;
+            if (grads.size() <  1) return null;
+            if (grads.size() == 1) return grads.get(0);
 
-            Tensor.sync(grads);//find the summary of all grads in grad_list
+            Tensor.sync(grads);
             Tensor mean = tensor.eg.mean(true, grads);
-            for(Tensor grad : grads) if(grad != mean) grad.delete();
-            grads.clear(); grads.add(mean);
+            mean.dual(()-> {
+                for (Tensor g : grads) if (g != mean) g.delete();
+                grads.clear(); 
+                mean.is_grad = false;//avoid add exception
+                grads.add(mean);
+            });
             return mean;
         }
     }
