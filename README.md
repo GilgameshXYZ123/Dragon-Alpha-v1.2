@@ -1,7 +1,7 @@
 # Dragon-Alpha-v1.2-source [Forgive me, I am really busy and have not complete the readme.md yet.]
 > The source code of Dragon-Alpha-v1.2.
 
-# I. About Cu32 (cuda-engine-base)
+# I. About Cu32 (engine-cuda-base)
 **1.** __What__ __is__ __Cu32__ ? __Cu32__ is a GPU library for FP32 tensor computing. __Cu32__ is designed for training, rather than predicting. It consists of 14 libs:
 > - [1]  _Cuda_: It serves as the bridge between JVM (CPU) and GPU. Its functions include data-copy, data-transfer, tensor-initialization, memory-management, and computing-scheduling. It provides Java APIs to manage Cuda memory, event, stream, and device.
 > - [2]  _CudaDevice_: It provides functions to manage the information of Cuda Device, such as id, name, SM number, and L2 cache size. The device information are encapsulated into an _CudaDevice_ Java Object.
