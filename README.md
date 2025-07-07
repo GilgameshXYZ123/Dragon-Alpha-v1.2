@@ -1,7 +1,7 @@
 # Dragon-Alpha-v1.2-source [Forgive me, I am really busy and have not complete the readme.md yet.]
 > - The source code of Dragon-Alpha-v1.2.
-> - the code is specifically optimized for sm86 GPUs, e.g. RTX4090 and RTX3090. 
-> - To find the kernel, please use the 'search' function of github. Some keywords: GEMM, Winograd
+> - The code is specifically optimized for sm86 GPUs, e.g. RTX4090 and RTX3090. 
+> - To find the CUDA kernels, please use the 'search' function of github. Some keywords: GEMM, Winograd, Reduce
 
 # I. About Cu32 (engine-cuda-base)
 **1.** __What__ __is__ __Cu32__ ? __Cu32__ is a GPU library for FP32 tensor computing. __Cu32__ is designed for training, rather than predicting. It consists of 14 libs:
