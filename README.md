@@ -1,4 +1,4 @@
-# Dragon-Alpha-v1.2-source [Forgive me, I am really busy and have not complete the readme.md yet.]
+# Dragon-Alpha-v1.2-source
 > - The source code of Dragon-Alpha-v1.2.
 > - The code is specifically optimized for sm86 GPUs, e.g. RTX4090 and RTX3090. 
 > - To find the CUDA kernels, please use the 'search' function of github. Some keywords: GEMM, Winograd, Reduce
