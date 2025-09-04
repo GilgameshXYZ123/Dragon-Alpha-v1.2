@@ -1,3 +1,5 @@
+### This is an old version, please go to see Dragon-Alpha-v1.3 in my Repositories!!!
+
 # Dragon-Alpha-v1.2-source
 > - The source code of Dragon-Alpha-v1.2.
 > - The code is specifically optimized for sm86 GPUs, e.g. RTX4090 and RTX3090. 
